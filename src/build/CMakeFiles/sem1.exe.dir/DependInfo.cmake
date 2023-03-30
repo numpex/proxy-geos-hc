@@ -1,0 +1,22 @@
+
+# Consider dependencies only in project.
+set(CMAKE_DEPENDS_IN_PROJECT_ONLY OFF)
+
+# The set of languages for which implicit dependencies are needed:
+set(CMAKE_DEPENDS_LANGUAGES
+  )
+
+# The set of dependency files which are needed:
+set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/home/j0024947/OneDrive/developements/sem/src/main/main1.cpp" "CMakeFiles/sem1.exe.dir/main/main1.cpp.o" "gcc" "CMakeFiles/sem1.exe.dir/main/main1.cpp.o.d"
+  )
+
+# Targets to which this target links.
+set(CMAKE_TARGET_LINKED_INFO_FILES
+  "/home/j0024947/OneDrive/developements/sem/src/build/finiteElements/CMakeFiles/finiteElements.dir/DependInfo.cmake"
+  "/home/j0024947/OneDrive/developements/sem/src/build/mesh/CMakeFiles/mesh.dir/DependInfo.cmake"
+  "/home/j0024947/OneDrive/developements/sem/src/build/solver/CMakeFiles/solver.dir/DependInfo.cmake"
+  )
+
+# Fortran module output directory.
+set(CMAKE_Fortran_TARGET_MODULE_DIR "")

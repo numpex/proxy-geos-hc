@@ -1,0 +1,2 @@
+/bin/ar qc libmesh.a CMakeFiles/mesh.dir/simpleMesh.cpp.o
+/bin/ranlib libmesh.a

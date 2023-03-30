@@ -1,0 +1,1 @@
+/bin/g++ -g CMakeFiles/sem1.exe.dir/main/main1.cpp.o -o sem1.exe  finiteElements/libfiniteElements.a mesh/libmesh.a solver/libsolver.a 

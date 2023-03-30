@@ -1,0 +1,2 @@
+/bin/aarch64-linux-gnu-ar qc libfiniteElements.a CMakeFiles/finiteElements.dir/QkGL.cpp.o
+/bin/aarch64-linux-gnu-ranlib libfiniteElements.a
