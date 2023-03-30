@@ -34,6 +34,20 @@ int  simpleMesh::getNumberOfElements()
    return numberOfElements;
 }
 
+//get nx
+int simpleMesh::getNx()
+{return nx;}
+//get nxy
+int simpleMesh::getNy()
+{return ny;}
+
+//get dx
+int simpleMesh::getDx()
+{return hx;}
+//get dy
+int simpleMesh::getDy()
+{return hy;}
+
 // Initialize nodal coordinates.
 vector<vector<float>> simpleMesh::nodesCoordinates(const int &numberOfNodes)
 {
@@ -164,12 +178,26 @@ vector<int> simpleMesh::localToGlobalNodes(const int &elementNumber, const int &
   return localToGlobal;
 }
 
-// compute global to local node indexes
+// compute global node to grid  indexes
 int simpleMesh::Itoij(const int &I, int &i, int &j)
 {
     i=I%nx;
     j=int((I-i)/nx);
     return 0;
+}
+
+// project vector node to grid
+vector<vector<float>> simpleMesh::projectToGrid(const int numberOfNodes,const vector<float>inputVector)
+{
+   vector<vector<float>>grid(nx,vector<float>(ny,0));
+   int i,j;
+   cout<< " In projecToGrid numberOfNodes="<<numberOfNodes<<endl;
+   for ( int node=0; node<numberOfNodes;node++)
+   {
+      Itoij(node,i,j);
+      grid[i][j]=inputVector[node];
+   }
+   return grid;
 }
 
 // compute element e where (x,y) belongs to

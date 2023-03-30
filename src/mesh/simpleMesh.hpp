@@ -29,6 +29,18 @@ class simpleMesh
 
        //  Returns the number of elements of the mesh
        int  getNumberOfElements();
+      
+       //get nx
+       int getNx();
+
+       //get ny
+       int getNy();
+
+       //get nx
+       int getDx();
+
+       //get ny
+       int getDy();
 
        // Initialize nodal coordinates.
        vector<vector<float>> nodesCoordinates(const int &numberOfNodes);
@@ -41,6 +53,9 @@ class simpleMesh
 
        // compute global to local node indes
        int Itoij(const int &I, int &i, int &j);
+       
+       // project vector node to grid
+       vector<vector<float>> projectToGrid(const int numberOfNodes,const vector<float> inputVector);
 
        // compute element e where (x,y) belongs to
        int getElementNumberFromPoints(const float &x,const float &y);

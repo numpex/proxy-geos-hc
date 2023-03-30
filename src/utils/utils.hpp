@@ -2,12 +2,12 @@
 #define UTILS_HPP_
 
 #include    <cmath>
+//#include    <simpleMesh>
 
 using namespace std;
 
 struct solverUtils
 {
-
   
   float evaluateRicker( float const & time_n, float const & f0, int order )
   {
@@ -55,6 +55,33 @@ struct solverUtils
         sourceTerm[i]=evaluateRicker(time_n,f0,order);
     }
     return sourceTerm;
+  }
+
+  void saveSnapShot(const int indexTimeStep, const int i1,const vector<vector<float>> pnGlobal, simpleMesh mesh)
+  {
+   
+    int numberOfNodes=mesh.getNumberOfNodes();                                                                             
+    vector<float>inputVector(numberOfNodes);
+    int nx=mesh.getNx();
+    int ny=mesh.getNy();
+    float dx=mesh.getDx();
+    float dy=mesh.getDy();
+    for ( int i = 0; i< numberOfNodes;i++)
+    {
+        inputVector[i]=pnGlobal[i][i1];
+    }
+    vector<vector<float>>grid=mesh.projectToGrid(numberOfNodes,inputVector);
+    fstream snapFile;
+    string snapNumber = "snapshot"+to_string(indexTimeStep);      
+    snapFile.open(snapNumber, ios::out| ios::trunc);
+    for (int j=0; j<nx;j++)
+    {
+        for (int i=0; i<ny; i++)
+        {
+            snapFile<<i*dx<<" "<<j*dy<<" " <<grid[i][j]<<endl;
+        }
+    }
+    snapFile.close();
   }
 };
 #endif //UTILS_HPP_
