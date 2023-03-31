@@ -57,9 +57,6 @@ void solver::computeOneStep(const float & timeSample,
      }
     // loop over mesh elements
     int e;
-    //#pragma omp parallel for  shared(model,massMatrixGlobal,yGlobal,pnGlobal)
-    
-    #pragma omp  parallel  shared(model,massMatrixGlobal,yGlobal,pnGlobal,globalNodesCoords)
     for ( int e=0; e<numberOfElements; e++)
     {
         // extract global coordinates of element e
@@ -104,7 +101,6 @@ void solver::computeOneStep(const float & timeSample,
         //cout<<"compute R and massmatrix done"<<endl;
 	    // get pnGlobal to pnLocal
 	    static vector<float> pnLocal(numberOfPointsPerElement);  
-        #pragma omp for
 	    for ( int i=0; i<numberOfPointsPerElement; i++)
         {
             massMatrixLocal[i][i]/=(model[e]*model[e]);
@@ -112,7 +108,6 @@ void solver::computeOneStep(const float & timeSample,
         }
         //cout <<"update pnLocal Done  "<<numberOfPointsPerElement<<endl;
         static vector<float>Y(numberOfPointsPerElement);
-        #pragma omp for
         for ( int i=0; i<numberOfPointsPerElement; i++)
         {
 	       Y[i]=0;
@@ -122,23 +117,19 @@ void solver::computeOneStep(const float & timeSample,
            }
         }
         //cout <<"update Y Done"<<endl
-        #pragma omp for
         for ( int i=0; i<numberOfPointsPerElement; i++)
         {
 	        int gIndex=localToGlobal[i];
-            #pragma omp atomic
 	        massMatrixGlobal[gIndex]+=massMatrixLocal[i][i];
-            #pragma omp atomic
 	        yGlobal[gIndex]+=Y[i];
         }
     vector<int>neighbors=mesh.neighbors(e);
-    //if(e==2510)cout<<"element e "<<e<<" neighbors "<<neighbors[0]<<" "<<neighbors[1]<<" "<<neighbors[2]
-    //<<" "<<neighbors[3]<<" "<<neighbors[4]<<endl;
+    if(e==2510)cout<<"element e "<<e<<" neighbors "<<neighbors[0]<<" "<<neighbors[1]<<" "<<neighbors[2]
+    <<" "<<neighbors[3]<<" "<<neighbors[4]<<endl;
 	}
     // update pressure
     int i;
     float tmp;
-    #pragma omp parallel for  private(i,tmp)
     for ( int i=0 ; i< numberOfNodes; i++)
     {
         tmp=timeSample*timeSample;
@@ -162,8 +153,6 @@ void solver::addRightAndSides(const int & timeStep,
     static vector<vector<int>> nodeList=mesh.globalNodesList(numberOfElements);
     int  i, rhsElement;
     float tmp=timeSample*timeSample;
-   
-    #pragma omp parallel for  private(i,rhsElement)
     for ( int i=0; i<numberOfRHS;i++)
     {
         //extract element number for current rhs
