@@ -74,6 +74,7 @@ struct solverUtils
     fstream snapFile;
     string snapNumber = "snapshot"+to_string(indexTimeStep);      
     snapFile.open(snapNumber, ios::out| ios::trunc);
+    cout<<"nx="<<nx<<" ny="<<ny<<endl;
     for (int j=0; j<nx;j++)
     {
         for (int i=0; i<ny; i++)

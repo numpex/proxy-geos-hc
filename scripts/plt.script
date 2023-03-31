@@ -1,0 +1,9 @@
+#!/usr/local/bin/gnuplot --persist
+print " number of snapshots: ",ARG1 
+do for [ n=0:ARG1] {
+print " display snapshot:",n
+name=sprintf('snapshot%d',n*ARG2)
+splot name every 4:4
+pause 1
+}
+
