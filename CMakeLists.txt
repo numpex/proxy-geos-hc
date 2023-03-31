@@ -12,4 +12,7 @@ if (OPENMP_FOUND)
     set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
+
+set(caliper_DIR "/data/gpfs/Users/j0535952/work2023/SEMCode_2023/Caliper/install/share/cmake/caliper")
+
 add_subdirectory(src)

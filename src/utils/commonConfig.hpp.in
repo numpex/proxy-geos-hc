@@ -1,0 +1,9 @@
+#ifndef COMMON_CONFIG_HPP
+#define COMMON_CONFIG_HPP
+
+/// Enables use of Caliper (CMake option)
+#cmakedefine SEM_USE_CALIPER
+
+#endif
+
+
