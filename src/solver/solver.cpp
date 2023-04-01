@@ -50,18 +50,38 @@ void solver::computeOneStep(const float & timeSample,
     static vector<float> model=mesh.getModel(numberOfElements);
     static vector<float>massMatrixGlobal(numberOfNodes);
     static vector<float>yGlobal(numberOfNodes);
+    int i;
+    #pragma omp  parallel for shared(massMatrixGlobal,yGlobal) private(i)
     for ( int i=0; i<numberOfNodes; i++)
     {
 	     massMatrixGlobal[i]=0;
 	     yGlobal[i]=0;
      }
     // loop over mesh elements
+    #pragma omp  parallel shared(model,massMatrixGlobal,yGlobal,pnGlobal,globalNodesCoords,globalNodesList)
+    {
     int e;
+    int gIndex;
+    vector<int>localToGlobal;
+    vector<vector<double>>Xi(numberOfPointsPerElement,vector<double>(2,0));
+    vector<vector<double>> jacobianMatrix;
+    vector<double> detJ;
+    vector<vector<double>> invJacobianMatrix;
+    vector<vector<double>> transpInvJacobianMatrix;
+    vector<vector<double>> B;
+    vector<vector<double>> R;
+    vector<vector<double>> massMatrixLocal;
+    vector<float> pnLocal(numberOfPointsPerElement); 
+    vector<float>Y(numberOfPointsPerElement);
+    vector<int>neighbors(5);
+    //Xi, pnLocal and Y cannot be private: segmentatin fault ????
+    #pragma omp for schedule(dynamic) private(e,i,gIndex,localToGlobal,jacobianMatrix,detJ)\
+                                      private(invJacobianMatrix,transpInvJacobianMatrix)\
+                                      private(B,R,massMatrixLocal,neighbors)
     for ( int e=0; e<numberOfElements; e++)
     {
         // extract global coordinates of element e
-        vector<int>localToGlobal=mesh.localToGlobalNodes(e,numberOfPointsPerElement,globalNodesList);
-        vector<vector<double>>Xi(numberOfPointsPerElement,vector<double>(2,0));
+        localToGlobal=mesh.localToGlobalNodes(e,numberOfPointsPerElement,globalNodesList);  
         //cout<<"before Xi definition "<<numberOfPointsPerElement<<endl;
         for ( int i=0; i<numberOfPointsPerElement; i++)
         {
@@ -69,45 +89,46 @@ void solver::computeOneStep(const float & timeSample,
             Xi[i][1]=globalNodesCoords[localToGlobal[i]][1];
             //cout<<" node "<<i<<"  "<<Xi[i][0]<<", "<<Xi[i][1]<<endl;
         }
+
         //cout<<"after  Xi definition"<<endl;
 	    // compute jacobian Matrix
-        vector<vector<double>> jacobianMatrix= Qk.computeJacobianMatrix(numberOfPointsPerElement,Xi,
+        jacobianMatrix= Qk.computeJacobianMatrix(numberOfPointsPerElement,Xi,
                                                                         derivativeBasisFunction2DX,
                                                                         derivativeBasisFunction2DY);
         //cout<<"Jacobian marix done"<<endl;
 	    // compute determinant of jacobian Matrix
-        vector<double> detJ= Qk.computeDeterminantOfJacobianMatrix(numberOfPointsPerElement,
+        detJ= Qk.computeDeterminantOfJacobianMatrix(numberOfPointsPerElement,
                                                                    jacobianMatrix);
         //cout<<"detJ Done"<<endl;
 	    // compute inverse of Jacobian Matrix
-        vector<vector<double>> invJacobianMatrix= Qk.computeInvJacobianMatrix(numberOfPointsPerElement,
+        invJacobianMatrix= Qk.computeInvJacobianMatrix(numberOfPointsPerElement,
                                                                               jacobianMatrix,
                                                                               detJ);
         //cout<<"InvdetJ Done"<<endl;     
 	    // compute transposed inverse of Jacobian Matrix
-        vector<vector<double>> transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix(numberOfPointsPerElement,
+        transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix(numberOfPointsPerElement,
                                                                                           jacobianMatrix,
                                                                                           detJ);
         //cout<<"transpInvdetJ Done"<<endl;
 	    // compute  geometrical transformation matrix
-        vector<vector<double>> B=Qk.computeB(numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ);
+        B=Qk.computeB(numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ);
         //cout<<"computeB Done"<<endl;
 	    // compute stifness and mass matrix
-        vector<vector<double>> R=Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
+        R=Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
                                                    derivativeBasisFunction2DY);
 
         // compute local mass matrix
-        vector<vector<double>> massMatrixLocal=Qk.phiIphiJ(numberOfPointsPerElement, weights2D, basisFunction2D, detJ);
+        massMatrixLocal=Qk.phiIphiJ(numberOfPointsPerElement, weights2D, basisFunction2D, detJ);
         //cout<<"compute R and massmatrix done"<<endl;
-	    // get pnGlobal to pnLocal
-	    static vector<float> pnLocal(numberOfPointsPerElement);  
+	    // get pnGlobal to pnLocal 
+        //#pragma omp for private(massMatrixLocal,pnLocal)
 	    for ( int i=0; i<numberOfPointsPerElement; i++)
         {
             massMatrixLocal[i][i]/=(model[e]*model[e]);
             pnLocal[i]=pnGlobal[localToGlobal[i]][i2];
         }
         //cout <<"update pnLocal Done  "<<numberOfPointsPerElement<<endl;
-        static vector<float>Y(numberOfPointsPerElement);
+        //#pragma omp for private(Y)
         for ( int i=0; i<numberOfPointsPerElement; i++)
         {
 	       Y[i]=0;
@@ -119,17 +140,16 @@ void solver::computeOneStep(const float & timeSample,
         //cout <<"update Y Done"<<endl
         for ( int i=0; i<numberOfPointsPerElement; i++)
         {
-	        int gIndex=localToGlobal[i];
+	        gIndex=localToGlobal[i];
 	        massMatrixGlobal[gIndex]+=massMatrixLocal[i][i];
 	        yGlobal[gIndex]+=Y[i];
         }
-    vector<int>neighbors=mesh.neighbors(e);
-    if(e==2510)cout<<"element e "<<e<<" neighbors "<<neighbors[0]<<" "<<neighbors[1]<<" "<<neighbors[2]
-    <<" "<<neighbors[3]<<" "<<neighbors[4]<<endl;
+    neighbors=mesh.neighbors(e);
 	}
+    }
     // update pressure
-    int i;
     float tmp;
+    #pragma omp for schedule(dynamic) private(tmp)
     for ( int i=0 ; i< numberOfNodes; i++)
     {
         tmp=timeSample*timeSample;

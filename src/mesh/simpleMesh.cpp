@@ -245,18 +245,35 @@ vector<int> simpleMesh::neighbors(const int & e)
    if(i==ex-1)
    {  
       neigh[2]=-2;
-      neigh[4]=-1;
+      neigh[4]=-3;
    }
    if(j==0)
    {
       neigh[1]=-1;
-      neigh[4]=-1;
+      neigh[4]=-2;
    }
    if(j==ey-1)
    {
       neigh[3]=-2;
-      neigh[4]=-1;
+      neigh[4]=-4;
+   }
+   if(i==0 && j==0)
+   {
+      neigh[4]=-5;
+   }
+   if(i==ex-1 && j==0)
+   {  
+      neigh[4]=-6;
+   }
+   if(i==0 && j==ey-1)
+   {
+      neigh[4]=-8;
+   }
+   if(i==ex-1 && j==ey-1)
+   {
+      neigh[4]=-7;
    }
    return neigh;
+
 }
 #endif //SIMPLEMESH_HPP_
