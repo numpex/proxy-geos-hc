@@ -81,16 +81,12 @@ void solver::computeOneStep(const float & timeSample,
     for ( int e=0; e<numberOfElements; e++)
     {
         // extract global coordinates of element e
+        // get local to global indexes of nodes of element e
         localToGlobal=mesh.localToGlobalNodes(e,numberOfPointsPerElement,globalNodesList);  
-        //cout<<"before Xi definition "<<numberOfPointsPerElement<<endl;
-        for ( int i=0; i<numberOfPointsPerElement; i++)
-        {
-            Xi[i][0]=globalNodesCoords[localToGlobal[i]][0];
-            Xi[i][1]=globalNodesCoords[localToGlobal[i]][1];
-            //cout<<" node "<<i<<"  "<<Xi[i][0]<<", "<<Xi[i][1]<<endl;
-        }
-
-        //cout<<"after  Xi definition"<<endl;
+        
+        //get global coordinates Xi of element e
+        mesh.getXi(numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi);
+        
 	    // compute jacobian Matrix
         jacobianMatrix= Qk.computeJacobianMatrix(numberOfPointsPerElement,Xi,
                                                                         derivativeBasisFunction2DX,
