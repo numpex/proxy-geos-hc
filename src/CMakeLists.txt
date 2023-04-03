@@ -15,18 +15,6 @@ include_directories(${PROJECT_BINARY_DIR}/utils)
 
 find_package(OpenMP REQUIRED)
 
-if (DEFINED caliper_DIR)
-  message("-- Found the caliper library in ${caliper_DIR}")
-  find_package(caliper)
-  target_link_libraries(sem.exe
-    PRIVATE
-    caliper
-    )
-  target_include_directories(sem.exe PRIVATE ${caliper_INCLUDE_DIR})
-else ()
-  message("-- Caliper is not enabled")
-endif()
-
 target_link_libraries(sem.exe
   PRIVATE
   finiteElements
