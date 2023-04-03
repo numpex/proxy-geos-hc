@@ -123,10 +123,8 @@ void solver::computeOneStep(const float & timeSample,
 	        massMatrixGlobal[gIndex]+=massMatrixLocal[i][i];
 	        yGlobal[gIndex]+=Y[i];
         }
-    vector<int>neighbors=mesh.neighbors(e);
-    if(e==2510)cout<<"element e "<<e<<" neighbors "<<neighbors[0]<<" "<<neighbors[1]<<" "<<neighbors[2]
-    <<" "<<neighbors[3]<<" "<<neighbors[4]<<endl;
-	}
+        vector<int>neighbors=mesh.neighbors(e);
+    }
     // update pressure
     int i;
     float tmp;
