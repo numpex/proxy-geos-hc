@@ -6,7 +6,7 @@ set(HEADERS
     solver.hpp
     )
 
-include_directories(../mesh)
-include_directories(../finiteElements)
+include_directories(../../mesh)
+include_directories(../../finiteElements)
 
 add_library(solver ${SRCS} ${HEADERS})
