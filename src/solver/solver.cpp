@@ -140,12 +140,8 @@ void solver::computeOneStep(const float & timeSample,
 	        massMatrixGlobal[gIndex]+=massMatrixLocal[i][i];
 	        yGlobal[gIndex]+=Y[i];
         }
-<<<<<<< HEAD
     neighbors=mesh.neighbors(e);
 	}
-=======
-        vector<int>neighbors=mesh.neighbors(e);
->>>>>>> feature/jmeng/addcaliper
     }
     // update pressure
     float tmp;
