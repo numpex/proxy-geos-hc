@@ -14,4 +14,6 @@ endif()
 
 set(CALIPER_DIR "$ENV{CALIPER_DIR}" CACHE PATH "" FORCE)
 
+set(RAJA_DIR "$ENV{RAJA_DIR}" CACHE PATH "" FORCE)
+
 add_subdirectory(src)

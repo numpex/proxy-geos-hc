@@ -9,6 +9,7 @@ make
 make install
 
 
+
 ###############################
 # to utilize caliper profiler
 ###############################
@@ -16,7 +17,7 @@ make install
 # firstly setup the caliper directory as following
 # for example on RDHPC
 
-set(caliper_DIR "/data/gpfs/Users/j0535952/work2023/SEMCode_2023/Caliper/install/share/cmake/caliper")
+export CALIPER_DIR=/data/gpfs/Users/j0535952/work2023/SEMCode_2023/Caliper/install
 
 mkdir ./build
 cd build
@@ -27,4 +28,22 @@ make install
 # then run with "CALI_CONFIG", for example:
 
 CALI_CONFIG=runtime-report sem.exe
+
+
+
+###############################
+# to utilize RAJA
+###############################
+
+# firstly setup the caliper directory as following
+# for example on RDHPC
+
+export RAJA_DIR=/data/gpfs/Users/j0535952/work2023/SEMCode_2023/raja/install/
+
+mkdir ./build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=.. ..
+make
+make install
+
 
