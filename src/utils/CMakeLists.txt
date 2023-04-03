@@ -9,8 +9,8 @@ include_directories(../mesh)
 set(SEM_USE_CALIPER FALSE)
 
 if(EXISTS ${CALIPER_DIR}/caliper-config.cmake)
-  message("-- Found the caliper library in ${caliper_DIR}")
   set(caliper_DIR "$ENV{CALIPER_DIR}" CACHE PATH "" FORCE)
+  message("-- Found the caliper library in ${caliper_DIR}")
   set(SEM_USE_CALIPER TRUE)
   find_package(caliper)
   target_link_libraries(sem.exe
