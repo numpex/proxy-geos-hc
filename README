@@ -1,16 +1,34 @@
 ###############################
 # to compile and install:
 ###############################
-edit config.f and set options
-mkdir ./build
-cd build
-cmake -DCMAKE_INSTALL_PREFIX=.. ..
-make
-make install
 
+install CALIPER:
+   git clone https://github.com/LLNL/Caliper.git
+   cd Caliper
+   mkdir build && cd build
+   cmake -DCMAKE_INSTALL_PREFIX=<path to install location> ..
+   make
+   make install
 
-if using CALIPER:
-set CALIPER_DIR and  update LD_LIBRAYRY_PATH (usually in your .bashrc file)
+in your .bashrc file:
+   caliper_install_dir=your caliper installation directory
+   export CALIPER_DIR=$caliper_intall_dir/share/cmake/caliper
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$caliper_install_dir/lib
+
+in proxyAppSEM:
+   edit config.h and set options:
+        set(CALIPER_DIR "$ENV{CALIPER_DIR}" CACHE PATH "" FORCE)
+        set (SOLVER "solver" CACHE PATH "" FORCE)
+
+        options for solver are:
+             sequentialVector
+             ompVector
+
+compile and install proxyAppSEM
+   mkdir ./build
+   cd build
+   cmake -DCMAKE_INSTALL_PREFIX=.. ..
+   make install
 
 ###############################
 # to utilize caliper profiler
