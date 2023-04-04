@@ -7,7 +7,6 @@ set(HEADERS
 include_directories(../mesh)
 
 set(SEM_USE_CALIPER FALSE)
-set (CALIPER_DIR "$ENV{CALIPER_DIR}" CACHE PATH "" FORCE)
 
 if(EXISTS ${CALIPER_DIR}/caliper-config.cmake)
   set(caliper_DIR "$ENV{CALIPER_DIR}" CACHE PATH "" FORCE)

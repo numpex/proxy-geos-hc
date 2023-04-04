@@ -1,12 +1,5 @@
-set(SRCS
-    solver.cpp
-    )
+cmake_minimum_required(VERSION 3.22)
+project(sem)
 
-set(HEADERS
-    solver.hpp
-    )
-
-include_directories(../../mesh)
-include_directories(../../finiteElements)
-
-add_library(solver ${SRCS} ${HEADERS})
+add_subdirectory(${SOLVER})
+include_directories(${SOLVER})
