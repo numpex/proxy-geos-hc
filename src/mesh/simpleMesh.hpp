@@ -65,5 +65,9 @@ class simpleMesh
 
        // list neighbors
        vector<int> neighbors(const int & e);
+
+       // get global coordinates of element e
+       void getXi(const int & numberOfPointsPerElement, const vector<vector<float>> & globalNodesCoords,
+                 const vector<int> & localToGlobal, vector<vector<double>> & Xi);
 };
 #endif //SIMPLE_MESH_
