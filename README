@@ -15,6 +15,9 @@ in your .bashrc file:
    export CALIPER_DIR=$caliper_intall_dir/share/cmake/caliper
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$caliper_install_dir/lib
 
+
+
+
 in proxyAppSEM:
    edit config.h and set options:
         set(CALIPER_DIR "$ENV{CALIPER_DIR}" CACHE PATH "" FORCE)
@@ -24,6 +27,10 @@ in proxyAppSEM:
              sequentialVector
              ompVector
 
+if working on  RDHPC:
+  set(caliper_DIR "/data/gpfs/Users/j0535952/work2023/SEMCode_2023/Caliper/install/share/cmake/caliper")
+
+
 compile and install proxyAppSEM
    mkdir ./build
    cd build
@@ -32,22 +39,4 @@ compile and install proxyAppSEM
 
 run with "CALI_CONFIG", for example:
    CALI_CONFIG=runtime-report <path_to_bin>/sem.exe
-###############################
-# to utilize caliper profiler
-###############################
-
-# firstly setup the caliper directory as following
-# for example on RDHPC
-
-set(caliper_DIR "/data/gpfs/Users/j0535952/work2023/SEMCode_2023/Caliper/install/share/cmake/caliper")
-
-mkdir ./build
-cd build
-cmake -DCMAKE_INSTALL_PREFIX=.. ..
-make
-make install
-
-# then run with "CALI_CONFIG", for example:
-
-CALI_CONFIG=runtime-report sem.exe
 
