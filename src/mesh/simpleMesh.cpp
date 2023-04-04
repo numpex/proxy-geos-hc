@@ -275,8 +275,6 @@ vector<int> simpleMesh::neighbors(const int & e)
    }
    return neigh;
 
-<<<<<<< HEAD
-=======
 }
 
 // get global coordinates of element e
@@ -289,6 +287,5 @@ void simpleMesh::getXi(const int & numberOfPointsPerElement,const vector<vector<
        Xi[i][1]=globalNodesCoords[localToGlobal[i]][1];
        //cout<<" node "<<i<<"  "<<Xi[i][0]<<", "<<Xi[i][1]<<endl;
    }
->>>>>>> ompNew
 }
 #endif //SIMPLEMESH_HPP_
