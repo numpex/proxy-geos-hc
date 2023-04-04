@@ -1,13 +1,16 @@
 ###############################
 # to compile and install:
 ###############################
-
+edit config.f and set options
 mkdir ./build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=.. ..
 make
 make install
 
+
+if using CALIPER:
+set CALIPER_DIR and  update LD_LIBRAYRY_PATH (usually in your .bashrc file)
 
 ###############################
 # to utilize caliper profiler
