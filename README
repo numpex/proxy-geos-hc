@@ -30,6 +30,8 @@ compile and install proxyAppSEM
    cmake -DCMAKE_INSTALL_PREFIX=.. ..
    make install
 
+run with "CALI_CONFIG", for example:
+   CALI_CONFIG=runtime-report <path_to_bin>/sem.exe
 ###############################
 # to utilize caliper profiler
 ###############################
