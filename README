@@ -41,7 +41,15 @@ Step 1: install CALIPER:
    make
    make install
 
-Step 2: run the following commands:
+Step 2: setup your environment variables:
+ 
+   1) if you have the permission to change .bashrc, add the following in your .bashrc file:
+
+   caliper_install_dir=your caliper installation directory
+   export CALIPER_DIR=$caliper_intall_dir/share/cmake/caliper
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$caliper_install_dir/lib
+
+   2) if not, run the following commands:
 
    export CALIPER_DIR={your caliper installation directory}/share/cmake/caliper
 
@@ -69,7 +77,15 @@ Step 1: install RAJA:
    make
    make install
 
-Step 2: run the following commands:
+Step 2: setup your environment variables:
+ 
+   1) if you have the permission to change .bashrc, add the following in your .bashrc file:
+
+   raja_install_dir=your raja installation directory
+   export RAJA_DIR=$raja_intall_dir/share/cmake/raja
+   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$raja_install_dir/lib
+
+   2) if not, run the following commands:
 
    export RAJA_DIR={your raja installation directory}/lib/cmake/raja
 
