@@ -60,26 +60,27 @@ void solver::computeOneStep(const float & timeSample,
     // loop over mesh elements
     #pragma omp  parallel shared(model,massMatrixGlobal,yGlobal,pnGlobal,globalNodesCoords,globalNodesList)
     {
-    int e;
-    int gIndex;
-    vector<int>localToGlobal;
-    vector<vector<double>>Xi(numberOfPointsPerElement,vector<double>(2,0));
-    vector<vector<double>> jacobianMatrix;
-    vector<double> detJ;
-    vector<vector<double>> invJacobianMatrix;
-    vector<vector<double>> transpInvJacobianMatrix;
-    vector<vector<double>> B;
-    vector<vector<double>> R;
-    vector<vector<double>> massMatrixLocal;
-    vector<float> pnLocal(numberOfPointsPerElement); 
-    vector<float>Y(numberOfPointsPerElement);
-    vector<int>neighbors(5);
-    //Xi, pnLocal and Y cannot be private: segmentatin fault ????
-    #pragma omp for schedule(dynamic) private(e,i,gIndex,localToGlobal,jacobianMatrix,detJ)\
+      int e;
+      int gIndex;
+      vector<int>localToGlobal;
+      vector<vector<double>>Xi(numberOfPointsPerElement,vector<double>(2,0));
+      vector<vector<double>> jacobianMatrix;
+      vector<double> detJ;
+      vector<vector<double>> invJacobianMatrix;
+      vector<vector<double>> transpInvJacobianMatrix;
+      vector<vector<double>> B;
+      vector<vector<double>> R;
+      vector<vector<double>> massMatrixLocal;
+      vector<float> pnLocal(numberOfPointsPerElement); 
+      vector<float>Y(numberOfPointsPerElement);
+      vector<int>neighboursOfElementE(5);
+      vector<vector<int>> nodesFace(4,vector<int>(order+1,0));
+      //Xi, pnLocal and Y cannot be private: segmentatin fault ????
+      #pragma omp for schedule(dynamic) private(e,i,gIndex,localToGlobal,jacobianMatrix,detJ)\
                                       private(invJacobianMatrix,transpInvJacobianMatrix)\
-                                      private(B,R,massMatrixLocal,neighbors)
-    for ( int e=0; e<numberOfElements; e++)
-    {
+                                      private(B,R,massMatrixLocal,neighboursOfElementE,nodesFace)
+      for ( int e=0; e<numberOfElements; e++)
+      {
         // extract global coordinates of element e
         // get local to global indexes of nodes of element e
         localToGlobal=mesh.localToGlobalNodes(e,numberOfPointsPerElement,globalNodesList);  
@@ -140,8 +141,36 @@ void solver::computeOneStep(const float & timeSample,
 	        massMatrixGlobal[gIndex]+=massMatrixLocal[i][i];
 	        yGlobal[gIndex]+=Y[i];
         }
-    neighbors=mesh.neighbors(e);
-	}
+        neighboursOfElementE=mesh.neighbors(e);
+        // if boundary element
+        if (neighboursOfElementE[4] != 0)
+        {
+            nodesFace=mesh.getGlobalDofOfFace(e,globalNodesList,localToGlobal);
+            // case of bottom left element
+            switch(neighboursOfElementE[4])
+            {
+                case -5 :
+                   cout<<"bottom left"<<endl;
+                   break;
+                case -6 :
+                   cout<<"bottom right"<<endl;
+                   break;
+                case -7 :
+                   cout<<"top right"<<endl;
+                   break;
+                case -8 :
+                   cout<<"top right"<<endl;
+                   break;
+                default:
+                   break;
+
+            }
+            
+           
+        }
+        
+	
+      }
     }
     // update pressure
     float tmp;

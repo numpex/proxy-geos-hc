@@ -228,6 +228,9 @@ vector<float>simpleMesh::getModel(const int & numberOfElements)
    return model;
 }
 // list neighbors for element e
+// neigh[0] to neigh[3] list neigbours elements
+// neigh[4] if not zero indicate that element e is a boundary element 
+// what type of boundary element
 vector<int> simpleMesh::neighbors(const int & e)
 {
    vector<int> neigh(5,0);
@@ -237,41 +240,50 @@ vector<int> simpleMesh::neighbors(const int & e)
    neigh[1]=e-ex;
    neigh[2]=e+1;
    neigh[3]=e+ex;
+   neigh[4]=0;
+   // if left boundary element
    if(i==0)
    {
       neigh[0]=-1;
       neigh[4]=-1;
    }
+   // if right boundary element
    if(i==ex-1)
    {  
       neigh[2]=-2;
       neigh[4]=-3;
    }
+   // if bottom boundary element
    if(j==0)
    {
       neigh[1]=-1;
       neigh[4]=-2;
    }
+   // if top boundary element
    if(j==ey-1)
    {
       neigh[3]=-2;
       neigh[4]=-4;
    }
+   // if bottom left boundary element
    if(i==0 && j==0)
    {
       neigh[4]=-5;
    }
+   // if bottom right boundary element
    if(i==ex-1 && j==0)
    {  
       neigh[4]=-6;
    }
+   // if top left boundary element
    if(i==0 && j==ey-1)
    {
-      neigh[4]=-8;
+      neigh[4]=-7;
    }
+   // if top right boundary element
    if(i==ex-1 && j==ey-1)
    {
-      neigh[4]=-7;
+      neigh[4]=-8;
    }
    return neigh;
 
@@ -287,5 +299,43 @@ void simpleMesh::getXi(const int & numberOfPointsPerElement,const vector<vector<
        Xi[i][1]=globalNodesCoords[localToGlobal[i]][1];
        //cout<<" node "<<i<<"  "<<Xi[i][0]<<", "<<Xi[i][1]<<endl;
    }
+}
+
+
+// get global DOF belonging to the faces of element e
+//    _____3_____
+//   |           |
+//   |           |
+// 0 |           | 2
+//   |           |
+//   |______1____|
+//        
+vector<vector<int>> simpleMesh::getGlobalDofOfFace(const int & e,
+                                                   const vector<vector<int>> & globalNodesList,
+                                                   const vector<int> & localToGlobal)
+{
+   vector<vector<int>> nodesFace(4,vector<int>(order+1,0));
+   
+   for ( int i=0;i<order+1;i++)
+   {
+      int dofLocal=i*(order+1);
+      nodesFace[0][i]=globalNodesList[e][dofLocal];
+   }
+   for ( int i=0;i<order+1;i++)
+   {
+      int dofLocal=i;
+      nodesFace[1][i]=globalNodesList[e][dofLocal];
+   }
+   for ( int i=0;i<order+1;i++)
+   {
+      int dofLocal=order+i*(order+1);
+      nodesFace[2][i]=globalNodesList[e][dofLocal];
+   }
+   for ( int i=0;i<order+1;i++)
+   {
+      int dofLocal=i+order*(order+1);
+      nodesFace[3][i]=globalNodesList[e][dofLocal];
+   }
+   return nodesFace;
 }
 #endif //SIMPLEMESH_HPP_

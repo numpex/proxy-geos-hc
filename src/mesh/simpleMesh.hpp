@@ -63,11 +63,18 @@ class simpleMesh
        // set model
        vector<float>getModel(const int & numberOfNodes);
 
-       // list neighbors
+       // list of neighbours of element e
        vector<int> neighbors(const int & e);
 
        // get global coordinates of element e
        void getXi(const int & numberOfPointsPerElement, const vector<vector<float>> & globalNodesCoords,
                  const vector<int> & localToGlobal, vector<vector<double>> & Xi);
+
+       // get global DOF belonging to the faces of element e
+       vector<vector<int>> getGlobalDofOfFace(const int & e,
+                                              const vector<vector<int>> & globalNodesList,
+                                              const vector<int> & localToGlobal);
+
+
 };
 #endif //SIMPLE_MESH_
