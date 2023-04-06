@@ -25,7 +25,7 @@ if(EXISTS $ENV{CALIPER_DIR}/caliper-config.cmake)
 elseif(NOT DEFINED CALIPER_DIR ) 
   message("-- Caliper_DIR is not defined and caliper is not enabled")
 else ()
-  message("-- Caliper_DIR is not the current path and caliper is not enabled")
+  message("-- Caliper_DIR is not the correct path and caliper is not enabled")
 endif()
 
 
@@ -43,7 +43,7 @@ if(EXISTS $ENV{RAJA_DIR}/raja-config.cmake)
 elseif(NOT DEFINED RAJA_DIR ) 
   message("-- RAJA_DIR is not defined and RAJA is not enabled")
 else ()
-  message("-- RAJA_DIR is not the current path and RAJA is not enabled")
+  message("-- RAJA_DIR is not the correct path and RAJA is not enabled")
 endif()
 
 configure_file(commonConfig.hpp.in commonConfig.hpp)
