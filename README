@@ -2,7 +2,38 @@
 # to compile and install:
 ###############################
 
-install CALIPER:
+#
+# general steps to build and run sem.exe
+#
+
+Step 1: in the root path of proxyAppSEM:
+
+   edit config.h and set options:
+
+        set (SOLVER "solver" CACHE PATH "" FORCE)
+        options for solver are:
+             sequentialVector
+             ompVector
+
+Step 2: compile and install proxyAppSEM
+
+   mkdir ./build
+   cd build
+   cmake -DCMAKE_INSTALL_PREFIX=.. ..
+   make install
+
+Step 3: run the executable, for example:
+
+   <path_to_bin>/sem.exe
+
+
+
+#
+# optional: to utilize CALIPER
+#
+
+Step 1: install CALIPER:
+
    git clone https://github.com/LLNL/Caliper.git
    cd Caliper
    mkdir build && cd build
@@ -10,33 +41,50 @@ install CALIPER:
    make
    make install
 
-in your .bashrc file:
-   caliper_install_dir=your caliper installation directory
-   export CALIPER_DIR=$caliper_intall_dir/share/cmake/caliper
-   export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$caliper_install_dir/lib
+Step 2: run the following commands:
 
+   export CALIPER_DIR={your caliper installation directory}/share/cmake/caliper
 
+Step 3: compile and install proxyAppSEM
 
-
-in proxyAppSEM:
-   edit config.h and set options:
-        set(CALIPER_DIR "$ENV{CALIPER_DIR}" CACHE PATH "" FORCE)
-        set (SOLVER "solver" CACHE PATH "" FORCE)
-
-        options for solver are:
-             sequentialVector
-             ompVector
-
-if working on  RDHPC:
-  set(caliper_DIR "/data/gpfs/Users/j0535952/work2023/SEMCode_2023/Caliper/install/share/cmake/caliper")
-
-
-compile and install proxyAppSEM
    mkdir ./build
    cd build
    cmake -DCMAKE_INSTALL_PREFIX=.. ..
    make install
 
-run with "CALI_CONFIG", for example:
+Step 4: run the executable, for example:
+
    CALI_CONFIG=runtime-report <path_to_bin>/sem.exe
+
+#
+# optional: to utilize RAJA
+#
+
+Step 1: install RAJA:
+
+   git clone --recursive https://github.com/llnl/raja.git
+   cd raja
+   mkdir build && cd build
+   cmake -DCMAKE_INSTALL_PREFIX=<path to install location> ..
+   make
+   make install
+
+Step 2: run the following commands:
+
+   export RAJA_DIR={your raja installation directory}/lib/cmake/raja
+
+Step 3: compile and install proxyAppSEM
+
+   mkdir ./build
+   cd build
+   cmake -DCMAKE_INSTALL_PREFIX=.. ..
+   make install
+
+Step 4: run the executable, for example:
+
+   <path_to_bin>/sem.exe
+
+
+
+
 

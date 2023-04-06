@@ -1,4 +1,4 @@
 
-set(CALIPER_DIR "$ENV{CALIPER_DIR}" CACHE PATH "" FORCE)
-#set (SOLVER "sequentialVector" CACHE PATH "" FORCE)
-set (SOLVER "ompVector" CACHE PATH "" FORCE)
+set (SOLVER "sequentialVector" CACHE PATH "" FORCE)
+#set (SOLVER "ompVector" CACHE PATH "" FORCE)
+
