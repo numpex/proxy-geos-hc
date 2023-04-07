@@ -9,7 +9,7 @@ add_subdirectory(utils)
 
 include_directories(finiteElements)
 include_directories(mesh)
-include_directories(solver)
+include_directories(solver/${SOLVER})
 include_directories(utils)
 include_directories(${PROJECT_BINARY_DIR}/utils)
 

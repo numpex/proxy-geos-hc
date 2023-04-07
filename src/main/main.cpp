@@ -20,11 +20,10 @@ int main()
     float ly;
     float hx,hy;
     
-    SEM_CALIPER_MARK_BEGIN("generate mesh");
     QkGL Qk;
-    simpleMesh mesh {ex=100,ey=100,lx=2000,ly=2000,order=2};
+    SEM_CALIPER_MARK_BEGIN("generate mesh");
+    simpleMesh mesh {ex=200,ey=200,lx=2000,ly=2000,order=1};
     SEM_CALIPER_MARK_END("generate mesh");
-
     solver solve; 
     solverUtils utils;
 
@@ -90,7 +89,7 @@ int main()
 
         //writes debugging ascii file.
         SEM_CALIPER_MARK_BEGIN("utils.saveSnapShot");
-        if (indexTimeStep%40==0)
+        if (indexTimeStep%100==0)
         {  
            cout<<indexTimeStep<<" i1="<<i1<<" i2="<<i2<<endl;
            cout<<"pnGlobal @ elementSource location "<<elementSource<<" after computeOneStep ="<<pnGlobal[nodeList[elementSource][0]][i2]<<endl;
