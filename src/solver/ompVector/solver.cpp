@@ -13,50 +13,81 @@ solver::~solver() {}
 // compute one step of the time dynamic wave equation solver
 //vector<vector<float>> 
 void solver::computeOneStep(const float & timeSample,
-		                    const int &order,
-					        int &i1,
-					        int &i2,
+		                      const int &order,
+					             int &i1,
+					             int &i2,
                             vector<vector<float>> & pnGlobal,
-					        simpleMesh mesh,
-					        QkGL Qk)
+					             simpleMesh mesh,
+					             QkGL Qk)
 {
-    static int numberOfNodes=mesh.getNumberOfNodes();
-    static int numberOfElements=mesh.getNumberOfElements();
-    static vector<vector<int>> globalNodesList=mesh.globalNodesList(numberOfElements);
-    static vector<vector<float>> globalNodesCoords=mesh.nodesCoordinates(numberOfNodes);
-    static int numberOfPointsPerElement;
-    if(order==1) numberOfPointsPerElement=4;
-    if(order==2) numberOfPointsPerElement=9;
-    if(order==3) numberOfPointsPerElement=16;
-    if(order==4) numberOfPointsPerElement=25;
-    if(order==5) numberOfPointsPerElement=36;
-    static vector<double> quadraturePoints=Qk.gaussLobattoQuadraturePoints(order);
-    static vector<double> weights=Qk.gaussLobattoQuadratureWeights(order);
-    static vector<double> weights2D=Qk.getGaussLobattoWeights(quadraturePoints,
-                                                              weights);
-    static vector<vector<double>> basisFunction1D=Qk.getBasisFunction1D(order, quadraturePoints);
-    static vector<vector<double>> derivativeBasisFunction1D=Qk.getDerivativeBasisFunction1D(order, quadraturePoints);
-    static vector<vector<double>> basisFunction2D=Qk.getBasisFunction2D(quadraturePoints,
+   // get infos from mesh
+   static int numberOfNodes=mesh.getNumberOfNodes();
+   static int numberOfElements=mesh.getNumberOfElements();
+   static int numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
+   static int numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
+   static int numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
+
+   static vector<vector<int>> globalNodesList=mesh.globalNodesList(numberOfElements);
+   static vector<int> listOfInteriorNodes=mesh.getListOfInteriorNodes(numberOfInteriorNodes);
+
+   static vector<int> listOfBoundaryNodes=mesh.getListOfBoundaryNodes(numberOfBoundaryNodes);
+   static vector<vector<float>> globalNodesCoords=mesh.nodesCoordinates(numberOfNodes);
+   static vector<vector<int>> boundaryFacesInfos=mesh.getBoundaryFacesInfos();
+   static vector<vector<int>>faceInfos=mesh.getBoundaryFacesInfos();
+
+   
+   
+
+   // get model
+   static vector<float> model=mesh.getModel(numberOfElements);
+
+   //get infos about finite element order of approximation
+   static int numberOfPointsPerElement;
+   if(order==1) numberOfPointsPerElement=4;
+   if(order==2) numberOfPointsPerElement=9;
+   if(order==3) numberOfPointsPerElement=16;
+   if(order==4) numberOfPointsPerElement=25;
+   if(order==5) numberOfPointsPerElement=36;
+
+   // get quadrature points and weights
+   static vector<double> quadraturePoints=Qk.gaussLobattoQuadraturePoints(order);
+   static vector<double> weights=Qk.gaussLobattoQuadratureWeights(order);
+   static vector<double> weights2D=Qk.getGaussLobattoWeights(quadraturePoints,
+                                                            weights);
+
+   // get basis function and corresponding derivatives
+   static vector<vector<double>> basisFunction1D=Qk.getBasisFunction1D(order, quadraturePoints);
+   static vector<vector<double>> derivativeBasisFunction1D=Qk.getDerivativeBasisFunction1D(order, quadraturePoints);
+   static vector<vector<double>> basisFunction2D=Qk.getBasisFunction2D(quadraturePoints,
                                                                         basisFunction1D,
                                                                         basisFunction1D);
-    static vector<vector<double>> derivativeBasisFunction2DX=Qk.getBasisFunction2D(quadraturePoints,
+   static vector<vector<double>> derivativeBasisFunction2DX=Qk.getBasisFunction2D(quadraturePoints,
                                                                                    derivativeBasisFunction1D,
                                                                                    basisFunction1D);
-    static vector<vector<double>> derivativeBasisFunction2DY=Qk.getBasisFunction2D(quadraturePoints,
+   static vector<vector<double>> derivativeBasisFunction2DY=Qk.getBasisFunction2D(quadraturePoints,
                                                                                    basisFunction1D,
                                                                                    derivativeBasisFunction1D);
 
 
-    static vector<float> model=mesh.getModel(numberOfElements);
-    static vector<float>massMatrixGlobal(numberOfNodes);
-    static vector<float>yGlobal(numberOfNodes);
-    int i;
-    #pragma omp  parallel for shared(massMatrixGlobal,yGlobal) private(i)
-    for ( int i=0; i<numberOfNodes; i++)
-    {
-	     massMatrixGlobal[i]=0;
-	     yGlobal[i]=0;
-     }
+    
+   static vector<float>massMatrixGlobal(numberOfNodes);
+   static vector<float>yGlobal(numberOfNodes);
+
+   static vector<float>ShGlobal(numberOfBoundaryNodes,0);
+
+   int i;
+   int gIndexFace=0;
+   #pragma omp  parallel for shared(massMatrixGlobal,yGlobal) private(i,gIndexFace)
+   for ( int i=0; i<numberOfNodes; i++)
+   {
+	   massMatrixGlobal[i]=0;
+	   yGlobal[i]=0;
+   }
+   #pragma omp  parallel for shared(ShGlobal) private(i)
+   for ( int i=0; i<numberOfBoundaryNodes; i++)
+   {
+	   ShGlobal[i]=0;
+   }
     // loop over mesh elements
     #pragma omp  parallel shared(model,massMatrixGlobal,yGlobal,pnGlobal,globalNodesCoords,globalNodesList)
     {
@@ -81,57 +112,55 @@ void solver::computeOneStep(const float & timeSample,
                                       private(B,R,massMatrixLocal,neighboursOfElementE,nodesFace)
       for ( int e=0; e<numberOfElements; e++)
       {
-        // extract global coordinates of element e
-        // get local to global indexes of nodes of element e
-        localToGlobal=mesh.localToGlobalNodes(e,numberOfPointsPerElement,globalNodesList);  
+         // extract global coordinates of element e
+         // get local to global indexes of nodes of element e
+         localToGlobal=mesh.localToGlobalNodes(e,numberOfPointsPerElement,globalNodesList);  
         
-        //get global coordinates Xi of element e
-        mesh.getXi(numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi);
+         //get global coordinates Xi of element e
+         mesh.getXi(numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi);
         
-	    // compute jacobian Matrix
+	     // compute jacobian Matrix
         jacobianMatrix= Qk.computeJacobianMatrix(numberOfPointsPerElement,Xi,
                                                                         derivativeBasisFunction2DX,
                                                                         derivativeBasisFunction2DY);
         //cout<<"Jacobian marix done"<<endl;
-	    // compute determinant of jacobian Matrix
+	     // compute determinant of jacobian Matrix
         detJ= Qk.computeDeterminantOfJacobianMatrix(numberOfPointsPerElement,
                                                                    jacobianMatrix);
         //cout<<"detJ Done"<<endl;
-	    // compute inverse of Jacobian Matrix
+	     // compute inverse of Jacobian Matrix
         invJacobianMatrix= Qk.computeInvJacobianMatrix(numberOfPointsPerElement,
                                                                               jacobianMatrix,
                                                                               detJ);
         //cout<<"InvdetJ Done"<<endl;     
-	    // compute transposed inverse of Jacobian Matrix
+	     // compute transposed inverse of Jacobian Matrix
         transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix(numberOfPointsPerElement,
                                                                                           jacobianMatrix,
                                                                                           detJ);
         //cout<<"transpInvdetJ Done"<<endl;
-	    // compute  geometrical transformation matrix
+	     // compute  geometrical transformation matrix
         B=Qk.computeB(numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ);
         //cout<<"computeB Done"<<endl;
-	    // compute stifness and mass matrix
+	     // compute stifness and mass matrix
         R=Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
                                                    derivativeBasisFunction2DY);
 
         // compute local mass matrix
         massMatrixLocal=Qk.phiIphiJ(numberOfPointsPerElement, weights2D, basisFunction2D, detJ);
         //cout<<"compute R and massmatrix done"<<endl;
-	    // get pnGlobal to pnLocal 
-        //#pragma omp for private(massMatrixLocal,pnLocal)
-	    for ( int i=0; i<numberOfPointsPerElement; i++)
+	     // get pnGlobal to pnLocal 
+	     for ( int i=0; i<numberOfPointsPerElement; i++)
         {
             massMatrixLocal[i][i]/=(model[e]*model[e]);
             pnLocal[i]=pnGlobal[localToGlobal[i]][i2];
         }
         //cout <<"update pnLocal Done  "<<numberOfPointsPerElement<<endl;
-        //#pragma omp for private(Y)
         for ( int i=0; i<numberOfPointsPerElement; i++)
         {
 	       Y[i]=0;
            for ( int j=0; j<numberOfPointsPerElement; j++)
            {
-               Y[i]-=R[i][j]*pnLocal[j]; 
+               Y[i]+=R[i][j]*pnLocal[j]; 
            }
         }
         //cout <<"update Y Done"<<endl
@@ -141,47 +170,120 @@ void solver::computeOneStep(const float & timeSample,
 	        massMatrixGlobal[gIndex]+=massMatrixLocal[i][i];
 	        yGlobal[gIndex]+=Y[i];
         }
-        neighboursOfElementE=mesh.neighbors(e);
-        // if boundary element
-        if (neighboursOfElementE[4] != 0)
-        {
-            nodesFace=mesh.getGlobalDofOfFace(e,globalNodesList,localToGlobal);
-            // case of bottom left element
-            switch(neighboursOfElementE[4])
-            {
-                case -5 :
-                   cout<<"bottom left"<<endl;
-                   break;
-                case -6 :
-                   cout<<"bottom right"<<endl;
-                   break;
-                case -7 :
-                   cout<<"top right"<<endl;
-                   break;
-                case -8 :
-                   cout<<"top right"<<endl;
-                   break;
-                default:
-                   break;
-
-            }
-            
-           
-        }
-        
-	
       }
-    }
-    // update pressure
-    float tmp;
-    #pragma omp for schedule(dynamic) private(tmp)
-    for ( int i=0 ; i< numberOfNodes; i++)
-    {
-        tmp=timeSample*timeSample;
-        pnGlobal[i][i1]=2*pnGlobal[i][i2]-pnGlobal[i][i1]+tmp*yGlobal[i]/massMatrixGlobal[i];    
-    }
-}
+      // update pressure
+      float tmp;
+      #pragma omp for schedule(dynamic) private(tmp)
+      for ( int i=0 ; i< numberOfInteriorNodes; i++)
+      {
+         tmp=timeSample*timeSample;
+         int I=listOfInteriorNodes[i];
+         //cout<<"interior global node="<<I<<endl;
+         pnGlobal[I][i1]=2*pnGlobal[I][i2]-pnGlobal[I][i1]-tmp*yGlobal[I]/massMatrixGlobal[I];    
+      }
 
+      // damping terms
+      // loop over bondary faces 
+      // Note: this loop is data parallel.
+      #pragma omp  parallel shared(ShGlobal)
+      {
+         int face=-1;
+         float xi=0;
+         float yi=0;
+         int iFace;
+         vector<int>numOfBasisFunctionOnFace(order+1,0);
+         vector<vector<float>>Js(2,vector<float>(order+1,0));
+         vector<float>ds(order+1,0);
+         vector<vector<float>>Sh(4,vector<float>(order+1,0));
+         #pragma omp  for schedule(static) private( iFace,xi,yi,face)
+         for (iFace=0; iFace< numberOfBoundaryFaces; iFace++)
+         {
+            //cout<<"iFace="<<iFace<<" face= "<<faceInfos[iFace][1]<<endl;
+            switch (faceInfos[iFace][1])
+            {
+               case 0: // left
+                  face=0; 
+                  //cout<<"left face "<<endl;
+                  for (int i=0;i<order+1;i++)
+                  {
+                     numOfBasisFunctionOnFace[i]=i*(order+1);
+                  }
+                  break;
+               case 1: // bottom
+                  // cout<<"bottom"<<endl;
+                  //cout<<"bottom face"<<endl;
+                  face=1;
+                  for (int i=0;i<order+1;i++)
+                  {
+                     numOfBasisFunctionOnFace[i]=i;
+                  }
+                  break;
+               case 2: //right
+                  //cout<<"right face "<<endl;
+                  face=2;
+                  for (int i=0;i<order+1;i++)
+                  {
+                     numOfBasisFunctionOnFace[i]=order+i*(order+1);
+                  }
+                  break;
+               case 3: //top
+                  //cout<<"top face "<<endl;
+                  // add free surface.
+                  //if (freeSurface)
+                  //{ 
+                  //     face=0;
+                  //     break;
+                  //else  
+                  face=3;
+                  for (int i=0;i<order+1;i++)
+                  {
+                     numOfBasisFunctionOnFace[i]=i+order*(order+1);
+                  }   
+                  break;               
+               default :
+                  cout<<"error in element flag, should be set to: 0, 1, 2, 3"<<endl;
+                  break;
+            }
+            for (int j=0; j<order+1; j++)
+            {
+               Js[0][j]=0;// x 
+               Js[1][j]=0;// y
+               for (int i=0; i<order+1; i++)
+               {
+                  xi=globalNodesCoords[faceInfos[face][2+i]][0];
+                  yi=globalNodesCoords[faceInfos[face][2+i]][1];
+                  if ( face==0 || face==2)
+                  {
+                     Js[0][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[i]]*xi;
+                     Js[1][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[i]]*yi;
+                  }
+                  if ( face==1 || face==3)
+                  {
+                     Js[0][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[i]]*xi;
+                     Js[1][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[i]]*yi;
+                  }               
+               }
+               ds[j]=sqrt(Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j]);
+               Sh[face][j]+=weights[j]*ds[j]/model[faceInfos[face][0]];
+               gIndexFace=iFace*order+j;
+               //cout<<"gIndexFace="<<gIndexFace<<endl;
+               ShGlobal[gIndexFace]+=Sh[face][j];
+            }
+         }
+      }  
+      float invMpSh;
+      float MmSh;
+      #pragma omp for schedule(dynamic) private(tmp,invMpSh,MmSh)
+      for ( int i=0 ; i< numberOfBoundaryNodes; i++)
+      {
+         tmp=timeSample*timeSample;
+         int I=listOfBoundaryNodes[i];
+         invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
+         MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
+         pnGlobal[I][i1]=invMpSh*((2*massMatrixGlobal[I]+tmp*yGlobal[I])*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]) ;   
+      }
+   }
+}
 /// add right and side
 void solver::addRightAndSides(const int & timeStep,
                               const int & numberOfRHS,

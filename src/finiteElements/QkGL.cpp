@@ -394,9 +394,9 @@ vector<vector<double>> QkGL::getBasisFunction2D(const vector<double> quadratureP
 // Xi[0,..,1][0,..,nPointsPerElement], global coordinate of element
 // dxPhi,dyPhi 2D derivative of basis Functions
 vector<vector<double>> QkGL::computeJacobianMatrix(const int &nPointsPerElement,
-	                                           const vector<vector<double>> &Xi ,
-	                                           const vector<vector<double>> &dxPhi ,
-	                                           const vector<vector<double>> &dyPhi )
+	                                               const vector<vector<double>> &Xi ,
+	                                               const vector<vector<double>> &dxPhi ,
+	                                               const vector<vector<double>> &dyPhi )
 {
     vector<vector<double>> jacobianMatrix(4,vector<double>(nPointsPerElement,0));
 
@@ -415,7 +415,7 @@ vector<vector<double>> QkGL::computeJacobianMatrix(const int &nPointsPerElement,
 
 // compute jacobian matrix determinant
 vector<double>  QkGL::computeDeterminantOfJacobianMatrix(const int &nPointsPerElement,
-	                                                 const vector<vector<double>> &jacobianMatrix)
+	                                                     const vector<vector<double>> &jacobianMatrix)
 {
     vector<double>  detJ(nPointsPerElement,0);
     for (int i=0; i<nPointsPerElement; i++) 
@@ -427,8 +427,8 @@ vector<double>  QkGL::computeDeterminantOfJacobianMatrix(const int &nPointsPerEl
 
 // compute inverse of Jacobian Matrix
 vector<vector<double>> QkGL::computeInvJacobianMatrix(const int &nPointsPerElement,
-	                                              const vector<vector<double>> &jacobianMatrix,
-				                      const vector<double> &detJ)
+	                                                  const vector<vector<double>> &jacobianMatrix,
+				                                      const vector<double> &detJ)
 {
     vector<vector<double>> invJacobianMatrix(4,vector<double>(nPointsPerElement,0));
     for (int i=0; i<nPointsPerElement; i++)
@@ -443,8 +443,8 @@ vector<vector<double>> QkGL::computeInvJacobianMatrix(const int &nPointsPerEleme
 
 // compute inverse of Jacobian Matrix
 vector<vector<double>> QkGL::computeTranspInvJacobianMatrix(const int &nPointsPerElement,
-		                                            const vector<vector<double>> &jacobianMatrix,
-					                    const vector<double> &detJ)
+		                                                    const vector<vector<double>> &jacobianMatrix,
+					                                        const vector<double> &detJ)
 {
     vector<vector<double>> transpInvJacobianMatrix(4,vector<double>(nPointsPerElement,0));
     for (int i=0; i<nPointsPerElement; i++)
@@ -486,7 +486,7 @@ vector<vector<double>> QkGL::gradPhiGradPhi(const int & nPointsPerElement,
                                             const vector<double> &weights2D,
                                             const vector<vector<double>> &B,
                                             const vector<vector<double>> &dxPhi,
-					    const vector<vector<double>> &dyPhi)
+					                        const vector<vector<double>> &dyPhi)
 {
     vector<vector<double>> R(nPointsPerElement,vector<double>(nPointsPerElement,0));
     for (int i=0; i<nPointsPerElement; i++)
@@ -508,9 +508,9 @@ vector<vector<double>> QkGL::gradPhiGradPhi(const int & nPointsPerElement,
 
 // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ 
 vector<vector<double>> QkGL::phiIphiJ(const int & nPointsPerElement,
-                                            const vector<double> &weights2D,
-					    const vector<vector<double>> &phi,
-					    const vector<double> &detJ)
+                                      const vector<double> &weights2D,
+					                  const vector<vector<double>> &phi,
+					                  const vector<double> &detJ)
 {
     vector<vector<double>> M(nPointsPerElement,vector<double>(nPointsPerElement,0));
     for (int i=0; i<nPointsPerElement; i++)

@@ -44,9 +44,26 @@ int simpleMesh::getNy()
 //get dx
 int simpleMesh::getDx()
 {return hx;}
+
 //get dy
 int simpleMesh::getDy()
 {return hy;}
+
+//get number of interior elements
+int simpleMesh::getNumberOfInteriorElements()
+{return (ex-2)*(ey-2);}
+
+//get number of interior Nodes
+int simpleMesh::getNumberOfInteriorNodes()
+{return ((ex-2)*order+1)*((ey-2)*order+1);}
+
+//get number of boundary Faces
+int simpleMesh::getNumberOfBoundaryFaces()
+{return 2*(ex+ey);}
+
+// get number of Boundary nodes
+int simpleMesh::getNumberOfBoundaryNodes()
+{return 2*(nx+ny);}
 
 // Initialize nodal coordinates.
 vector<vector<float>> simpleMesh::nodesCoordinates(const int &numberOfNodes)
@@ -74,7 +91,7 @@ vector<vector<float>> simpleMesh::nodesCoordinates(const int &numberOfNodes)
           xi[2] = 1./sqrt5;
           xi[3] = 1.;
           break;
-        case 4:
+         case 4:
           static constexpr double sqrt3_7 = 0.6546536707079771;
           xi[0] = -1.0;
           xi[1] = -sqrt3_7;
@@ -82,7 +99,7 @@ vector<vector<float>> simpleMesh::nodesCoordinates(const int &numberOfNodes)
           xi[3] = sqrt3_7;
           xi[4] = 1.0;
           break;
-        case 5:
+         case 5:
           static constexpr double sqrt__7_plus_2sqrt7__ = 3.50592393273573196;
           static constexpr double sqrt__7_mins_2sqrt7__ = 1.30709501485960033;
           static constexpr double sqrt_inv21 = 0.218217890235992381;
@@ -265,26 +282,6 @@ vector<int> simpleMesh::neighbors(const int & e)
       neigh[3]=-2;
       neigh[4]=-4;
    }
-   // if bottom left boundary element
-   if(i==0 && j==0)
-   {
-      neigh[4]=-5;
-   }
-   // if bottom right boundary element
-   if(i==ex-1 && j==0)
-   {  
-      neigh[4]=-6;
-   }
-   // if top left boundary element
-   if(i==0 && j==ey-1)
-   {
-      neigh[4]=-7;
-   }
-   // if top right boundary element
-   if(i==ex-1 && j==ey-1)
-   {
-      neigh[4]=-8;
-   }
    return neigh;
 
 }
@@ -316,26 +313,174 @@ vector<vector<int>> simpleMesh::getGlobalDofOfFace(const int & e,
 {
    vector<vector<int>> nodesFace(4,vector<int>(order+1,0));
    
+   //left face
    for ( int i=0;i<order+1;i++)
    {
       int dofLocal=i*(order+1);
       nodesFace[0][i]=globalNodesList[e][dofLocal];
    }
+   //bottom face
    for ( int i=0;i<order+1;i++)
    {
       int dofLocal=i;
       nodesFace[1][i]=globalNodesList[e][dofLocal];
    }
+   //right face
    for ( int i=0;i<order+1;i++)
    {
       int dofLocal=order+i*(order+1);
       nodesFace[2][i]=globalNodesList[e][dofLocal];
    }
+   //top face
    for ( int i=0;i<order+1;i++)
    {
       int dofLocal=i+order*(order+1);
       nodesFace[3][i]=globalNodesList[e][dofLocal];
    }
    return nodesFace;
+}
+
+// provides informations about boundary  faces:
+// element number,
+// orientation of the face
+// list of global indexes 
+// this method is sequential only for omp !!! 
+vector<vector<int>>simpleMesh::getBoundaryFacesInfos()
+{
+   int numberOfBoundaryFaces=getNumberOfBoundaryFaces();
+   int numFace=0;
+   vector<vector<int>>faceInfos(numberOfBoundaryFaces,vector<int>(2+(order+1),0));
+   // bottom, j=0, l=0
+   for( int i=0;i<ex;i++)
+   {
+      //cout<<" bottom face element "<<i<<endl;
+      faceInfos[numFace][0]=i;
+      faceInfos[numFace][1]=1;
+	   int offset=i*order;
+      for ( int j=0; j<order+1;j++)
+      {
+         faceInfos[numFace][2+j]=offset+j;
+         //cout<<faceInfos[numFace][2+j]<<", ";
+      }
+      //cout<<endl;
+      numFace++;
+   }
+   // top j=ey-1, k=order
+   for( int i=0;i<ex;i++)
+   {
+      int e=i+(ey-1)*ex;
+      //cout<<" top face element "<<e<<endl;
+      faceInfos[numFace][0]=e;
+      faceInfos[numFace][1]=3;
+	   int offset=i*order+(ey-1)*order*nx;
+      int k=order;
+      for ( int l=0; l<order+1;l++)
+      {
+         faceInfos[numFace][2+l]=offset+l+k*nx;
+         //cout<<faceInfos[numFace][2+l]<<", ";
+      }
+      //cout<<endl;
+      numFace++;
+   }
+   // left, i=0 and l=0
+   for( int j=0;j<ey;j++)
+   {
+      int e=j*ex;
+      //cout<<" left face element "<<e<<endl;
+	   int offset=j*order*nx;
+      faceInfos[numFace][0]=e;
+      faceInfos[numFace][1]=0;
+      for ( int k=0; k<order+1;k++)
+      {
+         faceInfos[numFace][2+k]=offset+k*nx;
+         //cout<<faceInfos[numFace][2+k]<<", ";
+      }
+      //cout<<endl;
+      numFace++;
+   }
+   // right i=ex-1 l=order
+   for( int j=0;j<ey;j++)
+   {
+      int e=ex-1+j*ex;
+      //cout<<" right face element "<<e<<endl;
+      int offset=(ex-1)*order+j*order*nx;
+      faceInfos[numFace][0]=e;
+      faceInfos[numFace][1]=2;
+      for ( int k=0; k<order+1;k++)
+      {
+         faceInfos[numFace][2+k]=offset+order+k*nx;
+         //cout<<faceInfos[numFace][2+k]<<", ";
+      }
+      //cout<<endl;
+      numFace++;
+   }
+   return faceInfos;
+}
+
+// get list of interior Elements
+vector<int> simpleMesh::getListOfInteriorElements()
+{
+   int numberOfInteriorElements=getNumberOfInteriorElements();
+   vector<int> listOfInteriorElements(numberOfInteriorElements,0);
+   int k=0;
+   for (int j=1;j<ey-1;j++)
+   {
+      for(int i=1; i<ex-1;i++)
+         listOfInteriorElements[k]=i+j*ex;
+         k++;
+   }
+   return listOfInteriorElements;
+}
+
+//  get list of global interior nodes 
+vector<int> simpleMesh::getListOfInteriorNodes(const int &numberOfInteriorNodes)
+{
+   vector<int>listOfInteriorNodes(numberOfInteriorNodes,0);
+   int k=0;
+   for( int j=order;j<ny-order;j++)
+   {
+      for ( int i=order; i<nx-order; i++)
+      {	      
+         listOfInteriorNodes[k]=i+j*nx;
+         k++;
+      }
+   } 
+   return listOfInteriorNodes;
+}
+
+//  get list of global boundary nodes 
+vector<int> simpleMesh::getListOfBoundaryNodes(const int &numberOfBoundaryNodes)
+{
+   vector<int>listOfBoundaryNodes(numberOfBoundaryNodes,0);
+   int k=0;
+   //bottom
+   int j=0;
+   for ( int i=0; i<nx; i++)
+   {	      
+         listOfBoundaryNodes[k]=i+j*nx;
+         k++;
+   } 
+   //right
+   int i=nx-1;
+   for( int j=0;j<ny;j++)
+   {
+      listOfBoundaryNodes[k]=i+j*nx;
+      k++;
+   } 
+   //top
+   j=ny-1;
+   for ( int i=0; i<nx; i++)
+   {	      
+      listOfBoundaryNodes[k]=i+j*nx;
+      k++;
+   }
+   //left
+   i=0;
+   for( int j=0;j<ny;j++)
+   {	      
+      listOfBoundaryNodes[k]=i+j*nx;
+      k++;
+   } 
+   return listOfBoundaryNodes;
 }
 #endif //SIMPLEMESH_HPP_
