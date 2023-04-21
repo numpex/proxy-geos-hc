@@ -76,8 +76,7 @@ void solver::computeOneStep(const float & timeSample,
    static vector<float>ShGlobal(numberOfBoundaryNodes,0);
 
    int i;
-   int gIndexFace=0;
-   #pragma omp  parallel for shared(massMatrixGlobal,yGlobal) private(i,gIndexFace)
+   #pragma omp  parallel for shared(massMatrixGlobal,yGlobal) private(i)
    for ( int i=0; i<numberOfNodes; i++)
    {
 	   massMatrixGlobal[i]=0;
@@ -183,14 +182,14 @@ void solver::computeOneStep(const float & timeSample,
       }
 
       // damping terms
-      // loop over bondary faces 
       // Note: this loop is data parallel.
       #pragma omp  parallel shared(ShGlobal)
       {
          int face=-1;
+         int iFace;
+         int gIndexFaceNode=0;
          float xi=0;
          float yi=0;
-         int iFace;
          vector<int>numOfBasisFunctionOnFace(order+1,0);
          vector<vector<float>>Js(2,vector<float>(order+1,0));
          vector<float>ds(order+1,0);
@@ -243,7 +242,7 @@ void solver::computeOneStep(const float & timeSample,
                default :
                   cout<<"error in element flag, should be set to: 0, 1, 2, 3"<<endl;
                   break;
-            }
+           // }
             for (int j=0; j<order+1; j++)
             {
                Js[0][j]=0;// x 
@@ -265,12 +264,14 @@ void solver::computeOneStep(const float & timeSample,
                }
                ds[j]=sqrt(Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j]);
                Sh[face][j]+=weights[j]*ds[j]/model[faceInfos[face][0]];
-               gIndexFace=iFace*order+j;
+               gIndexFaceNode=iFace*order+j;
                //cout<<"gIndexFace="<<gIndexFace<<endl;
-               ShGlobal[gIndexFace]+=Sh[face][j];
+               ShGlobal[gIndexFaceNode]+=Sh[face][j];
+            }
             }
          }
-      }  
+      } 
+      // update pressure @ boundaries 
       float invMpSh;
       float MmSh;
       #pragma omp for schedule(dynamic) private(tmp,invMpSh,MmSh)
@@ -280,7 +281,7 @@ void solver::computeOneStep(const float & timeSample,
          int I=listOfBoundaryNodes[i];
          invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
          MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
-         pnGlobal[I][i1]=invMpSh*((2*massMatrixGlobal[I]+tmp*yGlobal[I])*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]) ;   
+         pnGlobal[I][i1]=invMpSh*((2*massMatrixGlobal[I]-tmp*yGlobal[I])*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]) ;   
       }
    }
 }
