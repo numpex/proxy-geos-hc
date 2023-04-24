@@ -353,23 +353,42 @@ vector<vector<int>>simpleMesh::getBoundaryFacesInfos()
    // bottom, j=0, l=0
    for( int i=0;i<ex;i++)
    {
-      //cout<<" bottom face element "<<i<<endl;
+      cout<<" bottom face element "<<i<<endl;
+      numFace=i;
       faceInfos[numFace][0]=i;
       faceInfos[numFace][1]=1;
 	   int offset=i*order;
       for ( int j=0; j<order+1;j++)
       {
          faceInfos[numFace][2+j]=offset+j;
-         //cout<<faceInfos[numFace][2+j]<<", ";
+         cout<<faceInfos[numFace][2+j]<<", ";
       }
-      //cout<<endl;
-      numFace++;
+      cout<<endl;
+      //numFace++;
+   }
+   // right i=ex-1 l=order
+   for( int j=0;j<ey;j++)
+   {
+      int e=ex-1+j*ex;
+      numFace=ex+j;
+      cout<<" right face element "<<e<<endl;
+      int offset=(ex-1)*order+j*order*nx;
+      faceInfos[numFace][0]=e;
+      faceInfos[numFace][1]=2;
+      for ( int k=0; k<order+1;k++)
+      {
+         faceInfos[numFace][2+k]=offset+order+k*nx;
+         cout<<faceInfos[numFace][2+k]<<", ";
+      }
+      cout<<endl;
+      //numFace++;
    }
    // top j=ey-1, k=order
    for( int i=0;i<ex;i++)
    {
       int e=i+(ey-1)*ex;
-      //cout<<" top face element "<<e<<endl;
+      numFace=ey+ex+i;
+      cout<<" top face element "<<e<<endl;
       faceInfos[numFace][0]=e;
       faceInfos[numFace][1]=3;
 	   int offset=i*order+(ey-1)*order*nx;
@@ -377,43 +396,29 @@ vector<vector<int>>simpleMesh::getBoundaryFacesInfos()
       for ( int l=0; l<order+1;l++)
       {
          faceInfos[numFace][2+l]=offset+l+k*nx;
-         //cout<<faceInfos[numFace][2+l]<<", ";
+         cout<<faceInfos[numFace][2+l]<<", ";
       }
-      //cout<<endl;
-      numFace++;
+      cout<<endl;
+      //numFace++;
    }
    // left, i=0 and l=0
    for( int j=0;j<ey;j++)
    {
       int e=j*ex;
-      //cout<<" left face element "<<e<<endl;
+      numFace=2*ex+ey+j;
+      cout<<" left face element "<<e<<endl;
 	   int offset=j*order*nx;
       faceInfos[numFace][0]=e;
       faceInfos[numFace][1]=0;
       for ( int k=0; k<order+1;k++)
       {
          faceInfos[numFace][2+k]=offset+k*nx;
-         //cout<<faceInfos[numFace][2+k]<<", ";
+         cout<<faceInfos[numFace][2+k]<<", ";
       }
-      //cout<<endl;
-      numFace++;
+      cout<<endl;
+      //numFace++;
    }
-   // right i=ex-1 l=order
-   for( int j=0;j<ey;j++)
-   {
-      int e=ex-1+j*ex;
-      //cout<<" right face element "<<e<<endl;
-      int offset=(ex-1)*order+j*order*nx;
-      faceInfos[numFace][0]=e;
-      faceInfos[numFace][1]=2;
-      for ( int k=0; k<order+1;k++)
-      {
-         faceInfos[numFace][2+k]=offset+order+k*nx;
-         //cout<<faceInfos[numFace][2+k]<<", ";
-      }
-      //cout<<endl;
-      numFace++;
-   }
+
    return faceInfos;
 }
 
@@ -482,5 +487,40 @@ vector<int> simpleMesh::getListOfBoundaryNodes(const int &numberOfBoundaryNodes)
       k++;
    } 
    return listOfBoundaryNodes;
+}
+//  get list of locaal boundary nodes 
+vector<int> simpleMesh::getListOfBoundaryLocalNodes(const int &numberOfBoundaryNodes)
+{
+   vector<int>listOfBoundaryLocalNodes(numberOfBoundaryNodes,0);
+   int k=0;
+   //bottom
+   int j=0;
+   for ( int i=0; i<nx; i++)
+   {	      
+         listOfBoundaryLocalNodes[k]=k;
+         k++;
+   } 
+   //right
+   int i=nx-1;
+   for( int j=0;j<ny;j++)
+   {
+      listOfBoundaryLocalNodes[k]=k;
+      k++;
+   } 
+   //top
+   j=ny-1;
+   for ( int i=0; i<nx; i++)
+   {	      
+      listOfBoundaryLocalNodes[k]=k;
+      k++;
+   }
+   //left
+   i=0;
+   for( int j=0;j<ny;j++)
+   {	      
+      listOfBoundaryLocalNodes[k]=k;
+      k++;
+   } 
+   return listOfBoundaryLocalNodes;
 }
 #endif //SIMPLEMESH_HPP_

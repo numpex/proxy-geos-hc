@@ -31,8 +31,8 @@ void solver::computeOneStep(const float & timeSample,
    static vector<int> listOfInteriorNodes=mesh.getListOfInteriorNodes(numberOfInteriorNodes);
 
    static vector<int> listOfBoundaryNodes=mesh.getListOfBoundaryNodes(numberOfBoundaryNodes);
+   static vector<int> listOfBoundaryLocalNodes=mesh.getListOfBoundaryLocalNodes(numberOfBoundaryNodes);
    static vector<vector<float>> globalNodesCoords=mesh.nodesCoordinates(numberOfNodes);
-   static vector<vector<int>> boundaryFacesInfos=mesh.getBoundaryFacesInfos();
    static vector<vector<int>>faceInfos=mesh.getBoundaryFacesInfos();
 
    
@@ -172,12 +172,13 @@ void solver::computeOneStep(const float & timeSample,
       }
       // update pressure
       float tmp;
+      //cout<< "number of interior nodes="<<numberOfInteriorNodes<<endl;
       #pragma omp for schedule(dynamic) private(tmp)
       for ( int i=0 ; i< numberOfInteriorNodes; i++)
       {
          tmp=timeSample*timeSample;
          int I=listOfInteriorNodes[i];
-         //cout<<"interior global node="<<I<<endl;
+         //cout<<"i="<<i<<" interior global node="<<I<<endl;
          pnGlobal[I][i1]=2*pnGlobal[I][i2]-pnGlobal[I][i1]-tmp*yGlobal[I]/massMatrixGlobal[I];    
       }
 
@@ -193,37 +194,41 @@ void solver::computeOneStep(const float & timeSample,
          vector<int>numOfBasisFunctionOnFace(order+1,0);
          vector<vector<float>>Js(2,vector<float>(order+1,0));
          vector<float>ds(order+1,0);
-         vector<vector<float>>Sh(4,vector<float>(order+1,0));
-         #pragma omp  for schedule(static) private( iFace,xi,yi,face)
+         vector<float>Sh(order+1,0);
+         #pragma omp  for schedule(static) private( iFace,xi,yi,face,gIndexFaceNode)
          for (iFace=0; iFace< numberOfBoundaryFaces; iFace++)
          {
-            //cout<<"iFace="<<iFace<<" face= "<<faceInfos[iFace][1]<<endl;
-            switch (faceInfos[iFace][1])
+            face=faceInfos[iFace][1];
+            //cout<<"iFace="<<iFace<<" face= "<<face<<endl;
+            // get basis functions on Boundary faces
+            switch (face)
             {
                case 0: // left
-                  face=0; 
                   //cout<<"left face "<<endl;
                   for (int i=0;i<order+1;i++)
                   {
                      numOfBasisFunctionOnFace[i]=i*(order+1);
+                     //cout<<"num of basis function="<<numOfBasisFunctionOnFace[i]<<", ";
                   }
+                  //cout<<endl;
                   break;
                case 1: // bottom
-                  // cout<<"bottom"<<endl;
                   //cout<<"bottom face"<<endl;
-                  face=1;
                   for (int i=0;i<order+1;i++)
                   {
                      numOfBasisFunctionOnFace[i]=i;
+                     //cout<<"num of basis function="<<numOfBasisFunctionOnFace[i]<<", ";
                   }
+                  //cout<<endl;
                   break;
                case 2: //right
                   //cout<<"right face "<<endl;
-                  face=2;
                   for (int i=0;i<order+1;i++)
                   {
                      numOfBasisFunctionOnFace[i]=order+i*(order+1);
+                     //cout<<"num of basis function="<<numOfBasisFunctionOnFace[i]<<", ";
                   }
+                  //cout<<endl;
                   break;
                case 3: //top
                   //cout<<"top face "<<endl;
@@ -233,41 +238,59 @@ void solver::computeOneStep(const float & timeSample,
                   //     face=0;
                   //     break;
                   //else  
-                  face=3;
                   for (int i=0;i<order+1;i++)
                   {
                      numOfBasisFunctionOnFace[i]=i+order*(order+1);
-                  }   
+                     //cout<<"num of basis function="<<numOfBasisFunctionOnFace[i]<<", ";
+                  }  
+                  //cout<<endl; 
                   break;               
                default :
                   cout<<"error in element flag, should be set to: 0, 1, 2, 3"<<endl;
                   break;
-           // }
+            }
+            // compute ds
             for (int j=0; j<order+1; j++)
             {
                Js[0][j]=0;// x 
                Js[1][j]=0;// y
+               //cout<<"iface="<<iFace<<", j="<<j<<endl;
+               //cout<<"------------"<<endl;
                for (int i=0; i<order+1; i++)
                {
-                  xi=globalNodesCoords[faceInfos[face][2+i]][0];
-                  yi=globalNodesCoords[faceInfos[face][2+i]][1];
+                  xi=globalNodesCoords[faceInfos[iFace][2+i]][0];
+                  yi=globalNodesCoords[faceInfos[iFace][2+i]][1];
+                  //cout<<"i="<<i<<", facinfo  element "<<faceInfos[iFace][0]<<endl;
+                  //cout<<"i="<<i<<", facinfo  face "<<faceInfos[iFace][0]<<endl;
+                  //cout<<"i="<<i<<", facinfo  numpoint "<<faceInfos[iFace][2+i]<<endl;
+                  //cout<<"i="<<i<<", face="<<face<<" xi,yi="<<xi<<", "<<yi<<endl;
                   if ( face==0 || face==2)
                   {
-                     Js[0][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[i]]*xi;
-                     Js[1][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[i]]*yi;
-                  }
+                     Js[0][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*xi;
+                     Js[1][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*yi;
+                  }  
                   if ( face==1 || face==3)
                   {
-                     Js[0][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[i]]*xi;
-                     Js[1][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[i]]*yi;
+                     Js[0][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*xi; 
+                     Js[1][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*yi;
                   }               
                }
                ds[j]=sqrt(Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j]);
-               Sh[face][j]+=weights[j]*ds[j]/model[faceInfos[face][0]];
-               gIndexFaceNode=iFace*order+j;
-               //cout<<"gIndexFace="<<gIndexFace<<endl;
-               ShGlobal[gIndexFaceNode]+=Sh[face][j];
             }
+            // compute damping matrix
+            for (int i=0; i<order+1;i++)
+            {
+               /*
+               float tmp=0;
+               for (int r=0;r<order+1;r++)
+               {
+                  tmp+=weights[r]*ds[r];
+               }
+               */
+               Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
+               gIndexFaceNode=iFace*order+i;
+               //cout<<"gIndexFaceNode="<<gIndexFaceNode<<endl;
+               ShGlobal[gIndexFaceNode]+=Sh[i];
             }
          }
       } 
@@ -277,11 +300,12 @@ void solver::computeOneStep(const float & timeSample,
       #pragma omp for schedule(dynamic) private(tmp,invMpSh,MmSh)
       for ( int i=0 ; i< numberOfBoundaryNodes; i++)
       {
+         //cout<<i<<" "<<listOfBoundaryNodes[i]<<endl;
          tmp=timeSample*timeSample;
          int I=listOfBoundaryNodes[i];
          invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
          MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
-         pnGlobal[I][i1]=invMpSh*((2*massMatrixGlobal[I]-tmp*yGlobal[I])*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]) ;   
+         pnGlobal[I][i1]=invMpSh*(2*massMatrixGlobal[I]*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]-tmp*yGlobal[I]);   
       }
    }
 }
