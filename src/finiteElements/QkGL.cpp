@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include "QkGL.hpp"
+#include "commonMacro.hpp"
 
 using namespace std;
 

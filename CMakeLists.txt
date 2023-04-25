@@ -1,17 +1,21 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required( VERSION 3.8 )
 
-project(sem)
+project( sem )
 
-include (config.h)
+set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_FLAGS "-O3 -std=c++14 " CACHE STRING "")
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-O3 -std=c++14 " CACHE STRING "")
+#-----------------------------------------------------
+# Setup Flags for Building and Installation
+#-----------------------------------------------------
 
-find_package(OpenMP)
-if (OPENMP_FOUND)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif()
+# setup the flags for users to select programming models
+set (SEM_USE_OMP ON CACHE BOOL "")
+set (SEM_USE_RAJA ON CACHE BOOL "")
+
+# setup the flags for profiling using caliper
+set (SEM_USE_CALIPER ON CACHE BOOL "")
 
 add_subdirectory(src)
+
+
