@@ -245,18 +245,47 @@ vector<int> simpleMesh::neighbors(const int & e)
    if(i==ex-1)
    {  
       neigh[2]=-2;
-      neigh[4]=-1;
+      neigh[4]=-3;
    }
    if(j==0)
    {
       neigh[1]=-1;
-      neigh[4]=-1;
+      neigh[4]=-2;
    }
    if(j==ey-1)
    {
       neigh[3]=-2;
-      neigh[4]=-1;
+      neigh[4]=-4;
+   }
+   if(i==0 && j==0)
+   {
+      neigh[4]=-5;
+   }
+   if(i==ex-1 && j==0)
+   {  
+      neigh[4]=-6;
+   }
+   if(i==0 && j==ey-1)
+   {
+      neigh[4]=-8;
+   }
+   if(i==ex-1 && j==ey-1)
+   {
+      neigh[4]=-7;
    }
    return neigh;
+
+}
+
+// get global coordinates of element e
+void simpleMesh::getXi(const int & numberOfPointsPerElement,const vector<vector<float>> & globalNodesCoords,
+                       const vector<int> & localToGlobal, vector<vector<double>> & Xi)
+{
+   for ( int i=0; i<numberOfPointsPerElement; i++)
+   {
+       Xi[i][0]=globalNodesCoords[localToGlobal[i]][0];
+       Xi[i][1]=globalNodesCoords[localToGlobal[i]][1];
+       //cout<<" node "<<i<<"  "<<Xi[i][0]<<", "<<Xi[i][1]<<endl;
+   }
 }
 #endif //SIMPLEMESH_HPP_
