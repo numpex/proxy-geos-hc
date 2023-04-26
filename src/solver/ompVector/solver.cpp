@@ -82,11 +82,7 @@ void solver::computeOneStep(const float & timeSample,
 	   massMatrixGlobal[i]=0;
 	   yGlobal[i]=0;
    }
-   #pragma omp  parallel for shared(ShGlobal) private(i)
-   for ( int i=0; i<numberOfBoundaryNodes; i++)
-   {
-	   ShGlobal[i]=0;
-   }
+   
     // loop over mesh elements
     #pragma omp  parallel shared(model,massMatrixGlobal,yGlobal,pnGlobal,globalNodesCoords,globalNodesList)
     {
@@ -183,6 +179,11 @@ void solver::computeOneStep(const float & timeSample,
       }
 
       // damping terms
+      #pragma omp  parallel for shared(ShGlobal) private(i)
+      for ( int i=0; i<numberOfBoundaryNodes; i++)
+      {
+	      ShGlobal[i]=0;
+      }
       // Note: this loop is data parallel.
       #pragma omp  parallel shared(ShGlobal)
       {
@@ -199,7 +200,7 @@ void solver::computeOneStep(const float & timeSample,
          for (iFace=0; iFace< numberOfBoundaryFaces; iFace++)
          {
             face=faceInfos[iFace][1];
-            //cout<<"iFace="<<iFace<<" face= "<<face<<endl;
+            cout<<"iFace="<<iFace<<" face= "<<face<<endl;
             // get basis functions on Boundary faces
             switch (face)
             {
@@ -231,19 +232,12 @@ void solver::computeOneStep(const float & timeSample,
                   //cout<<endl;
                   break;
                case 3: //top
-                  //cout<<"top face "<<endl;
-                  // add free surface.
-                  //if (freeSurface)
-                  //{ 
-                  //     face=0;
-                  //     break;
-                  //else  
+                  //cout<<"top face "<<endl; 
                   for (int i=0;i<order+1;i++)
                   {
                      numOfBasisFunctionOnFace[i]=i+order*(order+1);
                      //cout<<"num of basis function="<<numOfBasisFunctionOnFace[i]<<", ";
-                  }  
-                  //cout<<endl; 
+                  }   
                   break;               
                default :
                   cout<<"error in element flag, should be set to: 0, 1, 2, 3"<<endl;
@@ -263,7 +257,7 @@ void solver::computeOneStep(const float & timeSample,
                   //cout<<"i="<<i<<", facinfo  element "<<faceInfos[iFace][0]<<endl;
                   //cout<<"i="<<i<<", facinfo  face "<<faceInfos[iFace][0]<<endl;
                   //cout<<"i="<<i<<", facinfo  numpoint "<<faceInfos[iFace][2+i]<<endl;
-                  //cout<<"i="<<i<<", face="<<face<<" xi,yi="<<xi<<", "<<yi<<endl;
+                  cout<<"i="<<i<<", face="<<face<<" xi,yi="<<xi<<", "<<yi<<endl;
                   if ( face==0 || face==2)
                   {
                      Js[0][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*xi;
@@ -276,6 +270,8 @@ void solver::computeOneStep(const float & timeSample,
                   }               
                }
                ds[j]=sqrt(Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j]);
+               cout<<"iFace="<<iFace<<", ds["<<j<<"]="<<ds[j]<<endl;
+               cout<<"iFace="<<iFace<<", Js[0]["<<j<<"]="<<Js[0][j]<<endl;
             }
             // compute damping matrix
             for (int i=0; i<order+1;i++)

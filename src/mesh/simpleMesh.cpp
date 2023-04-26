@@ -355,6 +355,7 @@ vector<vector<int>>simpleMesh::getBoundaryFacesInfos()
    {
       cout<<" bottom face element "<<i<<endl;
       numFace=i;
+      cout<<" numFace "<<numFace<<endl;
       faceInfos[numFace][0]=i;
       faceInfos[numFace][1]=1;
 	   int offset=i*order;
@@ -372,6 +373,7 @@ vector<vector<int>>simpleMesh::getBoundaryFacesInfos()
       int e=ex-1+j*ex;
       numFace=ex+j;
       cout<<" right face element "<<e<<endl;
+      cout<<" numFace "<<numFace<<endl;
       int offset=(ex-1)*order+j*order*nx;
       faceInfos[numFace][0]=e;
       faceInfos[numFace][1]=2;
@@ -389,6 +391,7 @@ vector<vector<int>>simpleMesh::getBoundaryFacesInfos()
       int e=i+(ey-1)*ex;
       numFace=ey+ex+i;
       cout<<" top face element "<<e<<endl;
+      cout<<" numFace "<<numFace<<endl;
       faceInfos[numFace][0]=e;
       faceInfos[numFace][1]=3;
 	   int offset=i*order+(ey-1)*order*nx;
@@ -407,6 +410,7 @@ vector<vector<int>>simpleMesh::getBoundaryFacesInfos()
       int e=j*ex;
       numFace=2*ex+ey+j;
       cout<<" left face element "<<e<<endl;
+      cout<<" numFace "<<numFace<<endl;
 	   int offset=j*order*nx;
       faceInfos[numFace][0]=e;
       faceInfos[numFace][1]=0;
