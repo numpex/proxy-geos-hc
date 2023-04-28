@@ -13,12 +13,12 @@ solver::~solver() {}
 // compute one step of the time dynamic wave equation solver
 //vector<vector<float>> 
 void solver::computeOneStep(const float & timeSample,
-		                    const int &order,
-					        int &i1,
-					        int &i2,
+                            const int &order,
+                            int &i1,
+                            int &i2,
                             vector<vector<float>> & pnGlobal,
-					        simpleMesh mesh,
-					        QkGL Qk)
+                            simpleMesh mesh,
+                            QkGL Qk)
 {
     static int numberOfNodes=mesh.getNumberOfNodes();
     static int numberOfElements=mesh.getNumberOfElements();
@@ -52,8 +52,8 @@ void solver::computeOneStep(const float & timeSample,
     static vector<float>yGlobal(numberOfNodes);
     for ( int i=0; i<numberOfNodes; i++)
     {
-	     massMatrixGlobal[i]=0;
-	     yGlobal[i]=0;
+        massMatrixGlobal[i]=0;
+        yGlobal[i]=0;
      }
     // loop over mesh elements
     int e;
@@ -70,38 +70,38 @@ void solver::computeOneStep(const float & timeSample,
             //cout<<" node "<<i<<"  "<<Xi[i][0]<<", "<<Xi[i][1]<<endl;
         }
         //cout<<"after  Xi definition"<<endl;
-	    // compute jacobian Matrix
+        // compute jacobian Matrix
         vector<vector<double>> jacobianMatrix= Qk.computeJacobianMatrix(numberOfPointsPerElement,Xi,
                                                                         derivativeBasisFunction2DX,
                                                                         derivativeBasisFunction2DY);
         //cout<<"Jacobian marix done"<<endl;
-	    // compute determinant of jacobian Matrix
+        // compute determinant of jacobian Matrix
         vector<double> detJ= Qk.computeDeterminantOfJacobianMatrix(numberOfPointsPerElement,
                                                                    jacobianMatrix);
         //cout<<"detJ Done"<<endl;
-	    // compute inverse of Jacobian Matrix
+        // compute inverse of Jacobian Matrix
         vector<vector<double>> invJacobianMatrix= Qk.computeInvJacobianMatrix(numberOfPointsPerElement,
                                                                               jacobianMatrix,
                                                                               detJ);
         //cout<<"InvdetJ Done"<<endl;     
-	    // compute transposed inverse of Jacobian Matrix
+        // compute transposed inverse of Jacobian Matrix
         vector<vector<double>> transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix(numberOfPointsPerElement,
                                                                                           jacobianMatrix,
                                                                                           detJ);
         //cout<<"transpInvdetJ Done"<<endl;
-	    // compute  geometrical transformation matrix
+        // compute  geometrical transformation matrix
         vector<vector<double>> B=Qk.computeB(numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ);
         //cout<<"computeB Done"<<endl;
-	    // compute stifness and mass matrix
+        // compute stifness and mass matrix
         vector<vector<double>> R=Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
                                                    derivativeBasisFunction2DY);
 
         // compute local mass matrix
         vector<vector<double>> massMatrixLocal=Qk.phiIphiJ(numberOfPointsPerElement, weights2D, basisFunction2D, detJ);
         //cout<<"compute R and massmatrix done"<<endl;
-	    // get pnGlobal to pnLocal
-	    static vector<float> pnLocal(numberOfPointsPerElement);  
-	    for ( int i=0; i<numberOfPointsPerElement; i++)
+        // get pnGlobal to pnLocal
+        static vector<float> pnLocal(numberOfPointsPerElement);  
+        for ( int i=0; i<numberOfPointsPerElement; i++)
         {
             massMatrixLocal[i][i]/=(model[e]*model[e]);
             pnLocal[i]=pnGlobal[localToGlobal[i]][i2];
@@ -110,7 +110,7 @@ void solver::computeOneStep(const float & timeSample,
         static vector<float>Y(numberOfPointsPerElement);
         for ( int i=0; i<numberOfPointsPerElement; i++)
         {
-	       Y[i]=0;
+           Y[i]=0;
            for ( int j=0; j<numberOfPointsPerElement; j++)
            {
                Y[i]-=R[i][j]*pnLocal[j]; 
@@ -119,12 +119,12 @@ void solver::computeOneStep(const float & timeSample,
         //cout <<"update Y Done"<<endl
         for ( int i=0; i<numberOfPointsPerElement; i++)
         {
-	        int gIndex=localToGlobal[i];
-	        massMatrixGlobal[gIndex]+=massMatrixLocal[i][i];
-	        yGlobal[gIndex]+=Y[i];
+            int gIndex=localToGlobal[i];
+            massMatrixGlobal[gIndex]+=massMatrixLocal[i][i];
+            yGlobal[gIndex]+=Y[i];
         }
     vector<int>neighbors=mesh.neighbors(e);
-	}
+    }
     // update pressure
     int i;
     float tmp;
