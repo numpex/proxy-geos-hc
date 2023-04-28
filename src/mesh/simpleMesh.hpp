@@ -102,9 +102,6 @@ class simpleMesh
       //  get list of global boundary nodes 
       vector<int> getListOfBoundaryNodes(const int &numberOfBoundaryNodes);
 
-      //  get list of global boundary nodes 
-      vector<int> getListOfBoundaryLocalNodes(const int &numberOfBoundaryNodes);
-
 
 };
 #endif //SIMPLE_MESH_

@@ -31,11 +31,8 @@ void solver::computeOneStep(const float & timeSample,
    static vector<int> listOfInteriorNodes=mesh.getListOfInteriorNodes(numberOfInteriorNodes);
 
    static vector<int> listOfBoundaryNodes=mesh.getListOfBoundaryNodes(numberOfBoundaryNodes);
-   static vector<int> listOfBoundaryLocalNodes=mesh.getListOfBoundaryLocalNodes(numberOfBoundaryNodes);
    static vector<vector<float>> globalNodesCoords=mesh.nodesCoordinates(numberOfNodes);
    static vector<vector<int>>faceInfos=mesh.getBoundaryFacesInfos();
-
-   
    
 
    // get model
@@ -118,38 +115,31 @@ void solver::computeOneStep(const float & timeSample,
         jacobianMatrix= Qk.computeJacobianMatrix(numberOfPointsPerElement,Xi,
                                                                         derivativeBasisFunction2DX,
                                                                         derivativeBasisFunction2DY);
-        //cout<<"Jacobian marix done"<<endl;
 	     // compute determinant of jacobian Matrix
         detJ= Qk.computeDeterminantOfJacobianMatrix(numberOfPointsPerElement,
                                                                    jacobianMatrix);
-        //cout<<"detJ Done"<<endl;
 	     // compute inverse of Jacobian Matrix
         invJacobianMatrix= Qk.computeInvJacobianMatrix(numberOfPointsPerElement,
                                                                               jacobianMatrix,
-                                                                              detJ);
-        //cout<<"InvdetJ Done"<<endl;     
+                                                                              detJ);   
 	     // compute transposed inverse of Jacobian Matrix
         transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix(numberOfPointsPerElement,
                                                                                           jacobianMatrix,
                                                                                           detJ);
-        //cout<<"transpInvdetJ Done"<<endl;
 	     // compute  geometrical transformation matrix
         B=Qk.computeB(numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ);
-        //cout<<"computeB Done"<<endl;
 	     // compute stifness and mass matrix
         R=Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
                                                    derivativeBasisFunction2DY);
 
         // compute local mass matrix
         massMatrixLocal=Qk.phiIphiJ(numberOfPointsPerElement, weights2D, basisFunction2D, detJ);
-        //cout<<"compute R and massmatrix done"<<endl;
 	     // get pnGlobal to pnLocal 
 	     for ( int i=0; i<numberOfPointsPerElement; i++)
         {
             massMatrixLocal[i][i]/=(model[e]*model[e]);
             pnLocal[i]=pnGlobal[localToGlobal[i]][i2];
         }
-        //cout <<"update pnLocal Done  "<<numberOfPointsPerElement<<endl;
         for ( int i=0; i<numberOfPointsPerElement; i++)
         {
 	       Y[i]=0;
@@ -158,7 +148,6 @@ void solver::computeOneStep(const float & timeSample,
                Y[i]+=R[i][j]*pnLocal[j]; 
            }
         }
-        //cout <<"update Y Done"<<endl
         for ( int i=0; i<numberOfPointsPerElement; i++)
         {
 	        gIndex=localToGlobal[i];
@@ -168,16 +157,15 @@ void solver::computeOneStep(const float & timeSample,
       }
       // update pressure
       float tmp;
-      //cout<< "number of interior nodes="<<numberOfInteriorNodes<<endl;
       #pragma omp for schedule(dynamic) private(tmp)
       for ( int i=0 ; i< numberOfInteriorNodes; i++)
       {
          tmp=timeSample*timeSample;
          int I=listOfInteriorNodes[i];
-         //cout<<"i="<<i<<" interior global node="<<I<<endl;
+         //cout<<"i="<<i<<" I="<<I<<endl;
          pnGlobal[I][i1]=2*pnGlobal[I][i2]-pnGlobal[I][i1]-tmp*yGlobal[I]/massMatrixGlobal[I];    
       }
-
+      
       // damping terms
       #pragma omp  parallel for shared(ShGlobal) private(i)
       for ( int i=0; i<numberOfBoundaryNodes; i++)
@@ -200,43 +188,31 @@ void solver::computeOneStep(const float & timeSample,
          for (iFace=0; iFace< numberOfBoundaryFaces; iFace++)
          {
             face=faceInfos[iFace][1];
-            cout<<"iFace="<<iFace<<" face= "<<face<<endl;
             // get basis functions on Boundary faces
             switch (face)
             {
                case 0: // left
-                  //cout<<"left face "<<endl;
                   for (int i=0;i<order+1;i++)
                   {
                      numOfBasisFunctionOnFace[i]=i*(order+1);
-                     //cout<<"num of basis function="<<numOfBasisFunctionOnFace[i]<<", ";
                   }
-                  //cout<<endl;
                   break;
                case 1: // bottom
-                  //cout<<"bottom face"<<endl;
                   for (int i=0;i<order+1;i++)
                   {
                      numOfBasisFunctionOnFace[i]=i;
-                     //cout<<"num of basis function="<<numOfBasisFunctionOnFace[i]<<", ";
                   }
-                  //cout<<endl;
                   break;
                case 2: //right
-                  //cout<<"right face "<<endl;
                   for (int i=0;i<order+1;i++)
                   {
                      numOfBasisFunctionOnFace[i]=order+i*(order+1);
-                     //cout<<"num of basis function="<<numOfBasisFunctionOnFace[i]<<", ";
                   }
-                  //cout<<endl;
                   break;
                case 3: //top
-                  //cout<<"top face "<<endl; 
                   for (int i=0;i<order+1;i++)
                   {
                      numOfBasisFunctionOnFace[i]=i+order*(order+1);
-                     //cout<<"num of basis function="<<numOfBasisFunctionOnFace[i]<<", ";
                   }   
                   break;               
                default :
@@ -248,16 +224,10 @@ void solver::computeOneStep(const float & timeSample,
             {
                Js[0][j]=0;// x 
                Js[1][j]=0;// y
-               //cout<<"iface="<<iFace<<", j="<<j<<endl;
-               //cout<<"------------"<<endl;
                for (int i=0; i<order+1; i++)
                {
                   xi=globalNodesCoords[faceInfos[iFace][2+i]][0];
                   yi=globalNodesCoords[faceInfos[iFace][2+i]][1];
-                  //cout<<"i="<<i<<", facinfo  element "<<faceInfos[iFace][0]<<endl;
-                  //cout<<"i="<<i<<", facinfo  face "<<faceInfos[iFace][0]<<endl;
-                  //cout<<"i="<<i<<", facinfo  numpoint "<<faceInfos[iFace][2+i]<<endl;
-                  cout<<"i="<<i<<", face="<<face<<" xi,yi="<<xi<<", "<<yi<<endl;
                   if ( face==0 || face==2)
                   {
                      Js[0][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*xi;
@@ -270,35 +240,43 @@ void solver::computeOneStep(const float & timeSample,
                   }               
                }
                ds[j]=sqrt(Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j]);
-               cout<<"iFace="<<iFace<<", ds["<<j<<"]="<<ds[j]<<endl;
-               cout<<"iFace="<<iFace<<", Js[0]["<<j<<"]="<<Js[0][j]<<endl;
+               //cout<<"j="<<j<<", ds="<<ds[j]<<endl;
             }
             // compute damping matrix
-            for (int i=0; i<order+1;i++)
+            //for (int i=0; i<order+1;i++)
             {
-               /*
-               float tmp=0;
-               for (int r=0;r<order+1;r++)
-               {
-                  tmp+=weights[r]*ds[r];
-               }
-               */
-               Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
+               i=0;
                gIndexFaceNode=iFace*order+i;
-               //cout<<"gIndexFaceNode="<<gIndexFaceNode<<endl;
+               cout<<"gIndex0="<<gIndexFaceNode<<endl;
+               Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
+               ShGlobal[gIndexFaceNode]+=Sh[i];
+            }
+            //cout<<"model faceInfos["<<iFace<<"][0]="<<faceInfos[iFace][0]<<", "<<model[faceInfos[iFace][0]]<<endl;
+            for (int i=1; i<order;i++)
+            {
+               gIndexFaceNode=iFace*order+i;
+               cout<<"gIndex1="<<gIndexFaceNode<<endl;
+               Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
+               ShGlobal[gIndexFaceNode]=Sh[i];
+            }
+            {
+               i=order;
+               gIndexFaceNode=iFace*order+i;
+               cout<<"gIndex2="<<gIndexFaceNode<<endl;
+               Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
                ShGlobal[gIndexFaceNode]+=Sh[i];
             }
          }
       } 
-      // update pressure @ boundaries 
+      // update pressure @ boundaries
       float invMpSh;
       float MmSh;
       #pragma omp for schedule(dynamic) private(tmp,invMpSh,MmSh)
       for ( int i=0 ; i< numberOfBoundaryNodes; i++)
       {
-         //cout<<i<<" "<<listOfBoundaryNodes[i]<<endl;
          tmp=timeSample*timeSample;
          int I=listOfBoundaryNodes[i];
+         cout<<"i="<<i<<", BoundaryNode="<<I<<endl;
          invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
          MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
          pnGlobal[I][i1]=invMpSh*(2*massMatrixGlobal[I]*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]-tmp*yGlobal[I]);   
