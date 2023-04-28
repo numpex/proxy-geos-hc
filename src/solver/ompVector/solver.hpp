@@ -27,8 +27,8 @@ class solver
        //vector<vector<float>> 
        void computeOneStep(const float & timeSample,
                            const int &order,
-					                 int &i1,
-					                 int &i2,
+                           int &i1,
+                           int &i2,
                            vector<vector<float>> & pnGlobal,
                            simpleMesh mesh,
                            QkGL Qk);
