@@ -163,7 +163,6 @@ void solver::computeOneStep(const float & timeSample,
       {
          tmp=timeSample*timeSample;
          int I=listOfInteriorNodes[i];
-         //cout<<"i="<<i<<" I="<<I<<endl;
          pnGlobal[I][i1]=2*pnGlobal[I][i2]-pnGlobal[I][i1]-tmp*yGlobal[I]/massMatrixGlobal[I];    
       }
       
@@ -196,12 +195,12 @@ void solver::computeOneStep(const float & timeSample,
                ShGlobal[gIndexFaceNode]=+Sh[i];
             }
             
-            for (int i=0; i<order+1;i++)
+            /**for (int i=0; i<order+1;i++)
             {
                gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
                cout<<"iFace="<<iFace<<" gIndex="<<gIndexFaceNode<<endl;
                cout<<"ShGlobal["<<gIndexFaceNode<<"]="<<ShGlobal[gIndexFaceNode]<<endl;
-            }
+            }**/
             
          }
       }
@@ -226,12 +225,12 @@ void solver::computeOneStep(const float & timeSample,
          MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
          pnGlobal[I][i1]=invMpSh*(2*massMatrixGlobal[I]*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]-tmp*yGlobal[I]);   
       }
-      for ( int i=0 ; i< numberOfBoundaryNodes; i++)
+      
+      /**for ( int i=0 ; i< numberOfBoundaryNodes; i++)
       {
          int I=listOfBoundaryNodes[i];
          cout<<"i="<<i<<", BoundaryNode="<<I<<endl;
-         //cout<<"ShGlobal["<<i<<"]="<<ShGlobal[i]<<endl;
-      }
+      }**/
    }
 }
 /// add right and side
