@@ -102,6 +102,9 @@ class simpleMesh
       //  get list of global boundary nodes 
       vector<int> getListOfBoundaryNodes(const int &numberOfBoundaryNodes);
 
+      // provides a mapping between local node of a face and global node Face:
+      vector<vector<int>>getLocalFaceNodeToGlobalFaceNode();
+
 
 };
 #endif //SIMPLE_MESH_

@@ -401,7 +401,15 @@ vector<vector<int>>simpleMesh::getBoundaryFacesInfos()
          faceInfos[numFace][2+k]=offset+k*nx;
       }
    }
-
+/**
+   for ( int iFace=0;iFace<numberOfBoundaryFaces;iFace++)
+   {
+      for ( int i=0; i<order+1;i++)
+      {
+         cout<<"iFace="<<iFace<<" node number="<<faceInfos[iFace][2+i]<<endl;
+      }
+   }
+**/
    return faceInfos;
 }
 
@@ -479,5 +487,107 @@ vector<int> simpleMesh::getListOfBoundaryNodes(const int &numberOfBoundaryNodes)
    //  cout<<"j="<<j<<", "<<listOfBoundaryNodes[j]<<endl;
    //}    
    return listOfBoundaryNodes;
+}
+
+// provides a mapping between local node of a face and global node Face:
+vector<vector<int>>simpleMesh::getLocalFaceNodeToGlobalFaceNode()
+{
+   int numberOfBoundaryFaces=getNumberOfBoundaryFaces();
+   int numFace=0;
+   int offset;
+   vector<vector<int>>localFaceNodeToGlobalFaceNode(numberOfBoundaryFaces,vector<int>(order+1,0));
+   // bottom, j=0, l=0
+   for( int i=0;i<ex;i++)
+   {
+      numFace=i;
+	   offset=i*order;
+      for ( int j=0; j<order+1;j++)
+      {
+         localFaceNodeToGlobalFaceNode[numFace][j]=offset+j;
+      }
+   }
+   // right i=ex-1 l=order
+   for( int j=0;j<ey;j++)
+   {
+      int e=ex-1+j*ex;
+      numFace=ex+j;
+      int offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
+      for ( int k=0; k<order+1;k++)
+      {
+         localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;
+      }
+   }
+   // top j=ey-1, k=order
+   for( int i=0;i<ex;i++)
+   {
+      int e=i+(ey-1)*ex;
+      numFace=ey+ex+i;
+      if(i<ex-1)
+	   {
+         if(i==0)
+         {
+            offset=localFaceNodeToGlobalFaceNode[numFace-1][order]+1;
+         }
+         else
+         {
+            offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
+         }
+         for ( int l=0; l<order+1;l++)
+         {
+            localFaceNodeToGlobalFaceNode[numFace][l]=offset+l;
+         }
+      }
+      else if(i==ex-1)
+      {
+         offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
+         for ( int l=0; l<order;l++)
+         {
+            localFaceNodeToGlobalFaceNode[numFace][l]=offset+l;
+         }
+         localFaceNodeToGlobalFaceNode[numFace][order]=localFaceNodeToGlobalFaceNode[ex+ey-1][order];
+      }
+
+   }
+   // left, i=0 and l=0
+   for( int j=0;j<ey;j++)
+   {
+      numFace=2*ex+ey+j;
+      if(j==0)
+      {
+	      localFaceNodeToGlobalFaceNode[numFace][0]=0;
+         for ( int k=1; k<order+1;k++)
+         {
+            offset=localFaceNodeToGlobalFaceNode[numFace-1][order-1];
+            localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;
+         }
+      }
+      else if (j<ey-1)
+      {
+         for ( int k=1; k<order+1;k++)
+         {
+            offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
+            localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;
+         }
+      }
+      else if (j==ey-1)
+      {
+         for ( int k=0; k<order;k++)
+         {
+            offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
+            localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;
+         }
+         offset=localFaceNodeToGlobalFaceNode[ex+ey][0];
+         localFaceNodeToGlobalFaceNode[numFace][order]=offset;
+      }
+
+   }
+   /**for ( int iFace=0;iFace<numberOfBoundaryFaces;iFace++)
+   {
+      for ( int i=0; i<order+1;i++)
+      {
+         cout<<"iFace="<<iFace<<" local number="<<i<<" global number="<<localFaceNodeToGlobalFaceNode[iFace][i]<<endl;
+      }
+   }**/
+   return localFaceNodeToGlobalFaceNode;
 }
 #endif //SIMPLEMESH_HPP_

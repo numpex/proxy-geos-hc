@@ -79,9 +79,16 @@ class QkGL
        // compute the matrix $M_{i,j}=:w
        // \int_{K}{{\phi_i}.{\phi_j}dx}$
        vector<vector<double>> phiIphiJ(const int & nPointsPerElement,
-                                             const vector<double> &weights,
-                                             const vector<vector<double>> &phi,
-                                             const vector<double> &detJ);
+                                      const vector<double> &weights,
+                                      const vector<vector<double>> &phi,
+                                      const vector<double> &detJ);
+       // compute dx
+       vector<float>computeDs(const int & iFace,
+                          const int & order,
+                          const vector<vector<int>> & faceInfos,
+                          const vector<vector<float>> & globalNodesCoords,
+                          const vector<vector<double>>& derivativeBasisFunction2DX,
+                          const vector<vector<double>>& derivativeBasisFunction2DY);
 
 };
 

@@ -33,6 +33,7 @@ void solver::computeOneStep(const float & timeSample,
    static vector<int> listOfBoundaryNodes=mesh.getListOfBoundaryNodes(numberOfBoundaryNodes);
    static vector<vector<float>> globalNodesCoords=mesh.nodesCoordinates(numberOfNodes);
    static vector<vector<int>>faceInfos=mesh.getBoundaryFacesInfos();
+   static vector<vector<int>>localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
    
 
    // get model
@@ -113,24 +114,24 @@ void solver::computeOneStep(const float & timeSample,
         
 	     // compute jacobian Matrix
         jacobianMatrix= Qk.computeJacobianMatrix(numberOfPointsPerElement,Xi,
-                                                                        derivativeBasisFunction2DX,
-                                                                        derivativeBasisFunction2DY);
+                                                derivativeBasisFunction2DX,
+                                                derivativeBasisFunction2DY);
 	     // compute determinant of jacobian Matrix
         detJ= Qk.computeDeterminantOfJacobianMatrix(numberOfPointsPerElement,
-                                                                   jacobianMatrix);
+                                                   jacobianMatrix);
 	     // compute inverse of Jacobian Matrix
         invJacobianMatrix= Qk.computeInvJacobianMatrix(numberOfPointsPerElement,
-                                                                              jacobianMatrix,
-                                                                              detJ);   
+                                                      jacobianMatrix,
+                                                      detJ);   
 	     // compute transposed inverse of Jacobian Matrix
         transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix(numberOfPointsPerElement,
-                                                                                          jacobianMatrix,
-                                                                                          detJ);
+                                                                  jacobianMatrix,
+                                                                  detJ);
 	     // compute  geometrical transformation matrix
         B=Qk.computeB(numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ);
 	     // compute stifness and mass matrix
         R=Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
-                                                   derivativeBasisFunction2DY);
+                           derivativeBasisFunction2DY);
 
         // compute local mass matrix
         massMatrixLocal=Qk.phiIphiJ(numberOfPointsPerElement, weights2D, basisFunction2D, detJ);
@@ -175,111 +176,61 @@ void solver::computeOneStep(const float & timeSample,
       // Note: this loop is data parallel.
       #pragma omp  parallel shared(ShGlobal)
       {
-         int face=-1;
-         int iFace;
-         int gIndexFaceNode=0;
-         float xi=0;
-         float yi=0;
-         vector<int>numOfBasisFunctionOnFace(order+1,0);
-         vector<vector<float>>Js(2,vector<float>(order+1,0));
          vector<float>ds(order+1,0);
          vector<float>Sh(order+1,0);
-         #pragma omp  for schedule(static) private( iFace,xi,yi,face,gIndexFaceNode)
+         int iFace;
+         int gIndexFaceNode;
+         #pragma omp  for schedule(static) private( iFace,gIndexFaceNode)
          for (iFace=0; iFace< numberOfBoundaryFaces; iFace++)
          {
-            face=faceInfos[iFace][1];
-            // get basis functions on Boundary faces
-            switch (face)
+            //get ds
+            ds=Qk.computeDs(iFace,order,faceInfos,globalNodesCoords,
+                        derivativeBasisFunction2DX,
+                        derivativeBasisFunction2DY);
+
+            //conpute Sh and ShGlobal
+            for (int i=0; i<order+1;i++)
             {
-               case 0: // left
-                  for (int i=0;i<order+1;i++)
-                  {
-                     numOfBasisFunctionOnFace[i]=i*(order+1);
-                  }
-                  break;
-               case 1: // bottom
-                  for (int i=0;i<order+1;i++)
-                  {
-                     numOfBasisFunctionOnFace[i]=i;
-                  }
-                  break;
-               case 2: //right
-                  for (int i=0;i<order+1;i++)
-                  {
-                     numOfBasisFunctionOnFace[i]=order+i*(order+1);
-                  }
-                  break;
-               case 3: //top
-                  for (int i=0;i<order+1;i++)
-                  {
-                     numOfBasisFunctionOnFace[i]=i+order*(order+1);
-                  }   
-                  break;               
-               default :
-                  cout<<"error in element flag, should be set to: 0, 1, 2, 3"<<endl;
-                  break;
-            }
-            // compute ds
-            for (int j=0; j<order+1; j++)
-            {
-               Js[0][j]=0;// x 
-               Js[1][j]=0;// y
-               for (int i=0; i<order+1; i++)
-               {
-                  xi=globalNodesCoords[faceInfos[iFace][2+i]][0];
-                  yi=globalNodesCoords[faceInfos[iFace][2+i]][1];
-                  if ( face==0 || face==2)
-                  {
-                     Js[0][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*xi;
-                     Js[1][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*yi;
-                  }  
-                  if ( face==1 || face==3)
-                  {
-                     Js[0][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*xi; 
-                     Js[1][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*yi;
-                  }               
-               }
-               ds[j]=sqrt(Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j]);
-               //cout<<"j="<<j<<", ds="<<ds[j]<<endl;
-            }
-            // compute damping matrix
-            //for (int i=0; i<order+1;i++)
-            {
-               i=0;
-               gIndexFaceNode=iFace*order+i;
-               cout<<"gIndex0="<<gIndexFaceNode<<endl;
+               gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
                Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
-               ShGlobal[gIndexFaceNode]+=Sh[i];
+               ShGlobal[gIndexFaceNode]=+Sh[i];
             }
-            //cout<<"model faceInfos["<<iFace<<"][0]="<<faceInfos[iFace][0]<<", "<<model[faceInfos[iFace][0]]<<endl;
-            for (int i=1; i<order;i++)
+            
+            for (int i=0; i<order+1;i++)
             {
-               gIndexFaceNode=iFace*order+i;
-               cout<<"gIndex1="<<gIndexFaceNode<<endl;
-               Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
-               ShGlobal[gIndexFaceNode]=Sh[i];
+               gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
+               cout<<"iFace="<<iFace<<" gIndex="<<gIndexFaceNode<<endl;
+               cout<<"ShGlobal["<<gIndexFaceNode<<"]="<<ShGlobal[gIndexFaceNode]<<endl;
             }
-            {
-               i=order;
-               gIndexFaceNode=iFace*order+i;
-               cout<<"gIndex2="<<gIndexFaceNode<<endl;
-               Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
-               ShGlobal[gIndexFaceNode]+=Sh[i];
-            }
+            
          }
-      } 
-      // update pressure @ boundaries
+      }
+      /**
+      for ( int i=0 ; i< numberOfBoundaryNodes; i++)
+      {
+         cout<<"ShGlobal["<<i<<"]="<<ShGlobal[i]<<endl;
+      }
+      **/
+      // update pressure @ boundaries;
+      int gIndexFaceNode=0;
       float invMpSh;
       float MmSh;
+      tmp=timeSample*timeSample;
+      
       #pragma omp for schedule(dynamic) private(tmp,invMpSh,MmSh)
       for ( int i=0 ; i< numberOfBoundaryNodes; i++)
       {
          tmp=timeSample*timeSample;
          int I=listOfBoundaryNodes[i];
-         cout<<"i="<<i<<", BoundaryNode="<<I<<endl;
          invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
          MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
          pnGlobal[I][i1]=invMpSh*(2*massMatrixGlobal[I]*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]-tmp*yGlobal[I]);   
+      }
+      for ( int i=0 ; i< numberOfBoundaryNodes; i++)
+      {
+         int I=listOfBoundaryNodes[i];
+         cout<<"i="<<i<<", BoundaryNode="<<I<<endl;
+         //cout<<"ShGlobal["<<i<<"]="<<ShGlobal[i]<<endl;
       }
    }
 }
