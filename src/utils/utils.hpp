@@ -75,9 +75,9 @@ struct solverUtils
     string snapNumber = "snapshot"+to_string(indexTimeStep);      
     snapFile.open(snapNumber, ios::out| ios::trunc);
     cout<<"nx="<<nx<<" ny="<<ny<<endl;
-    for (int j=0; j<nx;j++)
+    for (int i=0; i<nx;i++)
     {
-        for (int i=0; i<ny; i++)
+        for (int j=0; j<ny; j++)
         {
             snapFile<<i*dx<<" "<<j*dy<<" " <<grid[i][j]<<endl;
         }

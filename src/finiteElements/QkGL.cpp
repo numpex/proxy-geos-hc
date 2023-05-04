@@ -395,9 +395,9 @@ vector<vector<double>> QkGL::getBasisFunction2D(const vector<double> quadratureP
 // Xi[0,..,1][0,..,nPointsPerElement], global coordinate of element
 // dxPhi,dyPhi 2D derivative of basis Functions
 vector<vector<double>> QkGL::computeJacobianMatrix(const int &nPointsPerElement,
-	                                           const vector<vector<double>> &Xi ,
-	                                           const vector<vector<double>> &dxPhi ,
-	                                           const vector<vector<double>> &dyPhi )
+	                                               const vector<vector<double>> &Xi ,
+	                                               const vector<vector<double>> &dxPhi ,
+	                                               const vector<vector<double>> &dyPhi )
 {
     vector<vector<double>> jacobianMatrix(4,vector<double>(nPointsPerElement,0));
 
@@ -416,7 +416,7 @@ vector<vector<double>> QkGL::computeJacobianMatrix(const int &nPointsPerElement,
 
 // compute jacobian matrix determinant
 vector<double>  QkGL::computeDeterminantOfJacobianMatrix(const int &nPointsPerElement,
-	                                                 const vector<vector<double>> &jacobianMatrix)
+	                                                     const vector<vector<double>> &jacobianMatrix)
 {
     vector<double>  detJ(nPointsPerElement,0);
     for (int i=0; i<nPointsPerElement; i++) 
@@ -428,8 +428,8 @@ vector<double>  QkGL::computeDeterminantOfJacobianMatrix(const int &nPointsPerEl
 
 // compute inverse of Jacobian Matrix
 vector<vector<double>> QkGL::computeInvJacobianMatrix(const int &nPointsPerElement,
-	                                              const vector<vector<double>> &jacobianMatrix,
-				                      const vector<double> &detJ)
+	                                                  const vector<vector<double>> &jacobianMatrix,
+				                                      const vector<double> &detJ)
 {
     vector<vector<double>> invJacobianMatrix(4,vector<double>(nPointsPerElement,0));
     for (int i=0; i<nPointsPerElement; i++)
@@ -444,8 +444,8 @@ vector<vector<double>> QkGL::computeInvJacobianMatrix(const int &nPointsPerEleme
 
 // compute inverse of Jacobian Matrix
 vector<vector<double>> QkGL::computeTranspInvJacobianMatrix(const int &nPointsPerElement,
-		                                            const vector<vector<double>> &jacobianMatrix,
-					                    const vector<double> &detJ)
+		                                                    const vector<vector<double>> &jacobianMatrix,
+					                                        const vector<double> &detJ)
 {
     vector<vector<double>> transpInvJacobianMatrix(4,vector<double>(nPointsPerElement,0));
     for (int i=0; i<nPointsPerElement; i++)
@@ -480,14 +480,12 @@ vector<vector<double>> QkGL::computeB(const int & nPointsPerElement,
 
 }
 
-
-
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$ 
 vector<vector<double>> QkGL::gradPhiGradPhi(const int & nPointsPerElement,
                                             const vector<double> &weights2D,
                                             const vector<vector<double>> &B,
                                             const vector<vector<double>> &dxPhi,
-					    const vector<vector<double>> &dyPhi)
+					                        const vector<vector<double>> &dyPhi)
 {
     vector<vector<double>> R(nPointsPerElement,vector<double>(nPointsPerElement,0));
     for (int i=0; i<nPointsPerElement; i++)
@@ -509,9 +507,9 @@ vector<vector<double>> QkGL::gradPhiGradPhi(const int & nPointsPerElement,
 
 // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ 
 vector<vector<double>> QkGL::phiIphiJ(const int & nPointsPerElement,
-                                            const vector<double> &weights2D,
-					    const vector<vector<double>> &phi,
-					    const vector<double> &detJ)
+                                      const vector<double> &weights2D,
+					                  const vector<vector<double>> &phi,
+					                  const vector<double> &detJ)
 {
     vector<vector<double>> M(nPointsPerElement,vector<double>(nPointsPerElement,0));
     for (int i=0; i<nPointsPerElement; i++)
@@ -526,4 +524,76 @@ vector<vector<double>> QkGL::phiIphiJ(const int & nPointsPerElement,
     }
     return M;
 }
+
+
+ 
+vector<float>QkGL::computeDs(const int & iFace,
+                            const int & order,
+                            const vector<vector<int>> & faceInfos,
+                            const vector<vector<float>> & globalNodesCoords,
+                            const vector<vector<double>>& derivativeBasisFunction2DX,
+                            const vector<vector<double>>& derivativeBasisFunction2DY)
+{
+    vector<int>numOfBasisFunctionOnFace(order+1,0);
+    vector<vector<float>>Js(2,vector<float>(order+1,0));
+    vector<float>ds(order+1,0);
+
+    int face=faceInfos[iFace][1];
+    // get basis functions on Boundary faces
+    switch (face)
+    {
+        case 0: // left
+            for (int i=0;i<order+1;i++)
+            {
+                numOfBasisFunctionOnFace[i]=i*(order+1);
+            }
+            break;
+        case 1: // bottom
+            for (int i=0;i<order+1;i++)
+            {
+                numOfBasisFunctionOnFace[i]=i;
+            }
+            break;
+            case 2: //right
+                for (int i=0;i<order+1;i++)
+                {
+                    numOfBasisFunctionOnFace[i]=order+i*(order+1);
+                }
+                break;
+            case 3: //top
+                for (int i=0;i<order+1;i++)
+                {
+                    numOfBasisFunctionOnFace[i]=i+order*(order+1);
+                }   
+                break;               
+            default :
+                cout<<"error in element flag, should be set to: 0, 1, 2, 3"<<endl;
+                break;
+    }
+    // compute ds
+    for (int j=0; j<order+1; j++)
+    {
+        Js[0][j]=0;// x 
+        Js[1][j]=0;// y
+        for (int i=0; i<order+1; i++)
+        {
+            float xi=globalNodesCoords[faceInfos[iFace][2+i]][0];
+            float yi=globalNodesCoords[faceInfos[iFace][2+i]][1];
+            if ( face==0 || face==2)
+            {
+                Js[0][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*xi;
+                Js[1][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*yi;
+            }  
+            if ( face==1 || face==3)
+            {
+                Js[0][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*xi; 
+                Js[1][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*yi;
+            }               
+        }
+        ds[j]=sqrt(Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j]);
+        //cout<<"j="<<j<<", ds="<<ds[j]<<endl;
+    }
+    return ds;
+}
+            
 
