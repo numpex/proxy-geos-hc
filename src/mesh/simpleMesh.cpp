@@ -55,7 +55,7 @@ int simpleMesh::getNumberOfInteriorElements()
 
 //get number of interior Nodes
 int simpleMesh::getNumberOfInteriorNodes()
-{return ((ex-2)*order+1)*((ey-2)*order+1);}
+{return (nx-2)*(ny-2);}
 
 //get number of boundary Faces
 int simpleMesh::getNumberOfBoundaryFaces()
@@ -287,14 +287,16 @@ vector<int> simpleMesh::neighbors(const int & e)
 }
 
 // get global coordinates of element e
-void simpleMesh::getXi(const int & numberOfPointsPerElement,const vector<vector<float>> & globalNodesCoords,
-                       const vector<int> & localToGlobal, vector<vector<double>> & Xi)
+vector<vector<double>> simpleMesh::getXi(const int & numberOfPointsPerElement,const vector<vector<float>> & globalNodesCoords,
+                       const vector<int> & localToGlobal)
 {
+   vector<vector<double>> Xi(numberOfPointsPerElement,vector<double>(2,0));
    for ( int i=0; i<numberOfPointsPerElement; i++)
    {
        Xi[i][0]=globalNodesCoords[localToGlobal[i]][0];
        Xi[i][1]=globalNodesCoords[localToGlobal[i]][1];
    }
+   return Xi;
 }
 
 
@@ -433,9 +435,9 @@ vector<int> simpleMesh::getListOfInteriorNodes(const int &numberOfInteriorNodes)
 {
    vector<int>listOfInteriorNodes(numberOfInteriorNodes,0);
    int k=0;
-   for( int j=order;j<ny-order;j++)
+   for( int j=1;j<ny-1;j++)
    {
-      for ( int i=order; i<nx-order; i++)
+      for ( int i=1; i<nx-1; i++)
       {	      
          listOfInteriorNodes[k]=i+j*nx;
          k++;
@@ -561,9 +563,9 @@ vector<vector<int>>simpleMesh::getLocalFaceNodeToGlobalFaceNode()
             localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;
          }
       }
-      else if (j<ey-1)
+      else if (j>0 && j<ey-1)
       {
-         for ( int k=1; k<order+1;k++)
+         for ( int k=0; k<order+1;k++)
          {
             offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
             localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;

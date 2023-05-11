@@ -100,7 +100,7 @@ One of the key features of the SEM proxy benchmark is its adaptability to differ
 
 ```
    raja_install_dir=your raja installation directory
-   export RAJA_DIR=$raja_intall_dir/share/cmake/raja
+   export RAJA_DIR=$raja_intall_dir/lib/cmake/raja
    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$raja_install_dir/lib
 ```
 

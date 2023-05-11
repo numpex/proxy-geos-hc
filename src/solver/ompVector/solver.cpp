@@ -86,8 +86,8 @@ void solver::computeOneStep(const float & timeSample,
     {
       int e;
       int gIndex;
-      vector<int>localToGlobal;
-      vector<vector<double>>Xi(numberOfPointsPerElement,vector<double>(2,0));
+      vector<int> localToGlobal;
+      vector<vector<double>> Xi(numberOfPointsPerElement,vector<double>(2,0));
       vector<vector<double>> jacobianMatrix;
       vector<double> detJ;
       vector<vector<double>> invJacobianMatrix;
@@ -96,8 +96,8 @@ void solver::computeOneStep(const float & timeSample,
       vector<vector<double>> R;
       vector<vector<double>> massMatrixLocal;
       vector<float> pnLocal(numberOfPointsPerElement); 
-      vector<float>Y(numberOfPointsPerElement);
-      vector<int>neighboursOfElementE(5);
+      vector<float> Y(numberOfPointsPerElement);
+      vector<int> neighboursOfElementE(5);
       vector<vector<int>> nodesFace(4,vector<int>(order+1,0));
       //Xi, pnLocal and Y cannot be private: segmentatin fault ????
       #pragma omp for schedule(dynamic) private(e,i,gIndex,localToGlobal,jacobianMatrix,detJ)\
@@ -110,7 +110,7 @@ void solver::computeOneStep(const float & timeSample,
          localToGlobal=mesh.localToGlobalNodes(e,numberOfPointsPerElement,globalNodesList);  
         
          //get global coordinates Xi of element e
-         mesh.getXi(numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi);
+         Xi=mesh.getXi(numberOfPointsPerElement, globalNodesCoords, localToGlobal);
         
 	     // compute jacobian Matrix
         jacobianMatrix= Qk.computeJacobianMatrix(numberOfPointsPerElement,Xi,
@@ -186,7 +186,7 @@ void solver::computeOneStep(const float & timeSample,
             ds=Qk.computeDs(iFace,order,faceInfos,globalNodesCoords,
                         derivativeBasisFunction2DX,
                         derivativeBasisFunction2DY);
-
+            
             //conpute Sh and ShGlobal
             for (int i=0; i<order+1;i++)
             {
@@ -194,13 +194,15 @@ void solver::computeOneStep(const float & timeSample,
                Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
                ShGlobal[gIndexFaceNode]=+Sh[i];
             }
-            
-            /**for (int i=0; i<order+1;i++)
+            /**
+            cout<<"iFace="<<iFace<<endl;
+            for (int i=0; i<order+1;i++)
             {
                gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
-               cout<<"iFace="<<iFace<<" gIndex="<<gIndexFaceNode<<endl;
+               //cout<<" gIndex="<<gIndexFaceNode<<endl;
                cout<<"ShGlobal["<<gIndexFaceNode<<"]="<<ShGlobal[gIndexFaceNode]<<endl;
-            }**/
+            }
+            **/
             
          }
       }
@@ -211,7 +213,6 @@ void solver::computeOneStep(const float & timeSample,
       }
       **/
       // update pressure @ boundaries;
-      int gIndexFaceNode=0;
       float invMpSh;
       float MmSh;
       tmp=timeSample*timeSample;
@@ -219,7 +220,6 @@ void solver::computeOneStep(const float & timeSample,
       #pragma omp for schedule(dynamic) private(tmp,invMpSh,MmSh)
       for ( int i=0 ; i< numberOfBoundaryNodes; i++)
       {
-         tmp=timeSample*timeSample;
          int I=listOfBoundaryNodes[i];
          invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
          MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
