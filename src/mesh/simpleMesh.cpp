@@ -55,7 +55,7 @@ int simpleMesh::getNumberOfInteriorElements()
 
 //get number of interior Nodes
 int simpleMesh::getNumberOfInteriorNodes()
-{return ((ex-2)*order+1)*((ey-2)*order+1);}
+{return (nx-2)*(ny-2);}
 
 //get number of boundary Faces
 int simpleMesh::getNumberOfBoundaryFaces()
@@ -435,9 +435,9 @@ vector<int> simpleMesh::getListOfInteriorNodes(const int &numberOfInteriorNodes)
 {
    vector<int>listOfInteriorNodes(numberOfInteriorNodes,0);
    int k=0;
-   for( int j=order;j<ny-order;j++)
+   for( int j=1;j<ny-1;j++)
    {
-      for ( int i=order; i<nx-order; i++)
+      for ( int i=1; i<nx-1; i++)
       {	      
          listOfInteriorNodes[k]=i+j*nx;
          k++;

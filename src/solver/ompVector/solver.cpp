@@ -194,13 +194,15 @@ void solver::computeOneStep(const float & timeSample,
                Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
                ShGlobal[gIndexFaceNode]=+Sh[i];
             }
+            /**
             cout<<"iFace="<<iFace<<endl;
             for (int i=0; i<order+1;i++)
             {
                gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
-               cout<<" gIndex="<<gIndexFaceNode<<endl;
-               //cout<<"ShGlobal["<<gIndexFaceNode<<"]="<<ShGlobal[gIndexFaceNode]<<endl;
+               //cout<<" gIndex="<<gIndexFaceNode<<endl;
+               cout<<"ShGlobal["<<gIndexFaceNode<<"]="<<ShGlobal[gIndexFaceNode]<<endl;
             }
+            **/
             
          }
       }
@@ -211,7 +213,6 @@ void solver::computeOneStep(const float & timeSample,
       }
       **/
       // update pressure @ boundaries;
-      int gIndexFaceNode=0;
       float invMpSh;
       float MmSh;
       tmp=timeSample*timeSample;
