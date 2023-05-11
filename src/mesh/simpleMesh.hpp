@@ -80,8 +80,8 @@ class simpleMesh
       vector<int> neighbors(const int & e);
 
       // get global coordinates of element e
-      void getXi(const int & numberOfPointsPerElement, const vector<vector<float>> & globalNodesCoords,
-                 const vector<int> & localToGlobal, vector<vector<double>> & Xi);
+     vector<vector<double>> getXi(const int & numberOfPointsPerElement,const vector<vector<float>> & globalNodesCoords,
+                       const vector<int> & localToGlobal);
 
       // get global DOF belonging to the faces of element e
       vector<vector<int>> getGlobalDofOfFace(const int & e,

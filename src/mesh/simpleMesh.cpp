@@ -287,14 +287,16 @@ vector<int> simpleMesh::neighbors(const int & e)
 }
 
 // get global coordinates of element e
-void simpleMesh::getXi(const int & numberOfPointsPerElement,const vector<vector<float>> & globalNodesCoords,
-                       const vector<int> & localToGlobal, vector<vector<double>> & Xi)
+vector<vector<double>> simpleMesh::getXi(const int & numberOfPointsPerElement,const vector<vector<float>> & globalNodesCoords,
+                       const vector<int> & localToGlobal)
 {
+   vector<vector<double>> Xi(numberOfPointsPerElement,vector<double>(2,0));
    for ( int i=0; i<numberOfPointsPerElement; i++)
    {
        Xi[i][0]=globalNodesCoords[localToGlobal[i]][0];
        Xi[i][1]=globalNodesCoords[localToGlobal[i]][1];
    }
+   return Xi;
 }
 
 
@@ -561,7 +563,7 @@ vector<vector<int>>simpleMesh::getLocalFaceNodeToGlobalFaceNode()
             localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;
          }
       }
-      else if (j<ey-1)
+      else if (j>0 && j<ey-1)
       {
          for ( int k=1; k<order+1;k++)
          {
