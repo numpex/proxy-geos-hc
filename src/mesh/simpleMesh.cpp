@@ -568,7 +568,6 @@ vector<vector<int>>simpleMesh::getLocalFaceNodeToGlobalFaceNode()
          for ( int k=0; k<order+1;k++)
          {
             offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
-            cout<<numFace<<", "<<j<<", "<<k<<", "<<offset<<endl;
             localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;
          }
       }
