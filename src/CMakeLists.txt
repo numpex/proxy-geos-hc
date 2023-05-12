@@ -25,18 +25,16 @@ if (NOT SEM_USE_RAJA)
 elseif (EXISTS $ENV{RAJA_DIR}/raja-config.cmake)
   message ("-- SEM_USE_RAJA flag is set to be true and RAJA is now enabled")
   # the following part is working in progress ... ompVector will be replaced to be rajaVector
-  set (SOLVER "ompVector" CACHE PATH "" FORCE)
+  set (SOLVER "rajaVector" CACHE PATH "" FORCE)
   message("-- Found the RAJA library in $ENV{RAJA_DIR}")
   find_package(RAJA REQUIRED)
-  target_link_libraries(sem.exe
-    PUBLIC 
-    RAJA
-  )
+  set (raja_INCLUDE_DIR "$ENV{RAJA_INCLUDE_DIR}")
+  include_directories(${raja_INCLUDE_DIR})
   target_include_directories(sem.exe 
     PUBLIC 
-    ${caliper_INCLUDE_DIR}
+    ${raja_INCLUDE_DIR}
   )
-elseif (NOT DEFINED ENV{RAJA_DIR}) 
+elseif (NOT DEFINED $ENV{RAJA_DIR}) 
   set (SEM_USE_RAJA OFF CACHE BOOL "")
   message("-- RAJA_DIR is not defined and caliper is not enabled")
 else ()
@@ -90,9 +88,16 @@ target_link_libraries(sem.exe
   finiteElements
   mesh
   solver
+  
+  )
+target_link_libraries(sem.exe
+    PUBLIC 
+    RAJA
   )
 
-install(TARGETS sem.exe
-        RUNTIME DESTINATION bin)
+if(SEM_USE_RAJA)
+   install(TARGETS sem.exe
+           RUNTIME DESTINATION bin)
+endif()
 
 
