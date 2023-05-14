@@ -3,7 +3,7 @@ cmake_minimum_required( VERSION 3.8 )
 project( sem )
 
 set (CMAKE_CXX_STANDARD 14)
-set (CMAKE_CXX_FLAGS "-O3 -std=c++14 " CACHE STRING "")
+set (CMAKE_CXX_FLAGS "-O3 -std=c++14  " CACHE STRING "")
 set( CMAKE_VERBOSE_MAKEFILE on )
 #-----------------------------------------------------
 # Setup Flags for Building and Installation
