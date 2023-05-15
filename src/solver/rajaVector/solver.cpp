@@ -11,24 +11,16 @@ void solver::computeOneStep(const float & timeSample,
 					             int &i1,
 					             int &i2,
                             vector<vector<float>> & pnGlobal,
-					             simpleMesh  const mesh,
+					             simpleMesh  mesh,
 					             QkGL Qk)
 {
    // get infos from mesh
    static int const numberOfNodes=mesh.getNumberOfNodes();
    static int const numberOfElements=mesh.getNumberOfElements();
    static int const numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
-   static int const numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
-   static int const numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
-
    static vector<vector<int>> const globalNodesList=mesh.globalNodesList(numberOfElements);
    static vector<int>   const listOfInteriorNodes=mesh.getListOfInteriorNodes(numberOfInteriorNodes);
-
-   static vector<int>  const listOfBoundaryNodes=mesh.getListOfBoundaryNodes(numberOfBoundaryNodes);
    static vector<vector<float>>  const globalNodesCoords=mesh.nodesCoordinates(numberOfNodes);
-   static vector<vector<int>> const faceInfos=mesh.getBoundaryFacesInfos();
-   static vector<vector<int>> const localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
-   
 
    // get model
    static vector<float>  const model=mesh.getModel(numberOfElements);
@@ -69,7 +61,6 @@ void solver::computeOneStep(const float & timeSample,
 
    
    // loop over mesh elements
-   vector<vector<int>> nodesFace(4,vector<int>(order+1,0));
    RAJA::forall<omp_parallel_for_exec>(RangeSegment(0, numberOfElements), [=] (int e) 
    {
       // extract global coordinates of element e
@@ -135,7 +126,14 @@ void solver::computeOneStep(const float & timeSample,
    });
       
    // damping terms
+   // get infos from mesh
+   static int const numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
+   static int const numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
+   static vector<int>  const listOfBoundaryNodes=mesh.getListOfBoundaryNodes(numberOfBoundaryNodes);
+   static vector<vector<int>> const faceInfos=mesh.getBoundaryFacesInfos();
+   static vector<vector<int>> const localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
    static vector<float>ShGlobal(numberOfBoundaryNodes,0);
+
    RAJA::forall<omp_parallel_for_exec>(RangeSegment(0, numberOfBoundaryNodes), [=] (int i) {
 	   ShGlobal[i]=0;
    });
@@ -153,6 +151,7 @@ void solver::computeOneStep(const float & timeSample,
          {
             int gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
             Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
+            //cout<<i<<", "<<ds[i]<<", "<<model[faceInfos[iFace][0]]<<endl;
             ShGlobal[gIndexFaceNode]=+Sh[i];
          }
          /**
@@ -170,6 +169,7 @@ void solver::computeOneStep(const float & timeSample,
    float tmp=timeSample*timeSample; 
    RAJA::forall<omp_parallel_for_exec>(RangeSegment(0, numberOfBoundaryNodes), [=,&pnGlobal] (int i) {
       int I=listOfBoundaryNodes[i];
+      //cout<<i<<", "<<ShGlobal[i]<<", "<<I<<endl;
       float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
       float MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
       pnGlobal[I][i1]=invMpSh*(2*massMatrixGlobal[I]*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]-tmp*yGlobal[I]);   

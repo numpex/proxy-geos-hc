@@ -591,7 +591,7 @@ vector<float>QkGL::computeDs(const int & iFace,
             }               
         }
         ds[j]=sqrt(Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j]);
-        //cout<<"j="<<j<<", ds="<<ds[j]<<endl;
+        //cout<<"j="<<j<<", ds="<<ds[j]<<", "<<Js[0][j]<<", "<<Js[1][j]<<endl;
     }
     return ds;
 }

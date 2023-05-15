@@ -32,7 +32,7 @@ class solver
                            int &i1,
                            int &i2,
                            vector<vector<float>> & pnGlobal,
-                           simpleMesh  const mesh,
+                           simpleMesh  mesh,
                            QkGL  Qk);
 
        // add right and side
