@@ -192,7 +192,7 @@ void solver::computeOneStep(const float & timeSample,
             {
                gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
                Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
-               ShGlobal[gIndexFaceNode]=+Sh[i];
+               ShGlobal[gIndexFaceNode]+=Sh[i];
             }
             /**
             cout<<"iFace="<<iFace<<endl;

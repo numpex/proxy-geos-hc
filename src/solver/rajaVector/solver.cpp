@@ -145,21 +145,20 @@ void solver::computeOneStep(const float & timeSample,
          ds=Qk.computeDs(iFace,order,faceInfos,globalNodesCoords,
                         derivativeBasisFunction2DX,
                         derivativeBasisFunction2DY);
-            
          //conpute Sh and ShGlobal
          for (int i=0; i<order+1;i++)
          {
             int gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
             Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
-            //cout<<i<<", "<<ds[i]<<", "<<model[faceInfos[iFace][0]]<<endl;
-            ShGlobal[gIndexFaceNode]=+Sh[i];
+            ShGlobal[gIndexFaceNode]+=Sh[i];
          }
          /**
          cout<<"iFace="<<iFace<<endl;
          for (int i=0; i<order+1;i++)
          {
-            gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
-            //cout<<" gIndex="<<gIndexFaceNode<<endl;
+            int gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
+            cout<<" gIndex="<<gIndexFaceNode<<endl;
+            cout<<"Sh["<<i<<"]="<<Sh[i]<<endl;
             cout<<"ShGlobal["<<gIndexFaceNode<<"]="<<ShGlobal[gIndexFaceNode]<<endl;
          }
          **/    
@@ -169,7 +168,6 @@ void solver::computeOneStep(const float & timeSample,
    float tmp=timeSample*timeSample; 
    RAJA::forall<omp_parallel_for_exec>(RangeSegment(0, numberOfBoundaryNodes), [=,&pnGlobal] (int i) {
       int I=listOfBoundaryNodes[i];
-      //cout<<i<<", "<<ShGlobal[i]<<", "<<I<<endl;
       float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
       float MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
       pnGlobal[I][i1]=invMpSh*(2*massMatrixGlobal[I]*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]-tmp*yGlobal[I]);   
@@ -184,7 +182,8 @@ void solver::computeOneStep(const float & timeSample,
    {
       int I=listOfBoundaryNodes[i];
       cout<<"i="<<i<<", BoundaryNode="<<I<<endl;
-   }**/   
+   }  
+   **/
 }
 
 /// add right and side
