@@ -4,7 +4,6 @@
 #include    <iostream>
 #include    <vector>
 #include    <cmath>
-
 #include    "QkGL.hpp"
 #include    "simpleMesh.hpp"
 
@@ -30,8 +29,8 @@ class solver
                            int &i1,
                            int &i2,
                            vector<vector<float>> & pnGlobal,
-                           simpleMesh mesh,
-                           QkGL Qk);
+                           simpleMesh  mesh,
+                           QkGL  Qk);
 
        // add right and side
        void addRightAndSides(const int & timeStep,

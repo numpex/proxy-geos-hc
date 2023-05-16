@@ -124,6 +124,7 @@ void solver::computeOneStep(const float & timeSample,
          float tmp=timeSample*timeSample;
          pnGlobal[I][i1]=2*pnGlobal[I][i2]-pnGlobal[I][i1]-tmp*yGlobal[I]/massMatrixGlobal[I];    
    });
+   //cout<<"pressure="<<pnGlobal[5][i1]<<endl;
       
    // damping terms
    // get infos from mesh
@@ -145,7 +146,7 @@ void solver::computeOneStep(const float & timeSample,
          ds=Qk.computeDs(iFace,order,faceInfos,globalNodesCoords,
                         derivativeBasisFunction2DX,
                         derivativeBasisFunction2DY);
-         //conpute Sh and ShGlobal
+         //compute Sh and ShGlobal
          for (int i=0; i<order+1;i++)
          {
             int gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
@@ -157,9 +158,9 @@ void solver::computeOneStep(const float & timeSample,
          for (int i=0; i<order+1;i++)
          {
             int gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
-            cout<<" gIndex="<<gIndexFaceNode<<endl;
-            cout<<"Sh["<<i<<"]="<<Sh[i]<<endl;
-            cout<<"ShGlobal["<<gIndexFaceNode<<"]="<<ShGlobal[gIndexFaceNode]<<endl;
+            cout<<"   gIndex="<<gIndexFaceNode<<endl;
+            cout<<"   Sh["<<i<<"]="<<Sh[i]<<endl;
+            cout<<"   ShGlobal["<<gIndexFaceNode<<"]="<<ShGlobal[gIndexFaceNode]<<endl;
          }
          **/    
    });
