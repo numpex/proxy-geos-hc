@@ -555,7 +555,7 @@ vector<vector<double>> QkGL::gradPhiGradPhi(const int & nPointsPerElement,
     }
     return R;
 }
-/**
+///**
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$ 
 vector<vector<double>> QkGL::gradPhiGradPhi(const int & nPointsPerElement,
                                             const vector<double> &weights2D,
@@ -580,7 +580,8 @@ vector<vector<double>> QkGL::gradPhiGradPhi(const int & nPointsPerElement,
     }
     return R;
 }
-**/
+
+//**/
 // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ 
 vector<double> QkGL::phiIphiJ(const int & nPointsPerElement,
                                       const vector<double> &weights2D,
@@ -593,7 +594,8 @@ vector<double> QkGL::phiIphiJ(const int & nPointsPerElement,
     }
     return M;
 }
-/**
+
+///**
 // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ 
 vector<vector<double>> QkGL::phiIphiJ(const int & nPointsPerElement,
                                       const vector<double> &weights2D,
@@ -613,9 +615,7 @@ vector<vector<double>> QkGL::phiIphiJ(const int & nPointsPerElement,
     }
     return M;
 }
-**/
-
-
+//**/
  
 vector<float>QkGL::computeDs(const int & iFace,
                             const int & order,

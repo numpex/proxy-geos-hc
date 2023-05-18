@@ -76,28 +76,28 @@ class QkGL
                                              const vector<double> &weights,
                                              const vector<vector<double>> &B,
                                              const vector<vector<double>> &dPhi) const;
-      /**
+      ///**
        // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
        vector<vector<double>> gradPhiGradPhi(const int & nPointsPerElement,
                                              const vector<double> &weights,
                                              const vector<vector<double>> &B,
                                              const vector<vector<double>> &dxPhi,
                                              const vector<vector<double>> &dyPhi) const;
-      **/
+      //**/
 
        // compute the matrix $M_{i,j}=:w
        // \int_{K}{{\phi_i}.{\phi_j}dx}$
        vector<double> phiIphiJ(const int & nPointsPerElement,
                                const vector<double> &weights,
                                const vector<double> &detJ)const;
-      /**
+      ///**
        // compute the matrix $M_{i,j}=:w
        // \int_{K}{{\phi_i}.{\phi_j}dx}$
        vector<vector<double>> phiIphiJ(const int & nPointsPerElement,
                                       const vector<double> &weights,
                                       const vector<vector<double>> &phi,
                                       const vector<double> &detJ)const;
-      **/
+      //**/
        // compute dx
        vector<float>computeDs(const int & iFace,
                           const int & order,
