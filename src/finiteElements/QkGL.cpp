@@ -481,6 +481,82 @@ vector<vector<double>> QkGL::computeB(const int & nPointsPerElement,
 }
 
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$ 
+// Marc Durufle Formulae
+vector<vector<double>> QkGL::gradPhiGradPhi(const int & nPointsPerElement,
+                                            const int & order,
+                                            const vector<double> &weights2D,
+                                            const vector<vector<double>> &B,
+                                            const vector<vector<double>> &dPhi) const
+{
+    vector<vector<double>> R(nPointsPerElement,vector<double>(nPointsPerElement,0));
+    // B11
+    for (int i1=0; i1<order+1; i1++)
+    {
+        for (int i2=0; i2<order+1; i2++)
+	    {
+            int i=i1+i2*(order+1);
+            for ( int j1=0; j1<order+1; j1++)
+            {
+                int j=j1+i2*(order+1);
+                for (int m=0; m<order+1; m++)
+	            {
+		            R[i][j]+=weights2D[m+i2*(order+1)]*(B[0][m+i2*(order+1)]*dPhi[i1][m]*dPhi[j1][m]);
+	            }
+            }
+	    }
+    }
+    // B21
+    for (int i1=0; i1<order+1; i1++)
+    {
+        for (int i2=0; i2<order+1; i2++)
+	    {
+            int i=i1+i2*(order+1);
+            for ( int j1=0; j1<order+1; j1++)
+            {
+                for (int j2=0; j2<order+1; j2++)
+	            {
+                    int j=j1+j2*(order+1);
+		            R[i][j]+=weights2D[i1+j2*(order+1)]*(B[1][i1+j2*(order+1)]*dPhi[i2][j2]*dPhi[j1][i1]);
+	            }
+            }
+	    }
+    }  
+    // B12
+    for (int i1=0; i1<order+1; i1++)
+    {
+        for (int i2=0; i2<order+1; i2++)
+	    {
+            int i=i1+i2*(order+1);
+            for ( int j1=0; j1<order+1; j1++)
+            {
+                for (int j2=0; j2<order+1; j2++)
+	            {
+                    int j=j1+j2*(order+1);
+		            R[i][j]+=weights2D[i2+j1*(order+1)]*(B[2][i2+j1*(order+1)]*dPhi[i1][j1]*dPhi[j2][i2]);
+	            }
+            }
+	    }
+    }
+    // B22
+    for (int i1=0; i1<order+1; i1++)
+    {
+        for (int i2=0; i2<order+1; i2++)
+	    {
+            int i=i1+i2*(order+1);
+            for ( int j2=0; j2<order+1; j2++)
+            {
+                int j=i1+j2*(order+1);
+                for (int n=0; n<order+1; n++)
+	            {
+		            R[i][j]+=weights2D[i1+n*(order+1)]*(B[3][i1+n*(order+1)]*dPhi[i2][n]*dPhi[j2][n]);
+	            }
+            }
+	    }
+    }
+    return R;
+}
+/**
+// compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$ 
 vector<vector<double>> QkGL::gradPhiGradPhi(const int & nPointsPerElement,
                                             const vector<double> &weights2D,
                                             const vector<vector<double>> &B,
@@ -504,7 +580,20 @@ vector<vector<double>> QkGL::gradPhiGradPhi(const int & nPointsPerElement,
     }
     return R;
 }
-
+**/
+// compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ 
+vector<double> QkGL::phiIphiJ(const int & nPointsPerElement,
+                                      const vector<double> &weights2D,
+					                  const vector<double> &detJ) const
+{
+    vector<double> M(nPointsPerElement,0);
+    for (int i=0; i<nPointsPerElement; i++)
+    {
+        M[i]=weights2D[i]*abs(detJ[i]);
+    }
+    return M;
+}
+/**
 // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ 
 vector<vector<double>> QkGL::phiIphiJ(const int & nPointsPerElement,
                                       const vector<double> &weights2D,
@@ -524,6 +613,7 @@ vector<vector<double>> QkGL::phiIphiJ(const int & nPointsPerElement,
     }
     return M;
 }
+**/
 
 
  

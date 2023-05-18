@@ -88,18 +88,23 @@ void solver::computeOneStep(const float & timeSample,
 	   // compute  geometrical transformation matrix
       vector<vector<double>> const B=Qk.computeB(numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ);
 
+	   /**
 	   // compute stifness and mass matrix
       vector<vector<double>> const R=Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
                            derivativeBasisFunction2DY);
+      **/
+     
+      // compute stifness and mass matrix
+      vector<vector<double>> const R=Qk.gradPhiGradPhi(numberOfPointsPerElement,order, weights2D, B, derivativeBasisFunction1D);
 
       // compute local mass matrix
-      vector<vector<double>>  massMatrixLocal=Qk.phiIphiJ(numberOfPointsPerElement, weights2D, basisFunction2D, detJ);
+      vector<double>  massMatrixLocal=Qk.phiIphiJ(numberOfPointsPerElement, weights2D, detJ);
 	   // get pnGlobal to pnLocal 
       vector<float> pnLocal(numberOfPointsPerElement); 
       vector<float> Y(numberOfPointsPerElement);
 	   for ( int i=0; i<numberOfPointsPerElement; i++)
       {
-         massMatrixLocal[i][i]/=(model[e]*model[e]);
+         massMatrixLocal[i]/=(model[e]*model[e]);
          pnLocal[i]=pnGlobal[localToGlobal[i]][i2];
       }
       for ( int i=0; i<numberOfPointsPerElement; i++)
@@ -113,7 +118,7 @@ void solver::computeOneStep(const float & timeSample,
       for ( int i=0; i<numberOfPointsPerElement; i++)
      {
         int gIndex=localToGlobal[i];
-	     massMatrixGlobal[gIndex]+=massMatrixLocal[i][i];
+	     massMatrixGlobal[gIndex]+=massMatrixLocal[i];
 	     yGlobal[gIndex]+=Y[i];
      }
    });
