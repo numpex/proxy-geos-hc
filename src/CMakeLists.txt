@@ -81,7 +81,7 @@ endif()
 include_directories(utils)
 include_directories(finiteElements)
 include_directories(mesh)
-include_directories(solver/${SOLVER})
+include_directories(solver)
 include_directories(${PROJECT_BINARY_DIR}/src/utils)
 
 add_subdirectory(utils)
@@ -103,5 +103,4 @@ endif()
 
 install(TARGETS sem.exe
         RUNTIME DESTINATION bin)
-
 

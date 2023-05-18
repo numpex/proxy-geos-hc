@@ -1,6 +1,14 @@
-cmake_minimum_required(VERSION 3.22)
-project(sem)
+message("The current solver is running with ${SOLVER}")
 
+set(SRCS
+    ${SOLVER}_solver.cpp
+    )
 
-add_subdirectory(${SOLVER})
-include_directories(${SOLVER})
+set(HEADERS
+    solver.hpp
+    )
+
+include_directories(../mesh)
+include_directories(../finiteElements)
+
+add_library(solver ${SRCS} ${HEADERS})
