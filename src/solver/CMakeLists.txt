@@ -1,7 +1,7 @@
 message("The current solver is running with ${SOLVER}")
 
 set(SRCS
-    ${SOLVER}_solver.cpp
+    solver_${SOLVER}.cpp
     )
 
 set(HEADERS
