@@ -9,7 +9,8 @@ set (CMAKE_VERBOSE_MAKEFILE on )
 
 # setup the flags for users to select programming models
 set (SEM_USE_OMP OFF CACHE BOOL "")
-set (SEM_USE_RAJA ON CACHE BOOL "")
+set (SEM_USE_RAJA OFF CACHE BOOL "")
+set (SEM_USE_LVARRAY ON CACHE BOOL "")
 
 # setup the flags for profiling using caliper
 set (SEM_USE_CALIPER ON CACHE BOOL "")

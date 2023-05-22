@@ -81,6 +81,60 @@ else ()
   message("-- Caliper_DIR is not the correct path and caliper is not enabled")
 endif()
 
+#-----------------------------------------------------
+# LVARRAY
+#-----------------------------------------------------
+if (NOT SEM_USE_LVARRAY)
+  message ("-- SEM_USE_LVARRAY flag is set to be false and RAJA is not enabled")
+elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
+  message ("-- SEM_USE_LVARRAY flag is set to be true and LVARRAY is now enabled")
+  message("-- Found the LVARRAY library in $ENV{LVARRAY_DIR}")
+  set (SOLVER "rajavector" CACHE PATH "" FORCE)
+  # LvArray uses OMP
+  find_package(OpenMP)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+  # LvArray uses  RAJA
+  find_package(RAJA REQUIRED)
+  set (raja_INCLUDE_DIR "$ENV{RAJA_INCLUDE_DIR}")
+  include_directories(${raja_INCLUDE_DIR})
+  target_include_directories(sem.exe  
+                            PUBLIC
+                            ${raja_INCLUDE_DIR}
+                            )
+  # LvArray uses umpire
+  find_package(UMPIRE REQUIRED)
+  set (umpire_INCLUDE_DIR "$ENV{UMPIRE_INCLUDE_DIR}")
+  include_directories(${umpire_INCLUDE_DIR})
+  target_include_directories(sem.exe 
+                            PUBLIC 
+                            ${umpire_INCLUDE_DIR}
+                            )
+  # LvArray uses camp
+  find_package(CAMP REQUIRED)
+  set (camp_INCLUDE_DIR "$ENV{CAMP_INCLUDE_DIR}")
+  include_directories(${camp_INCLUDE_DIR})
+  target_include_directories(sem.exe 
+                            PUBLIC 
+                            ${camp_INCLUDE_DIR}
+                            )
+  # LvArray 
+  find_package(LVARRAY REQUIRED)
+  set (lvarray_INCLUDE_DIR "$ENV{LVARRAY_INCLUDE_DIR}")
+  include_directories(${lvarray_INCLUDE_DIR})
+  target_include_directories(sem.exe 
+                            PUBLIC 
+                            ${lvarray_INCLUDE_DIR}
+                            )
+elseif (NOT DEFINED $ENV{LVARRAY_DIR}) 
+  set (SEM_USE_LVARRAY OFF CACHE BOOL "")
+  message("-- LVARRAY_DIR is not defined and lvarray is not enabled")
+else ()
+  set (SEM_USE_LVARRAY OFF CACHE BOOL "")
+  message("-- LVARRAY_DIR is not the correct path and lvarray is not enabled")
+endif()
+
 include_directories(utils)
 include_directories(finiteElements)
 include_directories(mesh)
@@ -102,6 +156,13 @@ if( SEM_USE_RAJA)
   target_link_libraries(sem.exe
   PUBLIC 
   RAJA)
+endif()
+if( SEM_USE_LVARRAY)
+  target_link_libraries(sem.exe
+                        PUBLIC 
+                        umpire
+                        camp
+                        lvarray)
 endif()
 
 install(TARGETS sem.exe
