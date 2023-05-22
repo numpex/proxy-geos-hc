@@ -9,7 +9,6 @@ set (SOLVER "sequentialVector" CACHE PATH "" FORCE)
 
 set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_FLAGS "-O3 -std=c++14 -march=native")
-set( CMAKE_VERBOSE_MAKEFILE on )
 
 # the solver is using OMP multi-threading if SEM_USE_OMP is ON
 if (NOT SEM_USE_OMP)
