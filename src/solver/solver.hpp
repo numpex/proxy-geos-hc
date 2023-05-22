@@ -4,9 +4,10 @@
 #include    <iostream>
 #include    <vector>
 #include    <cmath>
+#include    <omp.h>
+#include    "RAJA/RAJA.hpp"
 #include    "QkGL.hpp"
 #include    "simpleMesh.hpp"
-
 using    namespace std;
 
 /*
