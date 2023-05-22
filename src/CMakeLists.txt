@@ -7,6 +7,9 @@ add_executable(sem.exe main/main.cpp)
 # the solver is using sequential mode by default 
 set (SOLVER "sequentialVector" CACHE PATH "" FORCE)
 
+
+set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_FLAGS "-O3 -std=c++14  " CACHE STRING "")
 # the solver is using OMP multi-threading if SEM_USE_OMP is ON
 if (NOT SEM_USE_OMP)
   message ("-- SEM_USE_OMP flag is set to be false and OMP is not enabled")
