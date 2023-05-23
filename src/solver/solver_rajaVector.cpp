@@ -1,5 +1,8 @@
 #include "solver.hpp"
 #include "RAJA/RAJA.hpp"
+#include "Array.hpp"
+#include "MallocBuffer.hpp"
+
 
 solver::solver() {}
 solver::~solver() {}
