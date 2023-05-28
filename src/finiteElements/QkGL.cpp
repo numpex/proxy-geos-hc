@@ -306,7 +306,7 @@ vectorDouble QkGL::derivativeShapeFunction1D( int order, double xi ) const
 arrayDouble QkGL::getBasisFunction1D( int order, const vectorDouble & quadraturePoints ) const
 {
   int nBasisFunction1D=order+1;
-  arrayDouble basisFunction1D( order+1, nBasisFunction1D );
+  arrayDouble basisFunction1D( nBasisFunction1D, nBasisFunction1D );
   arrayDouble tmp( order+1,order+1 );
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -338,7 +338,7 @@ arrayDouble QkGL::getBasisFunction1D( int order, const vectorDouble & quadrature
 arrayDouble QkGL::getDerivativeBasisFunction1D( int order, const vectorDouble & quadraturePoints ) const
 {
   int nBasisFunction1D=order+1;
-  arrayDouble derivativeBasisFunction1D( order+1,order+1 );
+  arrayDouble derivativeBasisFunction1D( nBasisFunction1D,nBasisFunction1D);
   arrayDouble tmp( order+1,order+1 );
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -388,16 +388,17 @@ arrayDouble QkGL::getBasisFunction2D( const vectorDouble & quadraturePoints,
 {
   int nBasisFunctions=quadraturePoints.size()*quadraturePoints.size();
   arrayDouble c( nBasisFunctions , nBasisFunctions);
-
   for( int j = 0; j < quadraturePoints.size(); j++ )
   {
     for( int k = 0; k<quadraturePoints.size(); k++ )
     {
+      int m=0;
       for( int i = 0; i< quadraturePoints.size(); i++ )
       {
         for( int l=0; l<quadraturePoints.size(); l++ )
         {
-          c[i+quadraturePoints.size()*j][l+k*quadraturePoints.size()]=a[i][l]*b[j][k] ;
+          c[i+quadraturePoints.size()*j][m]=a[i][l]*b[j][k];
+          m+=1; 
         }
       }
     }
