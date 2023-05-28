@@ -1,7 +1,8 @@
 #ifndef UTILS_HPP_
 #define UTILS_HPP_
 
-#include    <cmath>
+#include  <cmath>
+#include "dataType.hpp"
 //#include    <simpleMesh>
 
 using namespace std;
@@ -57,11 +58,11 @@ struct solverUtils
     return sourceTerm;
   }
 
-  void saveSnapShot( const int indexTimeStep, const int i1, const vector< vector< float > > pnGlobal, simpleMesh mesh )
+  void saveSnapShot( const int indexTimeStep, const int i1, arrayReal pnGlobal, simpleMesh mesh )
   {
 
     int numberOfNodes=mesh.getNumberOfNodes();
-    vector< float >inputVector( numberOfNodes );
+    vectorReal inputVector( numberOfNodes );
     int nx=mesh.getNx();
     int ny=mesh.getNy();
     float dx=mesh.getDx();
@@ -70,7 +71,7 @@ struct solverUtils
     {
       inputVector[i]=pnGlobal[i][i1];
     }
-    vector< vector< float > >grid=mesh.projectToGrid( numberOfNodes, inputVector );
+    arrayReal grid=mesh.projectToGrid( numberOfNodes, inputVector );
     fstream snapFile;
     string snapNumber = "snapshot"+to_string( indexTimeStep );
     snapFile.open( snapNumber, ios::out| ios::trunc );

@@ -10,232 +10,230 @@ using namespace std;
 QkGL::QkGL(){};
 QkGL::~QkGL(){};
 
-vector< double > QkGL::gaussLobattoQuadraturePoints( int order ) const
+vectorDouble QkGL::gaussLobattoQuadraturePoints( int order ) const
 {
-  vector< double > quadraturePoints;
-  quadraturePoints.reserve( order+1 );
+  vectorDouble quadraturePoints(order+1);
   if( order == 1 )
   {
-    quadraturePoints.push_back( -1.0 );
-    quadraturePoints.push_back( 1.0 );
+    quadraturePoints[0]=-1.0 ;
+    quadraturePoints[1]=1.0 ;
   }
   if( order == 2 )
   {
-    quadraturePoints.push_back( -1.0 );
-    quadraturePoints.push_back( 0.0 );
-    quadraturePoints.push_back( 1.0 );
+    quadraturePoints[0]=-1.0 ;
+    quadraturePoints[1]=0.0 ;
+    quadraturePoints[2]=1.0 ;
   }
   if( order == 3 )
   {
-    quadraturePoints.push_back( -1.0 );
-    quadraturePoints.push_back( -0.4472136 );
-    quadraturePoints.push_back( 0.4472136 );
-    quadraturePoints.push_back( 1.0 );
+    quadraturePoints[0]=-1.0 ;
+    quadraturePoints[1]=-0.4472136 ;
+    quadraturePoints[2]=0.4472136 ;
+    quadraturePoints[3]=1.0 ;
   }
   if( order == 4 )
   {
-    quadraturePoints.push_back( -1.0 );
-    quadraturePoints.push_back( -0.65465367 );
-    quadraturePoints.push_back( 0.0 );
-    quadraturePoints.push_back( 0.65465367 );
-    quadraturePoints.push_back( 1.0 );
+    quadraturePoints[0]=-1.0 ;
+    quadraturePoints[1]=-0.65465367 ;
+    quadraturePoints[2]=0.0 ;
+    quadraturePoints[3]=0.65465367 ;
+    quadraturePoints[4]=1.0 ;
   }
   if( order == 5 )
   {
-    quadraturePoints.push_back( -1.0 );
-    quadraturePoints.push_back( -0.76505532 );
-    quadraturePoints.push_back( -0.28523152 );
-    quadraturePoints.push_back( 0.28523152 );
-    quadraturePoints.push_back( 0.76505532 );
-    quadraturePoints.push_back( 1.0 );
+    quadraturePoints[0]=-1.0 ;
+    quadraturePoints[1]=-0.76505532 ;
+    quadraturePoints[2]=-0.28523152 ;
+    quadraturePoints[3]=0.28523152 ;
+    quadraturePoints[4]=0.76505532 ;
+    quadraturePoints[5]=1.0 ;
   }
   return quadraturePoints;
 }
-vector< double > QkGL::gaussLobattoQuadratureWeights( int order ) const
+vectorDouble QkGL::gaussLobattoQuadratureWeights( int order ) const
 {
-  vector< double > weights;
-  weights.reserve( order+1 );
+  vectorDouble weights(order+1);
+ 
   if( order == 1 )
   {
-    weights.push_back( 1.0 );
-    weights.push_back( 1.0 );
+    weights[0]=1.0 ;
+    weights[1]=1.0 ;
   }
   if( order == 2 )
   {
-    weights.push_back( 0.33333333 );
-    weights.push_back( 1.33333333 );
-    weights.push_back( 0.33333333 );
+    weights[0]=0.33333333 ;
+    weights[1]=1.33333333 ;
+    weights[2]= 0.33333333 ;
   }
   if( order == 3 )
   {
-    weights.push_back( 0.16666667 );
-    weights.push_back( 0.83333333 );
-    weights.push_back( 0.83333333 );
-    weights.push_back( 0.16666667 );
+    weights[0]=0.16666667 ;
+    weights[1]=0.83333333 ;
+    weights[2]=0.83333333 ;
+    weights[3]=0.16666667 ;
   }
   if( order == 4 )
   {
-    weights.push_back( 0.1 );
-    weights.push_back( 0.54444444 );
-    weights.push_back( 0.71111111 );
-    weights.push_back( 0.54444444 );
-    weights.push_back( 0.1 );
+    weights[0]=0.1;
+    weights[1]=0.54444444 ;
+    weights[2]=0.71111111 ;
+    weights[3]=0.54444444 ;
+    weights[4]=0.1 ;
   }
   if( order == 5 )
   {
-    weights.push_back( 0.06666667 );
-    weights.push_back( 0.37847496 );
-    weights.push_back( 0.55485838 );
-    weights.push_back( 0.55485838 );
-    weights.push_back( 0.37847496 );
-    weights.push_back( 0.06666667 );
+    weights[0]=0.06666667 ;
+    weights[1]=0.37847496 ;
+    weights[2]=0.55485838 ;
+    weights[3]=0.55485838 ;
+    weights[4]=0.37847496 ;
+    weights[5]=0.06666667 ;
   }
   return weights;
 }
 
-vector< double > QkGL::shapeFunction1D( int order, double xi ) const
+vectorDouble QkGL::shapeFunction1D( int order, double xi ) const
 {
-  vector< double > shapeFunction;
-  shapeFunction.reserve( order+1 );
+  vectorDouble shapeFunction(order+1);
   if( order==1 )
   {
-    shapeFunction.push_back( 0.5*(1.0-xi));
+    shapeFunction[0]=0.5*(1.0-xi);
 
-    shapeFunction.push_back( 0.5*(1.0+xi));
+    shapeFunction[1]=0.5*(1.0+xi);
   }
   if( order==2 )
   {
-    shapeFunction.push_back( -1.0*xi*(0.5 - 0.5*xi));
+    shapeFunction[0]= -1.0*xi*(0.5 - 0.5*xi);
 
-    shapeFunction.push_back((1.0 - 1.0*xi)*(1.0*xi + 1.0));
+    shapeFunction[1]=(1.0 - 1.0*xi)*(1.0*xi + 1.0);
 
-    shapeFunction.push_back( 1.0*xi*(0.5*xi + 0.5));
+    shapeFunction[2]= 1.0*xi*(0.5*xi + 0.5);
   }
   if( order==3 )
   {
-    shapeFunction.push_back((0.309016994374947 - 0.690983005625053*xi)*(0.5 - 0.5*xi)
-                            *(-1.80901699437495*xi - 0.809016994374947));
+    shapeFunction[0]=(0.309016994374947 - 0.690983005625053*xi)*(0.5 - 0.5*xi)
+                            *(-1.80901699437495*xi - 0.809016994374947);
 
-    shapeFunction.push_back((0.5 - 1.11803398874989*xi)*(0.690983005625053 - 0.690983005625053*xi)
-                            *(1.80901699437495*xi + 1.80901699437495));
+    shapeFunction[1]=(0.5 - 1.11803398874989*xi)*(0.690983005625053 - 0.690983005625053*xi)
+                            *(1.80901699437495*xi + 1.80901699437495);
 
-    shapeFunction.push_back((1.80901699437495 - 1.80901699437495*xi)
-                            *(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5));
+    shapeFunction[2]=(1.80901699437495 - 1.80901699437495*xi)
+                            *(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5);
 
-    shapeFunction.push_back((0.5*xi + 0.5)*(0.690983005625053*xi + 0.309016994374947)
-                            *(1.80901699437495*xi - 0.809016994374947));
+    shapeFunction[3]=(0.5*xi + 0.5)*(0.690983005625053*xi + 0.309016994374947)
+                            *(1.80901699437495*xi - 0.809016994374947);
   }
   if( order==4 )
   {
-    shapeFunction.push_back( 1.0*xi*(0.39564392373896 - 0.60435607626104*xi)*(0.5 - 0.5*xi)
-                             *(-2.89564392373896*xi - 1.89564392373896));
+    shapeFunction[0]=1.0*xi*(0.39564392373896 - 0.60435607626104*xi)*(0.5 - 0.5*xi)
+                             *(-2.89564392373896*xi - 1.89564392373896);
 
-    shapeFunction.push_back( -1.52752523165195*xi*(0.5 - 0.763762615825973*xi)*(0.60435607626104 - 0.60435607626104*xi)
-                             *(2.89564392373896*xi + 2.89564392373896));
+    shapeFunction[1]=-1.52752523165195*xi*(0.5 - 0.763762615825973*xi)*(0.60435607626104 - 0.60435607626104*xi)
+                             *(2.89564392373896*xi + 2.89564392373896);
 
-    shapeFunction.push_back((1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0));
+    shapeFunction[2]=(1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0);
 
-    shapeFunction.push_back( 1.52752523165195*xi*(2.89564392373896 - 2.89564392373896*xi)
-                             *(0.60435607626104*xi + 0.60435607626104)*(0.763762615825973*xi + 0.5));
+    shapeFunction[3]= 1.52752523165195*xi*(2.89564392373896 - 2.89564392373896*xi)
+                             *(0.60435607626104*xi + 0.60435607626104)*(0.763762615825973*xi + 0.5);
 
-    shapeFunction.push_back( 1.0*xi*(0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)
-                             *(2.89564392373896*xi - 1.89564392373896));
+    shapeFunction[4]= 1.0*xi*(0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)
+                             *(2.89564392373896*xi - 1.89564392373896);
   }
   if( order==5 )
   {
-    shapeFunction.push_back((0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
+    shapeFunction[0]=(0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
                             *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)
-                            *(-1.39905441140358*xi - 0.399054411403579));
+                            *(-1.39905441140358*xi - 0.399054411403579);
 
-    shapeFunction.push_back((0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
+    shapeFunction[1]=(0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
                             *(0.566554479308753 - 0.566554479308753*xi)*(-2.0840983387567*xi - 0.594450529658367)
-                            *(4.25632117622354*xi + 4.25632117622354));
+                            *(4.25632117622354*xi + 4.25632117622354);
 
-    shapeFunction.push_back((0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
+    shapeFunction[2]=(0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
                             *(0.778069933064125 - 0.778069933064125*xi)*(1.39905441140358*xi + 1.39905441140358)
-                            *(2.0840983387567*xi + 1.59445052965837));
+                            *(2.0840983387567*xi + 1.59445052965837);
 
-    shapeFunction.push_back((1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
+    shapeFunction[3]=(1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
                             *(0.778069933064125*xi + 0.778069933064125)*(0.952120850728289*xi + 0.728425125873928)
-                            *(1.75296196636787*xi + 0.5));
+                            *(1.75296196636787*xi + 0.5);
 
-    shapeFunction.push_back((4.25632117622354 - 4.25632117622354*xi)*(0.566554479308753*xi + 0.566554479308753)
+    shapeFunction[4]=(4.25632117622354 - 4.25632117622354*xi)*(0.566554479308753*xi + 0.566554479308753)
                             *(0.6535475074298*xi + 0.5)*(0.952120850728289*xi + 0.271574874126072)
-                            *(2.0840983387567*xi - 0.594450529658367));
+                            *(2.0840983387567*xi - 0.594450529658367);
 
-    shapeFunction.push_back((0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
+    shapeFunction[5]=(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
                             *(0.778069933064125*xi + 0.221930066935875)*(1.39905441140358*xi - 0.399054411403579)
-                            *(4.25632117622354*xi - 3.25632117622354));
+                            *(4.25632117622354*xi - 3.25632117622354);
   }
   return shapeFunction;
 }
 
-vector< double > QkGL::derivativeShapeFunction1D( int order, double xi ) const
+vectorDouble QkGL::derivativeShapeFunction1D( int order, double xi ) const
 {
-  vector< double > derivativeShapeFunction;
-  derivativeShapeFunction.reserve( order+1 );
+  vectorDouble derivativeShapeFunction(order+1);
+
   if( order == 1 )
   {
-    derivativeShapeFunction.push_back( -0.5 );
-    derivativeShapeFunction.push_back( 0.5 );
+    derivativeShapeFunction[0]=-0.5 ;
+    derivativeShapeFunction[1]=0.5 ;
   }
   if( order == 2 )
   {
-    derivativeShapeFunction.push_back( 1.0*xi - 0.5 );
-    derivativeShapeFunction.push_back( -2.0*xi );
-    derivativeShapeFunction.push_back( 1.0*xi + 0.5 );
+    derivativeShapeFunction[0]=1.0*xi - 0.5 ;
+    derivativeShapeFunction[1]=-2.0*xi ;
+    derivativeShapeFunction[2]=1.0*xi + 0.5 ;
   }
   if( order == 3 )
   {
-    derivativeShapeFunction.push_back( -1.80901699437495*(0.309016994374947 - 0.690983005625053*xi)*(0.5 - 0.5*xi)
+    derivativeShapeFunction[0]=-1.80901699437495*(0.309016994374947 - 0.690983005625053*xi)*(0.5 - 0.5*xi)
                                        + (-1.80901699437495*xi - 0.809016994374947)*(0.345491502812526*xi - 0.345491502812526)
-                                       + (-1.80901699437495*xi - 0.809016994374947)*(0.345491502812526*xi - 0.154508497187474));
+                                       + (-1.80901699437495*xi - 0.809016994374947)*(0.345491502812526*xi - 0.154508497187474);
 
-    derivativeShapeFunction.push_back( 1.80901699437495*(0.5 - 1.11803398874989*xi)*(0.690983005625053 - 0.690983005625053*xi)
+    derivativeShapeFunction[1]=1.80901699437495*(0.5 - 1.11803398874989*xi)*(0.690983005625053 - 0.690983005625053*xi)
                                        + (0.772542485937369*xi - 0.772542485937369)*(1.80901699437495*xi + 1.80901699437495)
-                                       + (0.772542485937369*xi - 0.345491502812526)*(1.80901699437495*xi + 1.80901699437495));
+                                       + (0.772542485937369*xi - 0.345491502812526)*(1.80901699437495*xi + 1.80901699437495);
 
-    derivativeShapeFunction.push_back((1.80901699437495 - 1.80901699437495*xi)*(0.772542485937369*xi + 0.345491502812526) +
+    derivativeShapeFunction[2]=(1.80901699437495 - 1.80901699437495*xi)*(0.772542485937369*xi + 0.345491502812526) +
                                       (1.80901699437495 - 1.80901699437495*xi)*(0.772542485937369*xi + 0.772542485937369) -
-                                      1.80901699437495*(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5));
+                                      1.80901699437495*(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5);
 
-    derivativeShapeFunction.push_back((0.345491502812526*xi + 0.154508497187474)*(1.80901699437495*xi - 0.809016994374947) +
+    derivativeShapeFunction[3]=(0.345491502812526*xi + 0.154508497187474)*(1.80901699437495*xi - 0.809016994374947) +
                                       (0.345491502812526*xi + 0.345491502812526)*(1.80901699437495*xi - 0.809016994374947) +
-                                      1.80901699437495*(0.5*xi + 0.5)*(0.690983005625053*xi + 0.309016994374947));
+                                      1.80901699437495*(0.5*xi + 0.5)*(0.690983005625053*xi + 0.309016994374947);
 
   }
   if( order == 4 )
   {
-    derivativeShapeFunction.push_back( 2.89564392373896*xi*(0.39564392373896 - 0.60435607626104*xi)*(0.5 - 0.5*xi) +
+    derivativeShapeFunction[0]=2.89564392373896*xi*(0.39564392373896 - 0.60435607626104*xi)*(0.5 - 0.5*xi) +
                                        0.5*xi*(0.39564392373896 - 0.60435607626104*xi)*(-2.89564392373896*xi - 1.89564392373896)
                                        + 0.60435607626104*xi*(0.5 - 0.5*xi)*(-2.89564392373896*xi - 1.89564392373896) +
-                                       (0.39564392373896 - 0.60435607626104*xi)*(-2.89564392373896*xi - 1.89564392373896)*(0.5*xi - 0.5));
+                                       (0.39564392373896 - 0.60435607626104*xi)*(-2.89564392373896*xi - 1.89564392373896)*(0.5*xi - 0.5);
 
-    derivativeShapeFunction.push_back( -4.42316915539091*xi*(0.5 - 0.763762615825973*xi)*(0.60435607626104 - 0.60435607626104*xi)
+    derivativeShapeFunction[1]=-4.42316915539091*xi*(0.5 - 0.763762615825973*xi)*(0.60435607626104 - 0.60435607626104*xi)
                                        + 0.923169155390906*xi*(0.5 - 0.763762615825973*xi)*(2.89564392373896*xi + 2.89564392373896)
                                        + 1.16666666666667*xi*(0.60435607626104 - 0.60435607626104*xi)*(2.89564392373896*xi + 2.89564392373896)
                                        + (0.60435607626104 - 0.60435607626104*xi)*(1.16666666666667*xi - 0.763762615825973)
-                                       *(2.89564392373896*xi + 2.89564392373896));
+                                       *(2.89564392373896*xi + 2.89564392373896);
 
-    derivativeShapeFunction.push_back((1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.52752523165195*xi + 1.0) +
+    derivativeShapeFunction[2]=(1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.52752523165195*xi + 1.0) +
                                       (1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.52752523165195*xi + 1.52752523165195)
                                       - 1.0*(1.0 - 1.52752523165195*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0)
-                                      - 1.52752523165195*(1.0 - 1.0*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0));
+                                      - 1.52752523165195*(1.0 - 1.0*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0);
 
-    derivativeShapeFunction.push_back( 1.16666666666667*xi*(2.89564392373896 - 2.89564392373896*xi)*(0.60435607626104*xi + 0.60435607626104)
+    derivativeShapeFunction[3]=1.16666666666667*xi*(2.89564392373896 - 2.89564392373896*xi)*(0.60435607626104*xi + 0.60435607626104)
                                        + 0.923169155390906*xi*(2.89564392373896 - 2.89564392373896*xi)*(0.763762615825973*xi + 0.5)
                                        - 4.42316915539091*xi*(0.60435607626104*xi + 0.60435607626104)*(0.763762615825973*xi + 0.5)
                                        + (2.89564392373896 - 2.89564392373896*xi)*(0.60435607626104*xi + 0.60435607626104)
-                                       *(1.16666666666667*xi + 0.763762615825973));
+                                       *(1.16666666666667*xi + 0.763762615825973);
 
-    derivativeShapeFunction.push_back( 2.89564392373896*xi*(0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)
+    derivativeShapeFunction[4]=2.89564392373896*xi*(0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)
                                        + 0.60435607626104*xi*(0.5*xi + 0.5)*(2.89564392373896*xi - 1.89564392373896)
                                        + 0.5*xi*(0.60435607626104*xi + 0.39564392373896)*(2.89564392373896*xi - 1.89564392373896)
-                                       + (0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)*(2.89564392373896*xi - 1.89564392373896));
+                                       + (0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)*(2.89564392373896*xi - 1.89564392373896);
   }
   if( order == 5 )
   {
-    derivativeShapeFunction.push_back( -1.39905441140358*(0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
+    derivativeShapeFunction[0]=-1.39905441140358*(0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
                                        *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)
                                        - 4.25632117622354*(0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
                                        *(0.5 - 0.5*xi)*(-1.39905441140358*xi - 0.399054411403579) + (0.221930066935875 - 0.778069933064125*xi)
@@ -243,9 +241,9 @@ vector< double > QkGL::derivativeShapeFunction1D( int order, double xi ) const
                                        *(0.283277239654376*xi - 0.283277239654376) + (0.221930066935875 - 0.778069933064125*xi)
                                        *(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579)
                                        *(0.283277239654376*xi - 0.216722760345624) - 0.778069933064125*(0.433445520691247 - 0.566554479308753*xi)
-                                       *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579));
+                                       *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579);
 
-    derivativeShapeFunction.push_back( -2.0840983387567*(0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
+    derivativeShapeFunction[1]= -2.0840983387567*(0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
                                        *(0.566554479308753 - 0.566554479308753*xi)*(4.25632117622354*xi + 4.25632117622354)
                                        - 0.566554479308753*(0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
                                        *(-2.0840983387567*xi - 0.594450529658367)*(4.25632117622354*xi + 4.25632117622354)
@@ -254,9 +252,9 @@ vector< double > QkGL::derivativeShapeFunction1D( int order, double xi ) const
                                        +(0.271574874126072 - 0.952120850728289*xi)*(0.566554479308753 - 0.566554479308753*xi)
                                        *(-2.78170809554157*xi - 2.78170809554157)*(-2.0840983387567*xi - 0.594450529658367)
                                        - 0.952120850728289*(0.5 - 0.6535475074298*xi)*(0.566554479308753 - 0.566554479308753*xi)
-                                       *(-2.0840983387567*xi - 0.594450529658367)*(4.25632117622354*xi + 4.25632117622354));
+                                       *(-2.0840983387567*xi - 0.594450529658367)*(4.25632117622354*xi + 4.25632117622354);
 
-    derivativeShapeFunction.push_back( 2.0840983387567*(0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
+    derivativeShapeFunction[2]= 2.0840983387567*(0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
                                        *(0.778069933064125 - 0.778069933064125*xi)*(1.39905441140358*xi + 1.39905441140358)
                                        + 1.39905441140358*(0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
                                        *(0.778069933064125 - 0.778069933064125*xi)*(2.0840983387567*xi + 1.59445052965837)
@@ -265,9 +263,9 @@ vector< double > QkGL::derivativeShapeFunction1D( int order, double xi ) const
                                        + (0.728425125873928 - 0.952120850728289*xi)*(1.3639269998358*xi - 1.3639269998358)
                                        *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837)
                                        + (0.728425125873928 - 0.952120850728289*xi)*(1.3639269998358*xi - 0.389034966532063)
-                                       *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837));
+                                       *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837);
 
-    derivativeShapeFunction.push_back( 0.952120850728289*(1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
+    derivativeShapeFunction[3]=0.952120850728289*(1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
                                        *(0.778069933064125*xi + 0.778069933064125)*(1.75296196636787*xi + 0.5)
                                        + (1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
                                        *(0.952120850728289*xi + 0.728425125873928)*(1.3639269998358*xi + 0.389034966532063)
@@ -276,9 +274,9 @@ vector< double > QkGL::derivativeShapeFunction1D( int order, double xi ) const
                                        - 2.0840983387567*(1.39905441140358 - 1.39905441140358*xi)*(0.778069933064125*xi + 0.778069933064125)
                                        *(0.952120850728289*xi + 0.728425125873928)*(1.75296196636787*xi + 0.5)
                                        - 1.39905441140358*(1.59445052965837 - 2.0840983387567*xi)*(0.778069933064125*xi + 0.778069933064125)
-                                       *(0.952120850728289*xi + 0.728425125873928)*(1.75296196636787*xi + 0.5));
+                                       *(0.952120850728289*xi + 0.728425125873928)*(1.75296196636787*xi + 0.5);
 
-    derivativeShapeFunction.push_back((2.78170809554157 - 2.78170809554157*xi)*(0.566554479308753*xi + 0.566554479308753)
+    derivativeShapeFunction[4]=(2.78170809554157 - 2.78170809554157*xi)*(0.566554479308753*xi + 0.566554479308753)
                                       *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367)
                                       + 2.0840983387567*(4.25632117622354 - 4.25632117622354*xi)*(0.566554479308753*xi + 0.566554479308753)
                                       *(0.6535475074298*xi + 0.5)*(0.952120850728289*xi + 0.271574874126072)
@@ -287,9 +285,9 @@ vector< double > QkGL::derivativeShapeFunction1D( int order, double xi ) const
                                       + 0.566554479308753*(4.25632117622354 - 4.25632117622354*xi)*(0.6535475074298*xi + 0.5)
                                       *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367)
                                       + (-2.78170809554157*xi - 2.12816058811177)*(0.566554479308753*xi + 0.566554479308753)
-                                      *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367));
+                                      *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367);
 
-    derivativeShapeFunction.push_back((0.283277239654376*xi + 0.216722760345624)*(0.778069933064125*xi + 0.221930066935875)
+    derivativeShapeFunction[5]=(0.283277239654376*xi + 0.216722760345624)*(0.778069933064125*xi + 0.221930066935875)
                                       *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354)
                                       + (0.283277239654376*xi + 0.283277239654376)*(0.778069933064125*xi + 0.221930066935875)
                                       *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354)
@@ -298,30 +296,38 @@ vector< double > QkGL::derivativeShapeFunction1D( int order, double xi ) const
                                       + 1.39905441140358*(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
                                       *(0.778069933064125*xi + 0.221930066935875)*(4.25632117622354*xi - 3.25632117622354)
                                       + 0.778069933064125*(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
-                                      *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354));
+                                      *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354);
   }
   return derivativeShapeFunction;
 }
 
 // get 1D basis functions @ quadrature points
 // returns 2D vector basisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-vector< vector< double > > QkGL::getBasisFunction1D( int order, const vector< double > & quadraturePoints ) const
+arrayDouble QkGL::getBasisFunction1D( int order, const vectorDouble & quadraturePoints ) const
 {
   int nBasisFunction1D=order+1;
-  vector< vector< double > > basisFunction1D( nBasisFunction1D );
-  vector< vector< double > > tmp( order+1 );
+  arrayDouble basisFunction1D( order+1, nBasisFunction1D );
+  arrayDouble tmp( order+1,order+1 );
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
   {
+    vectorDouble tmp0(order+1);
     //extract all basis functions  for current quadrature point
-    tmp[i]=shapeFunction1D( order, quadraturePoints[i] );
+    tmp0=shapeFunction1D( order, quadraturePoints[i] );
+    for (int k=0;k<order+1;k++)
+    {
+      for (int l=0;l<order+1;l++)
+      {
+        tmp[k][l]=tmp0[l];
+      }
+    }
   }
   // transpose to get  basis Function values at quadrature nodes
   for( int j=0; j < order+1; j++ )
   {
     for( int i=0; i < nBasisFunction1D; i++ )
     {
-      basisFunction1D[i].push_back( tmp[j][i] );
+      basisFunction1D[i][j]= tmp[j][i] ;
     }
   }
   return basisFunction1D;
@@ -329,23 +335,31 @@ vector< vector< double > > QkGL::getBasisFunction1D( int order, const vector< do
 
 // get derivative of 1D basis functions @ quadrature points
 // returns 2D vector derivativeBasisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-vector< vector< double > > QkGL::getDerivativeBasisFunction1D( int order, const vector< double > & quadraturePoints ) const
+arrayDouble QkGL::getDerivativeBasisFunction1D( int order, const vectorDouble & quadraturePoints ) const
 {
   int nBasisFunction1D=order+1;
-  vector< vector< double > > derivativeBasisFunction1D( order+1 );
-  vector< vector< double > > tmp( order+1 );
+  arrayDouble derivativeBasisFunction1D( order+1,order+1 );
+  arrayDouble tmp( order+1,order+1 );
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
   {
+    vectorDouble tmp0(order+1);
     //extract all basis functions  for current quadrature point
-    tmp[i]=derivativeShapeFunction1D( order, quadraturePoints[i] );
+    tmp0=derivativeShapeFunction1D( order, quadraturePoints[i] );
+    for (int k=0;k<order+1;k++)
+    {
+      for (int l=0;l<order+1;l++)
+      {
+        tmp[k][l]=tmp0[l];
+      }
+    }
   }
   // transpose to get  basis Function values at quadrature nodes
   for( int j=0; j < order+1; j++ )
   {
     for( int i=0; i < nBasisFunction1D; i++ )
     {
-      derivativeBasisFunction1D[i].push_back( tmp[j][i] );
+      derivativeBasisFunction1D[i][j]= tmp[j][i] ;
     }
   }
   return derivativeBasisFunction1D;
@@ -353,27 +367,27 @@ vector< vector< double > > QkGL::getDerivativeBasisFunction1D( int order, const 
 
 
 // compute 2D gauss-lobatto weights
-vector< double > QkGL::getGaussLobattoWeights( const vector< double > & quadraturePoints,
-                                               const vector< double > & weights )const
+vectorDouble QkGL::getGaussLobattoWeights( const vectorDouble & quadraturePoints,
+                                               const vectorDouble& weights )const
 {
-  vector< double >W;
+  vectorDouble W(quadraturePoints.size()*quadraturePoints.size());
   for( int j=0; j<quadraturePoints.size(); j++ )
   {
     for( int i=0; i<quadraturePoints.size(); i++ )
     {
-      W.push_back( weights[i]*weights[j] );
+      W[i+j*quadraturePoints.size()]= weights[i]*weights[j] ;
     }
   }
   return W;
 }
 
 // returns 2D vector basisFunction2D of dimensions nBasisFunctions,nQuadraturePoints
-vector< vector< double > > QkGL::getBasisFunction2D( const vector< double > quadraturePoints,
-                                                     const vector< vector< double > > & a,
-                                                     const vector< vector< double > > & b )const
+arrayDouble QkGL::getBasisFunction2D( const vectorDouble & quadraturePoints,
+                                      const arrayDouble & a,
+                                      const arrayDouble & b )const
 {
   int nBasisFunctions=quadraturePoints.size()*quadraturePoints.size();
-  vector< vector< double > > c( nBasisFunctions );
+  arrayDouble c( nBasisFunctions , nBasisFunctions);
 
   for( int j = 0; j < quadraturePoints.size(); j++ )
   {
@@ -383,7 +397,7 @@ vector< vector< double > > QkGL::getBasisFunction2D( const vector< double > quad
       {
         for( int l=0; l<quadraturePoints.size(); l++ )
         {
-          c[i+quadraturePoints.size()*j].push_back( a[i][l]*b[j][k] );
+          c[i+quadraturePoints.size()*j][l+k*quadraturePoints.size()]=a[i][l]*b[j][k] ;
         }
       }
     }
@@ -394,12 +408,12 @@ vector< vector< double > > QkGL::getBasisFunction2D( const vector< double > quad
 // compute jacobian matrix for element to ref element coordinates
 // Xi[0,..,1][0,..,nPointsPerElement], global coordinate of element
 // dxPhi,dyPhi 2D derivative of basis Functions
-vector< vector< double > > QkGL::computeJacobianMatrix( const int & nPointsPerElement,
-                                                        const vector< vector< double > > & Xi,
-                                                        const vector< vector< double > > & dxPhi,
-                                                        const vector< vector< double > > & dyPhi )const
+arrayDouble QkGL::computeJacobianMatrix( const int & nPointsPerElement,
+                                          const arrayDouble & Xi,
+                                          const arrayDouble & dxPhi,
+                                          const arrayDouble & dyPhi )const
 {
-  vector< vector< double > > jacobianMatrix( 4, vector< double >( nPointsPerElement, 0 ));
+ arrayDouble jacobianMatrix( 4,nPointsPerElement);
 
   for( int i=0; i<nPointsPerElement; i++ )
   {
@@ -415,10 +429,10 @@ vector< vector< double > > QkGL::computeJacobianMatrix( const int & nPointsPerEl
 }
 
 // compute jacobian matrix determinant
-vector< double >  QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
-                                                            const vector< vector< double > > & jacobianMatrix ) const
+vectorDouble  QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+                                                        const arrayDouble & jacobianMatrix ) const
 {
-  vector< double >  detJ( nPointsPerElement, 0 );
+  vectorDouble detJ( nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
   {
     detJ[i]=(jacobianMatrix[0][i]*jacobianMatrix[3][i]-jacobianMatrix[2][i]*jacobianMatrix[1][i]);
@@ -427,11 +441,11 @@ vector< double >  QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsP
 }
 
 // compute inverse of Jacobian Matrix
-vector< vector< double > > QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
-                                                           const vector< vector< double > > & jacobianMatrix,
-                                                           const vector< double > & detJ ) const
+arrayDouble QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
+                                            const arrayDouble & jacobianMatrix,
+                                            const vectorDouble & detJ ) const
 {
-  vector< vector< double > > invJacobianMatrix( 4, vector< double >( nPointsPerElement, 0 ));
+  arrayDouble invJacobianMatrix( 4, nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
   {
     invJacobianMatrix[0][i]=(jacobianMatrix[3][i]/detJ[i]);
@@ -443,11 +457,11 @@ vector< vector< double > > QkGL::computeInvJacobianMatrix( const int & nPointsPe
 }
 
 // compute inverse of Jacobian Matrix
-vector< vector< double > > QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-                                                                 const vector< vector< double > > & jacobianMatrix,
-                                                                 const vector< double > & detJ ) const
+arrayDouble QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+                                                  const arrayDouble & jacobianMatrix,
+                                                  const vectorDouble & detJ ) const
 {
-  vector< vector< double > > transpInvJacobianMatrix( 4, vector< double >( nPointsPerElement, 0 ));
+  arrayDouble transpInvJacobianMatrix( 4,nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
   {
     transpInvJacobianMatrix[0][i]=(jacobianMatrix[3][i]/detJ[i]);
@@ -459,12 +473,12 @@ vector< vector< double > > QkGL::computeTranspInvJacobianMatrix( const int & nPo
 }
 
 // compute B the matrix containing the geometrical informations
-vector< vector< double > > QkGL::computeB( const int & nPointsPerElement,
-                                           const vector< vector< double > > & invJacobianMatrix,
-                                           const vector< vector< double > > & transpInvJacobianMatrix,
-                                           const vector< double > & detJ ) const
+arrayDouble QkGL::computeB( const int & nPointsPerElement,
+                            const arrayDouble & invJacobianMatrix,
+                            const arrayDouble & transpInvJacobianMatrix,
+                            const vectorDouble & detJ ) const
 {
-  vector< vector< double > > B( 4, vector< double >( nPointsPerElement, 0 ));
+  arrayDouble B( 4,nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
   {
     B[0][i]=(abs( detJ[i] )*(invJacobianMatrix[0][i]*transpInvJacobianMatrix[0][i]+
@@ -482,13 +496,13 @@ vector< vector< double > > QkGL::computeB( const int & nPointsPerElement,
 
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
 // Marc Durufle Formulae
-vector< vector< double > > QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                                                 const int & order,
-                                                 const vector< double > & weights2D,
-                                                 const vector< vector< double > > & B,
-                                                 const vector< vector< double > > & dPhi ) const
+arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+                                  const int & order,
+                                  const vectorDouble & weights2D,
+                                  const arrayDouble  & B,
+                                  const arrayDouble  & dPhi ) const
 {
-  vector< vector< double > > R( nPointsPerElement, vector< double >( nPointsPerElement, 0 ));
+  arrayDouble R( nPointsPerElement, nPointsPerElement);
   // B11
   for( int i1=0; i1<order+1; i1++ )
   {
@@ -557,13 +571,13 @@ vector< vector< double > > QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 }
 ///**
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
-vector< vector< double > > QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                                                 const vector< double > & weights2D,
-                                                 const vector< vector< double > > & B,
-                                                 const vector< vector< double > > & dxPhi,
-                                                 const vector< vector< double > > & dyPhi ) const
+arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+                                  const vectorDouble & weights2D,
+                                  const arrayDouble  & B,
+                                  const arrayDouble  & dxPhi,
+                                  const arrayDouble  & dyPhi ) const
 {
-  vector< vector< double > > R( nPointsPerElement, vector< double >( nPointsPerElement, 0 ));
+  arrayDouble R( nPointsPerElement, nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
   {
     for( int j=0; j<nPointsPerElement; j++ )
@@ -583,11 +597,11 @@ vector< vector< double > > QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 
 //**/
 // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$
-vector< double > QkGL::phiIphiJ( const int & nPointsPerElement,
-                                 const vector< double > & weights2D,
-                                 const vector< double > & detJ ) const
+vectorDouble QkGL::phiIphiJ( const int & nPointsPerElement,
+                             const vectorDouble & weights2D,
+                             const vectorDouble & detJ ) const
 {
-  vector< double > M( nPointsPerElement, 0 );
+  vectorDouble M( nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
   {
     M[i]=weights2D[i]*abs( detJ[i] );
@@ -597,12 +611,12 @@ vector< double > QkGL::phiIphiJ( const int & nPointsPerElement,
 
 ///**
 // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$
-vector< vector< double > > QkGL::phiIphiJ( const int & nPointsPerElement,
-                                           const vector< double > & weights2D,
-                                           const vector< vector< double > > & phi,
-                                           const vector< double > & detJ ) const
+arrayDouble QkGL::phiIphiJ( const int & nPointsPerElement,
+                                           const vectorDouble & weights2D,
+                                           const arrayDouble  & phi,
+                                           const vectorDouble & detJ ) const
 {
-  vector< vector< double > > M( nPointsPerElement, vector< double >( nPointsPerElement, 0 ));
+  arrayDouble M( nPointsPerElement, nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
   {
     for( int j=0; j<nPointsPerElement; j++ )
@@ -617,16 +631,16 @@ vector< vector< double > > QkGL::phiIphiJ( const int & nPointsPerElement,
 }
 //**/
 
-vector< float >QkGL::computeDs( const int & iFace,
-                                const int & order,
-                                const vector< vector< int > > & faceInfos,
-                                const vector< vector< float > > & globalNodesCoords,
-                                const vector< vector< double > > & derivativeBasisFunction2DX,
-                                const vector< vector< double > > & derivativeBasisFunction2DY ) const
+vectorReal QkGL::computeDs( const int & iFace,
+                            const int & order,
+                            const arrayInt & faceInfos,
+                            const arrayReal & globalNodesCoords,
+                            const arrayDouble & derivativeBasisFunction2DX,
+                            const arrayDouble & derivativeBasisFunction2DY ) const
 {
-  vector< int >numOfBasisFunctionOnFace( order+1, 0 );
-  vector< vector< float > >Js( 2, vector< float >( order+1, 0 ));
-  vector< float >ds( order+1, 0 );
+  vectorInt numOfBasisFunctionOnFace( order+1);
+  arrayReal Js( 2, order+1);
+  vectorReal ds( order+1);
 
   int face=faceInfos[iFace][1];
   // get basis functions on Boundary faces

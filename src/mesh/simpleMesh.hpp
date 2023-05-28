@@ -4,6 +4,7 @@
 #include    <iostream>
 #include    <vector>
 #include    <cmath>
+#include    "dataType.hpp"
 
 using    namespace std;
 
@@ -56,53 +57,53 @@ public:
   int getNumberOfBoundaryNodes() const;
 
   // Initialize nodal coordinates.
-  vector< vector< float > > nodesCoordinates( const int & numberOfNodes ) const;
+  arrayReal nodesCoordinates( const int & numberOfNodes ) const;
 
   //  list of global nodes ( vertices)
-  vector< vector< int > > globalNodesList( const int & numberOfElements ) const;
+  arrayInt globalNodesList( const int & numberOfElements ) const;
 
   // local to global
-  const vector< int > localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, vector< vector< int > >  const & nodesList ) const;
+  const vectorInt localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt  const & nodesList ) const;
   // compute global to local node indes
   int Itoij( const int & I, int & i, int & j ) const;
 
   // project vector node to grid
-  vector< vector< float > > projectToGrid( const int numberOfNodes, const vector< float > inputVector ) const;
+  arrayReal projectToGrid( const int numberOfNodes, const vectorReal inputVector ) const;
 
   // compute element e where (x,y) belongs to
   int getElementNumberFromPoints( const float & x, const float & y ) const;
 
   // set model
-  vector< float >getModel( const int & numberOfNodes ) const;
+  vectorReal getModel( const int & numberOfNodes ) const;
 
   // list of neighbours of element e
-  vector< int > neighbors( const int & e ) const;
+  vectorInt neighbors( const int & e ) const;
 
   // get global coordinates of element e
-  vector< vector< double > > getXi( const int & numberOfPointsPerElement, const vector< vector< float > > & globalNodesCoords,
-                                    const vector< int > & localToGlobal ) const;
+  arrayDouble getXi( const int & numberOfPointsPerElement, const arrayReal & globalNodesCoords,
+                     const vectorInt & localToGlobal ) const;
 
   // get global DOF belonging to the faces of element e
-  vector< vector< int > > getGlobalDofOfFace( const int & e,
-                                              const vector< vector< int > > & globalNodesList,
-                                              const vector< int > & localToGlobal ) const;
+  arrayInt getGlobalDofOfFace( const int & e,
+                               const arrayInt & globalNodesList,
+                               const vectorInt & localToGlobal ) const;
 
   // provides informations about boundary  faces:
   // element number,
   // orientation of the face
-  vector< vector< int > > getBoundaryFacesInfos()const;
+  arrayInt getBoundaryFacesInfos()const;
 
   // get list of interior Elements
-  vector< int > getListOfInteriorElements() const;
+  vectorInt getListOfInteriorElements() const;
 
   //  get list of global interior nodes
-  vector< int > getListOfInteriorNodes( const int & numberOfInteriorNodes ) const;
+  vectorInt getListOfInteriorNodes( const int & numberOfInteriorNodes ) const;
 
   //  get list of global boundary nodes
-  vector< int > getListOfBoundaryNodes( const int & numberOfBoundaryNodes ) const;
+  vectorInt getListOfBoundaryNodes( const int & numberOfBoundaryNodes ) const;
 
   // provides a mapping between local node of a face and global node Face:
-  vector< vector< int > >getLocalFaceNodeToGlobalFaceNode() const;
+  arrayInt getLocalFaceNodeToGlobalFaceNode() const;
 
 
 };

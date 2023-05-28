@@ -6,7 +6,10 @@
 #include    <cmath>
 #include    "QkGL.hpp"
 #include    "simpleMesh.hpp"
+#include    "dataType.hpp"
+
 using    namespace std;
+
 
 /*
  *  simple 2D acoustive wave equation solver
@@ -27,18 +30,18 @@ public:
                        const int & order,
                        int & i1,
                        int & i2,
-                       vector< vector< float > > & pnGlobal,
+                       arrayReal & pnGlobal,
                        simpleMesh mesh,
                        QkGL Qk );
-
+//vector< vector< float > > & pnGlobal,
   // add right and side
   void addRightAndSides( const int & timeStep,
                          const int & numberOfRHS,
                          const int & i2,
                          const float & timeSample,
-                         vector< vector< float > > & pnGlobal,
-                         const vector< vector< float > > & rhsTerm,
-                         const vector< vector< float > > & rhsLocation,
+                         arrayReal & pnGlobal,
+                         const arrayReal & rhsTerm,
+                         const arrayReal & rhsLocation,
                          simpleMesh mesh );
 
   int i1=0, i2=1;

@@ -1,19 +1,15 @@
 #include "solver.hpp"
-#include "RAJA/RAJA.hpp"
-#include "Array.hpp"
-#include "MallocBuffer.hpp"
-
 
 solver::solver() {}
 solver::~solver() {}
-
+  
 // compute one step of the time dynamic wave equation solver
 //vector<vector<float>>
 void solver::computeOneStep( const float & timeSample,
                              const int & order,
                              int & i1,
                              int & i2,
-                             vector< vector< float > > & pnGlobal,
+                             arrayReal & pnGlobal,
                              simpleMesh mesh,
                              QkGL Qk )
 {
@@ -21,50 +17,12 @@ void solver::computeOneStep( const float & timeSample,
   static int const numberOfNodes=mesh.getNumberOfNodes();
   static int const numberOfElements=mesh.getNumberOfElements();
   static int const numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
-  static vector< vector< int > > const globalNodesList=mesh.globalNodesList( numberOfElements );
-  static vector< int >   const listOfInteriorNodes=mesh.getListOfInteriorNodes( numberOfInteriorNodes );
-  static vector< vector< float > >  const globalNodesCoords=mesh.nodesCoordinates( numberOfNodes );
+  static arrayInt  const globalNodesList=mesh.globalNodesList( numberOfElements );
+  static vectorInt const listOfInteriorNodes=mesh.getListOfInteriorNodes( numberOfInteriorNodes );
+  static arrayReal const globalNodesCoords=mesh.nodesCoordinates( numberOfNodes );
 
   // get model
-  static vector< float >  const model=mesh.getModel( numberOfElements );
-//#define SEM_USE_LVARRAY
-#if defined(SEM_USE_LVARRAY)
-  // Create an 1D array of integers.
-  using vectorInt=LvArray::Array< int,
-                  1,
-                  camp::idx_seq< 0 >,
-                  std::ptrdiff_t,
-                  LvArray::MallocBuffer >;
-  using vectorReal=LvArray::Array< float,
-                  1,
-                  camp::idx_seq< 0 >,
-                  std::ptrdiff_t,
-                  LvArray::MallocBuffer >;
-  using vectorDouble=LvArray::Array< double,
-                  1,
-                  camp::idx_seq< 0 >,
-                  std::ptrdiff_t,
-                  LvArray::MallocBuffer >;
-  using arrayInt=LvArray::Array< int,
-                  2,
-                  camp::idx_seq< 0,1 >,
-                  std::ptrdiff_t,
-                  LvArray::MallocBuffer >;
-  using arrayReal=LvArray::Array< float,
-                  2,
-                  camp::idx_seq< 0,1 >,
-                  std::ptrdiff_t,
-                  LvArray::MallocBuffer >;
-  using arrayDouble=LvArray::Array< double,
-                  2,
-                  camp::idx_seq< 0,1 >,
-                  std::ptrdiff_t,
-                  LvArray::MallocBuffer >;
-  static vectorInt vect(numberOfNodes);
-  static arrayDouble array2D(numberOfNodes,numberOfNodes);
-  for ( int i=0; i<numberOfNodes; i++){vect[i]=0;array2D[i][i]=0;}
-#endif
-
+  static vectorReal  const model=mesh.getModel( numberOfElements );
 
   //get infos about finite element order of approximation
   int numberOfPointsPerElement;
@@ -80,26 +38,24 @@ void solver::computeOneStep( const float & timeSample,
     numberOfPointsPerElement=36;
 
   // get quadrature points and weights
-  static vector< double > const quadraturePoints=Qk.gaussLobattoQuadraturePoints( order );
-  static vector< double > const weights=Qk.gaussLobattoQuadratureWeights( order );
-  static vector< double > const weights2D=Qk.getGaussLobattoWeights( quadraturePoints,
-                                                                     weights );
-
+  static vectorDouble const quadraturePoints=Qk.gaussLobattoQuadraturePoints( order );
+  static vectorDouble const weights=Qk.gaussLobattoQuadratureWeights( order );
+  static vectorDouble const weights2D=Qk.getGaussLobattoWeights( quadraturePoints,weights );
   // get basis function and corresponding derivatives
-  static vector< vector< double > > const basisFunction1D=Qk.getBasisFunction1D( order, quadraturePoints );
-  static vector< vector< double > > const derivativeBasisFunction1D=Qk.getDerivativeBasisFunction1D( order, quadraturePoints );
-  static vector< vector< double > > const basisFunction2D=Qk.getBasisFunction2D( quadraturePoints,
-                                                                                 basisFunction1D,
-                                                                                 basisFunction1D );
-  static vector< vector< double > > const derivativeBasisFunction2DX=Qk.getBasisFunction2D( quadraturePoints,
-                                                                                            derivativeBasisFunction1D,
-                                                                                            basisFunction1D );
-  static vector< vector< double > > const derivativeBasisFunction2DY=Qk.getBasisFunction2D( quadraturePoints,
-                                                                                            basisFunction1D,
-                                                                                            derivativeBasisFunction1D );
+  static arrayDouble const basisFunction1D=Qk.getBasisFunction1D( order, quadraturePoints );
+  static arrayDouble const derivativeBasisFunction1D=Qk.getDerivativeBasisFunction1D( order, quadraturePoints );
+  static arrayDouble const basisFunction2D=Qk.getBasisFunction2D( quadraturePoints,
+                                                                  basisFunction1D,
+                                                                  basisFunction1D );
+  static arrayDouble const derivativeBasisFunction2DX=Qk.getBasisFunction2D( quadraturePoints,
+                                                                             derivativeBasisFunction1D,
+                                                                             basisFunction1D );
+  static arrayDouble const derivativeBasisFunction2DY=Qk.getBasisFunction2D( quadraturePoints,
+                                                                             basisFunction1D,
+                                                                             derivativeBasisFunction1D );
 
-  static vector< float > massMatrixGlobal( numberOfNodes );
-  static vector< float >yGlobal( numberOfNodes );
+  static vectorReal massMatrixGlobal( numberOfNodes );
+  static vectorReal yGlobal( numberOfNodes );
 
   RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfNodes ), [=] ( int i ) {
     massMatrixGlobal[i]=0;
@@ -108,32 +64,32 @@ void solver::computeOneStep( const float & timeSample,
 
 
   // loop over mesh elements
-  RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfElements ), [=] ( int e )
+  RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfElements ), [=, &pnGlobal] ( int e )
   {
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
-    vector< int > const localToGlobal=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList );
+    vectorInt const localToGlobal=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList );
 
     //get global coordinates Xi of element e
-    vector< vector< double > > const Xi=mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal );
+    arrayDouble const Xi=mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal );
 
     // compute jacobian Matrix
-    vector< vector< double > > const jacobianMatrix= Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
+    arrayDouble const jacobianMatrix= Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
                                                                                derivativeBasisFunction2DX,
                                                                                derivativeBasisFunction2DY );
     // compute determinant of jacobian Matrix
-    vector< double > const detJ= Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
-                                                                        jacobianMatrix );
+    vectorDouble const detJ= Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
+                                                                    jacobianMatrix );
     // compute inverse of Jacobian Matrix
-    vector< vector< double > > const invJacobianMatrix= Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
-                                                                                     jacobianMatrix,
-                                                                                     detJ );
+    arrayDouble const invJacobianMatrix= Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
+                                                                      jacobianMatrix,
+                                                                      detJ );
     // compute transposed inverse of Jacobian Matrix
-    vector< vector< double > > const transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
+    arrayDouble const transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
                                                                                                  jacobianMatrix,
                                                                                                  detJ );
     // compute  geometrical transformation matrix
-    vector< vector< double > > const B=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ );
+    arrayDouble const B=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ );
 
     /**
        // compute stifness and mass matrix
@@ -142,13 +98,13 @@ void solver::computeOneStep( const float & timeSample,
      **/
 
     // compute stifness and mass matrix
-    vector< vector< double > > const R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
+    arrayDouble const R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
 
     // compute local mass matrix
-    vector< double >  massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
+    vectorDouble  massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
     // get pnGlobal to pnLocal
-    vector< float > pnLocal( numberOfPointsPerElement );
-    vector< float > Y( numberOfPointsPerElement );
+    vectorReal pnLocal( numberOfPointsPerElement );
+    vectorReal Y( numberOfPointsPerElement );
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
       massMatrixLocal[i]/=(model[e]*model[e]);
@@ -182,18 +138,18 @@ void solver::computeOneStep( const float & timeSample,
   // get infos from mesh
   static int const numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
   static int const numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
-  static vector< int >  const listOfBoundaryNodes=mesh.getListOfBoundaryNodes( numberOfBoundaryNodes );
-  static vector< vector< int > > const faceInfos=mesh.getBoundaryFacesInfos();
-  static vector< vector< int > > const localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
-  static vector< float >ShGlobal( numberOfBoundaryNodes, 0 );
+  static vectorInt const listOfBoundaryNodes=mesh.getListOfBoundaryNodes( numberOfBoundaryNodes );
+  static arrayInt  const faceInfos=mesh.getBoundaryFacesInfos();
+  static arrayInt const localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
+  static vectorReal ShGlobal( numberOfBoundaryNodes);
 
   RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] ( int i ) {
     ShGlobal[i]=0;
   } );
   // Note: this loop is data parallel.
   RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfBoundaryFaces ), [=] ( int iFace ) {
-    vector< float >ds( order+1, 0 );
-    vector< float >Sh( order+1, 0 );
+    vectorReal ds( order+1);
+    vectorReal Sh( order+1);
     //get ds
     ds=Qk.computeDs( iFace, order, faceInfos, globalNodesCoords,
                      derivativeBasisFunction2DX,
@@ -244,15 +200,15 @@ void solver::addRightAndSides( const int & timeStep,
                                const int & numberOfRHS,
                                const int & i2,
                                const float & timeSample,
-                               vector< vector< float > > & pnGlobal,
-                               const vector< vector< float > > & rhsTerm,
-                               const vector< vector< float > > & rhsLocation,
+                               arrayReal & pnGlobal,
+                               const arrayReal & rhsTerm,
+                               const arrayReal & rhsLocation,
                                simpleMesh mesh )
 {
   static int numberOfNodes=mesh.getNumberOfNodes();
   static int numberOfElements=mesh.getNumberOfElements();
-  static vector< float > model=mesh.getModel( numberOfElements );
-  static vector< vector< int > > nodeList=mesh.globalNodesList( numberOfElements );
+  static vectorReal model=mesh.getModel( numberOfElements );
+  static arrayInt nodeList=mesh.globalNodesList( numberOfElements );
   int i, rhsElement;
   float tmp=timeSample*timeSample;
   for( int i=0; i<numberOfRHS; i++ )

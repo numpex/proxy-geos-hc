@@ -10,5 +10,7 @@ set(HEADERS
 
 include_directories(../mesh)
 include_directories(../finiteElements)
+include_directories(../utils)
+
 
 add_library(solver ${SRCS} ${HEADERS})
