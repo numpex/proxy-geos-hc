@@ -40,8 +40,8 @@ public:
                          const int & i2,
                          const float & timeSample,
                          arrayReal & pnGlobal,
-                         const arrayReal & rhsTerm,
-                         const arrayReal & rhsLocation,
+                         arrayReal & rhsTerm,
+                         arrayReal & rhsLocation,
                          simpleMesh mesh );
 
   int i1=0, i2=1;

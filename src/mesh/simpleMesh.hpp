@@ -63,12 +63,12 @@ public:
   arrayInt globalNodesList( const int & numberOfElements ) const;
 
   // local to global
-  const vectorInt localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt  const & nodesList ) const;
+  const vectorInt localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList ) const;
   // compute global to local node indes
   int Itoij( const int & I, int & i, int & j ) const;
 
   // project vector node to grid
-  arrayReal projectToGrid( const int numberOfNodes, const vectorReal inputVector ) const;
+  arrayReal projectToGrid( const int numberOfNodes,  vectorReal inputVector ) const;
 
   // compute element e where (x,y) belongs to
   int getElementNumberFromPoints( const float & x, const float & y ) const;
@@ -80,13 +80,13 @@ public:
   vectorInt neighbors( const int & e ) const;
 
   // get global coordinates of element e
-  arrayDouble getXi( const int & numberOfPointsPerElement, const arrayReal & globalNodesCoords,
-                     const vectorInt & localToGlobal ) const;
+  arrayDouble getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
+                     vectorInt & localToGlobal ) const;
 
   // get global DOF belonging to the faces of element e
   arrayInt getGlobalDofOfFace( const int & e,
-                               const arrayInt & globalNodesList,
-                               const vectorInt & localToGlobal ) const;
+                               arrayInt & globalNodesList,
+                               vectorInt & localToGlobal ) const;
 
   // provides informations about boundary  faces:
   // element number,

@@ -303,7 +303,7 @@ vectorDouble QkGL::derivativeShapeFunction1D( int order, double xi ) const
 
 // get 1D basis functions @ quadrature points
 // returns 2D vector basisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-arrayDouble QkGL::getBasisFunction1D( int order, const vectorDouble & quadraturePoints ) const
+arrayDouble QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints ) const
 {
   int nBasisFunction1D=order+1;
   arrayDouble basisFunction1D( nBasisFunction1D, nBasisFunction1D );
@@ -323,7 +323,7 @@ arrayDouble QkGL::getBasisFunction1D( int order, const vectorDouble & quadrature
 
 // get derivative of 1D basis functions @ quadrature points
 // returns 2D vector derivativeBasisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-arrayDouble QkGL::getDerivativeBasisFunction1D( int order, const vectorDouble & quadraturePoints ) const
+arrayDouble QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints ) const
 {
   int nBasisFunction1D=order+1;
   arrayDouble derivativeBasisFunction1D( nBasisFunction1D,nBasisFunction1D);
@@ -343,8 +343,8 @@ arrayDouble QkGL::getDerivativeBasisFunction1D( int order, const vectorDouble & 
 
 
 // compute 2D gauss-lobatto weights
-vectorDouble QkGL::getGaussLobattoWeights( const vectorDouble & quadraturePoints,
-                                               const vectorDouble& weights )const
+vectorDouble QkGL::getGaussLobattoWeights( vectorDouble & quadraturePoints,
+                                               vectorDouble& weights )const
 {
   vectorDouble W(quadraturePoints.size()*quadraturePoints.size());
   for( int j=0; j<quadraturePoints.size(); j++ )
@@ -358,9 +358,9 @@ vectorDouble QkGL::getGaussLobattoWeights( const vectorDouble & quadraturePoints
 }
 
 // returns 2D vector basisFunction2D of dimensions nBasisFunctions,nQuadraturePoints
-arrayDouble QkGL::getBasisFunction2D( const vectorDouble & quadraturePoints,
-                                      const arrayDouble & a,
-                                      const arrayDouble & b )const
+arrayDouble QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
+                                      arrayDouble & a,
+                                      arrayDouble & b )const
 {
   int nBasisFunctions=quadraturePoints.size()*quadraturePoints.size();
   arrayDouble c( nBasisFunctions , nBasisFunctions);
@@ -384,9 +384,9 @@ arrayDouble QkGL::getBasisFunction2D( const vectorDouble & quadraturePoints,
 // Xi[0,..,1][0,..,nPointsPerElement], global coordinate of element
 // dxPhi,dyPhi 2D derivative of basis Functions
 arrayDouble QkGL::computeJacobianMatrix( const int & nPointsPerElement,
-                                          const arrayDouble & Xi,
-                                          const arrayDouble & dxPhi,
-                                          const arrayDouble & dyPhi )const
+                                         arrayDouble & Xi,
+                                         arrayDouble & dxPhi,
+                                         arrayDouble & dyPhi )const
 {
  arrayDouble jacobianMatrix( 4,nPointsPerElement);
 
@@ -405,7 +405,7 @@ arrayDouble QkGL::computeJacobianMatrix( const int & nPointsPerElement,
 
 // compute jacobian matrix determinant
 vectorDouble  QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
-                                                        const arrayDouble & jacobianMatrix ) const
+                                                        arrayDouble & jacobianMatrix ) const
 {
   vectorDouble detJ( nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
@@ -417,8 +417,8 @@ vectorDouble  QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerEl
 
 // compute inverse of Jacobian Matrix
 arrayDouble QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
-                                            const arrayDouble & jacobianMatrix,
-                                            const vectorDouble & detJ ) const
+                                            arrayDouble & jacobianMatrix,
+                                            vectorDouble & detJ ) const
 {
   arrayDouble invJacobianMatrix( 4, nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
@@ -433,8 +433,8 @@ arrayDouble QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
 
 // compute inverse of Jacobian Matrix
 arrayDouble QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-                                                  const arrayDouble & jacobianMatrix,
-                                                  const vectorDouble & detJ ) const
+                                                  arrayDouble & jacobianMatrix,
+                                                  vectorDouble & detJ ) const
 {
   arrayDouble transpInvJacobianMatrix( 4,nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
@@ -449,9 +449,9 @@ arrayDouble QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 
 // compute B the matrix containing the geometrical informations
 arrayDouble QkGL::computeB( const int & nPointsPerElement,
-                            const arrayDouble & invJacobianMatrix,
-                            const arrayDouble & transpInvJacobianMatrix,
-                            const vectorDouble & detJ ) const
+                            arrayDouble & invJacobianMatrix,
+                            arrayDouble & transpInvJacobianMatrix,
+                            vectorDouble & detJ ) const
 {
   arrayDouble B( 4,nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
@@ -473,9 +473,9 @@ arrayDouble QkGL::computeB( const int & nPointsPerElement,
 // Marc Durufle Formulae
 arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                   const int & order,
-                                  const vectorDouble & weights2D,
-                                  const arrayDouble  & B,
-                                  const arrayDouble  & dPhi ) const
+                                  vectorDouble & weights2D,
+                                  arrayDouble  & B,
+                                  arrayDouble  & dPhi ) const
 {
   arrayDouble R( nPointsPerElement, nPointsPerElement);
   // B11
@@ -547,10 +547,10 @@ arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 ///**
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
 arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                                  const vectorDouble & weights2D,
-                                  const arrayDouble  & B,
-                                  const arrayDouble  & dxPhi,
-                                  const arrayDouble  & dyPhi ) const
+                                  vectorDouble & weights2D,
+                                  arrayDouble  & B,
+                                  arrayDouble  & dxPhi,
+                                  arrayDouble  & dyPhi ) const
 {
   arrayDouble R( nPointsPerElement, nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
@@ -573,8 +573,8 @@ arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 //**/
 // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$
 vectorDouble QkGL::phiIphiJ( const int & nPointsPerElement,
-                             const vectorDouble & weights2D,
-                             const vectorDouble & detJ ) const
+                             vectorDouble & weights2D,
+                             vectorDouble & detJ ) const
 {
   vectorDouble M( nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
@@ -587,9 +587,9 @@ vectorDouble QkGL::phiIphiJ( const int & nPointsPerElement,
 ///**
 // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$
 arrayDouble QkGL::phiIphiJ( const int & nPointsPerElement,
-                                           const vectorDouble & weights2D,
-                                           const arrayDouble  & phi,
-                                           const vectorDouble & detJ ) const
+                            vectorDouble & weights2D,
+                            arrayDouble  & phi,
+                            vectorDouble & detJ ) const
 {
   arrayDouble M( nPointsPerElement, nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
@@ -608,10 +608,10 @@ arrayDouble QkGL::phiIphiJ( const int & nPointsPerElement,
 
 vectorReal QkGL::computeDs( const int & iFace,
                             const int & order,
-                            const arrayInt & faceInfos,
-                            const arrayReal & globalNodesCoords,
-                            const arrayDouble & derivativeBasisFunction2DX,
-                            const arrayDouble & derivativeBasisFunction2DY ) const
+                            arrayInt & faceInfos,
+                            arrayReal & globalNodesCoords,
+                            arrayDouble & derivativeBasisFunction2DX,
+                            arrayDouble & derivativeBasisFunction2DY ) const
 {
   vectorInt numOfBasisFunctionOnFace( order+1);
   arrayReal Js( 2, order+1);

@@ -185,7 +185,7 @@ arrayInt simpleMesh::globalNodesList( const int & numberOfElements ) const
 }
 
 // local to global
-const vectorInt simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt  const & nodesList )const
+const vectorInt simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList )const
 {
   vectorInt localToGlobal( nPointsPerElement);
   for( int i=0; i<nPointsPerElement; i++ )
@@ -287,8 +287,8 @@ vectorInt simpleMesh::neighbors( const int & e ) const
 }
 
 // get global coordinates of element e
-arrayDouble simpleMesh::getXi( const int & numberOfPointsPerElement, const arrayReal & globalNodesCoords,
-                                              const vectorInt & localToGlobal ) const
+arrayDouble simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
+                               vectorInt & localToGlobal ) const
 {
   arrayDouble Xi( numberOfPointsPerElement, 2 );
   for( int i=0; i<numberOfPointsPerElement; i++ )
@@ -309,8 +309,8 @@ arrayDouble simpleMesh::getXi( const int & numberOfPointsPerElement, const array
 //   |______1____|
 //
 arrayInt simpleMesh::getGlobalDofOfFace( const int & e,
-                                         const arrayInt & globalNodesList,
-                                         const vectorInt & localToGlobal ) const
+                                         arrayInt & globalNodesList,
+                                         vectorInt & localToGlobal ) const
 {
   arrayInt nodesFace( 4,order+1);
 

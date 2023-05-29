@@ -8,8 +8,8 @@ using namespace std;
 #include "Array.hpp"
 #include "MallocBuffer.hpp"
 
-//#define SEM_USE_VECTOR true
-#define SEM_USE_LVARRAY true
+#define SEM_USE_VECTOR true
+//#define SEM_USE_LVARRAY true
 
 #if defined(SEM_USE_VECTOR)
 #include <vector>
