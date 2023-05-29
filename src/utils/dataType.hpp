@@ -1,15 +1,21 @@
 #ifndef DATATYPE_HPP_
 #define DATATYPE_HPP_
 
+//#define SEM_USE_RAJA true 
+#define SEM_USE_VECTOR true
+//#define SEM_USE_LVARRAY true
+
+
 #include <iostream>
 
 using namespace std;
+
+#if defined( SEM_USE_RAJA)
 #include "RAJA/RAJA.hpp"
 #include "Array.hpp"
 #include "MallocBuffer.hpp"
+#endif
 
-#define SEM_USE_VECTOR true
-//#define SEM_USE_LVARRAY true
 
 #if defined(SEM_USE_VECTOR)
 #include <vector>

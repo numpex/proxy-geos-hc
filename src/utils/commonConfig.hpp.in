@@ -4,6 +4,9 @@
 /// Enables use of Caliper (CMake option)
 #cmakedefine SEM_USE_CALIPER
 
+#cmakedefine SEM_USE_RAJA
+#cmakedefine SEM_USE_VECTOR
+//#cmakedefine SEM_USE_LVARRAY
 #endif
 
 

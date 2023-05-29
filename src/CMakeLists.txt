@@ -5,7 +5,7 @@ add_executable(sem.exe main/main.cpp)
 #-----------------------------------------------------
 
 # the solver is using sequential mode by default 
-set (SOLVER "sequentialVector" CACHE PATH "" FORCE)
+set (SOLVER "Sequential" CACHE PATH "" FORCE)
 
 
 set (CMAKE_CXX_STANDARD 14)
@@ -15,7 +15,7 @@ if (NOT SEM_USE_OMP)
   message ("-- SEM_USE_OMP flag is set to be false and OMP is not enabled")
 else()
   message ("-- SEM_USE_OMP flag is set to be true and OMP is now enabled")
-  set (SOLVER "ompVector" CACHE PATH "" FORCE)
+  set (SOLVER "OMP" CACHE PATH "" FORCE)
   find_package(OpenMP)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -28,7 +28,7 @@ if (NOT SEM_USE_RAJA)
 elseif (EXISTS $ENV{RAJA_DIR}/raja-config.cmake)
   message ("-- SEM_USE_RAJA flag is set to be true and RAJA is now enabled")
   message("-- Found the RAJA library in $ENV{RAJA_DIR}")
-  set (SOLVER "rajaVector" CACHE PATH "" FORCE)
+  set (SOLVER "Raja" CACHE PATH "" FORCE)
   # RAJA uses OMP
   find_package(OpenMP)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -89,7 +89,7 @@ if (NOT SEM_USE_LVARRAY)
 elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
   message ("-- SEM_USE_LVARRAY flag is set to be true and LVARRAY is now enabled")
   message("-- Found the LVARRAY library in $ENV{LVARRAY_DIR}")
-  set (SOLVER "rajaLvArray" CACHE PATH "" FORCE)
+  set (SOLVER "Raja" CACHE PATH "" FORCE)
   # LvArray uses OMP
   find_package(OpenMP)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")

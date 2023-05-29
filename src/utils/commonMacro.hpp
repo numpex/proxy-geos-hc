@@ -39,3 +39,12 @@
 /// @endcond
 
 #endif // SEM_USE_CALIPER
+
+#ifdef SEM_USE_RAJA
+#define SEM_USE_RAJA true
+#endif
+
+
+#ifdef SEM_USE_VECTOR
+#define SEM_USE_VECTOR true
+#endif
