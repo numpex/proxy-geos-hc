@@ -1,6 +1,7 @@
 
 set(HEADERS
     utils.hpp
+    dataType.hpp
     commonConfig.hpp
     commonMacro.hpp
     )
