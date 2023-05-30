@@ -1,23 +1,12 @@
 #ifndef DATATYPE_HPP_
 #define DATATYPE_HPP_
 
-//#define SEM_USE_RAJA true 
-#define SEM_USE_VECTOR true
-//#define SEM_USE_LVARRAY true
-
-
+#include "commonConfig.hpp"
 #include <iostream>
 
 using namespace std;
 
-#if defined( SEM_USE_RAJA)
-#include "RAJA/RAJA.hpp"
-#include "Array.hpp"
-#include "MallocBuffer.hpp"
-#endif
-
-
-#if defined(SEM_USE_VECTOR)
+#ifdef SEM_USE_VECTOR
 #include <vector>
 template<class T> class Array2D {
 public:
@@ -36,9 +25,18 @@ using vectorDouble=vector<double>;
 using arrayInt=Array2D<int>;
 using arrayReal=Array2D<float>;
 using arrayDouble=Array2D<double>;
+
+#ifdef SEM_USE_RAJA
+#include "RAJA/RAJA.hpp"
 #endif
 
-#if defined(SEM_USE_LVARRAY)
+#endif
+
+#ifdef SEM_USE_LVARRAY
+
+#include "RAJA/RAJA.hpp"
+#include "Array.hpp"
+#include "MallocBuffer.hpp"
 
 // Create an 1D array of integers.
 using vectorInt=LvArray::Array< int,
@@ -71,7 +69,8 @@ using arrayDouble=LvArray::Array< double,
                   camp::idx_seq< 0,1 >,
                   std::ptrdiff_t,
                   LvArray::MallocBuffer >;
-#endif
 
+
+#endif
 
 #endif //DATATYPE_HPP_
