@@ -7,7 +7,8 @@ print " number of snapshots: ",ARG1
 do for [ n=0:ARG1] {
 print " display snapshot:",n
 name=sprintf('snapshot%d',n*ARG2)
-splot name every 4:4 
+print name
+splot name every 8:8 
 pause 1
 }
 

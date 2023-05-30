@@ -5,14 +5,21 @@ add_executable(sem.exe main/main.cpp)
 #-----------------------------------------------------
 
 # the solver is using sequential mode by default 
-set (SOLVER "sequentialVector" CACHE PATH "" FORCE)
+set (SOLVER "Sequential" CACHE PATH "" FORCE)
+
+set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_FLAGS "-O3 -std=c++14  " CACHE STRING "")
+
+
+set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_FLAGS "-O3 -std=c++14 -march=native")
 
 # the solver is using OMP multi-threading if SEM_USE_OMP is ON
 if (NOT SEM_USE_OMP)
   message ("-- SEM_USE_OMP flag is set to be false and OMP is not enabled")
 else()
   message ("-- SEM_USE_OMP flag is set to be true and OMP is now enabled")
-  set (SOLVER "ompVector" CACHE PATH "" FORCE)
+  set (SOLVER "OMP" CACHE PATH "" FORCE)
   find_package(OpenMP)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -25,7 +32,7 @@ if (NOT SEM_USE_RAJA)
 elseif (EXISTS $ENV{RAJA_DIR}/raja-config.cmake)
   message ("-- SEM_USE_RAJA flag is set to be true and RAJA is now enabled")
   message("-- Found the RAJA library in $ENV{RAJA_DIR}")
-  set (SOLVER "rajaVector" CACHE PATH "" FORCE)
+  set (SOLVER "Raja" CACHE PATH "" FORCE)
   # RAJA uses OMP
   find_package(OpenMP)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -48,6 +55,58 @@ else ()
   message("-- RAJA_DIR is not the correct path and caliper is not enabled")
 endif()
 
+#-----------------------------------------------------
+# LVARRAY
+#-----------------------------------------------------
+if (NOT SEM_USE_LVARRAY)
+  message ("-- SEM_USE_LVARRAY flag is set to be false and RAJA is not enabled")
+elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
+  message ("-- SEM_USE_LVARRAY flag is set to be true and LVARRAY is now enabled")
+  message("-- Found the LVARRAY library in $ENV{LVARRAY_DIR}")
+  # LvArray uses OMP
+  find_package(OpenMP)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+  # LvArray uses  RAJA
+  find_package(RAJA REQUIRED)
+  set (raja_INCLUDE_DIR "$ENV{RAJA_INCLUDE_DIR}")
+  include_directories(${raja_INCLUDE_DIR})
+  target_include_directories(sem.exe  
+                            PUBLIC
+                            ${raja_INCLUDE_DIR}
+                            )
+  # LvArray uses umpire
+  find_package(UMPIRE REQUIRED)
+  set (umpire_INCLUDE_DIR "$ENV{UMPIRE_INCLUDE_DIR}")
+  include_directories(${umpire_INCLUDE_DIR})
+  target_include_directories(sem.exe 
+                            PUBLIC 
+                            ${umpire_INCLUDE_DIR}
+                            )
+  # LvArray uses camp
+  find_package(CAMP REQUIRED)
+  set (camp_INCLUDE_DIR "$ENV{CAMP_INCLUDE_DIR}")
+  include_directories(${camp_INCLUDE_DIR})
+  target_include_directories(sem.exe 
+                            PUBLIC 
+                            ${camp_INCLUDE_DIR}
+                            )
+  # LvArray 
+  find_package(LVARRAY REQUIRED)
+  set (lvarray_INCLUDE_DIR "$ENV{LVARRAY_INCLUDE_DIR}")
+  include_directories(${lvarray_INCLUDE_DIR})
+  target_include_directories(sem.exe 
+                            PUBLIC 
+                            ${lvarray_INCLUDE_DIR}
+                            )
+elseif (NOT DEFINED $ENV{LVARRAY_DIR}) 
+  set (SEM_USE_LVARRAY OFF CACHE BOOL "")
+  message("-- LVARRAY_DIR is not defined and lvarray is not enabled")
+else ()
+  set (SEM_USE_LVARRAY OFF CACHE BOOL "")
+  message("-- LVARRAY_DIR is not the correct path and lvarray is not enabled")
+endif()
 
 #-----------------------------------------------------
 # Profiler: CALIPER
@@ -78,10 +137,11 @@ else ()
   message("-- Caliper_DIR is not the correct path and caliper is not enabled")
 endif()
 
+
 include_directories(utils)
 include_directories(finiteElements)
 include_directories(mesh)
-include_directories(solver/${SOLVER})
+include_directories(solver)
 include_directories(${PROJECT_BINARY_DIR}/src/utils)
 
 add_subdirectory(utils)
@@ -100,8 +160,14 @@ if( SEM_USE_RAJA)
   PUBLIC 
   RAJA)
 endif()
+if( SEM_USE_LVARRAY)
+  target_link_libraries(sem.exe
+                        PUBLIC 
+                        umpire
+                        camp
+                        lvarray)
+endif()
 
 install(TARGETS sem.exe
         RUNTIME DESTINATION bin)
-
 

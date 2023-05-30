@@ -4,6 +4,7 @@
 #include    <iostream>
 #include    <vector>
 #include    <cmath>
+#include    "dataType.hpp"
 
 using    namespace std;
 
@@ -14,83 +15,98 @@ using    namespace std;
 
 class QkGL
 {
-     private:
-       int order;
-     public:
+private:
+  int order;
+public:
 
-       QkGL();
-       ~QkGL();
+  QkGL();
+  ~QkGL();
 
-       // get Gauss Lobatto quadrature points
-       vector<double> gaussLobattoQuadraturePoints(int order) const;
+  // get Gauss Lobatto quadrature points
+  vectorDouble gaussLobattoQuadraturePoints( int order ) const;
 
-       // get Gauss Lobatto quadrature weights
-       vector<double> gaussLobattoQuadratureWeights(int order) const;
+  // get Gauss Lobatto quadrature weights
+  vectorDouble  gaussLobattoQuadratureWeights( int order ) const;
 
-       // compute  1d shape Functions and derivatives
-       vector<double> shapeFunction1D(int order, double xi) const;
-       vector<double> derivativeShapeFunction1D(int order, double xi) const;
+  // compute  1d shape Functions and derivatives
+  vectorDouble  shapeFunction1D( int order, double xi ) const;
+  vectorDouble  derivativeShapeFunction1D( int order, double xi ) const;
 
-       // get  1d shape Functions and derivatives for all quadrature points
-       vector<vector<double>> getBasisFunction1D(int order,const vector<double> & quadraturePoints) const;
-       vector<vector<double>> getDerivativeBasisFunction1D( int order,const vector<double> &quadraturePoints) const;
+  // get  1d shape Functions and derivatives for all quadrature points
+  arrayDouble  getBasisFunction1D( int order, vectorDouble  & quadraturePoints ) const;
+  arrayDouble  getDerivativeBasisFunction1D( int order, vectorDouble  & quadraturePoints ) const;
 
-       // compute 2D gauss-lobatto weights
-       vector<double> getGaussLobattoWeights(const vector<double> &quadraturePoints,
-                                             const vector<double> &weights) const;
+  // compute 2D gauss-lobatto weights
+  vectorDouble  getGaussLobattoWeights( vectorDouble  & quadraturePoints,
+                                        vectorDouble  & weights ) const;
 
-       // get  2d shape Functions  for all quadrature points
-       vector<vector<double>> getBasisFunction2D(const vector<double> quadraturePoints,
-                                                 const vector<vector<double>> &a,
-                                                 const vector<vector<double>> &b) const;
-       // compute Jacobian Matrix
-       vector<vector<double>> computeJacobianMatrix(const int &nPointsPerElement,
-                                                    const vector<vector<double>> &Xi ,
-                                                    const  vector<vector<double>> &dxPhi ,
-                                                    const  vector<vector<double>> &dyPhi ) const;
+  // get  2d shape Functions  for all quadrature points
+  arrayDouble  getBasisFunction2D( vectorDouble & quadraturePoints,
+                                   arrayDouble  & a,
+                                   arrayDouble  & b ) const;
+  // compute Jacobian Matrix
+  arrayDouble  computeJacobianMatrix( const int & nPointsPerElement,
+                                      arrayDouble & Xi,
+                                      arrayDouble  & dxPhi,
+                                      arrayDouble  & dyPhi ) const;
 
-       // compute determinant of Jacobian Matrix
-       vector<double> computeDeterminantOfJacobianMatrix(const int & nPointsPerElement,
-		                                         const vector<vector<double>> &jacobianMatrix) const;
+  // compute determinant of Jacobian Matrix
+  vectorDouble  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+                                                    arrayDouble  & jacobianMatrix ) const;
 
-       // compute inverse of Jacobian Matrix
-       vector<vector<double>> computeInvJacobianMatrix(const int & nPointsPerElement,
-                                                       const vector<vector<double>> &jacobianMatrix,
-                                                       const vector<double> &detJ) const ;
+  // compute inverse of Jacobian Matrix
+  arrayDouble  computeInvJacobianMatrix( const int & nPointsPerElement,
+                                         arrayDouble  & jacobianMatrix,
+                                         vectorDouble  & detJ ) const;
 
-       // compute tranposed inverse of Jacobian Matrix
-       vector<vector<double>> computeTranspInvJacobianMatrix(const int & nPointsPerElement,
-                                                             const vector<vector<double>> &jacobianMatrix,
-                                                             const vector<double> &detJ) const;
+  // compute tranposed inverse of Jacobian Matrix
+  arrayDouble  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+                                               arrayDouble  & jacobianMatrix,
+                                               vectorDouble  & detJ ) const;
 
-       // compute 𝐵 the matrix containing the geometrical informations
-       vector<vector<double>> computeB(const int & nPoinsPerElement,
-                                       const vector<vector<double>> &invJacobianMatrix,
-                                       const vector<vector<double>> &transpInvJacobianMatrix,
-                                       const vector<double> &detJ) const;
-     
-       // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
-       vector<vector<double>> gradPhiGradPhi(const int & nPointsPerElement,
-                                             const vector<double> &weights,
-                                             const vector<vector<double>> &B,
-                                             const vector<vector<double>> &dxPhi,
-                                             const vector<vector<double>> &dyPhi) const;
+  // compute 𝐵 the matrix containing the geometrical informations
+  arrayDouble  computeB( const int & nPoinsPerElement,
+                         arrayDouble  & invJacobianMatrix,
+                         arrayDouble  & transpInvJacobianMatrix,
+                         vectorDouble  & detJ ) const;
 
-       // compute the matrix $M_{i,j}=:w
-       // \int_{K}{{\phi_i}.{\phi_j}dx}$
-       vector<vector<double>> phiIphiJ(const int & nPointsPerElement,
-                                      const vector<double> &weights,
-                                      const vector<vector<double>> &phi,
-                                      const vector<double> &detJ)const;
-       // compute dx
-       vector<float>computeDs(const int & iFace,
-                          const int & order,
-                          const vector<vector<int>> & faceInfos,
-                          const vector<vector<float>> & globalNodesCoords,
-                          const vector<vector<double>>& derivativeBasisFunction2DX,
-                          const vector<vector<double>>& derivativeBasisFunction2DY) const;
+  // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
+  // Marc Durufle Formulae
+  arrayDouble  gradPhiGradPhi( const int & nPointsPerElement,
+                               const int & order,
+                               vectorDouble  & weights,
+                               arrayDouble  & B,
+                               arrayDouble  & dPhi ) const;
+  ///**
+  // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
+  arrayDouble  gradPhiGradPhi( const int & nPointsPerElement,
+                               vectorDouble  & weights,
+                               arrayDouble  & B,
+                               arrayDouble  & dxPhi,
+                               arrayDouble  & dyPhi ) const;
+  //**/
+
+  // compute the matrix $M_{i,j}=:w
+  // \int_{K}{{\phi_i}.{\phi_j}dx}$
+  vectorDouble  phiIphiJ( const int & nPointsPerElement,
+                          vectorDouble  & weights,
+                          vectorDouble  & detJ )const;
+  ///**
+  // compute the matrix $M_{i,j}=:w
+  // \int_{K}{{\phi_i}.{\phi_j}dx}$
+  arrayDouble  phiIphiJ( const int & nPointsPerElement,
+                         vectorDouble  & weights,
+                         arrayDouble  & phi,
+                         vectorDouble  & detJ )const;
+  //**/
+  // compute dx
+  vectorReal computeDs( const int & iFace,
+                        const int & order,
+                        arrayInt & faceInfos,
+                        arrayReal & globalNodesCoords,
+                        arrayDouble  & derivativeBasisFunction2DX,
+                        arrayDouble  & derivativeBasisFunction2DY ) const;
 
 };
 
 #endif //QKGL_HPP_
-
