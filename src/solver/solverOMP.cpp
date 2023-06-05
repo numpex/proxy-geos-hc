@@ -2,7 +2,7 @@
 
 solver::solver() {}
 solver::~solver() {}
-  
+
 // compute one step of the time dynamic wave equation solver
 //vector<vector<float>>
 void solver::computeOneStep( const float & timeSample,
@@ -13,57 +13,15 @@ void solver::computeOneStep( const float & timeSample,
                              simpleMesh mesh,
                              QkGL Qk )
 {
-  // get infos from mesh
-  static int numberOfNodes=mesh.getNumberOfNodes();
-  static int numberOfElements=mesh.getNumberOfElements();
-  static int numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
-  static arrayInt  globalNodesList=mesh.globalNodesList( numberOfElements );
-  static vectorInt listOfInteriorNodes=mesh.getListOfInteriorNodes( numberOfInteriorNodes );
-  static arrayReal globalNodesCoords=mesh.nodesCoordinates( numberOfNodes );
-
-  // get model
-  static vectorReal   model=mesh.getModel( numberOfElements );
-
-  //get infos about finite element order of approximation
-  int numberOfPointsPerElement;
-  if( order==1 )
-    numberOfPointsPerElement=4;
-  if( order==2 )
-    numberOfPointsPerElement=9;
-  if( order==3 )
-    numberOfPointsPerElement=16;
-  if( order==4 )
-    numberOfPointsPerElement=25;
-  if( order==5 )
-    numberOfPointsPerElement=36;
-
-  // get quadrature points and weights
-  static vectorDouble quadraturePoints=Qk.gaussLobattoQuadraturePoints( order );
-  static vectorDouble weights=Qk.gaussLobattoQuadratureWeights( order );
-  static vectorDouble weights2D=Qk.getGaussLobattoWeights( quadraturePoints,weights );
-  // get basis function and corresponding derivatives
-  static arrayDouble basisFunction1D=Qk.getBasisFunction1D( order, quadraturePoints );
-  static arrayDouble derivativeBasisFunction1D=Qk.getDerivativeBasisFunction1D( order, quadraturePoints );
-  static arrayDouble basisFunction2D=Qk.getBasisFunction2D( quadraturePoints,
-                                                            basisFunction1D,
-                                                            basisFunction1D );
-  static arrayDouble derivativeBasisFunction2DX=Qk.getBasisFunction2D( quadraturePoints,
-                                                                       derivativeBasisFunction1D,
-                                                                       basisFunction1D );
-  static arrayDouble derivativeBasisFunction2DY=Qk.getBasisFunction2D( quadraturePoints,
-                                                                       basisFunction1D,
-                                                                       derivativeBasisFunction1D );
-
   static vectorReal massMatrixGlobal( numberOfNodes );
   static vectorReal yGlobal( numberOfNodes );
-
   #pragma omp parallel for
   for(int i=0;i<numberOfNodes;i++) 
   {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
   }
-
+  
 
   // loop over mesh elements
   #pragma omp parallel for
