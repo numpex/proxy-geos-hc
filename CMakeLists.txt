@@ -23,6 +23,9 @@ set (SEM_USE_LVARRAY ON CACHE BOOL "")
 # setup the flags for profiling using caliper
 set (SEM_USE_CALIPER ON CACHE BOOL "")
 
+# setup the flags for python interface
+set (SEM_USE_PYTHON ON CACHE BOOL "")
+
 add_subdirectory(src)
 
 

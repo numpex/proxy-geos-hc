@@ -14,6 +14,9 @@ set (CMAKE_CXX_FLAGS "-O3 -std=c++14  " CACHE STRING "")
 set (CMAKE_CXX_STANDARD 14)
 set (CMAKE_CXX_FLAGS "-O3 -std=c++14 -march=native")
 
+#----------------------------------------------
+# OMP
+#----------------------------------------------
 # the solver is using OMP multi-threading if SEM_USE_OMP is ON
 if (NOT SEM_USE_OMP)
   message ("-- SEM_USE_OMP flag is set to be false and OMP is not enabled")
@@ -26,6 +29,9 @@ else()
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
+#-----------------------------------------------
+# RAJA
+#----------------------------------------------
 # the solver is using RAJA if SEM_USE_RAJA is ON
 if (NOT SEM_USE_RAJA)
   message ("-- SEM_USE_RAJA flag is set to be false and RAJA is not enabled")
@@ -109,9 +115,8 @@ else ()
 endif()
 
 #-----------------------------------------------------
-# Profiler: CALIPER
+# CALIPER
 #-----------------------------------------------------
-
 # for profiling using caliper
 if (NOT SEM_USE_CALIPER)
   message ("-- SEM_USE_CALIPER flag is set to be false and CALIPER is not enabled")
@@ -137,7 +142,29 @@ else ()
   message("-- Caliper_DIR is not the correct path and caliper is not enabled")
 endif()
 
+#------------------------------------------------------
+#  pybind11
+#------------------------------------------------------
+if (SEM_USE_PYTHON)
+  set (python_INCLUDE_DIR "/home/j0024947/anaconda3/include/python3.10/")
+  find_package(Python REQUIRED)
+  set(pybind11_DIR "$ENV{PYBIND11_DIR}" CACHE PATH "" FORCE)
+  message ("-- Found the pybind11 library in ${pybind11_DIR}")
+  find_package(pybind11 REQUIRED)
+  set (pybind11_INCLUDE_DIR "$ENV{PYBIND11_INCLUDE_DIR}")
+  include_directories(${pybind11_INCLUDE_DIR})
+  target_include_directories(sem.exe 
+                            PUBLIC 
+                            ${python_INCLUDE_DIR}
+                            ${pybind11_INCLUDE_DIR}
+                            )
+else()
+  message ("-- SEM_USE_PYTHON flag is set to be false and PYTHON is not enabled")
+endif()
 
+#-------------------------------------------------------
+# SEM
+#-------------------------------------------------------
 include_directories(utils)
 include_directories(finiteElements)
 include_directories(mesh)
@@ -166,6 +193,12 @@ if( SEM_USE_LVARRAY)
                         umpire
                         camp
                         lvarray)
+endif()
+
+if (SEM_USE_PYTHON)
+  target_link_libraries(sem.exe
+                        PUBLIC 
+                        python3.10)
 endif()
 
 install(TARGETS sem.exe
