@@ -24,7 +24,7 @@ set (SEM_USE_LVARRAY OFF CACHE BOOL "")
 set (SEM_USE_CALIPER ON CACHE BOOL "")
 
 # setup the flags for python interface
-set (SEM_USE_PYTHON OFF CACHE BOOL "")
+set (SEM_USE_PYTHON ON CACHE BOOL "")
 
 add_subdirectory(src)
 

@@ -11,7 +11,8 @@ using namespace std;
 template<class T> class myArray2D {
 public:
     myArray2D(int numRows, int numCols) : data(numRows, std::vector<T>(numCols)) {}
-
+    myArray2D() : data(0, std::vector<T>(0)) {}
+    
     std::vector<T>& operator[](int index){
         return data[index];
     }
