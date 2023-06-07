@@ -147,7 +147,7 @@ endif()
 #------------------------------------------------------
 if (SEM_USE_PYTHON)
   set (python_INCLUDE_DIR "/home/j0024947/anaconda3/include/python3.10/")
-  find_package(Python REQUIRED)
+  find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
   set(pybind11_DIR "$ENV{PYBIND11_DIR}" CACHE PATH "" FORCE)
   message ("-- Found the pybind11 library in ${pybind11_DIR}")
   find_package(pybind11 REQUIRED)
@@ -162,6 +162,9 @@ else()
   message ("-- SEM_USE_PYTHON flag is set to be false and PYTHON is not enabled")
 endif()
 
+
+message ( "###########  CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}")
+message ( "###########  PROJECT_BINARY_DIR ${PROJECT_BINARY_DIR}")
 #-------------------------------------------------------
 # SEM
 #-------------------------------------------------------
@@ -182,11 +185,13 @@ target_link_libraries(sem.exe
   mesh
   solver
   )
+  
 if( SEM_USE_RAJA)
   target_link_libraries(sem.exe
   PUBLIC 
   RAJA)
 endif()
+
 if( SEM_USE_LVARRAY)
   target_link_libraries(sem.exe
                         PUBLIC 
@@ -196,9 +201,23 @@ if( SEM_USE_LVARRAY)
 endif()
 
 if (SEM_USE_PYTHON)
-  target_link_libraries(sem.exe
-                        PUBLIC 
-                        python3.10)
+  set (SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/mesh/simpleMesh.cpp")
+  set (HEADER_FILES "${CMAKE_SOURCE_DIR}/src/mesh/simpleMesh.hpp")
+  set (PYTHON_FILES "${CMAKE_SOURCE_DIR}/python/simpleMesh.cpp" )
+  pybind11_add_module(pyMesh
+	                    ${SOURCE_FILES}
+	                    ${HEADER_FILES}
+	                    ${PYTHON_FILES}
+                     )
+
+  target_link_libraries(pyMesh PUBLIC)
+  set(PYTHON_LIBRARY_DIR "/home/j0024947/anaconda3/lib/python3.10/site-packages")
+  set(PYTHON_EXECUTABLE "/home/j0024947/anaconda3/bin/python3.10")
+  #set (PYTHON_LIBRARY_DIR "python")
+  install(TARGETS pyMesh
+          COMPONENT python
+          LIBRARY DESTINATION "${PYTHON_LIBRARY_DIR}"
+         )
 endif()
 
 install(TARGETS sem.exe

@@ -4,9 +4,9 @@
 #include    <iostream>
 #include    <vector>
 #include    <cmath>
+#include    "dataType.hpp"
 #include    "QkGL.hpp"
 #include    "simpleMesh.hpp"
-#include    "dataType.hpp"
 
 using    namespace std;
 
