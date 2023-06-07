@@ -1,16 +1,16 @@
-message("The current solver is running with ${SOLVER}")
+message("-- The Current Solver is Using: ${SOLVER}")
 
 set(SRCS
+    solverBase.cpp
     solver${SOLVER}.cpp
     )
 
 set(HEADERS
-    solver.hpp
+    solverBase.hpp
+    solver${SOLVER}.hpp
     )
 
 include_directories(../mesh)
 include_directories(../finiteElements)
-include_directories(../utils)
-
 
 add_library(solver ${SRCS} ${HEADERS})

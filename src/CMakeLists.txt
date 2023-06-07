@@ -190,17 +190,18 @@ include_directories(utils)
 include_directories(finiteElements)
 include_directories(mesh)
 include_directories(solver)
-#include_directories(main)
+include_directories(main)
 include_directories(${PROJECT_BINARY_DIR}/src/utils)
 
 add_subdirectory(utils)
 add_subdirectory(finiteElements)
 add_subdirectory(mesh)
 add_subdirectory(solver)
-#add_subdirectory(main)
+add_subdirectory(main)
 
 target_link_libraries(sem.exe
   PUBLIC
+  semproxy
   finiteElements
   mesh
   solver

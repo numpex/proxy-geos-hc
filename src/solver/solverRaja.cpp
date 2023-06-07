@@ -1,11 +1,17 @@
-#include "solver.hpp"
+//************************************************************************
+//  SEM proxy application v.0.0.1
+//
+//  solverRaja.cpp: simple 2D acoustive wave equation solver
+//
+//  the solverRaja class is derived from the solverBase class
+//  with the RAJA implementation of the solver
+//
+//************************************************************************
 
-solver::solver() {}
-solver::~solver() {}
+#include "solverRaja.hpp"
 
 // compute one step of the time dynamic wave equation solver
-//vector<vector<float>>
-void solver::computeOneStep( const float & timeSample,
+void solverRaja::computeOneStep( const float & timeSample,
                              const int & order,
                              int & i1,
                              int & i2,
@@ -50,12 +56,6 @@ void solver::computeOneStep( const float & timeSample,
                                                                             detJ );
     // compute  geometrical transformation matrix
     arrayDouble B=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ );
-
-    /**
-       // compute stifness and mass matrix
-       vector<vector<double>> const R=Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
-                          derivativeBasisFunction2DY);
-     **/
 
     // compute stifness and mass matrix
     arrayDouble  R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
@@ -122,16 +122,7 @@ void solver::computeOneStep( const float & timeSample,
       Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
       ShGlobal[gIndexFaceNode]+=Sh[i];
     }
-    /**
-       cout<<"iFace="<<iFace<<endl;
-       for (int i=0; i<order+1;i++)
-       {
-       int gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
-       cout<<"   gIndex="<<gIndexFaceNode<<endl;
-       cout<<"   Sh["<<i<<"]="<<Sh[i]<<endl;
-       cout<<"   ShGlobal["<<gIndexFaceNode<<"]="<<ShGlobal[gIndexFaceNode]<<endl;
-       }
-     **/
+
   } );
 
   // update pressure @ boundaries;
@@ -143,43 +134,4 @@ void solver::computeOneStep( const float & timeSample,
     pnGlobal[I][i1]=invMpSh*(2*massMatrixGlobal[I]*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]-tmp*yGlobal[I]);
   } );
 
-  /**
-     for ( int i=0 ; i< numberOfBoundaryNodes; i++)
-     {
-     cout<<"ShGlobal["<<i<<"]="<<ShGlobal[i]<<endl;
-     }
-     for ( int i=0 ; i< numberOfBoundaryNodes; i++)
-     {
-     int I=listOfBoundaryNodes[i];
-     cout<<"i="<<i<<", BoundaryNode="<<I<<endl;
-     }
-   **/
-}
-
-/// add right and side
-void solver::addRightAndSides( const int & timeStep,
-                               const int & numberOfRHS,
-                               const int & i2,
-                               const float & timeSample,
-                               arrayReal & pnGlobal,
-                               arrayReal & rhsTerm,
-                               arrayReal & rhsLocation,
-                               simpleMesh mesh )
-{
-  static int numberOfNodes=mesh.getNumberOfNodes();
-  static int numberOfElements=mesh.getNumberOfElements();
-  static vectorReal model=mesh.getModel( numberOfElements );
-  static arrayInt nodeList=mesh.globalNodesList( numberOfElements );
-  int i, rhsElement;
-  float tmp=timeSample*timeSample;
-  for( int i=0; i<numberOfRHS; i++ )
-  {
-    //extract element number for current rhs
-    float x=rhsLocation[i][0];
-    float y=rhsLocation[i][1];
-    int rhsElement=mesh.getElementNumberFromPoints( x, y );
-    // compute global node numbe to add source term to
-    int nodeRHS=nodeList[rhsElement][0];
-    pnGlobal[nodeRHS][i2]+=tmp*model[rhsElement]*model[rhsElement]*rhsTerm[i][timeStep];
-  }
 }

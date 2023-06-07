@@ -1,11 +1,18 @@
-#include "solver.hpp"
+//************************************************************************
+//  SEM proxy application v.0.0.1
+//
+//  solverSequential.cpp: simple 2D acoustive wave equation solver
+//
+//  the solverSEQ class is derived from the solverBase class
+//  with the sequential implementation of the solver
+//
+//************************************************************************
 
-solver::solver() {}
-solver::~solver() {}
-  
+#include "solverSequential.hpp"
+
+
 // compute one step of the time dynamic wave equation solver
-//vector<vector<float>>
-void solver::computeOneStep( const float & timeSample,
+void solverSEQ::computeOneStep( const float & timeSample,
                              const int & order,
                              int & i1,
                              int & i2,
@@ -201,30 +208,3 @@ void solver::computeOneStep( const float & timeSample,
    **/
 }
 
-/// add right and side
-void solver::addRightAndSides( const int & timeStep,
-                               const int & numberOfRHS,
-                               const int & i2,
-                               const float & timeSample,
-                               arrayReal & pnGlobal,
-                               arrayReal & rhsTerm,
-                               arrayReal & rhsLocation,
-                               simpleMesh mesh )
-{
-  static int numberOfNodes=mesh.getNumberOfNodes();
-  static int numberOfElements=mesh.getNumberOfElements();
-  static vectorReal model=mesh.getModel( numberOfElements );
-  static arrayInt nodeList=mesh.globalNodesList( numberOfElements );
-  int i, rhsElement;
-  float tmp=timeSample*timeSample;
-  for( int i=0; i<numberOfRHS; i++ )
-  {
-    //extract element number for current rhs
-    float x=rhsLocation[i][0];
-    float y=rhsLocation[i][1];
-    int rhsElement=mesh.getElementNumberFromPoints( x, y );
-    // compute global node numbe to add source term to
-    int nodeRHS=nodeList[rhsElement][0];
-    pnGlobal[nodeRHS][i2]+=tmp*model[rhsElement]*model[rhsElement]*rhsTerm[i][timeStep];
-  }
-}
