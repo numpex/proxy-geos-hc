@@ -53,4 +53,3 @@
 /// @endcond
 
 #endif // SEM_USE_CALIPER
-

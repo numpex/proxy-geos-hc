@@ -11,14 +11,7 @@
 #ifndef SOLVER_OMP_HPP_
 #define SOLVER_OMP_HPP_
 
-#include    <iostream>
-#include    <vector>
-#include    <cmath>
-#include    "QkGL.hpp"
-#include    "simpleMesh.hpp"
 #include    "solverBase.hpp"
-
-using    namespace std;
 
 class solverOMP : public solverBase
 {

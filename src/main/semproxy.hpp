@@ -9,14 +9,12 @@
 #define SEMPROXY_HPP_
 
 #include <iostream>
-#include <vector>
-#include <cmath>
-
 #include <fstream>
+
+#include "commonMacro.hpp"
 #include "QkGL.hpp"
 #include "simpleMesh.hpp"
 #include "utils.hpp"
-#include "commonMacro.hpp"
 
 /**
  * @class SEMProxy
@@ -28,18 +26,11 @@ public:
   /**
    * @brief Constructor of the SEMProxy class
    */
-  //SEMProxy();
-  SEMProxy():myRHSLocation(myNumberOfRHS, 2), myRHSTerm(myNumberOfRHS, myNumSamples){};
+  SEMProxy(): myRHSLocation( myNumberOfRHS, 2 ), myRHSTerm( myNumberOfRHS, myNumSamples ){};
   /**
    * @brief Destructor of the SEMProxy class
    */
-  ~SEMProxy();
-
-  /**
-   * @brief Initialize mesh for the simulation.
-   * @post run()
-   */
-  void initMesh();
+  ~SEMProxy(){};
 
   /**
    * @brief Initialize the simulation.
@@ -69,7 +60,6 @@ private:
   arrayReal myRHSTerm;
 
   simpleMesh const myMesh {50, 50, 1000, 1000, myOrderNumber};
-  //simpleMesh const myMesh {100, 100, 2000, 2000, myOrderNumber};
   int i1=0;
   int i2=1;
   int numberOfNodes;

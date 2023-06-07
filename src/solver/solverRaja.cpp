@@ -12,12 +12,12 @@
 
 // compute one step of the time dynamic wave equation solver
 void solverRaja::computeOneStep( const float & timeSample,
-                             const int & order,
-                             int & i1,
-                             int & i2,
-                             arrayReal & pnGlobal,
-                             simpleMesh mesh,
-                             QkGL Qk )
+                                 const int & order,
+                                 int & i1,
+                                 int & i2,
+                                 arrayReal & pnGlobal,
+                                 simpleMesh mesh,
+                                 QkGL Qk )
 {
 
   static vectorReal massMatrixGlobal( numberOfNodes );
@@ -58,10 +58,10 @@ void solverRaja::computeOneStep( const float & timeSample,
     arrayDouble B=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ );
 
     // compute stifness and mass matrix
-    arrayDouble  R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
+    arrayDouble R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
 
     // compute local mass matrix
-    vectorDouble  massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
+    vectorDouble massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
     // get pnGlobal to pnLocal
     vectorReal pnLocal( numberOfPointsPerElement );
     vectorReal Y( numberOfPointsPerElement );
@@ -76,7 +76,7 @@ void solverRaja::computeOneStep( const float & timeSample,
       for( int j=0; j<numberOfPointsPerElement; j++ )
       {
         Y[i]+=R[i][j]*pnLocal[j];
-        
+
       }
     }
     for( int i=0; i<numberOfPointsPerElement; i++ )
@@ -99,18 +99,18 @@ void solverRaja::computeOneStep( const float & timeSample,
   // get infos from mesh
   static int numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
   static int numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
-  static vectorInt  listOfBoundaryNodes=mesh.getListOfBoundaryNodes( numberOfBoundaryNodes );
-  static arrayInt   faceInfos=mesh.getBoundaryFacesInfos();
-  static arrayInt   localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
-  static vectorReal ShGlobal( numberOfBoundaryNodes);
+  static vectorInt listOfBoundaryNodes=mesh.getListOfBoundaryNodes( numberOfBoundaryNodes );
+  static arrayInt faceInfos=mesh.getBoundaryFacesInfos();
+  static arrayInt localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
+  static vectorReal ShGlobal( numberOfBoundaryNodes );
 
   RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] ( int i ) {
     ShGlobal[i]=0;
   } );
   // Note: this loop is data parallel.
   RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfBoundaryFaces ), [=] ( int iFace ) {
-    vectorReal ds( order+1);
-    vectorReal Sh( order+1);
+    vectorReal ds( order+1 );
+    vectorReal Sh( order+1 );
     //get ds
     ds=Qk.computeDs( iFace, order, faceInfos, globalNodesCoords,
                      derivativeBasisFunction2DX,

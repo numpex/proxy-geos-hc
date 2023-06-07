@@ -13,23 +13,23 @@
 
 // compute one step of the time dynamic wave equation solver
 void solverSEQ::computeOneStep( const float & timeSample,
-                             const int & order,
-                             int & i1,
-                             int & i2,
-                             arrayReal & pnGlobal,
-                             simpleMesh mesh,
-                             QkGL Qk )
+                                const int & order,
+                                int & i1,
+                                int & i2,
+                                arrayReal & pnGlobal,
+                                simpleMesh mesh,
+                                QkGL Qk )
 {
   // get infos from mesh
   static int numberOfNodes=mesh.getNumberOfNodes();
   static int numberOfElements=mesh.getNumberOfElements();
   static int numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
-  static arrayInt  globalNodesList=mesh.globalNodesList( numberOfElements );
+  static arrayInt globalNodesList=mesh.globalNodesList( numberOfElements );
   static vectorInt listOfInteriorNodes=mesh.getListOfInteriorNodes( numberOfInteriorNodes );
   static arrayReal globalNodesCoords=mesh.nodesCoordinates( numberOfNodes );
 
   // get model
-  static vectorReal   model=mesh.getModel( numberOfElements );
+  static vectorReal model=mesh.getModel( numberOfElements );
 
   //get infos about finite element order of approximation
   int numberOfPointsPerElement;
@@ -47,7 +47,7 @@ void solverSEQ::computeOneStep( const float & timeSample,
   // get quadrature points and weights
   static vectorDouble quadraturePoints=Qk.gaussLobattoQuadraturePoints( order );
   static vectorDouble weights=Qk.gaussLobattoQuadratureWeights( order );
-  static vectorDouble weights2D=Qk.getGaussLobattoWeights( quadraturePoints,weights );
+  static vectorDouble weights2D=Qk.getGaussLobattoWeights( quadraturePoints, weights );
   // get basis function and corresponding derivatives
   static arrayDouble basisFunction1D=Qk.getBasisFunction1D( order, quadraturePoints );
   static arrayDouble derivativeBasisFunction1D=Qk.getDerivativeBasisFunction1D( order, quadraturePoints );
@@ -64,7 +64,7 @@ void solverSEQ::computeOneStep( const float & timeSample,
   static vectorReal massMatrixGlobal( numberOfNodes );
   static vectorReal yGlobal( numberOfNodes );
 
-  for(int i=0;i<numberOfNodes;i++) 
+  for( int i=0; i<numberOfNodes; i++ )
   {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
@@ -72,7 +72,7 @@ void solverSEQ::computeOneStep( const float & timeSample,
 
 
   // loop over mesh elements
-  for (int e=0; e<numberOfElements; e++)
+  for( int e=0; e<numberOfElements; e++ )
   {
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
@@ -106,10 +106,10 @@ void solverSEQ::computeOneStep( const float & timeSample,
      **/
 
     // compute stifness and mass matrix
-    arrayDouble  R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
+    arrayDouble R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
 
     // compute local mass matrix
-    vectorDouble  massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
+    vectorDouble massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
     // get pnGlobal to pnLocal
     vectorReal pnLocal( numberOfPointsPerElement );
     vectorReal Y( numberOfPointsPerElement );
@@ -124,7 +124,7 @@ void solverSEQ::computeOneStep( const float & timeSample,
       for( int j=0; j<numberOfPointsPerElement; j++ )
       {
         Y[i]+=R[i][j]*pnLocal[j];
-        
+
       }
     }
     for( int i=0; i<numberOfPointsPerElement; i++ )
@@ -136,7 +136,7 @@ void solverSEQ::computeOneStep( const float & timeSample,
   }
 
   // update pressure
-  for (int i=0; i<numberOfInteriorNodes; i++ ) 
+  for( int i=0; i<numberOfInteriorNodes; i++ )
   {
     int I=listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
@@ -148,20 +148,20 @@ void solverSEQ::computeOneStep( const float & timeSample,
   // get infos from mesh
   static int numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
   static int numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
-  static vectorInt  listOfBoundaryNodes=mesh.getListOfBoundaryNodes( numberOfBoundaryNodes );
-  static arrayInt   faceInfos=mesh.getBoundaryFacesInfos();
-  static arrayInt   localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
-  static vectorReal ShGlobal( numberOfBoundaryNodes);
+  static vectorInt listOfBoundaryNodes=mesh.getListOfBoundaryNodes( numberOfBoundaryNodes );
+  static arrayInt faceInfos=mesh.getBoundaryFacesInfos();
+  static arrayInt localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
+  static vectorReal ShGlobal( numberOfBoundaryNodes );
 
-  for( int i=0; i<numberOfBoundaryNodes; i++ ) 
+  for( int i=0; i<numberOfBoundaryNodes; i++ )
   {
     ShGlobal[i]=0;
   }
   // Note: this loop is data parallel.
-  for (int iFace=0; iFace<numberOfBoundaryFaces; iFace++) 
+  for( int iFace=0; iFace<numberOfBoundaryFaces; iFace++ )
   {
-    vectorReal ds( order+1);
-    vectorReal Sh( order+1);
+    vectorReal ds( order+1 );
+    vectorReal Sh( order+1 );
     //get ds
     ds=Qk.computeDs( iFace, order, faceInfos, globalNodesCoords,
                      derivativeBasisFunction2DX,
@@ -187,7 +187,7 @@ void solverSEQ::computeOneStep( const float & timeSample,
 
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
-  for ( int i=0; i<numberOfBoundaryNodes; i++ ) 
+  for( int i=0; i<numberOfBoundaryNodes; i++ )
   {
     int I=listOfBoundaryNodes[i];
     float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
@@ -207,4 +207,3 @@ void solverSEQ::computeOneStep( const float & timeSample,
      }
    **/
 }
-

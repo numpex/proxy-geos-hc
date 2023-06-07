@@ -11,14 +11,7 @@
 #ifndef SOLVER_Raja_HPP_
 #define SOLVER_Raja_HPP_
 
-#include    <iostream>
-#include    <vector>
-#include    <cmath>
-#include    "QkGL.hpp"
-#include    "simpleMesh.hpp"
 #include    "solverBase.hpp"
-
-using    namespace std;
 
 class solverRaja : public solverBase
 {

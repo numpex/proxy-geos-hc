@@ -11,14 +11,7 @@
 #ifndef SOLVER_SEQ_HPP_
 #define SOLVER_SEQ_HPP_
 
-#include    <iostream>
-#include    <vector>
-#include    <cmath>
-#include    "QkGL.hpp"
-#include    "simpleMesh.hpp"
 #include    "solverBase.hpp"
-
-using    namespace std;
 
 class solverSEQ : public solverBase
 {

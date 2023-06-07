@@ -10,7 +10,4 @@ set(HEADERS
     solver${SOLVER}.hpp
     )
 
-include_directories(../mesh)
-include_directories(../finiteElements)
-
 add_library(solver ${SRCS} ${HEADERS})

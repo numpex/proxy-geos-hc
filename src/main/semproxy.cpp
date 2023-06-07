@@ -9,20 +9,6 @@
 
 using namespace std;
 
-// Constructor of the SEMProxy class
-/*
-SEMProxy::SEMProxy()
-{}
-*/
-
-// Destructor of the SEMProxy class
-SEMProxy::~SEMProxy()
-{}
-
-
-void SEMProxy::initMesh()
-{}
-
 // Initialize the simulation.
 void SEMProxy::init()
 {
@@ -33,9 +19,6 @@ void SEMProxy::init()
   numberOfElements=myMesh.getNumberOfElements();
 
   // set number of rhs and location
-  //myRHSLocation.resize( myNumberOfRHS, vector< float >( 2 ));
-  //myRHSTerm.resize( myNumberOfRHS, vector< float >( myNumSamples ));
-
   myRHSLocation[0][0]=501;
   myRHSLocation[0][1]=501;
   cout << "Source location: "<<myRHSLocation[0][0]<<", "<<myRHSLocation[0][1]<<endl;
@@ -71,18 +54,14 @@ void SEMProxy::run()
 
   // loop over time
   arrayInt nodeList=myMesh.globalNodesList( numberOfElements );
-  arrayReal pnGlobal( numberOfNodes,  2 );
+  arrayReal pnGlobal( numberOfNodes, 2 );
 
-  //mySolver.setup( myOrderNumber, myMesh, myQk );
-  //mySolver.setup( myOrderNumber, myTimeStep, myMesh, myQk );
   mySolver.computeFEInit( myOrderNumber, myMesh, myQk );
 
   for( int indexTimeStep=0; indexTimeStep<myNumSamples; indexTimeStep++ )
   {
     mySolver.addRightAndSides( indexTimeStep, myNumberOfRHS, i2, myTimeStep, pnGlobal, myRHSTerm, myRHSLocation, myMesh );
-    //mySolver.addRightAndSides( indexTimeStep, myNumberOfRHS, i2, pnGlobal, myRHSTerm, myRHSLocation, myMesh );
     mySolver.computeOneStep( myTimeStep, myOrderNumber, i1, i2, pnGlobal, myMesh, myQk );
-    //mySolver.computeOneStep( i1, i2, pnGlobal, myMesh, myQk );
 
     //writes debugging ascii file.
     if( indexTimeStep%50==0 )

@@ -10,14 +10,9 @@
 #ifndef SOLVER_BASE_HPP_
 #define SOLVER_BASE_HPP_
 
-#include    <iostream>
-#include    <vector>
-#include    <cmath>
 #include    "QkGL.hpp"
 #include    "simpleMesh.hpp"
 #include    "dataType.hpp"
-
-using    namespace std;
 
 class solverBase
 {
@@ -53,16 +48,16 @@ public:
    * compute one time step of wave propagation
    */
   virtual void computeOneStep( const float & timeSample,
-                       const int & order,
-                       int & i1,
-                       int & i2,
-                       arrayReal & pnGlobal,
-                       simpleMesh mesh,
-                       QkGL Qk )=0;
+                               const int & order,
+                               int & i1,
+                               int & i2,
+                               arrayReal & pnGlobal,
+                               simpleMesh mesh,
+                               QkGL Qk ) = 0;
 
 
 protected:
-  
+
   int i1=0, i2=1;
 
   // get infos from mesh
@@ -74,7 +69,7 @@ protected:
   arrayReal globalNodesCoords;
 
   // get model
-  vectorReal   model;
+  vectorReal model;
 
   //get infos about finite element order of approximation
   int numberOfPointsPerElement;
