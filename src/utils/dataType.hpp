@@ -8,9 +8,10 @@ using namespace std;
 
 #ifdef SEM_USE_VECTOR
 #include <vector>
-template<class T> class Array2D {
+template<class T> class myArray2D {
 public:
-    Array2D(int numRows, int numCols) : data(numRows, std::vector<T>(numCols)) {}
+    myArray2D(int numRows, int numCols) : data(numRows, std::vector<T>(numCols)) {}
+    myArray2D() : data(0, std::vector<T>(0)) {}
 
     std::vector<T>& operator[](int index){
         return data[index];
@@ -22,9 +23,9 @@ private:
 using vectorInt=vector<int>;
 using vectorReal=vector<float>;
 using vectorDouble=vector<double>;
-using arrayInt=Array2D<int>;
-using arrayReal=Array2D<float>;
-using arrayDouble=Array2D<double>;
+using arrayInt=myArray2D<int>;
+using arrayReal=myArray2D<float>;
+using arrayDouble=myArray2D<double>;
 
 #ifdef SEM_USE_RAJA
 #include "RAJA/RAJA.hpp"
