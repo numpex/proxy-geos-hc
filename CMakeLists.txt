@@ -12,7 +12,7 @@ set (CMAKE_VERBOSE_MAKEFILE on )
 set (SEM_USE_OMP OFF CACHE BOOL "")
 
 # use RAJA to expose parallelism loop
-set (SEM_USE_RAJA ON CACHE BOOL "")
+set (SEM_USE_RAJA OFF CACHE BOOL "")
 
 # use std::vector for vectores and arrays
 set (SEM_USE_VECTOR ON CACHE BOOL "")
