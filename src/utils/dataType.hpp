@@ -11,6 +11,7 @@ using namespace std;
 template<class T> class Array2D {
 public:
     Array2D(int numRows, int numCols) : data(numRows, std::vector<T>(numCols)) {}
+    Array2D() : data(0, std::vector<T>( 0 )) {}
 
     std::vector<T>& operator[](int index){
         return data[index];
@@ -35,8 +36,8 @@ using arrayDouble=Array2D<double>;
 #ifdef SEM_USE_LVARRAY
 
 #include "RAJA/RAJA.hpp"
-#include "Array.hpp"
-#include "MallocBuffer.hpp"
+#include "LvArray/Array.hpp"
+#include "LvArray/MallocBuffer.hpp"
 
 // Create an 1D array of integers.
 using vectorInt=LvArray::Array< int,
