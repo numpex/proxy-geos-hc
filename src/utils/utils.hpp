@@ -3,7 +3,6 @@
 
 #include  <cmath>
 #include "dataType.hpp"
-//#include    <simpleMesh>
 
 using namespace std;
 
