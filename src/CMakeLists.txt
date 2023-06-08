@@ -152,12 +152,13 @@ if (SEM_USE_PYTHON)
   message ("-- Found the pybind11 library in ${pybind11_DIR}")
   find_package(pybind11 REQUIRED)
   set (pybind11_INCLUDE_DIR "$ENV{PYBIND11_INCLUDE_DIR}")
-  include_directories(${pybind11_INCLUDE_DIR})
-  target_include_directories(sem.exe 
-                            PUBLIC 
-                            ${python_INCLUDE_DIR}
-                            ${pybind11_INCLUDE_DIR}
-                            )
+  include_directories(${pybind11_INCLUDE_DIR}
+                      ${python_INCLUDE_DIR})
+  #target_include_directories(sem.exe 
+  #                          PUBLIC 
+  #                          ${python_INCLUDE_DIR}
+  #                          ${pybind11_INCLUDE_DIR}
+  #                          )
 else()
   message ("-- SEM_USE_PYTHON flag is set to be false and PYTHON is not enabled")
 endif()
@@ -209,13 +210,12 @@ if (SEM_USE_PYTHON)
 	                    ${HEADER_FILES}
 	                    ${PYTHON_FILES}
                      )
-
   target_link_libraries(pyMesh PUBLIC)
   set(PYTHON_LIBRARY_DIR "/home/j0024947/anaconda3/lib/python3.10/site-packages")
   set(PYTHON_EXECUTABLE "/home/j0024947/anaconda3/bin/python3.10")
   #set (PYTHON_LIBRARY_DIR "python")
   install(TARGETS pyMesh
-          COMPONENT python
+          #COMPONENT python3
           LIBRARY DESTINATION "${PYTHON_LIBRARY_DIR}"
          )
 endif()

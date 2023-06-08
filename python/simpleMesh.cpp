@@ -10,7 +10,6 @@ PYBIND11_MODULE(pyMesh, m)
 
     // bindings to simpleMesh class
     py::class_<simpleMesh>(m, "simpleMesh")
-        .def(py::init<const int & , const int &, const float & , const float & , const int &  >())
-        .def("getNumberOfNodes",&simpleMesh::getNumberOfNodes)
-        .def("getNx", &simpleMesh::getNx, py::return_value_policy::copy);
+        .def(py::init<int , int , float , float  , int  >())
+        .def("getNx", &simpleMesh::getNx);
 }
