@@ -15,7 +15,7 @@
 add_executable(sem.exe main/main.cpp)
 
 set (CMAKE_CXX_STANDARD 14)
-set (CMAKE_CXX_FLAGS "-O3 -std=c++14  " CACHE STRING "")
+set (CMAKE_CXX_FLAGS "-O3 -std=c++14  " CACHE STRING "" FORCE)
 
 #---------------------------------------------------------------
 # (0) the solver is using sequential mode by default
