@@ -9,7 +9,7 @@ set (CMAKE_VERBOSE_MAKEFILE on )
 
 # setup the flags for users to select programming models
 # use OMP to parallelise loops
-set (SEM_USE_OMP OFF CACHE BOOL "")
+set (SEM_USE_OMP ON CACHE BOOL "")
 
 # use RAJA to expose parallelism loop
 set (SEM_USE_RAJA OFF CACHE BOOL "")
