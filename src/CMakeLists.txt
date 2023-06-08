@@ -148,17 +148,14 @@ endif()
 if (SEM_USE_PYTHON)
   set (python_INCLUDE_DIR "/home/j0024947/anaconda3/include/python3.10/")
   find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
   set(pybind11_DIR "$ENV{PYBIND11_DIR}" CACHE PATH "" FORCE)
   message ("-- Found the pybind11 library in ${pybind11_DIR}")
   find_package(pybind11 REQUIRED)
   set (pybind11_INCLUDE_DIR "$ENV{PYBIND11_INCLUDE_DIR}")
+
   include_directories(${pybind11_INCLUDE_DIR}
                       ${python_INCLUDE_DIR})
-  #target_include_directories(sem.exe 
-  #                          PUBLIC 
-  #                          ${python_INCLUDE_DIR}
-  #                          ${pybind11_INCLUDE_DIR}
-  #                          )
 else()
   message ("-- SEM_USE_PYTHON flag is set to be false and PYTHON is not enabled")
 endif()
@@ -202,8 +199,12 @@ if( SEM_USE_LVARRAY)
 endif()
 
 if (SEM_USE_PYTHON)
-  set (SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/mesh/simpleMesh.cpp")
-  set (HEADER_FILES "${CMAKE_SOURCE_DIR}/src/mesh/simpleMesh.hpp")
+  set (SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/mesh/simpleMesh.cpp"
+                    "${CMAKE_SOURCE_DIR}/src/finiteElements/QkGL.cpp"
+                    "${CMAKE_SOURCE_DIR}/src/solver/solverOMP.cpp")
+  set (HEADER_FILES "${CMAKE_SOURCE_DIR}/src/mesh/simpleMesh.hpp"
+                    "${CMAKE_SOURCE_DIR}/src/finiteElements/QkGL.hpp"
+                    "${CMAKE_SOURCE_DIR}/src/solver/solver.hpp")
   set (PYTHON_FILES "${CMAKE_SOURCE_DIR}/python/simpleMesh.cpp" )
   pybind11_add_module(pyMesh
 	                    ${SOURCE_FILES}
@@ -213,9 +214,7 @@ if (SEM_USE_PYTHON)
   target_link_libraries(pyMesh PUBLIC)
   set(PYTHON_LIBRARY_DIR "/home/j0024947/anaconda3/lib/python3.10/site-packages")
   set(PYTHON_EXECUTABLE "/home/j0024947/anaconda3/bin/python3.10")
-  #set (PYTHON_LIBRARY_DIR "python")
   install(TARGETS pyMesh
-          #COMPONENT python3
           LIBRARY DESTINATION "${PYTHON_LIBRARY_DIR}"
          )
 endif()
