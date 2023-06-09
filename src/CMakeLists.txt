@@ -15,7 +15,7 @@
 add_executable(sem.exe main/main.cpp)
 
 set (CMAKE_CXX_STANDARD 14)
-set (CMAKE_CXX_FLAGS "-O3 -std=c++14  " CACHE STRING "")
+set (CMAKE_CXX_FLAGS "-O3 -std=c++14  " CACHE STRING "" FORCE)
 
 #---------------------------------------------------------------
 # (0) the solver is using sequential mode by default
@@ -122,13 +122,13 @@ elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
                             )
 
   # LvArray uses chai
-  find_package(CHAI REQUIRED)
-  set (chai_INCLUDE_DIR "$ENV{CHAI_INCLUDE_DIR}")
-  include_directories(${chai_INCLUDE_DIR})
-  target_include_directories(sem.exe 
-                            PUBLIC 
-                            ${chai_INCLUDE_DIR}
-                            )
+  #find_package(CHAI REQUIRED)
+  #set (chai_INCLUDE_DIR "$ENV{CHAI_INCLUDE_DIR}")
+  #include_directories(${chai_INCLUDE_DIR})
+  #target_include_directories(sem.exe 
+  #                          PUBLIC 
+  #                          ${chai_INCLUDE_DIR}
+  #                          )
 
 
   # LvArray 
@@ -144,7 +144,7 @@ elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
                         PUBLIC 
                         umpire
                         camp
-                        chai
+  #                      chai
                         lvarray)
 
 elseif (NOT DEFINED $ENV{LVARRAY_DIR}) 

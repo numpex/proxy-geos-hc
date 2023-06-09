@@ -6,7 +6,7 @@ project( sem )
 # Setup Flags for Building and Installation
 #-----------------------------------------------------
 
-set (CMAKE_VERBOSE_MAKEFILE OFF )
+set (CMAKE_VERBOSE_MAKEFILE ON )
 
 #-----------------------------------------------------
 # Setup the flags for users to select programming models
@@ -23,10 +23,10 @@ set (SEM_USE_RAJA OFF CACHE BOOL "")
 #-----------------------------------------------------
 
 # use std::vector for vectores and arrays
-set (SEM_USE_VECTOR ON CACHE BOOL "")
+set (SEM_USE_VECTOR OFF CACHE BOOL "")
 
 # use LvArray for vectors and arrays
-set (SEM_USE_LVARRAY OFF CACHE BOOL "")
+set (SEM_USE_LVARRAY ON CACHE BOOL "")
 
 #-----------------------------------------------------
 # Setup the flags for profiling using caliper
