@@ -33,7 +33,7 @@ using arrayDouble=Array2D< double >;
 #include "RAJA/RAJA.hpp"
 #endif
 
-#endif
+#endif //SEM_USE_VECTOR
 
 #ifdef SEM_USE_LVARRAY
 
@@ -74,6 +74,6 @@ using arrayDouble=LvArray::Array< double,
                                   LvArray::MallocBuffer >;
 
 
-#endif
+#endif //SEM_USE_LVARRAY
 
 #endif //DATATYPE_HPP_

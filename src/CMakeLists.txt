@@ -157,9 +157,8 @@ endif()
 
 
 #-----------------------------------------------------
-# Profiler: CALIPER
+# CALIPER
 #-----------------------------------------------------
-
 # for profiling using caliper
 if (NOT SEM_USE_CALIPER)
   message ("-- SEM_USE_CALIPER flag is set to be false and CALIPER is not enabled")
@@ -185,7 +184,30 @@ else ()
   message("-- Caliper_DIR is not the correct path and caliper is not enabled")
 endif()
 
+#------------------------------------------------------
+#  pybind11
+#------------------------------------------------------
+if (SEM_USE_PYTHON)
+  set (python_INCLUDE_DIR "/home/j0024947/anaconda3/include/python3.10/")
+  find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
+  set(pybind11_DIR "$ENV{PYBIND11_DIR}" CACHE PATH "" FORCE)
+  message ("-- Found the pybind11 library in ${pybind11_DIR}")
+  find_package(pybind11 REQUIRED)
+  set (pybind11_INCLUDE_DIR "$ENV{PYBIND11_INCLUDE_DIR}")
+
+  include_directories(${pybind11_INCLUDE_DIR}
+                      ${python_INCLUDE_DIR})
+else()
+  message ("-- SEM_USE_PYTHON flag is set to be false and PYTHON is not enabled")
+endif()
+
+
+message ( "###########  CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}")
+message ( "###########  PROJECT_BINARY_DIR ${PROJECT_BINARY_DIR}")
+#-------------------------------------------------------
+# SEM
+#-------------------------------------------------------
 include_directories(utils)
 include_directories(finiteElements)
 include_directories(mesh)
@@ -206,11 +228,41 @@ target_link_libraries(sem.exe
   mesh
   solver
   )
-
-if (SEM_USE_RAJA)
+  
+if( SEM_USE_RAJA)
   target_link_libraries(sem.exe
-      PUBLIC 
-      RAJA)
+  PUBLIC 
+  RAJA)
+endif()
+
+if( SEM_USE_LVARRAY)
+  target_link_libraries(sem.exe
+                        PUBLIC 
+                        umpire
+                        camp
+#                       chai
+                        lvarray)
+endif()
+
+if (SEM_USE_PYTHON)
+  set (SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/mesh/simpleMesh.cpp"
+                    "${CMAKE_SOURCE_DIR}/src/finiteElements/QkGL.cpp"
+                    "${CMAKE_SOURCE_DIR}/src/solver/solverOMP.cpp")
+  set (HEADER_FILES "${CMAKE_SOURCE_DIR}/src/mesh/simpleMesh.hpp"
+                    "${CMAKE_SOURCE_DIR}/src/finiteElements/QkGL.hpp"
+                    "${CMAKE_SOURCE_DIR}/src/solver/solver.hpp")
+  set (PYTHON_FILES "${CMAKE_SOURCE_DIR}/python/simpleMesh.cpp" )
+  pybind11_add_module(pyMesh
+	                    ${SOURCE_FILES}
+	                    ${HEADER_FILES}
+	                    ${PYTHON_FILES}
+                     )
+  target_link_libraries(pyMesh PUBLIC)
+  set(PYTHON_LIBRARY_DIR "/home/j0024947/anaconda3/lib/python3.10/site-packages")
+  set(PYTHON_EXECUTABLE "/home/j0024947/anaconda3/bin/python3.10")
+  install(TARGETS pyMesh
+          LIBRARY DESTINATION "${PYTHON_LIBRARY_DIR}"
+         )
 endif()
 
 install(TARGETS sem.exe
