@@ -1,6 +1,6 @@
  #include "../src/mesh/simpleMesh.hpp"
  #include "../src/finiteElements/QkGL.hpp"
- #include "../src/solver/solver.hpp"
+ #include "../src/solver/solverOMP.hpp"
  #include <pybind11/pybind11.h>
 
 namespace py = pybind11;
@@ -23,9 +23,10 @@ PYBIND11_MODULE(pyMesh, m)
         .def("getNumberOfInteriorNodes",&simpleMesh::getNumberOfInteriorNodes)
         .def("getNumberOfBoundaryFaces",&simpleMesh::getNumberOfBoundaryFaces)
         .def("getNumberOfBoundaryNodes",&simpleMesh::getNumberOfBoundaryNodes);
-    
+    /**
     // bindings to simpleMesh class
     py::class_<solver>(m, "solver")
         .def(py::init< >())
         .def("computeFEInit",&solver::computeFEInit);
+    **/
 }

@@ -27,8 +27,8 @@ void SEMProxy::init()
   myElementSource=myMesh.getElementNumberFromPoints( myRHSLocation[0][0], myRHSLocation[0][1] );
   cout <<"Element number for the source location: "<<myElementSource<<endl;
 
-  float f0=15.;
-  int sourceOrder=1;
+  //float f0=15.;
+  //int sourceOrder=1;
 
   // iniatialize source term
   vector< float > sourceTerm=myUtils.computeSourceTerm( myNumSamples, myTimeStep, f0, sourceOrder );

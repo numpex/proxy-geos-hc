@@ -250,7 +250,7 @@ if (SEM_USE_PYTHON)
                     "${CMAKE_SOURCE_DIR}/src/solver/solverOMP.cpp")
   set (HEADER_FILES "${CMAKE_SOURCE_DIR}/src/mesh/simpleMesh.hpp"
                     "${CMAKE_SOURCE_DIR}/src/finiteElements/QkGL.hpp"
-                    "${CMAKE_SOURCE_DIR}/src/solver/solver.hpp")
+                    "${CMAKE_SOURCE_DIR}/src/solver/solverOMP.hpp")
   set (PYTHON_FILES "${CMAKE_SOURCE_DIR}/python/simpleMesh.cpp" )
   pybind11_add_module(pyMesh
 	                    ${SOURCE_FILES}

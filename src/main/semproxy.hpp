@@ -55,6 +55,8 @@ private:
   // element number of source term
   int myElementSource;
   const int myNumberOfRHS=1;
+  float f0=15.;
+  int sourceOrder=1;
 
   arrayReal myRHSLocation;
   arrayReal myRHSTerm;
