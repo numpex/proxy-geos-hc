@@ -122,13 +122,13 @@ elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
                             )
 
   # LvArray uses chai
-  find_package(CHAI REQUIRED)
-  set (chai_INCLUDE_DIR "$ENV{CHAI_INCLUDE_DIR}")
-  include_directories(${chai_INCLUDE_DIR})
-  target_include_directories(sem.exe 
-                            PUBLIC 
-                            ${chai_INCLUDE_DIR}
-                            )
+  #find_package(CHAI REQUIRED)
+  #set (chai_INCLUDE_DIR "$ENV{CHAI_INCLUDE_DIR}")
+  #include_directories(${chai_INCLUDE_DIR})
+  #target_include_directories(sem.exe 
+  #                          PUBLIC 
+  #                          ${chai_INCLUDE_DIR}
+  #                          )
 
 
   # LvArray 
@@ -144,7 +144,7 @@ elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
                         PUBLIC 
                         umpire
                         camp
-                        chai
+  #                      chai
                         lvarray)
 
 elseif (NOT DEFINED $ENV{LVARRAY_DIR}) 
