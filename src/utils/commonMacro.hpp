@@ -1,5 +1,19 @@
 #include "commonConfig.hpp"
 
+#ifdef SEM_USE_RAJA
+
+#include "solverRaja.hpp"
+
+#elif defined SEM_USE_OMP
+
+#include "solverOMP.hpp"
+
+#else
+
+#include "solverSequential.hpp"
+
+#endif
+
 #ifdef SEM_USE_CALIPER
 
 #include <caliper/cali.h>
@@ -39,4 +53,3 @@
 /// @endcond
 
 #endif // SEM_USE_CALIPER
-

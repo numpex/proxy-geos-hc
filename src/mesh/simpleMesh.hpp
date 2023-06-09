@@ -68,7 +68,7 @@ public:
   int Itoij( const int & I, int & i, int & j ) const;
 
   // project vector node to grid
-  arrayReal projectToGrid( const int numberOfNodes,  vectorReal inputVector ) const;
+  arrayReal projectToGrid( const int numberOfNodes, vectorReal inputVector ) const;
 
   // compute element e where (x,y) belongs to
   int getElementNumberFromPoints( const float & x, const float & y ) const;
