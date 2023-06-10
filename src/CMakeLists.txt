@@ -245,24 +245,12 @@ if( SEM_USE_LVARRAY)
 endif()
 
 if (SEM_USE_PYTHON)
-  set (SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/mesh/simpleMesh.cpp"
-                    "${CMAKE_SOURCE_DIR}/src/finiteElements/QkGL.cpp"
-                    "${CMAKE_SOURCE_DIR}/src/solver/solverOMP.cpp")
-  set (HEADER_FILES "${CMAKE_SOURCE_DIR}/src/mesh/simpleMesh.hpp"
-                    "${CMAKE_SOURCE_DIR}/src/finiteElements/QkGL.hpp"
-                    "${CMAKE_SOURCE_DIR}/src/solver/solverOMP.hpp")
-  set (PYTHON_FILES "${CMAKE_SOURCE_DIR}/python/simpleMesh.cpp" )
-  pybind11_add_module(pyMesh
-	                    ${SOURCE_FILES}
-	                    ${HEADER_FILES}
-	                    ${PYTHON_FILES}
-                     )
-  target_link_libraries(pyMesh PUBLIC)
   set(PYTHON_LIBRARY_DIR "/home/j0024947/anaconda3/lib/python3.10/site-packages")
   set(PYTHON_EXECUTABLE "/home/j0024947/anaconda3/bin/python3.10")
-  install(TARGETS pyMesh
-          LIBRARY DESTINATION "${PYTHON_LIBRARY_DIR}"
-         )
+
+  add_subdirectory(mesh/python)
+  add_subdirectory (finiteElements/python)
+
 endif()
 
 install(TARGETS sem.exe

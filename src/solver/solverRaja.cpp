@@ -96,12 +96,6 @@ void solverRaja::computeOneStep( const float & timeSample,
   //cout<<"pressure="<<pnGlobal[5][i1]<<endl;
 
   // damping terms
-  // get infos from mesh
-  static int numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
-  static int numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
-  static vectorInt listOfBoundaryNodes=mesh.getListOfBoundaryNodes( numberOfBoundaryNodes );
-  static arrayInt faceInfos=mesh.getBoundaryFacesInfos();
-  static arrayInt localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
   static vectorReal ShGlobal( numberOfBoundaryNodes );
 
   RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] ( int i ) {

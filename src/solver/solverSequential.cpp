@@ -145,12 +145,6 @@ void solverSEQ::computeOneStep( const float & timeSample,
   //cout<<"pressure="<<pnGlobal[5][i1]<<endl;
 
   // damping terms
-  // get infos from mesh
-  static int numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
-  static int numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
-  static vectorInt listOfBoundaryNodes=mesh.getListOfBoundaryNodes( numberOfBoundaryNodes );
-  static arrayInt faceInfos=mesh.getBoundaryFacesInfos();
-  static arrayInt localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
   static vectorReal ShGlobal( numberOfBoundaryNodes );
 
   for( int i=0; i<numberOfBoundaryNodes; i++ )

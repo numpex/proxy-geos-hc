@@ -64,9 +64,14 @@ protected:
   int numberOfNodes;
   int numberOfElements;
   int numberOfInteriorNodes;
+  int numberOfBoundaryNodes;
+  int numberOfBoundaryFaces;
   arrayInt globalNodesList;
   vectorInt listOfInteriorNodes;
   arrayReal globalNodesCoords;
+  vectorInt listOfBoundaryNodes;
+  arrayInt faceInfos;
+  arrayInt localFaceNodeToGlobalFaceNode;
 
   // get model
   vectorReal model;
