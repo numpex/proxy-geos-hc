@@ -12,6 +12,7 @@
 #include <fstream>
 
 #include "commonMacro.hpp"
+#include "commonConfig.hpp"
 #include "QkGL.hpp"
 #include "simpleMesh.hpp"
 #include "utils.hpp"
