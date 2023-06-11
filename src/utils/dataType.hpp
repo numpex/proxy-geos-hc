@@ -76,4 +76,8 @@ using arrayDouble=LvArray::Array< double,
 
 #endif //SEM_USE_LVARRAY
 
+#ifdef SEM_USE_KOKKOS
+#include <Kokkos_Core.hpp>
+#endif
+
 #endif //DATATYPE_HPP_

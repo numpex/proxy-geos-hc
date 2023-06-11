@@ -14,8 +14,8 @@
 
 add_executable(sem.exe main/main.cpp)
 
-set (CMAKE_CXX_STANDARD 14)
-set (CMAKE_CXX_FLAGS "-O3 -std=c++14  " CACHE STRING "" FORCE)
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_FLAGS "-O3 -std=c++17  " CACHE STRING "" FORCE)
 
 #---------------------------------------------------------------
 # (0) the solver is using sequential mode by default
@@ -76,6 +76,42 @@ elseif (NOT DEFINED $ENV{RAJA_DIR})
 else ()
   set (SEM_USE_RAJA OFF CACHE BOOL "")
   message("-- RAJA_DIR is not the correct path and caliper is not enabled")
+endif()
+
+#-------------------------------------------------------------------------------------
+# (3) the solver is using KOKOS with vectors if SEM_USE_KOKKOS and SEM_USE_VECTOR are ON
+#-------------------------------------------------------------------------------------
+
+# the solver is using KOKKOS if SEM_USE_KOKKOS is ON
+if (NOT SEM_USE_KOKKOS)
+  message ("-- SEM_USE_KOKKOS flag is set to be false and KOKKOS is not enabled")
+elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
+  message ("-- SEM_USE_KOKKOS flag is set to be true and KOKOS is now enabled")
+  message("-- Found the KOKKOS library in $ENV{KOKKOS_DIR}")
+  set (SOLVER "Kokkos" CACHE PATH "" FORCE)
+
+  # KOKOS uses OMP
+  find_package(OpenMP)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+
+  # setup KOKOS
+  set(Kokkos_ROOT "$ENV{KOKKOS_DIR}")
+  find_package(Kokkos REQUIRED)
+  set (Kokkos_INCLUDE_DIRS "${Kokkos_ROOT}/../../../include")
+  include_directories(${Kokkos_INCLUDE_DIRS})
+  target_include_directories(sem.exe 
+    PUBLIC 
+    ${Kokkos_INCLUDE_DIRS}
+  )
+
+elseif (NOT DEFINED $ENV{KOKKOS_DIR}) 
+  set (SEM_USE_KOKKOS OFF CACHE BOOL "")
+  message("-- KOKKOS_DIR is not defined and caliper is not enabled")
+else ()
+  set (SEM_USE_KOKKOS OFF CACHE BOOL "")
+  message("-- KOKKOS_DIR is not the correct path and caliper is not enabled")
 endif()
 
 
@@ -233,6 +269,12 @@ if( SEM_USE_RAJA)
   target_link_libraries(sem.exe
   PUBLIC 
   RAJA)
+endif()
+
+if( SEM_USE_KOKKOS)
+  target_link_libraries(sem.exe
+  PUBLIC 
+  Kokkos::kokkos)
 endif()
 
 if( SEM_USE_LVARRAY)
