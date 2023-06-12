@@ -13,7 +13,7 @@ void SEMProxy::init()
   #ifdef SEM_USE_KOKKOS
   Kokkos::initialize();
   #endif
-  
+
   SEM_CALIPER_MARK_BEGIN( "InitTime" );
 
   // get information from mesh
@@ -81,4 +81,3 @@ void SEMProxy::run()
   #endif
 
 }
-

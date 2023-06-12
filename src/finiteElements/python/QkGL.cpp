@@ -4,13 +4,13 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(pyQkGL, m) 
+PYBIND11_MODULE( pyQkGL, m )
 {
-    // optional module docstring
-    m.doc() = "QkGL python interface";
+  // optional module docstring
+  m.doc() = "QkGL python interface";
 
-    // bindings to simpleMesh class
-    py::class_<QkGL>(m, "QkGL")
-        .def(py::init< >());
-    
+  // bindings to simpleMesh class
+  py::class_< QkGL >( m, "QkGL" )
+    .def( py::init< >());
+
 }

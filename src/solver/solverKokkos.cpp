@@ -10,15 +10,15 @@
 
 #include "solverKokkos.hpp"
 
- 
+
 // compute one step of the time dynamic wave equation solver
 void solverKokkos::computeOneStep( const float & timeSample,
-                                const int & order,
-                                int & i1,
-                                int & i2,
-                                arrayReal & pnGlobal,
-                                simpleMesh mesh,
-                                QkGL Qk )
+                                   const int & order,
+                                   int & i1,
+                                   int & i2,
+                                   arrayReal & pnGlobal,
+                                   simpleMesh mesh,
+                                   QkGL Qk )
 {
   // get infos from mesh
   static int numberOfNodes=mesh.getNumberOfNodes();
@@ -64,14 +64,14 @@ void solverKokkos::computeOneStep( const float & timeSample,
   static vectorReal massMatrixGlobal( numberOfNodes );
   static vectorReal yGlobal( numberOfNodes );
 
-  Kokkos::parallel_for(numberOfNodes, [=] (const int i)
+  Kokkos::parallel_for( numberOfNodes, [=] ( const int i )
   {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
-  });
+  } );
 
   // loop over mesh elements
-  Kokkos::parallel_for(numberOfElements,[=, &pnGlobal] ( const int e)
+  Kokkos::parallel_for( numberOfElements, [=, &pnGlobal] ( const int e )
   {
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
@@ -132,15 +132,15 @@ void solverKokkos::computeOneStep( const float & timeSample,
       massMatrixGlobal[gIndex]+=massMatrixLocal[i];
       yGlobal[gIndex]+=Y[i];
     }
-  });
+  } );
 
   // update pressure
-  Kokkos::parallel_for(numberOfInteriorNodes,[=, &pnGlobal] ( const int i)
+  Kokkos::parallel_for( numberOfInteriorNodes, [=, &pnGlobal] ( const int i )
   {
     int I=listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
     pnGlobal[I][i1]=2*pnGlobal[I][i2]-pnGlobal[I][i1]-tmp*yGlobal[I]/massMatrixGlobal[I];
-  });
+  } );
   //cout<<"pressure="<<pnGlobal[5][i1]<<endl;
 
   // damping terms
@@ -151,7 +151,7 @@ void solverKokkos::computeOneStep( const float & timeSample,
     ShGlobal[i]=0;
   }
   // Note: this loop is data parallel.
-  Kokkos::parallel_for(numberOfBoundaryFaces,[=] ( const int iFace)
+  Kokkos::parallel_for( numberOfBoundaryFaces, [=] ( const int iFace )
   {
     vectorReal ds( order+1 );
     vectorReal Sh( order+1 );
@@ -176,17 +176,17 @@ void solverKokkos::computeOneStep( const float & timeSample,
        cout<<"   ShGlobal["<<gIndexFaceNode<<"]="<<ShGlobal[gIndexFaceNode]<<endl;
        }
      **/
-  });
+  } );
 
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
-  Kokkos::parallel_for(numberOfBoundaryNodes,[=, &pnGlobal] ( const int i)
+  Kokkos::parallel_for( numberOfBoundaryNodes, [=, &pnGlobal] ( const int i )
   {
     int I=listOfBoundaryNodes[i];
     float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
     float MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
     pnGlobal[I][i1]=invMpSh*(2*massMatrixGlobal[I]*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]-tmp*yGlobal[I]);
-  });
+  } );
 
   /**
      for ( int i=0 ; i< numberOfBoundaryNodes; i++)

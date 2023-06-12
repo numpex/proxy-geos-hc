@@ -8,7 +8,7 @@
 
 #include "solverOMP.hpp"
 
-#elif defined SEM_USE_KOKKOS 
+#elif defined SEM_USE_KOKKOS
 
 #include "solverKokkos.hpp"
 

@@ -101,13 +101,13 @@ void solverOMP::computeOneStep( const float & timeSample,
 
   // damping terms
   static vectorReal ShGlobal( numberOfBoundaryNodes );
-  
+
   #pragma omp parallel for
   for( int i=0; i<numberOfBoundaryNodes; i++ )
   {
     ShGlobal[i]=0;
   }
- 
+
   // Note: this loop is data parallel.
   #pragma omp parallel for
   for( int iFace=0; iFace<numberOfBoundaryFaces; iFace++ )
