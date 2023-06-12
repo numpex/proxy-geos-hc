@@ -1,10 +1,10 @@
 //************************************************************************
 //  SEM proxy application v.0.0.1
 //
-//  solverSequential.cpp: simple 2D acoustive wave equation solver
+//  solverKokkos.hpp: simple 2D acoustive wave equation solver
 //
-//  the solverSEQ class is derived from the solverBase class
-//  with the sequential implementation of the solver
+//  the solverKokkos class is derived from the solverBase class
+//  with the KOKKOS implementation of the solver
 //
 //************************************************************************
 
@@ -12,7 +12,7 @@
 
  
 // compute one step of the time dynamic wave equation solver
-void solverSEQ::computeOneStep( const float & timeSample,
+void solverKokkos::computeOneStep( const float & timeSample,
                                 const int & order,
                                 int & i1,
                                 int & i2,

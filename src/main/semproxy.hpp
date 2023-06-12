@@ -12,7 +12,6 @@
 #include <fstream>
 
 #include "commonMacro.hpp"
-#include "commonConfig.hpp"
 #include "QkGL.hpp"
 #include "simpleMesh.hpp"
 #include "utils.hpp"
@@ -75,6 +74,8 @@ private:
   solverRaja mySolver;
 #elif defined(SEM_USE_OMP)
   solverOMP mySolver;
+#elif defined(SEM_USE_KOKKOS)
+  solverKokkos mySolver;
 #else
   solverSEQ mySolver;
 #endif

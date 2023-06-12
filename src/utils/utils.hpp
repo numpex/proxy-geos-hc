@@ -4,8 +4,6 @@
 #include  <cmath>
 #include "dataType.hpp"
 
-using namespace std;
-
 struct solverUtils
 {
 

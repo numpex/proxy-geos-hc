@@ -1,33 +1,38 @@
-#---------------------------------------------------------------
+#-------------------------------------------------------------------
 # The Solver Implementation is with Programming Models:
 #
-#  "OMP" and "RAJA"
+#  Users can choose from "OMP", "RAJA", and "KOKKOS" as following:
 #
-#  the current implementations include:
+#  (0) The default is using sequential mode
+#  (1) If SEM_USE_OMP is ON, it is using OMP to parallelise loops.
+#  (2) If SEM_USE_RAJA is ON, it is using RAJA.
+#  (3) If SEM_USE_KOKKOS is ON, it is using KOKKOS.
 #
-#  (0) the default is using sequential mode
-#  (1) if SEM_USE_OMP is ON it is using OMP to parallelise loops
-#  (2) if SEM_USE_RAJA is ON it is using RAJA with vectors
-#  (3) if SEM_USE_LVARRAY is ON it is using RAJA with LVARRAY
+#  And the users can chose data containers as following:
 #
-#---------------------------------------------------------------
+#  (a) If SEM_USE_LVARRAY is ON, LVARRAY is used.
+#  (b) If SEM_USE_VECTOR is ON, std::vector is used.
+#
+#-------------------------------------------------------------------
 
 add_executable(sem.exe main/main.cpp)
 
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_FLAGS "-O3 -std=c++17  " CACHE STRING "" FORCE)
 
-#---------------------------------------------------------------
+#-------------------------------------------------------------------
+# Setup Programming Model Options:
 # (0) the solver is using sequential mode by default
-#---------------------------------------------------------------
+#-------------------------------------------------------------------
 
 # the solver is using sequential mode by default 
 set (SOLVER "Sequential" CACHE PATH "" FORCE)
 
 
-#---------------------------------------------------------------
+#-------------------------------------------------------------------
+# Setup Programming Model Options:
 # (1) the solver is using OMP multi-threading if SEM_USE_OMP is ON
-#---------------------------------------------------------------
+#-------------------------------------------------------------------
 
 if (NOT SEM_USE_OMP)
   message ("-- SEM_USE_OMP flag is set to be false and OMP is not enabled")
@@ -42,9 +47,10 @@ endif()
 
 
 
-#-------------------------------------------------------------------------------------
-# (2) the solver is using RAJA with vectors if SEM_USE_RAJA and SEM_USE_VECTOR are ON
-#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------
+# Setup Programming Model Options:
+# (2) the solver is using RAJA if SEM_USE_RAJA is ON
+#-------------------------------------------------------------------
 
 # the solver is using RAJA if SEM_USE_RAJA is ON
 if (NOT SEM_USE_RAJA)
@@ -78,9 +84,10 @@ else ()
   message("-- RAJA_DIR is not the correct path and caliper is not enabled")
 endif()
 
-#-------------------------------------------------------------------------------------
-# (3) the solver is using KOKOS with vectors if SEM_USE_KOKKOS and SEM_USE_VECTOR are ON
-#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------
+# Setup Programming Model Options:
+# (3) the solver is using KOKOS if SEM_USE_KOKKOS is ON
+#-------------------------------------------------------------------
 
 # the solver is using KOKKOS if SEM_USE_KOKKOS is ON
 if (NOT SEM_USE_KOKKOS)
@@ -115,13 +122,25 @@ else ()
 endif()
 
 
-#-------------------------------------------------------------------------------------
-# (3) the solver is using RAJA with LVARRAY if SEM_USE_RAJA and SEM_USE_LVARRAY are ON
-#-------------------------------------------------------------------------------------
+#-------------------------------------------------------------------
+# Setup Programming Data Container Options:
+# (a) the data container is using VECTOR if SEM_USE_VECTOR is ON
+#-------------------------------------------------------------------
+
+if (SEM_USE_VECTOR)
+  set (DATA_CONTAINER "VECTOR" CACHE PATH "" FORCE)
+endif()
+
+#-------------------------------------------------------------------
+# Setup Programming Data Container Options:
+# (b) the data container is using LVARRAY if SEM_USE_LVARRAY is ON
+#-------------------------------------------------------------------
+
 
 if (NOT SEM_USE_LVARRAY)
   message ("-- SEM_USE_LVARRAY flag is set to be false and RAJA is not enabled")
 elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
+  set (DATA_CONTAINER "LVARRAY" CACHE PATH "" FORCE)
   message ("-- SEM_USE_LVARRAY flag is set to be true and LVARRAY is now enabled")
   message("-- Found the LVARRAY library in $ENV{LVARRAY_DIR}")
 
@@ -193,7 +212,7 @@ endif()
 
 
 #-----------------------------------------------------
-# CALIPER
+# Setup Profiler: CALIPER
 #-----------------------------------------------------
 # for profiling using caliper
 if (NOT SEM_USE_CALIPER)
@@ -239,11 +258,17 @@ else()
 endif()
 
 
-message ( "###########  CMAKE_SOURCE_DIR ${CMAKE_SOURCE_DIR}")
-message ( "###########  PROJECT_BINARY_DIR ${PROJECT_BINARY_DIR}")
+message ( "\n---------------------------------------------------------------------------------" )
+message ( "-- The Current Solver is Using: ${SOLVER}")
+message ( "-- The Current Data Container is Using: ${DATA_CONTAINER}")
+message ( "-- CMAKE_SOURCE_DIR : ${CMAKE_SOURCE_DIR}")
+message ( "-- PROJECT_BINARY_DIR :  ${PROJECT_BINARY_DIR}")
+message ( "---------------------------------------------------------------------------------\n" )
+
 #-------------------------------------------------------
-# SEM
+# SEM proxy application setup
 #-------------------------------------------------------
+
 include_directories(utils)
 include_directories(finiteElements)
 include_directories(mesh)

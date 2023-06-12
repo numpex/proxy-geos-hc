@@ -1,25 +1,25 @@
 //************************************************************************
 //  SEM proxy application v.0.0.1
 //
-//  solverSequential.hpp: simple 2D acoustive wave equation solver
+//  solverKokkos.hpp: simple 2D acoustive wave equation solver
 //
-//  the solverSEQ class is derived from the solverBase class
-//  with the RAJA implementation of the solver
+//  the solverKokkos class is derived from the solverBase class
+//  with the KOKKOS implementation of the solver
 //
 //************************************************************************
 
-#ifndef SOLVER_SEQ_HPP_
-#define SOLVER_SEQ_HPP_
+#ifndef SOLVER_Kokkos_HPP_
+#define SOLVER_Kokkos_HPP_
 
 #include    "solverBase.hpp"
 
-class solverSEQ : public solverBase
+class solverKokkos : public solverBase
 {
 
 public:
 
-  solverSEQ(){};
-  ~solverSEQ(){};
+  solverKokkos(){};
+  ~solverKokkos(){};
 
   void computeOneStep( const float & timeSample,
                        const int & order,
@@ -29,4 +29,4 @@ public:
                        simpleMesh mesh,
                        QkGL Qk );
 };
-#endif //SOLVER_SEQ_HPP_
+#endif //SOLVER_Kokkos_HPP_

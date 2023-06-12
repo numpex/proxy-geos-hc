@@ -6,8 +6,6 @@
 #include "dataType.hpp"
 #include "simpleMesh.hpp"
 
-using namespace std;
-
 simpleMesh::simpleMesh( const int & ex_in, const int & ey_in, const float & lx_in, const float & ly_in, const int & order_in )
 {
   order=order_in;

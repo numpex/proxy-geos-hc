@@ -5,8 +5,6 @@
 #include "QkGL.hpp"
 #include "commonMacro.hpp"
 
-using namespace std;
-
 QkGL::QkGL(){};
 QkGL::~QkGL(){};
 

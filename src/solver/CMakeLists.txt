@@ -1,5 +1,3 @@
-message("-- The Current Solver is Using: ${SOLVER}")
-
 set(SRCS
     solverBase.cpp
     solver${SOLVER}.cpp
