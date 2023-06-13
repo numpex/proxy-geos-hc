@@ -4,8 +4,6 @@
 #include "commonConfig.hpp"
 #include <iostream>
 
-using namespace std;
-
 #ifdef SEM_USE_VECTOR
 #include <vector>
 template< class T > class Array2D
@@ -22,9 +20,9 @@ public:
 private:
   std::vector< std::vector< T > > data;
 };
-using vectorInt=vector< int >;
-using vectorReal=vector< float >;
-using vectorDouble=vector< double >;
+using vectorInt=std::vector< int >;
+using vectorReal=std::vector< float >;
+using vectorDouble=std::vector< double >;
 using arrayInt=Array2D< int >;
 using arrayReal=Array2D< float >;
 using arrayDouble=Array2D< double >;
@@ -33,7 +31,7 @@ using arrayDouble=Array2D< double >;
 #include "RAJA/RAJA.hpp"
 #endif
 
-#endif
+#endif //SEM_USE_VECTOR
 
 #ifdef SEM_USE_LVARRAY
 
@@ -74,6 +72,10 @@ using arrayDouble=LvArray::Array< double,
                                   LvArray::MallocBuffer >;
 
 
+#endif //SEM_USE_LVARRAY
+
+#ifdef SEM_USE_KOKKOS
+#include <Kokkos_Core.hpp>
 #endif
 
 #endif //DATATYPE_HPP_

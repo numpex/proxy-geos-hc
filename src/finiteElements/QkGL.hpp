@@ -6,7 +6,7 @@
 #include    <cmath>
 #include    "dataType.hpp"
 
-using    namespace std;
+//using    namespace std;
 
 /**
  * This class is the basis class for the hexahedron finite element cells with

@@ -55,6 +55,8 @@ private:
   // element number of source term
   int myElementSource;
   const int myNumberOfRHS=1;
+  float f0=15.;
+  int sourceOrder=1;
 
   arrayReal myRHSLocation;
   arrayReal myRHSTerm;
@@ -72,6 +74,8 @@ private:
   solverRaja mySolver;
 #elif defined(SEM_USE_OMP)
   solverOMP mySolver;
+#elif defined(SEM_USE_KOKKOS)
+  solverKokkos mySolver;
 #else
   solverSEQ mySolver;
 #endif

@@ -6,8 +6,6 @@
 #include "dataType.hpp"
 #include "simpleMesh.hpp"
 
-using namespace std;
-
 simpleMesh::simpleMesh( const int & ex_in, const int & ey_in, const float & lx_in, const float & ly_in, const int & order_in )
 {
   order=order_in;
@@ -19,6 +17,8 @@ simpleMesh::simpleMesh( const int & ex_in, const int & ey_in, const float & lx_i
   ny=ey_in*order+1;
   hx=lx/(1.*ex);
   hy=ly/(1.*ey);
+  cout <<"simpleMesh initiliazed\n";
+  cout<<"nx, ny="<<nx<<", "<<ny<<endl;
 }
 simpleMesh::~simpleMesh(){};
 
@@ -37,6 +37,7 @@ int simpleMesh::getNumberOfElements() const
 //get nx
 int simpleMesh::getNx() const
 {return nx;}
+
 //get nxy
 int simpleMesh::getNy() const
 {return ny;}
