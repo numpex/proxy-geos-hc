@@ -15,8 +15,6 @@
 #
 #-------------------------------------------------------------------
 
-add_executable(sem.exe main/main.cpp)
-
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_FLAGS "-O3 -std=c++17  " CACHE STRING "" FORCE)
 
@@ -69,12 +67,7 @@ elseif (EXISTS $ENV{RAJA_DIR}/raja-config.cmake)
   # setup RAJA
   find_package(RAJA REQUIRED)
   set (raja_INCLUDE_DIR "${RAJA_DIR}/../../../include")
-
   include_directories(${raja_INCLUDE_DIR})
-  target_include_directories(sem.exe 
-    PUBLIC 
-    ${raja_INCLUDE_DIR}
-  )
 
 elseif (NOT DEFINED $ENV{RAJA_DIR}) 
   set (SEM_USE_RAJA OFF CACHE BOOL "")
@@ -108,10 +101,6 @@ elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
   find_package(Kokkos REQUIRED)
   set (Kokkos_INCLUDE_DIRS "${Kokkos_ROOT}/../../../include")
   include_directories(${Kokkos_INCLUDE_DIRS})
-  target_include_directories(sem.exe 
-    PUBLIC 
-    ${Kokkos_INCLUDE_DIRS}
-  )
 
 elseif (NOT DEFINED $ENV{KOKKOS_DIR}) 
   set (SEM_USE_KOKKOS OFF CACHE BOOL "")
@@ -154,53 +143,21 @@ elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
   find_package(RAJA REQUIRED)
   set (raja_INCLUDE_DIR "${RAJA_DIR}/../../../include")
   include_directories(${raja_INCLUDE_DIR})
-  target_include_directories(sem.exe  
-                            PUBLIC
-                            ${raja_INCLUDE_DIR}
-                            )
 
   # LvArray uses umpire
   find_package(UMPIRE REQUIRED)
   set (umpire_INCLUDE_DIR "$ENV{UMPIRE_INCLUDE_DIR}")
   include_directories(${umpire_INCLUDE_DIR})
-  target_include_directories(sem.exe 
-                            PUBLIC 
-                            ${umpire_INCLUDE_DIR}
-                            )
+
   # LvArray uses camp
   find_package(CAMP REQUIRED)
   set (camp_INCLUDE_DIR "$ENV{CAMP_INCLUDE_DIR}")
   include_directories(${camp_INCLUDE_DIR})
-  target_include_directories(sem.exe 
-                            PUBLIC 
-                            ${camp_INCLUDE_DIR}
-                            )
-
-  # LvArray uses chai
-  #find_package(CHAI REQUIRED)
-  #set (chai_INCLUDE_DIR "$ENV{CHAI_INCLUDE_DIR}")
-  #include_directories(${chai_INCLUDE_DIR})
-  #target_include_directories(sem.exe 
-  #                          PUBLIC 
-  #                          ${chai_INCLUDE_DIR}
-  #                          )
-
 
   # LvArray 
   find_package(LVARRAY REQUIRED)
   set (lvarray_INCLUDE_DIR "${LVARRAY_DIR}/../../../include")
   include_directories(${lvarray_INCLUDE_DIR})
-  target_include_directories(sem.exe 
-                            PUBLIC 
-                            ${lvarray_INCLUDE_DIR}
-                            )
-
-  target_link_libraries(sem.exe
-                        PUBLIC 
-                        umpire
-                        camp
-  #                      chai
-                        lvarray)
 
 elseif (NOT DEFINED $ENV{LVARRAY_DIR}) 
   set (SEM_USE_LVARRAY OFF CACHE BOOL "")
@@ -211,9 +168,25 @@ else ()
 endif()
 
 
+set (SEM_EXECUTABLE "sem_${SOLVER}_${DATA_CONTAINER}.exe" CACHE PATH "" FORCE)
+
+message ( "\n---------------------------------------------------------------------------------" )
+message ( "-- The Current Solver is Using: ${SOLVER}")
+message ( "-- The Current Data Container is Using: ${DATA_CONTAINER}")
+message ( "-- CMAKE_SOURCE_DIR : ${CMAKE_SOURCE_DIR}")
+message ( "-- PROJECT_BINARY_DIR :  ${PROJECT_BINARY_DIR}")
+message ( "---------------------------------------------------------------------------------\n" )
+
+
+
+add_executable(${SEM_EXECUTABLE} main/main.cpp)
+
+
+
 #-----------------------------------------------------
 # Setup Profiler: CALIPER
 #-----------------------------------------------------
+
 # for profiling using caliper
 if (NOT SEM_USE_CALIPER)
   message ("-- SEM_USE_CALIPER flag is set to be false and CALIPER is not enabled")
@@ -222,11 +195,11 @@ elseif (EXISTS $ENV{CALIPER_DIR}/caliper-config.cmake)
   set (caliper_DIR "$ENV{CALIPER_DIR}" CACHE PATH "" FORCE)
   message ("-- Found the caliper library in ${caliper_DIR}")
   find_package(caliper REQUIRED)
-  target_link_libraries(sem.exe
+  target_link_libraries(${SEM_EXECUTABLE}
     PUBLIC
     caliper
     )
-  target_include_directories(sem.exe 
+  target_include_directories(${SEM_EXECUTABLE} 
     PUBLIC 
     ${caliper_INCLUDE_DIR}
     )
@@ -258,13 +231,6 @@ else()
 endif()
 
 
-message ( "\n---------------------------------------------------------------------------------" )
-message ( "-- The Current Solver is Using: ${SOLVER}")
-message ( "-- The Current Data Container is Using: ${DATA_CONTAINER}")
-message ( "-- CMAKE_SOURCE_DIR : ${CMAKE_SOURCE_DIR}")
-message ( "-- PROJECT_BINARY_DIR :  ${PROJECT_BINARY_DIR}")
-message ( "---------------------------------------------------------------------------------\n" )
-
 #-------------------------------------------------------
 # SEM proxy application setup
 #-------------------------------------------------------
@@ -282,7 +248,7 @@ add_subdirectory(mesh)
 add_subdirectory(solver)
 add_subdirectory(main)
 
-target_link_libraries(sem.exe
+target_link_libraries(${SEM_EXECUTABLE}
   PUBLIC
   semproxy
   finiteElements
@@ -291,19 +257,37 @@ target_link_libraries(sem.exe
   )
   
 if( SEM_USE_RAJA)
-  target_link_libraries(sem.exe
-  PUBLIC 
-  RAJA)
+  target_link_libraries(${SEM_EXECUTABLE}
+    PUBLIC 
+    RAJA
+  )
+  target_include_directories(${SEM_EXECUTABLE} 
+    PUBLIC 
+    ${raja_INCLUDE_DIR}
+  )
 endif()
 
 if( SEM_USE_KOKKOS)
-  target_link_libraries(sem.exe
+  target_include_directories(${SEM_EXECUTABLE} 
+    PUBLIC 
+    ${Kokkos_INCLUDE_DIRS}
+  )
+  target_link_libraries(${SEM_EXECUTABLE}
   PUBLIC 
-  Kokkos::kokkos)
+  Kokkos::kokkos
+  )
 endif()
 
 if( SEM_USE_LVARRAY)
-  target_link_libraries(sem.exe
+  target_include_directories(${SEM_EXECUTABLE} 
+                            PUBLIC 
+                            ${raja_INCLUDE_DIR}
+                            ${umpire_INCLUDE_DIR}
+                            ${camp_INCLUDE_DIR}
+                            ${lvarray_INCLUDE_DIR}
+                            )
+
+  target_link_libraries(${SEM_EXECUTABLE}
                         PUBLIC 
                         umpire
                         camp
@@ -320,6 +304,6 @@ if (SEM_USE_PYTHON)
 
 endif()
 
-install(TARGETS sem.exe
+install(TARGETS ${SEM_EXECUTABLE}
         RUNTIME DESTINATION bin)
 
