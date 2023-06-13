@@ -13,23 +13,23 @@ set (CMAKE_VERBOSE_MAKEFILE ON )
 #-----------------------------------------------------
 
 # use OMP to parallelise loops
-set (SEM_USE_OMP ON CACHE BOOL "")
+set (SEM_USE_OMP OFF CACHE BOOL "")
 
 # use RAJA to expose parallelism loop
 set (SEM_USE_RAJA OFF CACHE BOOL "")
 
 # use KOKOS to expose parallelism loop
-set (SEM_USE_KOKKOS OFF CACHE BOOL "")
+set (SEM_USE_KOKKOS ON CACHE BOOL "")
 
 #-----------------------------------------------------
 # Setup the flags for users to select data containers
 #-----------------------------------------------------
 
 # use std::vector for vectores and arrays
-set (SEM_USE_VECTOR OFF CACHE BOOL "")
+set (SEM_USE_VECTOR ON CACHE BOOL "")
 
 # use LvArray for vectors and arrays
-set (SEM_USE_LVARRAY ON CACHE BOOL "")
+set (SEM_USE_LVARRAY OFF CACHE BOOL "")
 
 #-----------------------------------------------------
 # Setup the flags for profiling using caliper

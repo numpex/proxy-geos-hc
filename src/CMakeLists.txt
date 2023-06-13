@@ -142,6 +142,7 @@ elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
   find_package(RAJA REQUIRED)
   set (raja_INCLUDE_DIR "${RAJA_DIR}/../../../include")
   include_directories(${raja_INCLUDE_DIR})
+  
 
   # LvArray uses umpire
   find_package(UMPIRE REQUIRED)
@@ -152,36 +153,18 @@ elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
   find_package(CAMP REQUIRED)
   set (camp_INCLUDE_DIR "$ENV{CAMP_INCLUDE_DIR}")
   include_directories(${camp_INCLUDE_DIR})
-  target_include_directories(sem.exe 
-                            PUBLIC 
-                            ${camp_INCLUDE_DIR}
-                            )
 
   # LvArray uses chai
   #find_package(CHAI REQUIRED)
   #set (chai_INCLUDE_DIR "$ENV{CHAI_INCLUDE_DIR}")
   #include_directories(${chai_INCLUDE_DIR})
-  #target_include_directories(sem.exe 
-  #                          PUBLIC 
-  #                          ${chai_INCLUDE_DIR}
-  #                          )
 
 
   # LvArray 
   find_package(LVARRAY REQUIRED)
   set (lvarray_INCLUDE_DIR "${LVARRAY_DIR}/../../../include")
   include_directories(${lvarray_INCLUDE_DIR})
-  target_include_directories(sem.exe 
-                            PUBLIC 
-                            ${lvarray_INCLUDE_DIR}
-                            )
 
-  target_link_libraries(sem.exe
-                        PUBLIC 
-                        umpire
-                        camp
-  #                      chai
-                        lvarray)
 
 elseif (NOT DEFINED $ENV{LVARRAY_DIR}) 
   set (SEM_USE_LVARRAY OFF CACHE BOOL "")
