@@ -6,30 +6,33 @@ project( sem )
 # Setup Flags for Building and Installation
 #-----------------------------------------------------
 
-set (CMAKE_VERBOSE_MAKEFILE OFF )
+set (CMAKE_VERBOSE_MAKEFILE ON )
+
+#set (CMAKE_C_COMPILER "/hrtc/apps/devtools/llvm/x86_64/centos8/17.0.0/gcc12/bin/clang")
+#set (CMAKE_CXX_COMPILER "/hrtc/apps/devtools/llvm/x86_64/centos8/17.0.0/gcc12/bin/clang++")
 
 #-----------------------------------------------------
 # Setup the flags for users to select programming models
 #-----------------------------------------------------
 
 # use OMP to parallelise loops
-set (SEM_USE_OMP ON CACHE BOOL "")
+option (SEM_USE_OMP "Use OpenMP to parallelise loops" OFF)
 
 # use RAJA to expose parallelism loop
-set (SEM_USE_RAJA OFF CACHE BOOL "")
+option (SEM_USE_RAJA "Use RAJA to parallelise loops" OFF)
 
 # use KOKOS to expose parallelism loop
-set (SEM_USE_KOKKOS OFF CACHE BOOL "")
+option (SEM_USE_KOKKOS "Use KOKKOS to parallelise loops" OFF)
 
 #-----------------------------------------------------
 # Setup the flags for users to select data containers
 #-----------------------------------------------------
 
 # use std::vector for vectores and arrays
-set (SEM_USE_VECTOR ON CACHE BOOL "")
+option (SEM_USE_VECTOR "Use standard vectors as data containers" OFF)
 
 # use LvArray for vectors and arrays
-set (SEM_USE_LVARRAY OFF CACHE BOOL "")
+option (SEM_USE_LVARRAY "Use LVARRAY as data containers" OFF)
 
 #-----------------------------------------------------
 # Setup the flags for profiling using caliper
