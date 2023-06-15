@@ -59,7 +59,6 @@ So you will get an executable named "sem_Sequential_VECTOR.exe" in your installa
 ## Option: to utilize RAJA + std::vector
 
 ### Step 1: install RAJA:
-
 ```
    git clone --recursive https://github.com/llnl/raja.git
    cd raja
@@ -68,7 +67,7 @@ So you will get an executable named "sem_Sequential_VECTOR.exe" in your installa
    make
    make install
 ```
-
+ 
 ### Step 2: setup your environment variables:
 
 ```
@@ -92,7 +91,7 @@ So you will get an executable named "sem_Sequential_VECTOR.exe" in your installa
 
 ## Option: to utilize KOKKOS + std::vector
 
-### Step 1: install RAJA:
+### Step 1: install KOKKOS:
 
 ```
    git clone --recursive https://github.com/kokkos/kokkos.git
@@ -123,9 +122,119 @@ So you will get an executable named "sem_Sequential_VECTOR.exe" in your installa
    install/bin/sem_Kokkos_VECTOR.exe
 ```
 ## Option: to utilize LvArray
+
+In order to intall LvArray you need to install camp and raja (please refer to install RAJA section above) first. 
+
+### Step 1: install camp and LvArray:
+
+```
+   git clone https://github.com/LLNL/camp.git
+   cd camp
+   mkdir build && cd build
+   cmake -DCMAKE_INSTALL_PREFIX=<path to install location> ..
+   make install
+```
+The simplest way to build LvArray is to define a host-configs file, an example could be find in host-configs/corigpu-gcc.cmake.
+```
+   git clone https://github.com/GEOS-DEV/LvArray.git
+   cd LvArray
+   python ./scripts/config-build.py -hc host-configs/<your configure file> -bt Release
+   cd build-pecan-base-release
+   make -j 32; make install
+```
+### Step 2: setup your environment variables:
+
+```
+   export LVARRAY_DIR={your LvArray installation directory}/share/lvarray/cmake/
+```
+
+### Step 3: compile and install proxyAppSEM
+
+```
+   mkdir ./build
+   cd build
+   cmake -DCMAKE_INSTALL_PREFIX=../install -DSEM_USE_LVARRAY=ON ..  
+   make install
+```
+
+### Step 4: run the executable, for example:
+
+```
+   install/bin/sem_Sequential_LVARRAY.exe
+```
+
 ## Option: to utilize OMP + LvArray
+### Step 1: install LvArray:
+Please find installation LvArray in the above section.
+### Step 2: setup your environment variables:
+
+```
+   export LVARRAY_DIR={your LvArray installation directory}/share/lvarray/cmake/
+```
+
+### Step 3: compile and install proxyAppSEM
+
+```
+   mkdir ./build
+   cd build
+   cmake -DCMAKE_INSTALL_PREFIX=../install -DSEM_USE_OMP=ON -DSEM_USE_LVARRAY=ON ..  
+   make install
+```
+
+### Step 4: run the executable, for example:
+
+```
+   install/bin/sem_OMP_LVARRAY.exe
+```
 ## Option: to utilize RAJA + LvArray
+### Step 1: install RAJA and LvArray:
+Please find how to install RAJA and LvArray in the above sections.
+### Step 2: setup your environment variables:
+
+```
+   export RAJA_DIR={your Raja installation directory}/lib/cmake/raja
+   export LVARRAY_DIR={your LvArray installation directory}/share/lvarray/cmake/
+```
+
+### Step 3: compile and install proxyAppSEM
+
+```
+   mkdir ./build
+   cd build
+   cmake -DCMAKE_INSTALL_PREFIX=../install -DSEM_USE_RAJA=ON -DSEM_USE_LVARRAY=ON ..  
+   make install
+```
+
+### Step 4: run the executable, for example:
+
+```
+   install/bin/sem_RAJA_LVARRAY.exe
+```
+
 ## Option: to utilize KOKKOS + LvArray
+### Step 1: install KOKKOS and LvArray:
+Please find how to install KOKKOS and LvArray in the above sections.
+### Step 2: setup your environment variables:
+
+```
+   export KOKKOS_DIR={your kokkos installation directory}/lib64/cmake/Kokkos/
+   export LVARRAY_DIR={your LvArray installation directory}/share/lvarray/cmake/
+```
+
+### Step 3: compile and install proxyAppSEM
+
+```
+   mkdir ./build
+   cd build
+   cmake -DCMAKE_INSTALL_PREFIX=../install -DSEM_USE_KOKKOS=ON -DSEM_USE_LVARRAY=ON ..  
+   make install
+```
+
+### Step 4: run the executable, for example:
+
+```
+   install/bin/sem_KOKKOS_LVARRAY.exe
+```
 ## Option: to utilize Caliper as a profiler to output timing information
 
 ### Step 1: install CALIPER:
@@ -145,7 +254,6 @@ So you will get an executable named "sem_Sequential_VECTOR.exe" in your installa
 ```
 
 ### Step 3: compile and install proxyAppSEM
-
 ```
    using any combinations of programming models and data containeres as above
 ```
