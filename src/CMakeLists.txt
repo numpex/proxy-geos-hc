@@ -155,9 +155,9 @@ elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
   include_directories(${camp_INCLUDE_DIR})
 
   # LvArray uses chai
-  #find_package(CHAI REQUIRED)
-  #set (chai_INCLUDE_DIR "$ENV{CHAI_INCLUDE_DIR}")
-  #include_directories(${chai_INCLUDE_DIR})
+  find_package(CHAI REQUIRED)
+  set (chai_INCLUDE_DIR "$ENV{CHAI_INCLUDE_DIR}")
+  include_directories(${chai_INCLUDE_DIR})
 
 
   # LvArray 
@@ -291,6 +291,7 @@ if( SEM_USE_LVARRAY)
                             ${raja_INCLUDE_DIR}
                             ${umpire_INCLUDE_DIR}
                             ${camp_INCLUDE_DIR}
+                            ${chai_INCLUDE_DIR}
                             ${lvarray_INCLUDE_DIR}
                             )
 
@@ -298,7 +299,7 @@ if( SEM_USE_LVARRAY)
                         PUBLIC 
                         umpire
                         camp
-#                       chai
+                        chai
                         lvarray)
 endif()
 
