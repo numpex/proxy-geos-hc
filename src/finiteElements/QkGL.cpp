@@ -5,96 +5,94 @@
 #include "QkGL.hpp"
 #include "commonMacro.hpp"
 
-using namespace std;
-
 QkGL::QkGL(){};
 QkGL::~QkGL(){};
 
 vectorDouble QkGL::gaussLobattoQuadraturePoints( int order ) const
 {
-  vectorDouble quadraturePoints(order+1);
+  vectorDouble quadraturePoints( order+1 );
   if( order == 1 )
   {
-    quadraturePoints[0]=-1.0 ;
-    quadraturePoints[1]=1.0 ;
+    quadraturePoints[0]=-1.0;
+    quadraturePoints[1]=1.0;
   }
   if( order == 2 )
   {
-    quadraturePoints[0]=-1.0 ;
-    quadraturePoints[1]=0.0 ;
-    quadraturePoints[2]=1.0 ;
+    quadraturePoints[0]=-1.0;
+    quadraturePoints[1]=0.0;
+    quadraturePoints[2]=1.0;
   }
   if( order == 3 )
   {
-    quadraturePoints[0]=-1.0 ;
-    quadraturePoints[1]=-0.4472136 ;
-    quadraturePoints[2]=0.4472136 ;
-    quadraturePoints[3]=1.0 ;
+    quadraturePoints[0]=-1.0;
+    quadraturePoints[1]=-0.4472136;
+    quadraturePoints[2]=0.4472136;
+    quadraturePoints[3]=1.0;
   }
   if( order == 4 )
   {
-    quadraturePoints[0]=-1.0 ;
-    quadraturePoints[1]=-0.65465367 ;
-    quadraturePoints[2]=0.0 ;
-    quadraturePoints[3]=0.65465367 ;
-    quadraturePoints[4]=1.0 ;
+    quadraturePoints[0]=-1.0;
+    quadraturePoints[1]=-0.65465367;
+    quadraturePoints[2]=0.0;
+    quadraturePoints[3]=0.65465367;
+    quadraturePoints[4]=1.0;
   }
   if( order == 5 )
   {
-    quadraturePoints[0]=-1.0 ;
-    quadraturePoints[1]=-0.76505532 ;
-    quadraturePoints[2]=-0.28523152 ;
-    quadraturePoints[3]=0.28523152 ;
-    quadraturePoints[4]=0.76505532 ;
-    quadraturePoints[5]=1.0 ;
+    quadraturePoints[0]=-1.0;
+    quadraturePoints[1]=-0.76505532;
+    quadraturePoints[2]=-0.28523152;
+    quadraturePoints[3]=0.28523152;
+    quadraturePoints[4]=0.76505532;
+    quadraturePoints[5]=1.0;
   }
   return quadraturePoints;
 }
 vectorDouble QkGL::gaussLobattoQuadratureWeights( int order ) const
 {
-  vectorDouble weights(order+1);
- 
+  vectorDouble weights( order+1 );
+
   if( order == 1 )
   {
-    weights[0]=1.0 ;
-    weights[1]=1.0 ;
+    weights[0]=1.0;
+    weights[1]=1.0;
   }
   if( order == 2 )
   {
-    weights[0]=0.33333333 ;
-    weights[1]=1.33333333 ;
-    weights[2]= 0.33333333 ;
+    weights[0]=0.33333333;
+    weights[1]=1.33333333;
+    weights[2]= 0.33333333;
   }
   if( order == 3 )
   {
-    weights[0]=0.16666667 ;
-    weights[1]=0.83333333 ;
-    weights[2]=0.83333333 ;
-    weights[3]=0.16666667 ;
+    weights[0]=0.16666667;
+    weights[1]=0.83333333;
+    weights[2]=0.83333333;
+    weights[3]=0.16666667;
   }
   if( order == 4 )
   {
     weights[0]=0.1;
-    weights[1]=0.54444444 ;
-    weights[2]=0.71111111 ;
-    weights[3]=0.54444444 ;
-    weights[4]=0.1 ;
+    weights[1]=0.54444444;
+    weights[2]=0.71111111;
+    weights[3]=0.54444444;
+    weights[4]=0.1;
   }
   if( order == 5 )
   {
-    weights[0]=0.06666667 ;
-    weights[1]=0.37847496 ;
-    weights[2]=0.55485838 ;
-    weights[3]=0.55485838 ;
-    weights[4]=0.37847496 ;
-    weights[5]=0.06666667 ;
+    weights[0]=0.06666667;
+    weights[1]=0.37847496;
+    weights[2]=0.55485838;
+    weights[3]=0.55485838;
+    weights[4]=0.37847496;
+    weights[5]=0.06666667;
   }
   return weights;
 }
 
 vectorDouble QkGL::shapeFunction1D( int order, double xi ) const
 {
-  vectorDouble shapeFunction(order+1);
+  vectorDouble shapeFunction( order+1 );
   if( order==1 )
   {
     shapeFunction[0]=0.5*(1.0-xi);
@@ -112,191 +110,191 @@ vectorDouble QkGL::shapeFunction1D( int order, double xi ) const
   if( order==3 )
   {
     shapeFunction[0]=(0.309016994374947 - 0.690983005625053*xi)*(0.5 - 0.5*xi)
-                            *(-1.80901699437495*xi - 0.809016994374947);
+                      *(-1.80901699437495*xi - 0.809016994374947);
 
     shapeFunction[1]=(0.5 - 1.11803398874989*xi)*(0.690983005625053 - 0.690983005625053*xi)
-                            *(1.80901699437495*xi + 1.80901699437495);
+                      *(1.80901699437495*xi + 1.80901699437495);
 
     shapeFunction[2]=(1.80901699437495 - 1.80901699437495*xi)
-                            *(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5);
+                      *(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5);
 
     shapeFunction[3]=(0.5*xi + 0.5)*(0.690983005625053*xi + 0.309016994374947)
-                            *(1.80901699437495*xi - 0.809016994374947);
+                      *(1.80901699437495*xi - 0.809016994374947);
   }
   if( order==4 )
   {
     shapeFunction[0]=1.0*xi*(0.39564392373896 - 0.60435607626104*xi)*(0.5 - 0.5*xi)
-                             *(-2.89564392373896*xi - 1.89564392373896);
+                      *(-2.89564392373896*xi - 1.89564392373896);
 
     shapeFunction[1]=-1.52752523165195*xi*(0.5 - 0.763762615825973*xi)*(0.60435607626104 - 0.60435607626104*xi)
-                             *(2.89564392373896*xi + 2.89564392373896);
+                      *(2.89564392373896*xi + 2.89564392373896);
 
     shapeFunction[2]=(1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0);
 
     shapeFunction[3]= 1.52752523165195*xi*(2.89564392373896 - 2.89564392373896*xi)
-                             *(0.60435607626104*xi + 0.60435607626104)*(0.763762615825973*xi + 0.5);
+                      *(0.60435607626104*xi + 0.60435607626104)*(0.763762615825973*xi + 0.5);
 
     shapeFunction[4]= 1.0*xi*(0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)
-                             *(2.89564392373896*xi - 1.89564392373896);
+                      *(2.89564392373896*xi - 1.89564392373896);
   }
   if( order==5 )
   {
     shapeFunction[0]=(0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
-                            *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)
-                            *(-1.39905441140358*xi - 0.399054411403579);
+                      *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)
+                      *(-1.39905441140358*xi - 0.399054411403579);
 
     shapeFunction[1]=(0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
-                            *(0.566554479308753 - 0.566554479308753*xi)*(-2.0840983387567*xi - 0.594450529658367)
-                            *(4.25632117622354*xi + 4.25632117622354);
+                      *(0.566554479308753 - 0.566554479308753*xi)*(-2.0840983387567*xi - 0.594450529658367)
+                      *(4.25632117622354*xi + 4.25632117622354);
 
     shapeFunction[2]=(0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
-                            *(0.778069933064125 - 0.778069933064125*xi)*(1.39905441140358*xi + 1.39905441140358)
-                            *(2.0840983387567*xi + 1.59445052965837);
+                      *(0.778069933064125 - 0.778069933064125*xi)*(1.39905441140358*xi + 1.39905441140358)
+                      *(2.0840983387567*xi + 1.59445052965837);
 
     shapeFunction[3]=(1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
-                            *(0.778069933064125*xi + 0.778069933064125)*(0.952120850728289*xi + 0.728425125873928)
-                            *(1.75296196636787*xi + 0.5);
+                      *(0.778069933064125*xi + 0.778069933064125)*(0.952120850728289*xi + 0.728425125873928)
+                      *(1.75296196636787*xi + 0.5);
 
     shapeFunction[4]=(4.25632117622354 - 4.25632117622354*xi)*(0.566554479308753*xi + 0.566554479308753)
-                            *(0.6535475074298*xi + 0.5)*(0.952120850728289*xi + 0.271574874126072)
-                            *(2.0840983387567*xi - 0.594450529658367);
+                      *(0.6535475074298*xi + 0.5)*(0.952120850728289*xi + 0.271574874126072)
+                      *(2.0840983387567*xi - 0.594450529658367);
 
     shapeFunction[5]=(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
-                            *(0.778069933064125*xi + 0.221930066935875)*(1.39905441140358*xi - 0.399054411403579)
-                            *(4.25632117622354*xi - 3.25632117622354);
+                      *(0.778069933064125*xi + 0.221930066935875)*(1.39905441140358*xi - 0.399054411403579)
+                      *(4.25632117622354*xi - 3.25632117622354);
   }
   return shapeFunction;
 }
 
 vectorDouble QkGL::derivativeShapeFunction1D( int order, double xi ) const
 {
-  vectorDouble derivativeShapeFunction(order+1);
+  vectorDouble derivativeShapeFunction( order+1 );
 
   if( order == 1 )
   {
-    derivativeShapeFunction[0]=-0.5 ;
-    derivativeShapeFunction[1]=0.5 ;
+    derivativeShapeFunction[0]=-0.5;
+    derivativeShapeFunction[1]=0.5;
   }
   if( order == 2 )
   {
-    derivativeShapeFunction[0]=1.0*xi - 0.5 ;
-    derivativeShapeFunction[1]=-2.0*xi ;
-    derivativeShapeFunction[2]=1.0*xi + 0.5 ;
+    derivativeShapeFunction[0]=1.0*xi - 0.5;
+    derivativeShapeFunction[1]=-2.0*xi;
+    derivativeShapeFunction[2]=1.0*xi + 0.5;
   }
   if( order == 3 )
   {
     derivativeShapeFunction[0]=-1.80901699437495*(0.309016994374947 - 0.690983005625053*xi)*(0.5 - 0.5*xi)
-                                       + (-1.80901699437495*xi - 0.809016994374947)*(0.345491502812526*xi - 0.345491502812526)
-                                       + (-1.80901699437495*xi - 0.809016994374947)*(0.345491502812526*xi - 0.154508497187474);
+                                + (-1.80901699437495*xi - 0.809016994374947)*(0.345491502812526*xi - 0.345491502812526)
+                                + (-1.80901699437495*xi - 0.809016994374947)*(0.345491502812526*xi - 0.154508497187474);
 
     derivativeShapeFunction[1]=1.80901699437495*(0.5 - 1.11803398874989*xi)*(0.690983005625053 - 0.690983005625053*xi)
-                                       + (0.772542485937369*xi - 0.772542485937369)*(1.80901699437495*xi + 1.80901699437495)
-                                       + (0.772542485937369*xi - 0.345491502812526)*(1.80901699437495*xi + 1.80901699437495);
+                                + (0.772542485937369*xi - 0.772542485937369)*(1.80901699437495*xi + 1.80901699437495)
+                                + (0.772542485937369*xi - 0.345491502812526)*(1.80901699437495*xi + 1.80901699437495);
 
     derivativeShapeFunction[2]=(1.80901699437495 - 1.80901699437495*xi)*(0.772542485937369*xi + 0.345491502812526) +
-                                      (1.80901699437495 - 1.80901699437495*xi)*(0.772542485937369*xi + 0.772542485937369) -
-                                      1.80901699437495*(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5);
+                                (1.80901699437495 - 1.80901699437495*xi)*(0.772542485937369*xi + 0.772542485937369) -
+                                1.80901699437495*(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5);
 
     derivativeShapeFunction[3]=(0.345491502812526*xi + 0.154508497187474)*(1.80901699437495*xi - 0.809016994374947) +
-                                      (0.345491502812526*xi + 0.345491502812526)*(1.80901699437495*xi - 0.809016994374947) +
-                                      1.80901699437495*(0.5*xi + 0.5)*(0.690983005625053*xi + 0.309016994374947);
+                                (0.345491502812526*xi + 0.345491502812526)*(1.80901699437495*xi - 0.809016994374947) +
+                                1.80901699437495*(0.5*xi + 0.5)*(0.690983005625053*xi + 0.309016994374947);
 
   }
   if( order == 4 )
   {
     derivativeShapeFunction[0]=2.89564392373896*xi*(0.39564392373896 - 0.60435607626104*xi)*(0.5 - 0.5*xi) +
-                                       0.5*xi*(0.39564392373896 - 0.60435607626104*xi)*(-2.89564392373896*xi - 1.89564392373896)
-                                       + 0.60435607626104*xi*(0.5 - 0.5*xi)*(-2.89564392373896*xi - 1.89564392373896) +
-                                       (0.39564392373896 - 0.60435607626104*xi)*(-2.89564392373896*xi - 1.89564392373896)*(0.5*xi - 0.5);
+                                0.5*xi*(0.39564392373896 - 0.60435607626104*xi)*(-2.89564392373896*xi - 1.89564392373896)
+                                + 0.60435607626104*xi*(0.5 - 0.5*xi)*(-2.89564392373896*xi - 1.89564392373896) +
+                                (0.39564392373896 - 0.60435607626104*xi)*(-2.89564392373896*xi - 1.89564392373896)*(0.5*xi - 0.5);
 
     derivativeShapeFunction[1]=-4.42316915539091*xi*(0.5 - 0.763762615825973*xi)*(0.60435607626104 - 0.60435607626104*xi)
-                                       + 0.923169155390906*xi*(0.5 - 0.763762615825973*xi)*(2.89564392373896*xi + 2.89564392373896)
-                                       + 1.16666666666667*xi*(0.60435607626104 - 0.60435607626104*xi)*(2.89564392373896*xi + 2.89564392373896)
-                                       + (0.60435607626104 - 0.60435607626104*xi)*(1.16666666666667*xi - 0.763762615825973)
-                                       *(2.89564392373896*xi + 2.89564392373896);
+                                + 0.923169155390906*xi*(0.5 - 0.763762615825973*xi)*(2.89564392373896*xi + 2.89564392373896)
+                                + 1.16666666666667*xi*(0.60435607626104 - 0.60435607626104*xi)*(2.89564392373896*xi + 2.89564392373896)
+                                + (0.60435607626104 - 0.60435607626104*xi)*(1.16666666666667*xi - 0.763762615825973)
+                                *(2.89564392373896*xi + 2.89564392373896);
 
     derivativeShapeFunction[2]=(1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.52752523165195*xi + 1.0) +
-                                      (1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.52752523165195*xi + 1.52752523165195)
-                                      - 1.0*(1.0 - 1.52752523165195*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0)
-                                      - 1.52752523165195*(1.0 - 1.0*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0);
+                                (1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.52752523165195*xi + 1.52752523165195)
+                                - 1.0*(1.0 - 1.52752523165195*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0)
+                                - 1.52752523165195*(1.0 - 1.0*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0);
 
     derivativeShapeFunction[3]=1.16666666666667*xi*(2.89564392373896 - 2.89564392373896*xi)*(0.60435607626104*xi + 0.60435607626104)
-                                       + 0.923169155390906*xi*(2.89564392373896 - 2.89564392373896*xi)*(0.763762615825973*xi + 0.5)
-                                       - 4.42316915539091*xi*(0.60435607626104*xi + 0.60435607626104)*(0.763762615825973*xi + 0.5)
-                                       + (2.89564392373896 - 2.89564392373896*xi)*(0.60435607626104*xi + 0.60435607626104)
-                                       *(1.16666666666667*xi + 0.763762615825973);
+                                + 0.923169155390906*xi*(2.89564392373896 - 2.89564392373896*xi)*(0.763762615825973*xi + 0.5)
+                                - 4.42316915539091*xi*(0.60435607626104*xi + 0.60435607626104)*(0.763762615825973*xi + 0.5)
+                                + (2.89564392373896 - 2.89564392373896*xi)*(0.60435607626104*xi + 0.60435607626104)
+                                *(1.16666666666667*xi + 0.763762615825973);
 
     derivativeShapeFunction[4]=2.89564392373896*xi*(0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)
-                                       + 0.60435607626104*xi*(0.5*xi + 0.5)*(2.89564392373896*xi - 1.89564392373896)
-                                       + 0.5*xi*(0.60435607626104*xi + 0.39564392373896)*(2.89564392373896*xi - 1.89564392373896)
-                                       + (0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)*(2.89564392373896*xi - 1.89564392373896);
+                                + 0.60435607626104*xi*(0.5*xi + 0.5)*(2.89564392373896*xi - 1.89564392373896)
+                                + 0.5*xi*(0.60435607626104*xi + 0.39564392373896)*(2.89564392373896*xi - 1.89564392373896)
+                                + (0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)*(2.89564392373896*xi - 1.89564392373896);
   }
   if( order == 5 )
   {
     derivativeShapeFunction[0]=-1.39905441140358*(0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
-                                       *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)
-                                       - 4.25632117622354*(0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
-                                       *(0.5 - 0.5*xi)*(-1.39905441140358*xi - 0.399054411403579) + (0.221930066935875 - 0.778069933064125*xi)
-                                       *(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579)
-                                       *(0.283277239654376*xi - 0.283277239654376) + (0.221930066935875 - 0.778069933064125*xi)
-                                       *(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579)
-                                       *(0.283277239654376*xi - 0.216722760345624) - 0.778069933064125*(0.433445520691247 - 0.566554479308753*xi)
-                                       *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579);
+                                *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)
+                                - 4.25632117622354*(0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
+                                *(0.5 - 0.5*xi)*(-1.39905441140358*xi - 0.399054411403579) + (0.221930066935875 - 0.778069933064125*xi)
+                                *(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579)
+                                *(0.283277239654376*xi - 0.283277239654376) + (0.221930066935875 - 0.778069933064125*xi)
+                                *(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579)
+                                *(0.283277239654376*xi - 0.216722760345624) - 0.778069933064125*(0.433445520691247 - 0.566554479308753*xi)
+                                *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579);
 
     derivativeShapeFunction[1]= -2.0840983387567*(0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
-                                       *(0.566554479308753 - 0.566554479308753*xi)*(4.25632117622354*xi + 4.25632117622354)
-                                       - 0.566554479308753*(0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
-                                       *(-2.0840983387567*xi - 0.594450529658367)*(4.25632117622354*xi + 4.25632117622354)
-                                       +(0.271574874126072 - 0.952120850728289*xi)*(0.566554479308753 - 0.566554479308753*xi)
-                                       *(2.12816058811177 - 2.78170809554157*xi)*(-2.0840983387567*xi - 0.594450529658367)
-                                       +(0.271574874126072 - 0.952120850728289*xi)*(0.566554479308753 - 0.566554479308753*xi)
-                                       *(-2.78170809554157*xi - 2.78170809554157)*(-2.0840983387567*xi - 0.594450529658367)
-                                       - 0.952120850728289*(0.5 - 0.6535475074298*xi)*(0.566554479308753 - 0.566554479308753*xi)
-                                       *(-2.0840983387567*xi - 0.594450529658367)*(4.25632117622354*xi + 4.25632117622354);
+                                *(0.566554479308753 - 0.566554479308753*xi)*(4.25632117622354*xi + 4.25632117622354)
+                                - 0.566554479308753*(0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
+                                *(-2.0840983387567*xi - 0.594450529658367)*(4.25632117622354*xi + 4.25632117622354)
+                                +(0.271574874126072 - 0.952120850728289*xi)*(0.566554479308753 - 0.566554479308753*xi)
+                                *(2.12816058811177 - 2.78170809554157*xi)*(-2.0840983387567*xi - 0.594450529658367)
+                                +(0.271574874126072 - 0.952120850728289*xi)*(0.566554479308753 - 0.566554479308753*xi)
+                                *(-2.78170809554157*xi - 2.78170809554157)*(-2.0840983387567*xi - 0.594450529658367)
+                                - 0.952120850728289*(0.5 - 0.6535475074298*xi)*(0.566554479308753 - 0.566554479308753*xi)
+                                *(-2.0840983387567*xi - 0.594450529658367)*(4.25632117622354*xi + 4.25632117622354);
 
     derivativeShapeFunction[2]= 2.0840983387567*(0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
-                                       *(0.778069933064125 - 0.778069933064125*xi)*(1.39905441140358*xi + 1.39905441140358)
-                                       + 1.39905441140358*(0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
-                                       *(0.778069933064125 - 0.778069933064125*xi)*(2.0840983387567*xi + 1.59445052965837)
-                                       - 0.952120850728289*(0.5 - 1.75296196636787*xi)*(0.778069933064125 - 0.778069933064125*xi)
-                                       *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837)
-                                       + (0.728425125873928 - 0.952120850728289*xi)*(1.3639269998358*xi - 1.3639269998358)
-                                       *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837)
-                                       + (0.728425125873928 - 0.952120850728289*xi)*(1.3639269998358*xi - 0.389034966532063)
-                                       *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837);
+                                *(0.778069933064125 - 0.778069933064125*xi)*(1.39905441140358*xi + 1.39905441140358)
+                                + 1.39905441140358*(0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
+                                *(0.778069933064125 - 0.778069933064125*xi)*(2.0840983387567*xi + 1.59445052965837)
+                                - 0.952120850728289*(0.5 - 1.75296196636787*xi)*(0.778069933064125 - 0.778069933064125*xi)
+                                *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837)
+                                + (0.728425125873928 - 0.952120850728289*xi)*(1.3639269998358*xi - 1.3639269998358)
+                                *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837)
+                                + (0.728425125873928 - 0.952120850728289*xi)*(1.3639269998358*xi - 0.389034966532063)
+                                *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837);
 
     derivativeShapeFunction[3]=0.952120850728289*(1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
-                                       *(0.778069933064125*xi + 0.778069933064125)*(1.75296196636787*xi + 0.5)
-                                       + (1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
-                                       *(0.952120850728289*xi + 0.728425125873928)*(1.3639269998358*xi + 0.389034966532063)
-                                       + (1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
-                                       *(0.952120850728289*xi + 0.728425125873928)*(1.3639269998358*xi + 1.3639269998358)
-                                       - 2.0840983387567*(1.39905441140358 - 1.39905441140358*xi)*(0.778069933064125*xi + 0.778069933064125)
-                                       *(0.952120850728289*xi + 0.728425125873928)*(1.75296196636787*xi + 0.5)
-                                       - 1.39905441140358*(1.59445052965837 - 2.0840983387567*xi)*(0.778069933064125*xi + 0.778069933064125)
-                                       *(0.952120850728289*xi + 0.728425125873928)*(1.75296196636787*xi + 0.5);
+                                *(0.778069933064125*xi + 0.778069933064125)*(1.75296196636787*xi + 0.5)
+                                + (1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
+                                *(0.952120850728289*xi + 0.728425125873928)*(1.3639269998358*xi + 0.389034966532063)
+                                + (1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
+                                *(0.952120850728289*xi + 0.728425125873928)*(1.3639269998358*xi + 1.3639269998358)
+                                - 2.0840983387567*(1.39905441140358 - 1.39905441140358*xi)*(0.778069933064125*xi + 0.778069933064125)
+                                *(0.952120850728289*xi + 0.728425125873928)*(1.75296196636787*xi + 0.5)
+                                - 1.39905441140358*(1.59445052965837 - 2.0840983387567*xi)*(0.778069933064125*xi + 0.778069933064125)
+                                *(0.952120850728289*xi + 0.728425125873928)*(1.75296196636787*xi + 0.5);
 
     derivativeShapeFunction[4]=(2.78170809554157 - 2.78170809554157*xi)*(0.566554479308753*xi + 0.566554479308753)
-                                      *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367)
-                                      + 2.0840983387567*(4.25632117622354 - 4.25632117622354*xi)*(0.566554479308753*xi + 0.566554479308753)
-                                      *(0.6535475074298*xi + 0.5)*(0.952120850728289*xi + 0.271574874126072)
-                                      + 0.952120850728289*(4.25632117622354 - 4.25632117622354*xi)*(0.566554479308753*xi
-                                                                                                    + 0.566554479308753)*(0.6535475074298*xi + 0.5)*(2.0840983387567*xi - 0.594450529658367)
-                                      + 0.566554479308753*(4.25632117622354 - 4.25632117622354*xi)*(0.6535475074298*xi + 0.5)
-                                      *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367)
-                                      + (-2.78170809554157*xi - 2.12816058811177)*(0.566554479308753*xi + 0.566554479308753)
-                                      *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367);
+                                *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367)
+                                + 2.0840983387567*(4.25632117622354 - 4.25632117622354*xi)*(0.566554479308753*xi + 0.566554479308753)
+                                *(0.6535475074298*xi + 0.5)*(0.952120850728289*xi + 0.271574874126072)
+                                + 0.952120850728289*(4.25632117622354 - 4.25632117622354*xi)*(0.566554479308753*xi
+                                                                                              + 0.566554479308753)*(0.6535475074298*xi + 0.5)*(2.0840983387567*xi - 0.594450529658367)
+                                + 0.566554479308753*(4.25632117622354 - 4.25632117622354*xi)*(0.6535475074298*xi + 0.5)
+                                *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367)
+                                + (-2.78170809554157*xi - 2.12816058811177)*(0.566554479308753*xi + 0.566554479308753)
+                                *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367);
 
     derivativeShapeFunction[5]=(0.283277239654376*xi + 0.216722760345624)*(0.778069933064125*xi + 0.221930066935875)
-                                      *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354)
-                                      + (0.283277239654376*xi + 0.283277239654376)*(0.778069933064125*xi + 0.221930066935875)
-                                      *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354)
-                                      + 4.25632117622354*(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
-                                      *(0.778069933064125*xi + 0.221930066935875)*(1.39905441140358*xi - 0.399054411403579)
-                                      + 1.39905441140358*(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
-                                      *(0.778069933064125*xi + 0.221930066935875)*(4.25632117622354*xi - 3.25632117622354)
-                                      + 0.778069933064125*(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
-                                      *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354);
+                                *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354)
+                                + (0.283277239654376*xi + 0.283277239654376)*(0.778069933064125*xi + 0.221930066935875)
+                                *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354)
+                                + 4.25632117622354*(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
+                                *(0.778069933064125*xi + 0.221930066935875)*(1.39905441140358*xi - 0.399054411403579)
+                                + 1.39905441140358*(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
+                                *(0.778069933064125*xi + 0.221930066935875)*(4.25632117622354*xi - 3.25632117622354)
+                                + 0.778069933064125*(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
+                                *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354);
   }
   return derivativeShapeFunction;
 }
@@ -310,12 +308,12 @@ arrayDouble QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
   {
-    vectorDouble tmp(order+1);
+    vectorDouble tmp( order+1 );
     //extract all basis functions  for current quadrature point
     tmp=shapeFunction1D( order, quadraturePoints[i] );
-    for (int j=0;j<order+1;j++)
+    for( int j=0; j<order+1; j++ )
     {
-        basisFunction1D[j][i]=tmp[j];
+      basisFunction1D[j][i]=tmp[j];
     }
   }
   return basisFunction1D;
@@ -326,16 +324,16 @@ arrayDouble QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints
 arrayDouble QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints ) const
 {
   int nBasisFunction1D=order+1;
-  arrayDouble derivativeBasisFunction1D( nBasisFunction1D,nBasisFunction1D);
+  arrayDouble derivativeBasisFunction1D( nBasisFunction1D, nBasisFunction1D );
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
   {
-    vectorDouble tmp(order+1);
+    vectorDouble tmp( order+1 );
     //extract all basis functions  for current quadrature point
     tmp=derivativeShapeFunction1D( order, quadraturePoints[i] );
-    for (int j=0;j<order+1;j++)
+    for( int j=0; j<order+1; j++ )
     {
-        derivativeBasisFunction1D[j][i]=tmp[j];
+      derivativeBasisFunction1D[j][i]=tmp[j];
     }
   }
   return derivativeBasisFunction1D;
@@ -344,14 +342,14 @@ arrayDouble QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadra
 
 // compute 2D gauss-lobatto weights
 vectorDouble QkGL::getGaussLobattoWeights( vectorDouble & quadraturePoints,
-                                               vectorDouble& weights )const
+                                           vectorDouble & weights )const
 {
-  vectorDouble W(quadraturePoints.size()*quadraturePoints.size());
+  vectorDouble W( quadraturePoints.size()*quadraturePoints.size());
   for( int j=0; j<quadraturePoints.size(); j++ )
   {
     for( int i=0; i<quadraturePoints.size(); i++ )
     {
-      W[i+j*quadraturePoints.size()]= weights[i]*weights[j] ;
+      W[i+j*quadraturePoints.size()]= weights[i]*weights[j];
     }
   }
   return W;
@@ -363,7 +361,7 @@ arrayDouble QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
                                       arrayDouble & b )const
 {
   int nBasisFunctions=quadraturePoints.size()*quadraturePoints.size();
-  arrayDouble c( nBasisFunctions , nBasisFunctions);
+  arrayDouble c( nBasisFunctions, nBasisFunctions );
   for( int j = 0; j < quadraturePoints.size(); j++ )
   {
     for( int i = 0; i<quadraturePoints.size(); i++ )
@@ -388,7 +386,7 @@ arrayDouble QkGL::computeJacobianMatrix( const int & nPointsPerElement,
                                          arrayDouble & dxPhi,
                                          arrayDouble & dyPhi )const
 {
- arrayDouble jacobianMatrix( 4,nPointsPerElement);
+  arrayDouble jacobianMatrix( 4, nPointsPerElement );
 
   for( int i=0; i<nPointsPerElement; i++ )
   {
@@ -404,10 +402,10 @@ arrayDouble QkGL::computeJacobianMatrix( const int & nPointsPerElement,
 }
 
 // compute jacobian matrix determinant
-vectorDouble  QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
-                                                        arrayDouble & jacobianMatrix ) const
+vectorDouble QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+                                                       arrayDouble & jacobianMatrix ) const
 {
-  vectorDouble detJ( nPointsPerElement);
+  vectorDouble detJ( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     detJ[i]=(jacobianMatrix[0][i]*jacobianMatrix[3][i]-jacobianMatrix[2][i]*jacobianMatrix[1][i]);
@@ -420,7 +418,7 @@ arrayDouble QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
                                             arrayDouble & jacobianMatrix,
                                             vectorDouble & detJ ) const
 {
-  arrayDouble invJacobianMatrix( 4, nPointsPerElement);
+  arrayDouble invJacobianMatrix( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     invJacobianMatrix[0][i]=(jacobianMatrix[3][i]/detJ[i]);
@@ -436,7 +434,7 @@ arrayDouble QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
                                                   arrayDouble & jacobianMatrix,
                                                   vectorDouble & detJ ) const
 {
-  arrayDouble transpInvJacobianMatrix( 4,nPointsPerElement);
+  arrayDouble transpInvJacobianMatrix( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     transpInvJacobianMatrix[0][i]=(jacobianMatrix[3][i]/detJ[i]);
@@ -453,7 +451,7 @@ arrayDouble QkGL::computeB( const int & nPointsPerElement,
                             arrayDouble & transpInvJacobianMatrix,
                             vectorDouble & detJ ) const
 {
-  arrayDouble B( 4,nPointsPerElement);
+  arrayDouble B( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     B[0][i]=(abs( detJ[i] )*(invJacobianMatrix[0][i]*transpInvJacobianMatrix[0][i]+
@@ -474,10 +472,10 @@ arrayDouble QkGL::computeB( const int & nPointsPerElement,
 arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                   const int & order,
                                   vectorDouble & weights2D,
-                                  arrayDouble  & B,
-                                  arrayDouble  & dPhi ) const
+                                  arrayDouble & B,
+                                  arrayDouble & dPhi ) const
 {
-  arrayDouble R( nPointsPerElement, nPointsPerElement);
+  arrayDouble R( nPointsPerElement, nPointsPerElement );
   // B11
   for( int i1=0; i1<order+1; i1++ )
   {
@@ -548,11 +546,11 @@ arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
 arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                   vectorDouble & weights2D,
-                                  arrayDouble  & B,
-                                  arrayDouble  & dxPhi,
-                                  arrayDouble  & dyPhi ) const
+                                  arrayDouble & B,
+                                  arrayDouble & dxPhi,
+                                  arrayDouble & dyPhi ) const
 {
-  arrayDouble R( nPointsPerElement, nPointsPerElement);
+  arrayDouble R( nPointsPerElement, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     for( int j=0; j<nPointsPerElement; j++ )
@@ -576,7 +574,7 @@ vectorDouble QkGL::phiIphiJ( const int & nPointsPerElement,
                              vectorDouble & weights2D,
                              vectorDouble & detJ ) const
 {
-  vectorDouble M( nPointsPerElement);
+  vectorDouble M( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     M[i]=weights2D[i]*abs( detJ[i] );
@@ -588,10 +586,10 @@ vectorDouble QkGL::phiIphiJ( const int & nPointsPerElement,
 // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$
 arrayDouble QkGL::phiIphiJ( const int & nPointsPerElement,
                             vectorDouble & weights2D,
-                            arrayDouble  & phi,
+                            arrayDouble & phi,
                             vectorDouble & detJ ) const
 {
-  arrayDouble M( nPointsPerElement, nPointsPerElement);
+  arrayDouble M( nPointsPerElement, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     for( int j=0; j<nPointsPerElement; j++ )
@@ -613,9 +611,9 @@ vectorReal QkGL::computeDs( const int & iFace,
                             arrayDouble & derivativeBasisFunction2DX,
                             arrayDouble & derivativeBasisFunction2DY ) const
 {
-  vectorInt numOfBasisFunctionOnFace( order+1);
-  arrayReal Js( 2, order+1);
-  vectorReal ds( order+1);
+  vectorInt numOfBasisFunctionOnFace( order+1 );
+  arrayReal Js( 2, order+1 );
+  vectorReal ds( order+1 );
 
   int face=faceInfos[iFace][1];
   // get basis functions on Boundary faces

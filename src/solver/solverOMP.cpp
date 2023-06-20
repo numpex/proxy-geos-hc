@@ -1,64 +1,29 @@
-#include "solver.hpp"
+//************************************************************************
+//  SEM proxy application v.0.0.1
+//
+//  solverOMP.cpp: simple 2D acoustive wave equation solver
+//
+//  the solverOMP class is derived from the solverBase class
+//  with the openMP implementation of the solver
+//
+//************************************************************************
 
-solver::solver() {}
-solver::~solver() {}
-  
+#include "solverOMP.hpp"
+
 // compute one step of the time dynamic wave equation solver
-//vector<vector<float>>
-void solver::computeOneStep( const float & timeSample,
-                             const int & order,
-                             int & i1,
-                             int & i2,
-                             arrayReal & pnGlobal,
-                             simpleMesh mesh,
-                             QkGL Qk )
+
+void solverOMP::computeOneStep( const float & timeSample,
+                                const int & order,
+                                int & i1,
+                                int & i2,
+                                arrayReal & pnGlobal,
+                                simpleMesh mesh,
+                                QkGL Qk )
 {
-  // get infos from mesh
-  static int numberOfNodes=mesh.getNumberOfNodes();
-  static int numberOfElements=mesh.getNumberOfElements();
-  static int numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
-  static arrayInt  globalNodesList=mesh.globalNodesList( numberOfElements );
-  static vectorInt listOfInteriorNodes=mesh.getListOfInteriorNodes( numberOfInteriorNodes );
-  static arrayReal globalNodesCoords=mesh.nodesCoordinates( numberOfNodes );
-
-  // get model
-  static vectorReal   model=mesh.getModel( numberOfElements );
-
-  //get infos about finite element order of approximation
-  int numberOfPointsPerElement;
-  if( order==1 )
-    numberOfPointsPerElement=4;
-  if( order==2 )
-    numberOfPointsPerElement=9;
-  if( order==3 )
-    numberOfPointsPerElement=16;
-  if( order==4 )
-    numberOfPointsPerElement=25;
-  if( order==5 )
-    numberOfPointsPerElement=36;
-
-  // get quadrature points and weights
-  static vectorDouble quadraturePoints=Qk.gaussLobattoQuadraturePoints( order );
-  static vectorDouble weights=Qk.gaussLobattoQuadratureWeights( order );
-  static vectorDouble weights2D=Qk.getGaussLobattoWeights( quadraturePoints,weights );
-  // get basis function and corresponding derivatives
-  static arrayDouble basisFunction1D=Qk.getBasisFunction1D( order, quadraturePoints );
-  static arrayDouble derivativeBasisFunction1D=Qk.getDerivativeBasisFunction1D( order, quadraturePoints );
-  static arrayDouble basisFunction2D=Qk.getBasisFunction2D( quadraturePoints,
-                                                            basisFunction1D,
-                                                            basisFunction1D );
-  static arrayDouble derivativeBasisFunction2DX=Qk.getBasisFunction2D( quadraturePoints,
-                                                                       derivativeBasisFunction1D,
-                                                                       basisFunction1D );
-  static arrayDouble derivativeBasisFunction2DY=Qk.getBasisFunction2D( quadraturePoints,
-                                                                       basisFunction1D,
-                                                                       derivativeBasisFunction1D );
-
   static vectorReal massMatrixGlobal( numberOfNodes );
   static vectorReal yGlobal( numberOfNodes );
-
   #pragma omp parallel for
-  for(int i=0;i<numberOfNodes;i++) 
+  for( int i=0; i<numberOfNodes; i++ )
   {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
@@ -67,7 +32,7 @@ void solver::computeOneStep( const float & timeSample,
 
   // loop over mesh elements
   #pragma omp parallel for
-  for (int e=0; e<numberOfElements; e++)
+  for( int e=0; e<numberOfElements; e++ )
   {
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
@@ -94,17 +59,11 @@ void solver::computeOneStep( const float & timeSample,
     // compute  geometrical transformation matrix
     arrayDouble B=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ );
 
-    /**
-       // compute stifness and mass matrix
-       vector<vector<double>> const R=Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
-                          derivativeBasisFunction2DY);
-     **/
-
     // compute stifness and mass matrix
-    arrayDouble  R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
+    arrayDouble R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
 
     // compute local mass matrix
-    vectorDouble  massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
+    vectorDouble massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
     // get pnGlobal to pnLocal
     vectorReal pnLocal( numberOfPointsPerElement );
     vectorReal Y( numberOfPointsPerElement );
@@ -119,7 +78,7 @@ void solver::computeOneStep( const float & timeSample,
       for( int j=0; j<numberOfPointsPerElement; j++ )
       {
         Y[i]+=R[i][j]*pnLocal[j];
-        
+
       }
     }
     for( int i=0; i<numberOfPointsPerElement; i++ )
@@ -132,7 +91,7 @@ void solver::computeOneStep( const float & timeSample,
 
   // update pressure
   #pragma omp parallel for
-  for (int i=0; i<numberOfInteriorNodes; i++ ) 
+  for( int i=0; i<numberOfInteriorNodes; i++ )
   {
     int I=listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
@@ -141,25 +100,20 @@ void solver::computeOneStep( const float & timeSample,
   //cout<<"pressure="<<pnGlobal[5][i1]<<endl;
 
   // damping terms
-  // get infos from mesh
-  static int numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
-  static int numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
-  static vectorInt  listOfBoundaryNodes=mesh.getListOfBoundaryNodes( numberOfBoundaryNodes );
-  static arrayInt   faceInfos=mesh.getBoundaryFacesInfos();
-  static arrayInt   localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
-  static vectorReal ShGlobal( numberOfBoundaryNodes);
+  static vectorReal ShGlobal( numberOfBoundaryNodes );
 
   #pragma omp parallel for
-  for( int i=0; i<numberOfBoundaryNodes; i++ ) 
+  for( int i=0; i<numberOfBoundaryNodes; i++ )
   {
     ShGlobal[i]=0;
   }
+
   // Note: this loop is data parallel.
   #pragma omp parallel for
-  for (int iFace=0; iFace<numberOfBoundaryFaces; iFace++) 
+  for( int iFace=0; iFace<numberOfBoundaryFaces; iFace++ )
   {
-    vectorReal ds( order+1);
-    vectorReal Sh( order+1);
+    vectorReal ds( order+1 );
+    vectorReal Sh( order+1 );
     //get ds
     ds=Qk.computeDs( iFace, order, faceInfos, globalNodesCoords,
                      derivativeBasisFunction2DX,
@@ -171,66 +125,16 @@ void solver::computeOneStep( const float & timeSample,
       Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
       ShGlobal[gIndexFaceNode]+=Sh[i];
     }
-    /**
-       cout<<"iFace="<<iFace<<endl;
-       for (int i=0; i<order+1;i++)
-       {
-       int gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
-       cout<<"   gIndex="<<gIndexFaceNode<<endl;
-       cout<<"   Sh["<<i<<"]="<<Sh[i]<<endl;
-       cout<<"   ShGlobal["<<gIndexFaceNode<<"]="<<ShGlobal[gIndexFaceNode]<<endl;
-       }
-     **/
   }
 
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
   #pragma omp parallel for
-  for ( int i=0; i<numberOfBoundaryNodes; i++) 
+  for( int i=0; i<numberOfBoundaryNodes; i++ )
   {
     int I=listOfBoundaryNodes[i];
     float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
     float MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
     pnGlobal[I][i1]=invMpSh*(2*massMatrixGlobal[I]*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]-tmp*yGlobal[I]);
-  }
-
-  /**
-     for ( int i=0 ; i< numberOfBoundaryNodes; i++)
-     {
-     cout<<"ShGlobal["<<i<<"]="<<ShGlobal[i]<<endl;
-     }
-     for ( int i=0 ; i< numberOfBoundaryNodes; i++)
-     {
-     int I=listOfBoundaryNodes[i];
-     cout<<"i="<<i<<", BoundaryNode="<<I<<endl;
-     }
-   **/
-}
-
-/// add right and side
-void solver::addRightAndSides( const int & timeStep,
-                               const int & numberOfRHS,
-                               const int & i2,
-                               const float & timeSample,
-                               arrayReal & pnGlobal,
-                               arrayReal & rhsTerm,
-                               arrayReal & rhsLocation,
-                               simpleMesh mesh )
-{
-  static int numberOfNodes=mesh.getNumberOfNodes();
-  static int numberOfElements=mesh.getNumberOfElements();
-  static vectorReal model=mesh.getModel( numberOfElements );
-  static arrayInt nodeList=mesh.globalNodesList( numberOfElements );
-  int i, rhsElement;
-  float tmp=timeSample*timeSample;
-  for( int i=0; i<numberOfRHS; i++ )
-  {
-    //extract element number for current rhs
-    float x=rhsLocation[i][0];
-    float y=rhsLocation[i][1];
-    int rhsElement=mesh.getElementNumberFromPoints( x, y );
-    // compute global node numbe to add source term to
-    int nodeRHS=nodeList[rhsElement][0];
-    pnGlobal[nodeRHS][i2]+=tmp*model[rhsElement]*model[rhsElement]*rhsTerm[i][timeStep];
   }
 }

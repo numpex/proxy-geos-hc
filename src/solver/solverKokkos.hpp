@@ -1,0 +1,32 @@
+//************************************************************************
+//  SEM proxy application v.0.0.1
+//
+//  solverKokkos.hpp: simple 2D acoustive wave equation solver
+//
+//  the solverKokkos class is derived from the solverBase class
+//  with the KOKKOS implementation of the solver
+//
+//************************************************************************
+
+#ifndef SOLVER_Kokkos_HPP_
+#define SOLVER_Kokkos_HPP_
+
+#include    "solverBase.hpp"
+
+class solverKokkos : public solverBase
+{
+
+public:
+
+  solverKokkos(){};
+  ~solverKokkos(){};
+
+  void computeOneStep( const float & timeSample,
+                       const int & order,
+                       int & i1,
+                       int & i2,
+                       arrayReal & pnGlobal,
+                       simpleMesh mesh,
+                       QkGL Qk );
+};
+#endif //SOLVER_Kokkos_HPP_

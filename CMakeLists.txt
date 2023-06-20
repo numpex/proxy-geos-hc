@@ -1,27 +1,49 @@
-cmake_minimum_required( VERSION 3.8 )
+cmake_minimum_required( VERSION 3.22.1 )
 
 project( sem )
 
 #-----------------------------------------------------
 # Setup Flags for Building and Installation
 #-----------------------------------------------------
-set (CMAKE_VERBOSE_MAKEFILE on )
 
-# setup the flags for users to select programming models
+set (CMAKE_VERBOSE_MAKEFILE ON )
+
+#set (CMAKE_C_COMPILER "/hrtc/apps/devtools/llvm/x86_64/centos8/17.0.0/gcc12/bin/clang")
+#set (CMAKE_CXX_COMPILER "/hrtc/apps/devtools/llvm/x86_64/centos8/17.0.0/gcc12/bin/clang++")
+
+#-----------------------------------------------------
+# Setup the flags for users to select programming models
+#-----------------------------------------------------
+
 # use OMP to parallelise loops
-set (SEM_USE_OMP OFF CACHE BOOL "")
+option (SEM_USE_OMP "Use OpenMP to parallelise loops" OFF)
 
 # use RAJA to expose parallelism loop
-set (SEM_USE_RAJA ON CACHE BOOL "")
+option (SEM_USE_RAJA "Use RAJA to parallelise loops" OFF)
+
+# use KOKOS to expose parallelism loop
+option (SEM_USE_KOKKOS "Use KOKKOS to parallelise loops" OFF)
+
+#-----------------------------------------------------
+# Setup the flags for users to select data containers
+#-----------------------------------------------------
 
 # use std::vector for vectores and arrays
-set (SEM_USE_VECTOR OFF CACHE BOOL "")
+option (SEM_USE_VECTOR "Use standard vectors as data containers" OFF)
 
-#use LvArray for vectors and arrays
-set (SEM_USE_LVARRAY ON CACHE BOOL "")
+# use LvArray for vectors and arrays
+option (SEM_USE_LVARRAY "Use LVARRAY as data containers" OFF)
 
-# setup the flags for profiling using caliper
-set (SEM_USE_CALIPER ON CACHE BOOL "")
+#-----------------------------------------------------
+# Setup the flags for profiling using caliper
+#-----------------------------------------------------
+option (SEM_USE_CALIPER "Use CALIPER for profiling" OFF)
+
+# setup the flags for python interface
+option (SEM_USE_PYTHON "bind python" OFF)
+
+# setup the flags for using Chai
+option (SEM_USE_CHAI "Use Chai as memory manager" OFF)
 
 add_subdirectory(src)
 
