@@ -156,7 +156,7 @@ elseif (EXISTS $ENV{LVARRAY_DIR}/lvarray-config.cmake)
 
   # LvArray uses chai
   find_package(CHAI REQUIRED)
-  set (chai_INCLUDE_DIR "$ENV{CHAI_INCLUDE_DIR}/../../../include")
+  set (chai_INCLUDE_DIR "$ENV{CHAI_DIR}/../../../include")
   include_directories(${chai_INCLUDE_DIR})
 
 
