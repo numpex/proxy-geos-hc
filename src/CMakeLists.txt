@@ -315,3 +315,22 @@ endif()
 install(TARGETS ${SEM_EXECUTABLE}
         RUNTIME DESTINATION bin)
 
+# build test
+add_subdirectory(tests)
+add_executable(test.exe tests/test.cpp)
+target_include_directories(test.exe
+                            PUBLIC 
+                            ${raja_INCLUDE_DIR}
+                            ${umpire_INCLUDE_DIR}
+                            ${camp_INCLUDE_DIR}
+                            ${chai_INCLUDE_DIR}
+                            ${lvarray_INCLUDE_DIR}
+                            )
+target_link_libraries(test.exe
+                      PUBLIC 
+                      umpire
+                      camp
+                      chai
+                      lvarray)
+install(TARGETS test.exe
+        RUNTIME DESTINATION bin)
