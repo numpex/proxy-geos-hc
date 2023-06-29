@@ -38,7 +38,7 @@ using arrayRealViewCB=LvArray::ArrayView< float,
                                          LvArray::ChaiBuffer >;
 
               
-// test MallocBuffer MallocBuffer OMP
+// test MallocBuffer MallocBuffer 
 // -------------------------------
 arrayRealMB computeMBMB(int const n1, int const n2,arrayRealMB arrayIn)
 {
@@ -53,7 +53,7 @@ arrayRealMB computeMBMB(int const n1, int const n2,arrayRealMB arrayIn)
   return (array);  
 }
 
-// test ChaiBuffer ChaiBuffer OMP
+// test ChaiBuffer ChaiBuffer 
 // -------------------------------
 arrayRealCB computeCBCB(int const n1, int const n2, arrayRealViewCB &arrayView)
 {
@@ -68,7 +68,7 @@ arrayRealCB computeCBCB(int const n1, int const n2, arrayRealViewCB &arrayView)
   return (array);  
 }
 
-// test MallocBuffer ChaiBuffer OMP
+// test MallocBuffer ChaiBuffer 
 // -------------------------------
 arrayRealMB computeMBCB(int const n1, int const n2, arrayRealViewCB &arrayView)
 {
@@ -168,7 +168,7 @@ int main( int argc, char *argv[] )
   std::cout << "Elapsed Time RAJA loop MBCB : "<<std::chrono::duration_cast< std::chrono::milliseconds >
           ( std::chrono::system_clock::now() - startTimeRAJAMBCB ).count() / 1000.0 <<" seconds.\n"<<std::endl;
 
-    // test ChaiBuffer ChaiBuffer RAJA
+  // test ChaiBuffer ChaiBuffer RAJA
   // -------------------------------
   std::chrono::time_point< std::chrono::system_clock > startTimeRAJACBCB = std::chrono::system_clock::now();
   RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, nIter ), [=,&arrayView] ( int e )
