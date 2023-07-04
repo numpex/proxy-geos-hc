@@ -73,9 +73,57 @@ using arrayDouble=LvArray::Array< double,
 
 
 #endif //SEM_USE_LVARRAY
-
 #ifdef SEM_USE_KOKKOS
 #include <Kokkos_Core.hpp>
-#endif
+#ifdef SEM_USE_KOKKOSVECTOR
+#include <Kokkos_Vector.hpp>
+//#include <Kokkos_OpenMP.hpp>
+
+
+template< class T > class Array2D
+{
+public:
+  Array2D( int numRows, int numCols ): data( numRows, std::vector< T >( numCols )) {}
+  Array2D(): data( 0, std::vector< T >( 0 )) {}
+
+  std::vector< T > & operator[]( int index )
+  {
+    return data[index];
+  }
+
+private:
+  std::vector< std::vector< T > > data;
+};
+//*
+using vectorInt=std::vector< int >;
+using vectorReal=std::vector< float >;
+using vectorDouble=std::vector< double >;
+//*/
+/*
+template< class T > class Array2D
+{
+public:
+  Array2D( int numRows, int numCols ): data( numRows, Kokkos::vector< T >( numCols )) {}
+  Array2D(): data( 0, Kokkos::vector< T >( 0 )) {}
+
+  Kokkos::vector< T > & operator[]( int index )
+  {
+    return data[index];
+  }
+
+private:
+  Kokkos::vector< Kokkos::vector< T > > data;
+};
+*/
+/*
+using vectorInt=Kokkos::vector< int >;
+using vectorReal=Kokkos::vector< float >;
+using vectorDouble=Kokkos::vector< double >;
+*/
+using arrayInt=Array2D< int >;
+using arrayReal=Array2D< float >;
+using arrayDouble=Array2D< double >;
+#endif //SEM_USE_KOKKOSVECTOR
+#endif //SEM_USE_KOKKOS
 
 #endif //DATATYPE_HPP_

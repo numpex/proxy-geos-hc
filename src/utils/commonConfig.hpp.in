@@ -19,6 +19,9 @@
 // Enables use of KOKOS (CMake option)
 #cmakedefine SEM_USE_KOKKOS
 
+// Enables use of KOKOS (CMake option)
+#cmakedefine SEM_USE_KOKKOSVECTOR
+
 #endif
 
 

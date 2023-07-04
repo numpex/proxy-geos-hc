@@ -8,6 +8,7 @@
 #include <fstream>
 #include <cmath>
 #include <chrono>
+#include "commonConfig.hpp"
 
 #include "RAJA/RAJA.hpp"
 #include "LvArray/Array.hpp"

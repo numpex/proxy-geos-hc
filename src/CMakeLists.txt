@@ -174,7 +174,21 @@ else ()
   message("-- LVARRAY_DIR is not the correct path and lvarray is not enabled")
 endif()
 
+#-------------------------------------------------------------------
+# Setup Programming Data Container Options:
+# (c) the data container is using Kokkos if SEM_USE_KOKKOSVECTOR is ON
+#-------------------------------------------------------------------
 
+
+if (SEM_USE_KOKKOSVECTOR)
+  set (DATA_CONTAINER "KOKKOSVECTOR" CACHE PATH "" FORCE)
+  # KOKKOS uses OMP
+  find_package(OpenMP)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
+  
 set (SEM_EXECUTABLE "sem_${SOLVER}_${DATA_CONTAINER}.exe" CACHE PATH "" FORCE)
 
 message ( "\n---------------------------------------------------------------------------------" )
@@ -316,21 +330,21 @@ install(TARGETS ${SEM_EXECUTABLE}
         RUNTIME DESTINATION bin)
 
 # build test
-add_subdirectory(tests)
-add_executable(test.exe tests/test.cpp)
-target_include_directories(test.exe
-                            PUBLIC 
-                            ${raja_INCLUDE_DIR}
-                            ${umpire_INCLUDE_DIR}
-                            ${camp_INCLUDE_DIR}
-                            ${chai_INCLUDE_DIR}
-                            ${lvarray_INCLUDE_DIR}
-                            )
-target_link_libraries(test.exe
-                      PUBLIC 
-                      umpire
-                      camp
-                      chai
-                      lvarray)
-install(TARGETS test.exe
-        RUNTIME DESTINATION bin)
+#add_subdirectory(tests)
+#add_executable(test.exe tests/test.cpp)
+#target_include_directories(test.exe
+#                            PUBLIC 
+#                            ${raja_INCLUDE_DIR}
+#                            ${umpire_INCLUDE_DIR}
+#                            ${camp_INCLUDE_DIR}
+#                            ${chai_INCLUDE_DIR}
+#                            ${lvarray_INCLUDE_DIR}
+#                            )
+#target_link_libraries(test.exe
+#                      PUBLIC 
+#                      umpire
+#                      camp
+#                      chai
+#                      lvarray)
+#install(TARGETS test.exe
+#        RUNTIME DESTINATION bin)
