@@ -40,7 +40,7 @@ option (SEM_USE_KOKKOSVECTOR "Use Kokkos::Vector as data containers" OFF)
 #-----------------------------------------------------
 # Setup the flags for profiling using caliper
 #-----------------------------------------------------
-option (SEM_USE_CALIPER "Use CALIPER for profiling" OFF)
+option (SEM_USE_CALIPER "Use CALIPER for profiling" ON)
 
 # setup the flags for python interface
 option (SEM_USE_PYTHON "bind python" OFF)

@@ -77,9 +77,9 @@ using arrayDouble=LvArray::Array< double,
 #include <Kokkos_Core.hpp>
 #ifdef SEM_USE_KOKKOSVECTOR
 #include <Kokkos_Vector.hpp>
-//#include <Kokkos_OpenMP.hpp>
+#include <Kokkos_OpenMP.hpp>
 
-
+/*
 template< class T > class Array2D
 {
 public:
@@ -99,7 +99,7 @@ using vectorInt=std::vector< int >;
 using vectorReal=std::vector< float >;
 using vectorDouble=std::vector< double >;
 //*/
-/*
+///*
 template< class T > class Array2D
 {
 public:
@@ -114,12 +114,12 @@ public:
 private:
   Kokkos::vector< Kokkos::vector< T > > data;
 };
-*/
-/*
+//*/
+///*
 using vectorInt=Kokkos::vector< int >;
 using vectorReal=Kokkos::vector< float >;
 using vectorDouble=Kokkos::vector< double >;
-*/
+//*/
 using arrayInt=Array2D< int >;
 using arrayReal=Array2D< float >;
 using arrayDouble=Array2D< double >;

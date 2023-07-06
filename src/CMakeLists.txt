@@ -18,6 +18,9 @@
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_FLAGS "-O3 -std=c++17  " CACHE STRING "" FORCE)
 
+# allow to install only one target
+set (CMAKE_SKIP_INSTALL_ALL_DEPENDENCY "True" CACHE STRING "" FORCE)
+
 #---------------------------------------------------------------
 # (0) the solver is using sequential mode by default
 #-------------------------------------------------------------------
@@ -327,24 +330,31 @@ if (SEM_USE_PYTHON)
 endif()
 
 install(TARGETS ${SEM_EXECUTABLE}
-        RUNTIME DESTINATION bin)
+        RUNTIME DESTINATION bin
+        OPTIONAL)
 
-# build test
-#add_subdirectory(tests)
-#add_executable(test.exe tests/test.cpp)
-#target_include_directories(test.exe
-#                            PUBLIC 
-#                            ${raja_INCLUDE_DIR}
-#                            ${umpire_INCLUDE_DIR}
-#                            ${camp_INCLUDE_DIR}
-#                            ${chai_INCLUDE_DIR}
-#                            ${lvarray_INCLUDE_DIR}
-#                            )
-#target_link_libraries(test.exe
-#                      PUBLIC 
-#                      umpire
-#                      camp
-#                      chai
-#                      lvarray)
-#install(TARGETS test.exe
-#        RUNTIME DESTINATION bin)
+#build test
+if (SEM_TEST)
+  if (NOT SEM_USE_LVARRAY)
+    message( FATAL_ERROR "--  test.exe must be built with option -DSEM_USE_LVARRAY=On")
+  endif()
+  add_subdirectory(tests)
+  add_executable(test.exe tests/test.cpp)
+  target_include_directories(test.exe
+                            PUBLIC 
+                            ${raja_INCLUDE_DIR}
+                            ${umpire_INCLUDE_DIR}
+                            ${camp_INCLUDE_DIR}
+                            ${chai_INCLUDE_DIR}
+                            ${lvarray_INCLUDE_DIR}
+                            )
+  target_link_libraries(test.exe
+                      PUBLIC 
+                      umpire
+                      camp
+                      chai
+                      lvarray)
+  install(TARGETS test.exe
+          RUNTIME DESTINATION bin
+          OPTIONAL)
+endif()
