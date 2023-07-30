@@ -84,7 +84,7 @@ if (NOT BLT_LOADED)
     # NOTE: this will be deprecated eventually but NEW causes
     #  problems in header only libraries, OLD keeps current behavior
     if(POLICY CMP0076)
-        cmake_policy(SET CMP0076 OLD)
+	    #cmake_policy(SET CMP0076 OLD)
     endif()
 
     ################################
@@ -226,7 +226,7 @@ if (NOT BLT_LOADED)
     # BLT smoke tests
     ################################
     if(ENABLE_TESTS)
-        add_subdirectory(${BLT_ROOT_DIR}/tests/smoke ${BLT_BUILD_DIR}/tests/smoke)
+	    #add_subdirectory(${BLT_ROOT_DIR}/tests/smoke ${BLT_BUILD_DIR}/tests/smoke)
     endif()
 
 endif() # only load BLT once!

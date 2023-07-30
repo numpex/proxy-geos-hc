@@ -8,12 +8,12 @@
 #include <fstream>
 #include <cmath>
 #include <chrono>
-#include "commonConfig.hpp"
 
 #include "RAJA/RAJA.hpp"
-#include "LvArray/Array.hpp"
-#include "LvArray/MallocBuffer.hpp"
-#include "LvArray/ChaiBuffer.hpp"
+#include "Macros.hpp"
+#include "Array.hpp"
+#include "MallocBuffer.hpp"
+#include "ChaiBuffer.hpp"
 
 // test lvArray
 using arrayRealMB=LvArray::Array< float,

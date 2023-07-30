@@ -8,9 +8,6 @@ project( sem )
 
 set (CMAKE_VERBOSE_MAKEFILE ON )
 
-#set (CMAKE_C_COMPILER "/hrtc/apps/devtools/llvm/x86_64/centos8/17.0.0/gcc12/bin/clang")
-#set (CMAKE_CXX_COMPILER "/hrtc/apps/devtools/llvm/x86_64/centos8/17.0.0/gcc12/bin/clang++")
-
 #-----------------------------------------------------
 # Setup the flags for users to select programming models
 #-----------------------------------------------------
@@ -40,7 +37,7 @@ option (SEM_USE_KOKKOSVECTOR "Use Kokkos::Vector as data containers" OFF)
 #-----------------------------------------------------
 # Setup the flags for profiling using caliper
 #-----------------------------------------------------
-option (SEM_USE_CALIPER "Use CALIPER for profiling" ON)
+option (SEM_USE_CALIPER "Use CALIPER for profiling" OFF)
 
 # setup the flags for python interface
 option (SEM_USE_PYTHON "bind python" OFF)
@@ -51,5 +48,4 @@ option (SEM_USE_PYTHON "bind python" OFF)
 option (SEM_USE_CHAI "Use Chai as memory manager" OFF)
 
 add_subdirectory(src)
-
 
