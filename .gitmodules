@@ -2,6 +2,3 @@
 	path = extern/pybind11
 	url = ../../pybind/pybind11
 	branch = stable
-[submodule "blt"]
-	path = blt
-	url = https://github.com/LLNL/blt.git
