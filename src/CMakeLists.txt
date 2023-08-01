@@ -37,9 +37,12 @@ set( ENABLE_EXAMPLES OFF )
 set( ENABLE_DOCS OFF )
 set( ENABLE_BENCHMARKS OFF )
 set( DISABLE_UNIT_TESTS ON)
-
-set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
-set( ENABLE_CUDA ON CACHE STRING "" FORCE)
+if(SEM_USE_OMP)
+    set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
+endif()
+if(SEM_USE_CUDA)
+    set( ENABLE_CUDA ON CACHE STRING "" FORCE)
+endif()
 
 # Cuda options
 if (ENABLE_CUDA)
@@ -65,64 +68,68 @@ include( ../blt/SetupBLT.cmake )
 ################################
 # RAJA
 ################################
-set (RAJA_DIR "$ENV{RAJA_DIR}")
-if(DEFINED RAJA_DIR)
-    message(STATUS "RAJA_DIR = ${RAJA_DIR}")
-    find_package(RAJA REQUIRED
-                 PATHS ${RAJA_DIR}
-                 NO_DEFAULT_PATH)
+if ( SEM_USE_RAJA)
+   set (RAJA_DIR "$ENV{RAJA_DIR}")
+   if(DEFINED RAJA_DIR)
+       message(STATUS "RAJA_DIR = ${RAJA_DIR}")
+       find_package(RAJA REQUIRED
+                    PATHS ${RAJA_DIR}
+                    NO_DEFAULT_PATH)
 
-    message( " ----> RAJA_VERSION=${RAJA_VERSION}")
+       message( " ----> RAJA_VERSION=${RAJA_VERSION}")
 
-    get_target_property(RAJA_INCLUDE_DIRS RAJA INTERFACE_INCLUDE_DIRECTORIES)
-    set_target_properties(RAJA PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${RAJA_INCLUDE_DIRS}")
-    set(ENABLE_RAJA ON CACHE BOOL "")
-    set(thirdPartyLibs ${thirdPartyLibs} RAJA )
-else()
-    message(FATAL_ERROR "GEOSX requires RAJA, set RAJA_DIR to the RAJA installation directory.")
+       get_target_property(RAJA_INCLUDE_DIRS RAJA INTERFACE_INCLUDE_DIRECTORIES)
+       set_target_properties(RAJA PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${RAJA_INCLUDE_DIRS}")
+       set(ENABLE_RAJA ON CACHE BOOL "")
+       set(thirdPartyLibs ${thirdPartyLibs} RAJA )
+   else()
+       message(FATAL_ERROR "GEOSX requires RAJA, set RAJA_DIR to the RAJA installation directory.")
+   endif()
+
+   if(SEM_USE_CUDA)
+     ################################
+     # Umpire
+     ################################
+     set (UMPIRE_DIR "$ENV{UMPIRE_DIR}")
+     if(DEFINED UMPIRE_DIR)
+         message(STATUS "UMPIRE_DIR = ${UMPIRE_DIR}")
+
+         find_package(umpire REQUIRED
+                      PATHS ${UMPIRE_DIR}
+                      NO_DEFAULT_PATH)
+
+         message( " ----> umpire_VERSION=${umpire_VERSION}")
+
+         set(ENABLE_UMPIRE ON CACHE BOOL "")
+         set(thirdPartyLibs ${thirdPartyLibs} umpire)
+     else()
+         message(FATAL_ERROR "GEOSX requires Umpire, set UMPIRE_DIR to the Umpire installation directory.")
+     endif()
+
+     ################################
+     # CHAI
+     ################################
+     set (CHAI_DIR "$ENV{CHAI_DIR}")
+     if(DEFINED CHAI_DIR)
+         message(STATUS "CHAI_DIR = ${CHAI_DIR}")
+
+         find_package(chai REQUIRED
+                      PATHS ${CHAI_DIR}
+                      NO_DEFAULT_PATH)
+
+         message( " ----> chai_VERSION=${chai_VERSION}")
+
+         get_target_property(CHAI_INCLUDE_DIRS chai INTERFACE_INCLUDE_DIRECTORIES)
+         set_target_properties(chai PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CHAI_INCLUDE_DIRS}")
+
+         set(ENABLE_CHAI ON CACHE BOOL "")
+         set(thirdPartyLibs ${thirdPartyLibs} chai)
+     else()
+       message(FATAL_ERROR "GEOSX requires CHAI, set CHAI_DIR to the CHAI installation directory.")
+     endif()
+   endif()
+
+   add_subdirectory( LvArray )
 endif()
-
-################################
-# Umpire
-################################
-set (UMPIRE_DIR "$ENV{UMPIRE_DIR}")
-if(DEFINED UMPIRE_DIR)
-    message(STATUS "UMPIRE_DIR = ${UMPIRE_DIR}")
-
-    find_package(umpire REQUIRED
-                 PATHS ${UMPIRE_DIR}
-                 NO_DEFAULT_PATH)
-
-    message( " ----> umpire_VERSION=${umpire_VERSION}")
-
-    set(ENABLE_UMPIRE ON CACHE BOOL "")
-    set(thirdPartyLibs ${thirdPartyLibs} umpire)
-else()
-    message(FATAL_ERROR "GEOSX requires Umpire, set UMPIRE_DIR to the Umpire installation directory.")
-endif()
-
-################################
-# CHAI
-################################
-set (CHAI_DIR "$ENV{CHAI_DIR}")
-if(DEFINED CHAI_DIR)
-    message(STATUS "CHAI_DIR = ${CHAI_DIR}")
-
-    find_package(chai REQUIRED
-                 PATHS ${CHAI_DIR}
-                 NO_DEFAULT_PATH)
-
-    message( " ----> chai_VERSION=${chai_VERSION}")
-
-    get_target_property(CHAI_INCLUDE_DIRS chai INTERFACE_INCLUDE_DIRECTORIES)
-    set_target_properties(chai PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CHAI_INCLUDE_DIRS}")
-
-    set(ENABLE_CHAI ON CACHE BOOL "")
-    set(thirdPartyLibs ${thirdPartyLibs} chai)
-else()
-    message(FATAL_ERROR "GEOSX requires CHAI, set CHAI_DIR to the CHAI installation directory.")
-endif()
-
-add_subdirectory( LvArray )
 
 add_subdirectory( tests )
