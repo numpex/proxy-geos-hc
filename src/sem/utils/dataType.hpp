@@ -36,8 +36,10 @@ using arrayDouble=Array2D< double >;
 #ifdef SEM_USE_LVARRAY
 
 #include "RAJA/RAJA.hpp"
-#include "LvArray/Array.hpp"
-#include "LvArray/MallocBuffer.hpp"
+//#include "LvArray/Array.hpp"
+//#include "LvArray/MallocBuffer.hpp"
+#include "Array.hpp"
+#include "MallocBuffer.hpp"
 
 // Create an 1D array of integers.
 using vectorInt=LvArray::Array< int,

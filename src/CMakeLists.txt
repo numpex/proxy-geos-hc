@@ -37,29 +37,30 @@ set( ENABLE_EXAMPLES OFF )
 set( ENABLE_DOCS OFF )
 set( ENABLE_BENCHMARKS OFF )
 set( DISABLE_UNIT_TESTS ON)
+
 if(SEM_USE_OMP)
     set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 endif()
-if(SEM_USE_CUDA)
-    set( ENABLE_CUDA ON CACHE STRING "" FORCE)
-endif()
 
-# Cuda options
-if (ENABLE_CUDA)
-  set(CUDA_ROOT "/data_local/sw/cuda/11.0.3-rhel8" CACHE PATH "")
-  set(ENABLE_CUDA_NVTOOLSEXT ON CACHE BOOL "")
-  set(CUDA_TOOLKIT_ROOT_DIR $ENV{CUDA_ROOT} CACHE PATH "")
-  set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "")
-  set(CMAKE_CUDA_COMPILER ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc CACHE STRING "")
-  set(CMAKE_CUDA_ARCHITECTURES 70 CACHE STRING "")
-  set(CUDA_ARCH sm_70 CACHE STRING "")
-  set(CMAKE_CUDA_STANDARD 14 CACHE STRING "")
-  set(CMAKE_CUDA_FLAGS "-restrict -arch ${CUDA_ARCH} --expt-extended-lambda -Xcompiler -std=c++14" CACHE STRING "")
-  set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -DNDEBUG -Xcompiler -DNDEBUG -Xcompiler -O3 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le" CACHE STRING "")
-  set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "-g -lineinfo ${CMAKE_CUDA_FLAGS_RELEASE}" CACHE STRING "")
-  set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
-else()
-  message(FATAL_ERROR "You must have CUDA_ROOT environment variable set, we advise loading module cuda/11.0.3")
+if(SEM_USE_CUDA)
+  set( ENABLE_CUDA ON CACHE STRING "" FORCE)
+  # Cuda options
+  if (ENABLE_CUDA)
+    set(CUDA_ROOT "/data_local/sw/cuda/11.0.3-rhel8" CACHE PATH "")
+    set(ENABLE_CUDA_NVTOOLSEXT ON CACHE BOOL "")
+    set(CUDA_TOOLKIT_ROOT_DIR $ENV{CUDA_ROOT} CACHE PATH "")
+    set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "")
+    set(CMAKE_CUDA_COMPILER ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc CACHE STRING "")
+    set(CMAKE_CUDA_ARCHITECTURES 70 CACHE STRING "")
+    set(CUDA_ARCH sm_70 CACHE STRING "")
+    set(CMAKE_CUDA_STANDARD 14 CACHE STRING "")
+    set(CMAKE_CUDA_FLAGS "-restrict -arch ${CUDA_ARCH} --expt-extended-lambda -Xcompiler -std=c++14" CACHE STRING "")
+    set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -DNDEBUG -Xcompiler -DNDEBUG -Xcompiler -O3 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le" CACHE STRING "")
+    set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "-g -lineinfo ${CMAKE_CUDA_FLAGS_RELEASE}" CACHE STRING "")
+    set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
+  else()
+    message(FATAL_ERROR "You must have CUDA_ROOT environment variable set, we advise loading module cuda/11.0.3")
+  endif()
 endif()
 
 include( ../blt/SetupBLT.cmake )
@@ -86,50 +87,51 @@ if ( SEM_USE_RAJA)
        message(FATAL_ERROR "GEOSX requires RAJA, set RAJA_DIR to the RAJA installation directory.")
    endif()
 
-   if(SEM_USE_CUDA)
-     ################################
-     # Umpire
-     ################################
-     set (UMPIRE_DIR "$ENV{UMPIRE_DIR}")
-     if(DEFINED UMPIRE_DIR)
-         message(STATUS "UMPIRE_DIR = ${UMPIRE_DIR}")
+   ################################
+   # Umpire
+   ################################
+   set (UMPIRE_DIR "$ENV{UMPIRE_DIR}")
+   if(DEFINED UMPIRE_DIR)
+       message(STATUS "UMPIRE_DIR = ${UMPIRE_DIR}")
 
-         find_package(umpire REQUIRED
-                      PATHS ${UMPIRE_DIR}
-                      NO_DEFAULT_PATH)
+       find_package(umpire REQUIRED
+                    PATHS ${UMPIRE_DIR}
+                    NO_DEFAULT_PATH)
 
-         message( " ----> umpire_VERSION=${umpire_VERSION}")
+       message( " ----> umpire_VERSION=${umpire_VERSION}")
 
-         set(ENABLE_UMPIRE ON CACHE BOOL "")
-         set(thirdPartyLibs ${thirdPartyLibs} umpire)
-     else()
-         message(FATAL_ERROR "GEOSX requires Umpire, set UMPIRE_DIR to the Umpire installation directory.")
-     endif()
+       set(ENABLE_UMPIRE ON CACHE BOOL "")
+       set(thirdPartyLibs ${thirdPartyLibs} umpire)
+   else()
+       message(FATAL_ERROR "GEOSX requires Umpire, set UMPIRE_DIR to the Umpire installation directory.")
+   endif()
 
-     ################################
-     # CHAI
-     ################################
-     set (CHAI_DIR "$ENV{CHAI_DIR}")
-     if(DEFINED CHAI_DIR)
-         message(STATUS "CHAI_DIR = ${CHAI_DIR}")
+   ################################
+   # CHAI
+   ################################
+   set (CHAI_DIR "$ENV{CHAI_DIR}")
+   if(DEFINED CHAI_DIR)
+       message(STATUS "CHAI_DIR = ${CHAI_DIR}")
 
-         find_package(chai REQUIRED
-                      PATHS ${CHAI_DIR}
-                      NO_DEFAULT_PATH)
+       find_package(chai REQUIRED
+                    PATHS ${CHAI_DIR}
+                    NO_DEFAULT_PATH)
 
-         message( " ----> chai_VERSION=${chai_VERSION}")
+       message( " ----> chai_VERSION=${chai_VERSION}")
 
-         get_target_property(CHAI_INCLUDE_DIRS chai INTERFACE_INCLUDE_DIRECTORIES)
-         set_target_properties(chai PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CHAI_INCLUDE_DIRS}")
+       get_target_property(CHAI_INCLUDE_DIRS chai INTERFACE_INCLUDE_DIRECTORIES)
+       set_target_properties(chai PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CHAI_INCLUDE_DIRS}")
 
-         set(ENABLE_CHAI ON CACHE BOOL "")
-         set(thirdPartyLibs ${thirdPartyLibs} chai)
-     else()
-       message(FATAL_ERROR "GEOSX requires CHAI, set CHAI_DIR to the CHAI installation directory.")
-     endif()
+       set(ENABLE_CHAI ON CACHE BOOL "")
+       set(thirdPartyLibs ${thirdPartyLibs} chai)
+   else()
+     message(FATAL_ERROR "GEOSX requires CHAI, set CHAI_DIR to the CHAI installation directory.")
    endif()
 
    add_subdirectory( LvArray )
 endif()
+
+
+add_subdirectory( sem )
 
 add_subdirectory( tests )
