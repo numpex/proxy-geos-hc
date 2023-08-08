@@ -32,6 +32,10 @@ blt_add_executable( NAME test_LvArray.exe
 target_include_directories(test_LvArray.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
 
 if (ENABLE_CUDA)
+  blt_add_executable( NAME test_LvArrayRAJACuda.exe 
+                    SOURCES test_LvArrayRAJACuda.cpp
+                    DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+	    target_include_directories(test_LvArrayRAJACuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
   blt_add_executable( NAME    test_cuda.exe
                       SOURCES test_cuda.cpp
                       DEPENDS_ON cuda)

@@ -21,23 +21,12 @@ using arrayRealMB=LvArray::Array< float,
                                  camp::idx_seq< 1,0 >,
                                  std::ptrdiff_t,
                                  LvArray::MallocBuffer >;
-using arrayRealViewMB=LvArray::ArrayView< float,
-                                         2,
-                                         0,
-                                         std::ptrdiff_t,
-                                         LvArray::MallocBuffer >;
 
 using arrayRealCB=LvArray::Array< float,
                                  2,
                                  camp::idx_seq< 1,0 >,
                                  std::ptrdiff_t,
                                  LvArray::ChaiBuffer >;
-using arrayRealViewCB=LvArray::ArrayView< float,
-                                         2,
-                                         0,
-                                         std::ptrdiff_t,
-                                         LvArray::ChaiBuffer >;
-
               
 // test MallocBuffer MallocBuffer 
 // -------------------------------
@@ -56,7 +45,7 @@ arrayRealMB computeMBMB(int const n1, int const n2,arrayRealMB arrayIn)
 
 // test ChaiBuffer ChaiBuffer 
 // -------------------------------
-arrayRealCB computeCBCB(int const n1, int const n2, arrayRealViewCB &arrayView)
+arrayRealCB computeCBCB(int const n1, int const n2, arrayRealCB &arrayView)
 {
   arrayRealCB array(n1,n2);
   for (int i=0; i<n1;i++)
@@ -71,7 +60,7 @@ arrayRealCB computeCBCB(int const n1, int const n2, arrayRealViewCB &arrayView)
 
 // test MallocBuffer ChaiBuffer 
 // -------------------------------
-arrayRealMB computeMBCB(int const n1, int const n2, arrayRealViewCB &arrayView)
+arrayRealMB computeMBCB(int const n1, int const n2, arrayRealCB &arrayView)
 {
   arrayRealMB array(n1,n2);
   for (int i=0; i<n1;i++)
@@ -90,20 +79,11 @@ int main( int argc, char *argv[] )
   
   
   const int nIter=1000000;
-  const int n1=100;
-  const int n2=100;
+  const int n1=1000;
+  const int n2=1000;
 
-  arrayRealCB arrayToMove(n1,n2);
+  arrayRealCB arrayView(n1,n2);
   arrayRealMB arrayIn(n1,n2);
-  for (int i=0; i<n1;i++)
-  {
-    for ( int j=0; j<n2;j++)
-    {
-      arrayToMove[i][j]=sqrt(2*i*j);
-      arrayIn[i][j]=sqrt(2*i*j);
-    }     
-  }
-  arrayRealViewCB arrayView=arrayToMove.toView();
 
   // test MallocBuffer MallocBuffer OMP
   // -------------------------------
