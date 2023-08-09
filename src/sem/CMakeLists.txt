@@ -11,7 +11,18 @@ if( ENABLE_CUDA )
   set( extraComponentsLinkList ${extraComponentsLinkList} cuda )
 endif()
 
-set( dependencyList lvarray RAJA chai )
+if(SEM_USE_LVARRAY)
+set( dependencyList lvarray  )
+endif()
+
+if(SEM_USE_RAJA )
+   if (NOT SEM_USE_LVARRAY)
+     set( dependencyList RAJA chai )
+   endif()
+   if(SEM_USE_LVARRAY)
+      set( dependencyList lvarray RAJA chai )
+   endif()
+endif()
 
 if( ENABLE_CALIPER )
   set( dependencyList ${dependencyList} caliper )
@@ -28,6 +39,9 @@ endif()
 #-------------------------------------------------------
 # SEM proxy application setup
 #-------------------------------------------------------
+message("         ")
+message( STATUS "-------------------SEM ${SOLVER} Solver settings-----------------------" )
+message( STATUS "-----------------------------------------------------------------------" )
 
 set (sem_headers
      utils/commonMacro.hpp
@@ -36,33 +50,42 @@ set (sem_headers
      finiteElements/QkGL.hpp
      mesh/simpleMesh.hpp
      solver/solverBase.hpp
-     solver/solverRaja.hpp
+     solver/solver${SOLVER}.hpp
      main/semproxy.hpp)
 
 set (sem_sources
      finiteElements/QkGL.cpp
      mesh/simpleMesh.cpp
      solver/solverBase.cpp
-     solver/solverRaja.cpp
+     solver/solver${SOLVER}.cpp
      main/semproxy.cpp
      main/main.cpp)
 
 
 
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/utils/commonConfig.hpp.in
-                ${CMAKE_BINARY_DIR}/include/commonConfig.hpp)
+                ${CMAKE_BINARY_DIR}/src/sem/commonConfig.hpp)
+# Install the generated header.
+install( FILES ${CMAKE_BINARY_DIR}/src/sem/CommonConfig.hpp
+         DESTINATION src/sem )
+message(STATUS "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
+message(STATUS "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
 
-message("--------------------------------------------------CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
-message("--------------------------------------------------CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
-
-blt_add_executable( NAME sem.exe 
+ blt_add_executable( NAME sem${SOLVER}.exe 
                     SOURCES ${sem_sources}
 		    HEADERS ${sem_headers}
 		    DEPENDS_ON ${extraComponentsLinkList} ${dependencyList} )
-target_include_directories(sem.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../LvArray/src)
-target_include_directories(sem.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/utils)
-target_include_directories(sem.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/finiteElements)
-target_include_directories(sem.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mesh)
-target_include_directories(sem.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/solver)
-target_include_directories(sem.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/main)
+if (SEM_USE_LVARRAY)
+	target_include_directories(sem${SOLVER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../LvArray/src)
+	target_include_directories(sem${SOLVER}.exe PUBLIC ${CMAKE_BINARY_DIR}/include)
+endif()
+target_include_directories(sem${SOLVER}.exe PUBLIC ${CMAKE_BINARY_DIR}/src/sem)
+target_include_directories(sem${SOLVER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/utils)
+target_include_directories(sem${SOLVER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/finiteElements)
+target_include_directories(sem${SOLVER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mesh)
+target_include_directories(sem${SOLVER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/solver)
+target_include_directories(sem${SOLVER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/main)
 
+message("         ")
+message( STATUS "-------------------END SEM ${SOLVER} Solver settings-------------------" )
+message( STATUS "-----------------------------------------------------------------------" )

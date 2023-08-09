@@ -13,7 +13,25 @@
 #  (a) If SEM_USE_LVARRAY is ON, LVARRAY is used.
 #  (b) If SEM_USE_VECTOR is ON, std::vector is used.
 #
+#  env variables to be defined before build
+#  the variables above are defined for Pangea3
+#  SEM_TPL must be first compiled and installed 
+#
+#  example:
+#  export MODULEPATH=/data_local/appli_local/MTS/GEOSX/modulefiles/:$MODULEPATH
+#  module load cmake/3.21.4 gcc/8.4.1 cuda/11.0.3 ompi/4.1.2 openblas/0.3.18 python4geosx/3.8.5-gcc-8.4.1-ompi-4.1.2
+#  export SEM_TPL_ROOT_DIR=/users/j0024947/appli_src/geosx/codes/proxyApp/tpl4ProxyApp/installTPLNOCUDA
+#  export SEM_TPL_ROOT_DIR=/users/j0024947/appli_src/geosx/codes/proxyApp/tpl4ProxyApp/installTPL
+#  export RAJA_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/raja
+#  export CAMP_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/camp
+#  export CHAI_DIR=${SEM_TPL_ROOT_DIR}/chai/share/chai/cmake/
+#  export UMPIRE_DIR=${SEM_TPL_ROOT_DIR}/chai/lib/cmake/umpire/
+
 #-------------------------------------------------------------------
+
+# the solver is using sequential mode by default
+set (SOLVER "Sequential" CACHE PATH "" FORCE)
+
 
 set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_FLAGS "-O3 -std=c++17  " CACHE STRING "" FORCE)
@@ -25,7 +43,7 @@ set (CMAKE_SKIP_INSTALL_ALL_DEPENDENCY "True" CACHE STRING "" FORCE)
 # BLT 
 ################################
 
-# Default to C++14 if not set so GTest/GMock can build
+# Default to C++17 if not set so GTest/GMock can build
 if (NOT BLT_CXX_STD)
     set(BLT_CXX_STD "c++17" CACHE STRING "")
 endif()
@@ -38,13 +56,15 @@ set( ENABLE_DOCS OFF )
 set( ENABLE_BENCHMARKS OFF )
 set( DISABLE_UNIT_TESTS ON)
 
+
 if(SEM_USE_OMP)
     set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 endif()
 
+# at this point User have to know if SEM_TPL has beeb built with CUDA support.
 if(SEM_USE_CUDA)
   set( ENABLE_CUDA ON CACHE STRING "" FORCE)
-  # Cuda options
+  # Cuda options for pangea3
   if (ENABLE_CUDA)
     set(CUDA_ROOT "/data_local/sw/cuda/11.0.3-rhel8" CACHE PATH "")
     set(ENABLE_CUDA_NVTOOLSEXT ON CACHE BOOL "")
@@ -54,6 +74,7 @@ if(SEM_USE_CUDA)
     set(CMAKE_CUDA_ARCHITECTURES 70 CACHE STRING "")
     set(CUDA_ARCH sm_70 CACHE STRING "")
     set(CMAKE_CUDA_STANDARD 14 CACHE STRING "")
+    # --expt-extended-lambda --expt-relaxed-constexpr: important for compilation  are not set by default
     set(CMAKE_CUDA_FLAGS "-restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++14" CACHE STRING "")
     set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -DNDEBUG -Xcompiler -DNDEBUG -Xcompiler -O3 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le" CACHE STRING "")
     set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "-g -lineinfo ${CMAKE_CUDA_FLAGS_RELEASE}" CACHE STRING "")
@@ -70,14 +91,24 @@ include( ../blt/SetupBLT.cmake )
 # RAJA
 ################################
 if ( SEM_USE_RAJA)
+   # disable OMP and KOKKOS 
+   set (SEM_USE_OMP OFF CACHE BOOL "")
+   set (SEM_USE_KOKKOS OFF CACHE BOOL "")
+   # set solver
+   message( " " )
+   message( STATUS "-------------------RAJA SETTINGS---------------------------------------" )
+   message( STATUS "-----------------------------------------------------------------------" )
+   set (SOLVER "Raja" CACHE PATH "" FORCE)
+   message(STATUS "BUILDING SOLVER including RAJA ")
+
    set (RAJA_DIR "$ENV{RAJA_DIR}")
    if(DEFINED RAJA_DIR)
-       message(STATUS "RAJA_DIR = ${RAJA_DIR}")
+       message(STATUS "SEM USE RAJA in RAJA_DIR = ${RAJA_DIR}")
        find_package(RAJA REQUIRED
                     PATHS ${RAJA_DIR}
                     NO_DEFAULT_PATH)
 
-       message( " ----> RAJA_VERSION=${RAJA_VERSION}")
+	    message(STATUS "SEM USE RAJA:  RAJA VERSION=${RAJA_VERSION}")
 
        get_target_property(RAJA_INCLUDE_DIRS RAJA INTERFACE_INCLUDE_DIRECTORIES)
        set_target_properties(RAJA PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${RAJA_INCLUDE_DIRS}")
@@ -92,13 +123,13 @@ if ( SEM_USE_RAJA)
    ################################
    set (UMPIRE_DIR "$ENV{UMPIRE_DIR}")
    if(DEFINED UMPIRE_DIR)
-       message(STATUS "UMPIRE_DIR = ${UMPIRE_DIR}")
+       message(STATUS "SEM USE RAJA: RAJA must be compiled with UMPIRE in UMPIRE_DIR = ${UMPIRE_DIR}")
 
        find_package(umpire REQUIRED
                     PATHS ${UMPIRE_DIR}
                     NO_DEFAULT_PATH)
 
-       message( " ----> umpire_VERSION=${umpire_VERSION}")
+	    message(STATUS "SEM USE RAJA: RAJA is compiled with UMPIRE VERSION=${umpire_VERSION}")
 
        set(ENABLE_UMPIRE ON CACHE BOOL "")
        set(thirdPartyLibs ${thirdPartyLibs} umpire)
@@ -111,13 +142,13 @@ if ( SEM_USE_RAJA)
    ################################
    set (CHAI_DIR "$ENV{CHAI_DIR}")
    if(DEFINED CHAI_DIR)
-       message(STATUS "CHAI_DIR = ${CHAI_DIR}")
+       message(STATUS "SEM USE RAJA in CHAI_DIR = ${CHAI_DIR}")
 
        find_package(chai REQUIRED
                     PATHS ${CHAI_DIR}
                     NO_DEFAULT_PATH)
 
-       message( " ----> chai_VERSION=${chai_VERSION}")
+	    message(STATUS "SEM USE RAJA: RAJA is compiled with chai_VERSION=${chai_VERSION}")
 
        get_target_property(CHAI_INCLUDE_DIRS chai INTERFACE_INCLUDE_DIRECTORIES)
        set_target_properties(chai PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CHAI_INCLUDE_DIRS}")
@@ -128,7 +159,12 @@ if ( SEM_USE_RAJA)
      message(FATAL_ERROR "GEOSX requires CHAI, set CHAI_DIR to the CHAI installation directory.")
    endif()
 
+   if (SEM_USE_LVARRAY)
    add_subdirectory( LvArray )
+   endif()
+   message( " " )
+   message( STATUS "-------------------END RAJA SETTINGS-----------------------------------" )
+   message( STATUS "-----------------------------------------------------------------------" )
 endif()
 
 
