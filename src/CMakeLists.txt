@@ -30,7 +30,7 @@
 #-------------------------------------------------------------------
 
 # the solver is using sequential mode by default
-set (SOLVER "Sequential" CACHE PATH "" FORCE)
+set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
 
 
 set (CMAKE_CXX_STANDARD 17)
@@ -64,12 +64,13 @@ if(SEM_USE_OMP)
     set (SEM_USE_KOKKOS OFF CACHE BOOL "")
     set (SEM_USE_RAJA OFF CACHE BOOL "")
     if(SEM_USE_LVARRAY)
-	    message(FATAL_ERROR "SEM_USE_OMP can  be used with SEM_USE_VECTOR=ON only")
+      set( DATA_CONTAINER "LVARRAY" CACHE STRING "" FORCE)
+      message(FATAL_ERROR "SEM_USE_OMP can  be used with SEM_USE_VECTOR=ON only")
     endif()
-    set (PRG "Vector" CACHE STRING "" FORCE)
+    set (DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
 endif()
 
-# at this point User have to know if SEM_TPL has beeb built with CUDA support.
+# at this point User have to know if SEM_TPL is built with CUDA support.
 if(SEM_USE_CUDA)
   set( ENABLE_CUDA ON CACHE STRING "" FORCE)
   # Cuda options for pangea3
@@ -168,11 +169,11 @@ if ( SEM_USE_RAJA)
    endif()
 
    if (SEM_USE_LVARRAY)
-      set( PRG "LVARRAY" CACHE STRING "" FORCE)
+      set( DATA_CONTAINER "LVARRAY" CACHE STRING "" FORCE)
       add_subdirectory( LvArray )
    endif()
    if (SEM_USE_VECTOR)
-      set( PRG "VECTOR" CACHE STRING "" FORCE)
+      set( DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
    endif()
    message( " " )
    message( STATUS "-------------------END RAJA SETTINGS-----------------------------------" )

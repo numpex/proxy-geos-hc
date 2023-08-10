@@ -40,7 +40,7 @@ endif()
 # SEM proxy application setup
 #-------------------------------------------------------
 message("         ")
-message( STATUS "-------------------SEM ${SOLVER}_${PRG} Solver settings-----------------------" )
+message( STATUS "-------------------SEM ${SOLVER}_${DATA_CONTAINER} Solver settings-----------------------" )
 message( STATUS "-----------------------------------------------------------------------" )
 
 set (sem_headers
@@ -71,21 +71,21 @@ install( FILES ${CMAKE_BINARY_DIR}/src/sem/CommonConfig.hpp
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
 
-blt_add_executable( NAME sem${SOLVER}_${PRG}.exe 
+blt_add_executable( NAME sem${SOLVER}_${DATA_CONTAINER}.exe 
                     SOURCES ${sem_sources}
 		    HEADERS ${sem_headers}
 		    DEPENDS_ON ${extraComponentsLinkList} ${dependencyList} )
 if (SEM_USE_LVARRAY)
-	target_include_directories(sem${SOLVER}_${PRG}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../LvArray/src)
-	target_include_directories(sem${SOLVER}_${PRG}.exe PUBLIC ${CMAKE_BINARY_DIR}/include)
+	target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../LvArray/src)
+	target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_BINARY_DIR}/include)
 endif()
-target_include_directories(sem${SOLVER}_${PRG}.exe PUBLIC ${CMAKE_BINARY_DIR}/src/sem)
-target_include_directories(sem${SOLVER}_${PRG}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/utils)
-target_include_directories(sem${SOLVER}_${PRG}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/finiteElements)
-target_include_directories(sem${SOLVER}_${PRG}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mesh)
-target_include_directories(sem${SOLVER}_${PRG}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/solver)
-target_include_directories(sem${SOLVER}_${PRG}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/main)
+target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_BINARY_DIR}/src/sem)
+target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/utils)
+target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/finiteElements)
+target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mesh)
+target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/solver)
+target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/main)
 
 message("         ")
-message( STATUS "-------------------END SEM ${SOLVER}_${PRG} Solver settings-------------------" )
+message( STATUS "-------------------END SEM ${SOLVER}_${DATA_CONTAINER} Solver settings-------------------" )
 message( STATUS "-----------------------------------------------------------------------" )
