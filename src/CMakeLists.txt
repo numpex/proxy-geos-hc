@@ -56,6 +56,9 @@ set( ENABLE_DOCS OFF )
 set( ENABLE_BENCHMARKS OFF )
 set( DISABLE_UNIT_TESTS ON)
 
+if (SEM_USE_VECTOR)
+    set (DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
+endif()
 
 if(SEM_USE_OMP)
     set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
@@ -82,9 +85,9 @@ if(SEM_USE_CUDA)
     set(CMAKE_CUDA_COMPILER ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc CACHE STRING "")
     set(CMAKE_CUDA_ARCHITECTURES 70 CACHE STRING "")
     set(CUDA_ARCH sm_70 CACHE STRING "")
-    set(CMAKE_CUDA_STANDARD 14 CACHE STRING "")
+    set(CMAKE_CUDA_STANDARD 17 CACHE STRING "")
     # --expt-extended-lambda --expt-relaxed-constexpr: important for compilation  are not set by default
-    set(CMAKE_CUDA_FLAGS "-restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++14" CACHE STRING "")
+    set(CMAKE_CUDA_FLAGS "-restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17" CACHE STRING "")
     set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -DNDEBUG -Xcompiler -DNDEBUG -Xcompiler -O3 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le" CACHE STRING "")
     set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "-g -lineinfo ${CMAKE_CUDA_FLAGS_RELEASE}" CACHE STRING "")
     set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
@@ -180,6 +183,42 @@ if ( SEM_USE_RAJA)
    message( STATUS "-----------------------------------------------------------------------" )
 endif()
 
+
+################################
+# KOKKOS
+################################
+# the solver is using KOKKOS if SEM_USE_KOKKOS is ON
+if (NOT SEM_USE_KOKKOS)
+  message ("-- SEM_USE_KOKKOS flag is set to be false and KOKKOS is not enabled")
+elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
+  message ("-- SEM_USE_KOKKOS flag is set to be true and KOKOS is now enabled")
+  message("-- Found the KOKKOS library in $ENV{KOKKOS_DIR}")
+  set (SOLVER "Kokkos" CACHE PATH "" FORCE)
+
+  # KOKOS uses OMP
+  find_package(OpenMP)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+
+  # setup KOKOS
+  set(Kokkos_ROOT "$ENV{KOKKOS_DIR}")
+  find_package(Kokkos REQUIRED)
+  set (Kokkos_INCLUDE_DIRS "${Kokkos_ROOT}/../../../include")
+  include_directories(${Kokkos_INCLUDE_DIRS})
+
+  if (SEM_USE_KOKKOSVECTOR)
+     set (DATA_CONTAINER "KOKKOSVECTOR" CACHE PATH "" FORCE)
+  endif()
+
+
+elseif (NOT DEFINED $ENV{KOKKOS_DIR})
+  set (SEM_USE_KOKKOS OFF CACHE BOOL "")
+  message("-- KOKKOS_DIR is not defined and caliper is not enabled")
+else ()
+  set (SEM_USE_KOKKOS OFF CACHE BOOL "")
+  message("-- KOKKOS_DIR is not the correct path and caliper is not enabled")
+endif()
 
 add_subdirectory( sem )
 
