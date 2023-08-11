@@ -37,7 +37,6 @@ if( ENABLE_CALIPER )
 endif()
 
 if(SEM_USE_KOKKOS)
-	set (kokkosList "-L/users/j0024947/appli_src/geosx/codes/proxyApp/tpl4ProxyApp/installTPLCudaSupport/kokkos/lib64 -lkokkoscontainers -lkokkoscore -lkokkossimd")
 	set( dependencyList ${dependencyList} ${kokkosList} )
     message ("-------------------- KOKKOS DEPENDENCY LIST= ${dependencyList}")
 endif()
