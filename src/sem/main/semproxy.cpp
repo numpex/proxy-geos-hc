@@ -6,13 +6,9 @@
 //************************************************************************
 
 #include "semproxy.hpp"
-//#include <Kokkos_OpenMP.hpp>
 // Initialize the simulation.
 void SEMProxy::init()
 {
-  #ifdef SEM_USE_KOKKOS
-  Kokkos::initialize();
-  #endif
   SEM_CALIPER_MARK_BEGIN( "InitTime" );
 
   // get information from mesh
@@ -75,8 +71,5 @@ void SEMProxy::run()
 
   SEM_CALIPER_MARK_END( "RunTime" );
 
-  #ifdef SEM_USE_KOKKOS
-  Kokkos::finalize();
-  #endif
 
 }

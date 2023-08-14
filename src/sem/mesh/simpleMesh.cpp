@@ -147,8 +147,10 @@ arrayReal simpleMesh::nodesCoordinates( const int & numberOfNodes ) const
   {
     for( int i=0; i<nx; i++ )
     {
-      nodeCoords[i+nx*j][0]=coordX[i];
-      nodeCoords[i+nx*j][1]=coordY[j];
+      //nodeCoords[i+nx*j][0]=coordX[i];
+      //nodeCoords[i+nx*j][1]=coordY[j];
+      nodeCoords(i+nx*j,0)=coordX[i];
+      nodeCoords(i+nx*j,1)=coordY[j];
       //cout<<"Xi["<<i+nx*j<<"][0]="<<nodeCoords[i+nx*j][0]<<", ";
       //cout<<"Xi["<<i+nx*j<<"][1]="<<nodeCoords[i+nx*j][1]<<endl;
     }

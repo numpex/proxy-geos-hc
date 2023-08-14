@@ -6,16 +6,34 @@
 
 #ifdef SEM_USE_VECTOR
   #include <vector>
+  template<class T> class Vector 
+  {
+  public:
+    Vector(int numRows) : data(numRows) {}
+    Vector() : data(0) {}
+
+    T & operator()(int index)
+    {
+        return data[index];
+    }
+    T & operator[](int index)
+    {
+        return data[index];
+    }
+    int size(){return this->size();}
+
+  private:
+    std::vector<T> data ;
+  };
+
   template< class T > class Array2D
   {
   public:
     Array2D( int numRows, int numCols ): data( numRows, std::vector< T >( numCols )) {}
     Array2D(): data( 0, std::vector< T >( 0 )) {}
 
-    std::vector< T > & operator[]( int index )
-    {
-      return data[index];
-    }
+    std::vector< T > & operator[]( int index ){return data[index];}
+    T& operator()(size_t row, size_t col) {return data[row][col];}
 
   private:
     std::vector< std::vector< T > > data;
@@ -23,6 +41,9 @@
   using vectorInt=std::vector< int >;
   using vectorReal=std::vector< float >;
   using vectorDouble=std::vector< double >;
+  //using vectorInt=Vector< int >;
+  //using vectorReal=Vector< float >;
+  //using vectorDouble=Vector< double >;
   using arrayInt=Array2D< int >;
   using arrayReal=Array2D< float >;
   using arrayDouble=Array2D< double >;
@@ -116,10 +137,8 @@
         Array2D( int numRows, int numCols ): data( numRows, Kokkos::vector< T >( numCols )) {}
         Array2D(): data( 0, Kokkos::vector< T >( 0 )) {}
 
-        Kokkos::vector< T > & operator[]( int index )
-      {
-      return data[index];
-      }
+        Kokkos::vector< T > & operator[]( int index ){return data[index];}
+        T& operator()(size_t row, size_t col) {return data[row][col];}
 
       private:
       Kokkos::vector< Kokkos::vector< T > > data;
