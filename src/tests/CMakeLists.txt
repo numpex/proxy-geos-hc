@@ -40,33 +40,39 @@ target_include_directories(test_LvArray.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../
 
 if (ENABLE_CUDA)
   if(ENABLE_KOKKOS)
-    target_include_directories(test_KOKKOS.exe PUBLIC "${Kokkos_ROOT}/../../../include")
+	  message( STATUS "kokkosinclude=${Kokkos_ROOT}/../../../include")
     blt_add_executable( NAME test_KOKKOS.exe 
-                        SOURCES test_KOKKOS.cpp
+                        SOURCES test_Kokkos.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+    blt_add_executable( NAME test1_KOKKOS.exe 
+                        SOURCES test1_Kokkos.cpp
+                        DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+    target_include_directories(test_KOKKOS.exe PUBLIC "${Kokkos_ROOT}/../../../include")
   endif()
   if(ENABLE_LVARRAY)
-	  target_include_directories(test_LvArrayRAJACuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
     blt_add_executable( NAME test_LvArrayRAJACuda.exe 
                         SOURCES test_LvArrayRAJACuda.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
-	  target_include_directories(test_LvArrayRAJACuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
+		target_include_directories(test_LvArrayRAJACuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
     blt_add_executable( NAME    test_cuda.exe
                         SOURCES test_cuda.cpp
                         DEPENDS_ON cuda)
+    target_include_directories(test_cuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
 
     blt_add_executable( NAME    test_cuda_runtime.exe
                         SOURCES test_cuda_runtime.cpp
                         DEPENDS_ON cuda_runtime)
+    target_include_directories(test_cuda_runtime.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
 
     blt_add_executable( NAME    test_Raja_cuda.exe
 	                      SOURCES test_Raja_cuda.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+    target_include_directories(test_Raja_cuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
 
-    target_include_directories(test_LvArray_cuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
     blt_add_executable( NAME    test_LvArray_cuda.exe
 	                      SOURCES test_LvArray_cuda.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+    target_include_directories(test_LvArray_cuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
   endif()
 endif()
 

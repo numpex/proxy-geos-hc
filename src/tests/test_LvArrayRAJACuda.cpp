@@ -61,7 +61,7 @@ LVARRAY_HOST_DEVICE inline  arrayRealCB   compute1CBCB(int const n1, int const n
 int main( int argc, char *argv[] )
 {
   
-  const int nIter=1000000;
+  const int nIter=10000000;
   const int n1=1000;
   const int n2=1000;
 
