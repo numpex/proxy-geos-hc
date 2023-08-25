@@ -59,13 +59,9 @@ void solverOMP::computeOneStep( const float & timeSample,
                                        jacobianMatrix,
                                        detJ,
                                        transpInvJacobianMatrix );
+                                       
     // compute  geometrical transformation matrix
     Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
-
-    
-    // compute stifness and mass matrix ( non optimized)
-    //Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
-    //                  derivativeBasisFunction2DY, R);
 
     // compute stifness and mass matrix ( durufle's optimization)
     Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
