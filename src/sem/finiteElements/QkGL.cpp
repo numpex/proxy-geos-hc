@@ -377,19 +377,28 @@ arrayDouble QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
   }
   return c;
 }
-
 // compute jacobian matrix for element to ref element coordinates
 // Xi[0,..,1][0,..,nPointsPerElement], global coordinate of element
 // dxPhi,dyPhi 2D derivative of basis Functions
-arrayDouble QkGL::computeJacobianMatrix( const int & nPointsPerElement,
-                                         arrayDouble & Xi,
-                                         arrayDouble & dxPhi,
-                                         arrayDouble & dyPhi )const
+//arrayDouble QkGL::computeJacobianMatrix( const int & nPointsPerElement,
+//                                         arrayDouble & Xi,
+//                                         arrayDouble & dxPhi,
+//                                         arrayDouble & dyPhi )const
+
+void QkGL::computeJacobianMatrix( const int & nPointsPerElement,
+                                  arrayDouble & Xi,
+                                  arrayDouble & dxPhi,
+                                  arrayDouble & dyPhi,
+                                  arrayDouble & jacobianMatrix )const
 {
-  arrayDouble jacobianMatrix( 4, nPointsPerElement );
+  //arrayDouble jacobianMatrix( 4, nPointsPerElement );
 
   for( int i=0; i<nPointsPerElement; i++ )
   {
+    jacobianMatrix[0][i]=0;
+    jacobianMatrix[1][i]=0;
+    jacobianMatrix[2][i]=0;
+    jacobianMatrix[3][i]=0;
     for( int j=0; j<nPointsPerElement; j++ )
     {
       jacobianMatrix[0][i]+=Xi[j][0]*dxPhi[j][i];
@@ -398,7 +407,7 @@ arrayDouble QkGL::computeJacobianMatrix( const int & nPointsPerElement,
       jacobianMatrix[3][i]+=Xi[j][1]*dyPhi[j][i];
     }
   }
-  return jacobianMatrix;
+  //return jacobianMatrix;
 }
 
 // compute jacobian matrix determinant

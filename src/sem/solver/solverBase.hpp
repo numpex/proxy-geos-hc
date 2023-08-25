@@ -92,6 +92,8 @@ protected:
   arrayDouble derivativeBasisFunction2DX;
   arrayDouble derivativeBasisFunction2DY;
 
+  arrayDouble jacobianMatrix;
+
   // end init
 
 };

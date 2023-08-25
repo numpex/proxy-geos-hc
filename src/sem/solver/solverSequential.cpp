@@ -43,9 +43,15 @@ void solverSEQ::computeOneStep( const float & timeSample,
     mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
 
     // compute jacobian Matrix
-    arrayDouble jacobianMatrix= Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
-                                                          derivativeBasisFunction2DX,
-                                                          derivativeBasisFunction2DY );
+    //arrayDouble jacobianMatrix= Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
+    //                                                      derivativeBasisFunction2DX,
+    //                                                      derivativeBasisFunction2DY );
+
+    Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
+                              derivativeBasisFunction2DX,
+                              derivativeBasisFunction2DY,
+                              jacobianMatrix );
+
     // compute determinant of jacobian Matrix
     vectorDouble detJ= Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
                                                               jacobianMatrix );

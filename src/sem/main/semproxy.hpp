@@ -62,7 +62,7 @@ private:
   arrayReal myRHSTerm;
 
   simpleMesh const myMesh {50, 50, 1000, 1000, myOrderNumber};
-  //simpleMesh const myMesh {200, 200, 4000, 4000, myOrderNumber};
+  //simpleMesh const myMesh {2, 2, 4000, 4000, myOrderNumber};
   int i1=0;
   int i2=1;
   int numberOfNodes;

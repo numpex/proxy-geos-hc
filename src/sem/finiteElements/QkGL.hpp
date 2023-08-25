@@ -45,10 +45,16 @@ public:
                                    arrayDouble & a,
                                    arrayDouble & b ) const;
   // compute Jacobian Matrix
-  arrayDouble  computeJacobianMatrix( const int & nPointsPerElement,
-                                      arrayDouble & Xi,
-                                      arrayDouble & dxPhi,
-                                      arrayDouble & dyPhi ) const;
+  //arrayDouble  computeJacobianMatrix( const int & nPointsPerElement,
+  //                                    arrayDouble & Xi,
+  //                                    arrayDouble & dxPhi,
+  //                                    arrayDouble & dyPhi ) const;
+
+  void computeJacobianMatrix( const int & nPointsPerElement,
+                              arrayDouble & Xi,
+                              arrayDouble & dxPhi,
+                              arrayDouble & dyPhi,
+                              arrayDouble & jacobianMatrix ) const;
 
   // compute determinant of Jacobian Matrix
   vectorDouble  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,

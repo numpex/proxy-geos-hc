@@ -15,6 +15,7 @@ void solverBase::computeFEInit( const int & order,
 {
 
   // get infos from mesh
+
   //interior elements
   numberOfNodes=mesh.getNumberOfNodes();
   numberOfElements=mesh.getNumberOfElements();
@@ -22,6 +23,7 @@ void solverBase::computeFEInit( const int & order,
   globalNodesList=mesh.globalNodesList( numberOfElements );
   listOfInteriorNodes=mesh.getListOfInteriorNodes( numberOfInteriorNodes );
   globalNodesCoords=mesh.nodesCoordinates( numberOfNodes );
+
   // boundary elements
   numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
   numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
@@ -50,7 +52,7 @@ void solverBase::computeFEInit( const int & order,
   derivativeBasisFunction2DX=Qk.getBasisFunction2D( quadraturePoints, derivativeBasisFunction1D, basisFunction1D );
   derivativeBasisFunction2DY=Qk.getBasisFunction2D( quadraturePoints, basisFunction1D, derivativeBasisFunction1D );
 
-
+  jacobianMatrix=allocateArray2D<arrayDouble>( 4, numberOfPointsPerElement );
 
 }
 
