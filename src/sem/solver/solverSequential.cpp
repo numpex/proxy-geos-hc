@@ -61,7 +61,6 @@ void solverSEQ::computeOneStep( const float & timeSample,
     // compute  geometrical transformation matrix
     Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
 
-    
     // compute stifness and mass matrix ( non optimized)
     //Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
     //                  derivativeBasisFunction2DY, R);
