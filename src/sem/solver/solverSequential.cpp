@@ -35,10 +35,12 @@ void solverSEQ::computeOneStep( const float & timeSample,
   {
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
-    vectorInt localToGlobal=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList );
+    //vectorInt localToGlobal=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList );
+    mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
 
     //get global coordinates Xi of element e
-    arrayDouble Xi=mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal );
+    //arrayDouble Xi=mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal );
+    mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
 
     // compute jacobian Matrix
     arrayDouble jacobianMatrix= Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,

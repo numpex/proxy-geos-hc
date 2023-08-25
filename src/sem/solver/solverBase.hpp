@@ -66,18 +66,19 @@ protected:
   int numberOfInteriorNodes;
   int numberOfBoundaryNodes;
   int numberOfBoundaryFaces;
+  int numberOfPointsPerElement;
+
+  vectorInt localToGlobal;
   arrayInt globalNodesList;
   vectorInt listOfInteriorNodes;
   arrayReal globalNodesCoords;
   vectorInt listOfBoundaryNodes;
   arrayInt faceInfos;
   arrayInt localFaceNodeToGlobalFaceNode;
+  arrayDouble Xi;
 
   // get model
   vectorReal model;
-
-  //get infos about finite element order of approximation
-  int numberOfPointsPerElement;
 
   // get quadrature points and weights
   vectorDouble quadraturePoints;

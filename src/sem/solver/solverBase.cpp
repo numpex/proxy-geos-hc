@@ -32,8 +32,10 @@ void solverBase::computeFEInit( const int & order,
   // get model
   model=mesh.getModel( numberOfElements );
 
-  //get infos about finite element order of approximation
+  //allocate mesh arrays used in kernel
   numberOfPointsPerElement = ( order + 1 ) * ( order + 1 );
+  localToGlobal=allocateVector<vectorInt>(numberOfPointsPerElement);
+  Xi=allocateArray2D<arrayDouble>( numberOfPointsPerElement, 2 );
 
   // get quadrature points and weights
   quadraturePoints=Qk.gaussLobattoQuadraturePoints( order );

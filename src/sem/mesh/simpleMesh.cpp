@@ -34,6 +34,12 @@ int simpleMesh::getNumberOfElements() const
   return numberOfElements;
 }
 
+// get number of points per element
+int simpleMesh::getNumberOfPointsPerElement() const
+{
+  return((order+1)*(order+1));
+}
+
 //get nx
 int simpleMesh::getNx() const
 {return nx;}
@@ -188,14 +194,15 @@ arrayInt simpleMesh::globalNodesList( const int & numberOfElements ) const
 }
 
 // local to global
-const vectorInt simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList )const
+//const vectorInt simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList )const
+void simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList,  vectorInt &localToGlobal)const
 {
-  vectorInt localToGlobal( nPointsPerElement );
+  //vectorInt localToGlobal( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     localToGlobal[i]=nodesList[elementNumber][i];
   }
-  return localToGlobal;
+  //return localToGlobal;
 }
 
 // compute global node to grid  indexes
@@ -290,16 +297,18 @@ vectorInt simpleMesh::neighbors( const int & e ) const
 }
 
 // get global coordinates of element e
-arrayDouble simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
-                               vectorInt & localToGlobal ) const
+//arrayDouble simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
+//                              vectorInt & localToGlobal ) const
+void simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
+                     vectorInt & localToGlobal , arrayDouble & Xi) const
 {
-  arrayDouble Xi( numberOfPointsPerElement, 2 );
+  //arrayDouble Xi( numberOfPointsPerElement, 2 );
   for( int i=0; i<numberOfPointsPerElement; i++ )
   {
     Xi[i][0]=globalNodesCoords[localToGlobal[i]][0];
     Xi[i][1]=globalNodesCoords[localToGlobal[i]][1];
   }
-  return Xi;
+  //return Xi;
 }
 
 

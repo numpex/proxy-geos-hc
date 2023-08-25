@@ -32,6 +32,9 @@ public:
   //  Returns the number of elements of the mesh
   int  getNumberOfElements() const;
 
+  // get number of points per element
+  int getNumberOfPointsPerElement() const;
+
   //get nx
   int getNx() const;
 
@@ -63,7 +66,8 @@ public:
   arrayInt globalNodesList( const int & numberOfElements ) const;
 
   // local to global
-  const vectorInt localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList ) const;
+  //const vectorInt localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList ) const;
+  void localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList, vectorInt & localToGlobal) const;
   // compute global to local node indes
   int Itoij( const int & I, int & i, int & j ) const;
 
@@ -80,8 +84,10 @@ public:
   vectorInt neighbors( const int & e ) const;
 
   // get global coordinates of element e
-  arrayDouble getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
-                     vectorInt & localToGlobal ) const;
+  //arrayDouble getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
+  //                   vectorInt & localToGlobal ) const;
+  void getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
+                     vectorInt & localToGlobal , arrayDouble & Xi) const;
 
   // get global DOF belonging to the faces of element e
   arrayInt getGlobalDofOfFace( const int & e,

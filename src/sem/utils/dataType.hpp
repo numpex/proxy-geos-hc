@@ -52,6 +52,20 @@
     #include "RAJA/RAJA.hpp"
   #endif
 
+  template<class T>
+  T allocateVector(int n1)
+  {
+     std::cout<<"allocate array of size "<<n1<<std::endl;
+     T vect(n1);
+    return vect;
+  }
+  template<class T>
+  T allocateArray2D(int n1, int n2)
+  {
+     T array(n1, n2);
+    return array;
+  }
+
 #endif //SEM_USE_VECTOR
 
 #ifdef SEM_USE_LVARRAY
