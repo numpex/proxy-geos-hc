@@ -116,13 +116,10 @@ void solverSEQ::computeOneStep( const float & timeSample,
   for( int iFace=0; iFace<numberOfBoundaryFaces; iFace++ )
   {
     //get ds
-    //ds=Qk.computeDs( iFace, order, faceInfos, globalNodesCoords,
-    //                 derivativeBasisFunction2DX,
-    //                 derivativeBasisFunction2DY );
     Qk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
-                     Js, globalNodesCoords, derivativeBasisFunction2DX,
-                     derivativeBasisFunction2DY,
-                     ds );
+                  Js, globalNodesCoords, derivativeBasisFunction2DX,
+                  derivativeBasisFunction2DY,
+                  ds );
 
     //compute Sh and ShGlobal
     for( int i=0; i<order+1; i++ )

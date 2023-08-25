@@ -20,8 +20,6 @@ void solverOMP::computeOneStep( const float & timeSample,
                                 simpleMesh mesh,
                                 QkGL Qk )
 {
-  static vectorReal massMatrixGlobal( numberOfNodes );
-  static vectorReal yGlobal( numberOfNodes );
   #pragma omp parallel for
   for( int i=0; i<numberOfNodes; i++ )
   {
@@ -36,51 +34,63 @@ void solverOMP::computeOneStep( const float & timeSample,
   {
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
-    vectorInt localToGlobal=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList );
+    mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
 
     //get global coordinates Xi of element e
-    arrayDouble Xi=mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal );
+    mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
 
     // compute jacobian Matrix
-    arrayDouble jacobianMatrix= Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
-                                                          derivativeBasisFunction2DX,
-                                                          derivativeBasisFunction2DY );
+    Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
+                              derivativeBasisFunction2DX,
+                              derivativeBasisFunction2DY,
+                              jacobianMatrix );
+
     // compute determinant of jacobian Matrix
-    vectorDouble detJ= Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
-                                                              jacobianMatrix );
+    Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
+                                           jacobianMatrix,
+                                           detJ );
     // compute inverse of Jacobian Matrix
-    arrayDouble invJacobianMatrix= Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
-                                                                jacobianMatrix,
-                                                                detJ );
+    Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
+                                 jacobianMatrix,
+                                 detJ,
+                                 invJacobianMatrix );
     // compute transposed inverse of Jacobian Matrix
-    arrayDouble transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
-                                                                            jacobianMatrix,
-                                                                            detJ );
+    Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
+                                       jacobianMatrix,
+                                       detJ,
+                                       transpInvJacobianMatrix );
     // compute  geometrical transformation matrix
-    arrayDouble B=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ );
+    Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
 
-    // compute stifness and mass matrix
-    arrayDouble R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
+    
+    // compute stifness and mass matrix ( non optimized)
+    //Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
+    //                  derivativeBasisFunction2DY, R);
 
-    // compute local mass matrix
-    vectorDouble massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
+    // compute stifness and mass matrix ( durufle's optimization)
+    Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
+
+    // compute local mass matrix ( used optimez version)
+    Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
+
     // get pnGlobal to pnLocal
-    vectorReal pnLocal( numberOfPointsPerElement );
-    vectorReal Y( numberOfPointsPerElement );
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
       massMatrixLocal[i]/=(model[e]*model[e]);
       pnLocal[i]=pnGlobal[localToGlobal[i]][i2];
     }
+
+    // compute Y=R*pnLocal
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
       Y[i]=0;
       for( int j=0; j<numberOfPointsPerElement; j++ )
       {
         Y[i]+=R[i][j]*pnLocal[j];
-
       }
     }
+
+    //compute gloval mass Matrix and global stiffness vector
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
       int gIndex=localToGlobal[i];
@@ -100,8 +110,6 @@ void solverOMP::computeOneStep( const float & timeSample,
   //cout<<"pressure="<<pnGlobal[5][i1]<<endl;
 
   // damping terms
-  static vectorReal ShGlobal( numberOfBoundaryNodes );
-
   #pragma omp parallel for
   for( int i=0; i<numberOfBoundaryNodes; i++ )
   {
@@ -112,12 +120,11 @@ void solverOMP::computeOneStep( const float & timeSample,
   #pragma omp parallel for
   for( int iFace=0; iFace<numberOfBoundaryFaces; iFace++ )
   {
-    vectorReal ds( order+1 );
-    vectorReal Sh( order+1 );
     //get ds
-    ds=Qk.computeDs( iFace, order, faceInfos, globalNodesCoords,
-                     derivativeBasisFunction2DX,
-                     derivativeBasisFunction2DY );
+    Qk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
+                  Js, globalNodesCoords, derivativeBasisFunction2DX,
+                  derivativeBasisFunction2DY,
+                  ds );
     //compute Sh and ShGlobal
     for( int i=0; i<order+1; i++ )
     {
