@@ -22,6 +22,8 @@ void solverSEQ::computeOneStep( const float & timeSample,
 {
   static vectorReal massMatrixGlobal( numberOfNodes );
   static vectorReal yGlobal( numberOfNodes );
+  static vectorReal pnLocal( numberOfPointsPerElement );
+  static vectorReal Y( numberOfPointsPerElement );
 
   for( int i=0; i<numberOfNodes; i++ )
   {
@@ -92,8 +94,7 @@ void solverSEQ::computeOneStep( const float & timeSample,
     Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
 
     // get pnGlobal to pnLocal
-    vectorReal pnLocal( numberOfPointsPerElement );
-    vectorReal Y( numberOfPointsPerElement );
+
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
       massMatrixLocal[i]/=(model[e]*model[e]);
