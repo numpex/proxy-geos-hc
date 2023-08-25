@@ -59,7 +59,17 @@ void solverBase::computeFEInit( const int & order,
   B=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
   R=allocateArray2D<arrayDouble>(numberOfPointsPerElement, numberOfPointsPerElement);
   massMatrixLocal=allocateVector<vectorDouble>(numberOfPointsPerElement);
+  massMatrixGlobal=allocateVector<vectorReal>( numberOfNodes );
+  yGlobal=allocateVector<vectorReal>( numberOfNodes );
+  pnLocal=allocateVector<vectorReal>( numberOfPointsPerElement );
+  Y=allocateVector<vectorReal>( numberOfPointsPerElement );
 
+  ShGlobal=allocateVector<vectorReal>( numberOfBoundaryNodes );
+
+  ds=allocateVector<vectorReal>( order+1 );
+  Sh=allocateVector<vectorReal>( order+1 );
+  numOfBasisFunctionOnFace=allocateVector<vectorInt>( order+1 );
+  Js=allocateArray2D<arrayReal>( 2, order+1 );
 }
 
 // add right and side

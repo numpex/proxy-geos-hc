@@ -142,12 +142,21 @@ public:
                  arrayDouble  & massMatrixLocal )const;
   
   // compute dx
-  vectorReal computeDs( const int & iFace,
-                        const int & order,
-                        arrayInt & faceInfos,
-                        arrayReal & globalNodesCoords,
-                        arrayDouble & derivativeBasisFunction2DX,
-                        arrayDouble & derivativeBasisFunction2DY ) const;
+  //vectorReal computeDs( const int & iFace,
+  //                      const int & order,
+  //                      arrayInt & faceInfos,
+  //                      arrayReal & globalNodesCoords,
+  //                      arrayDouble & derivativeBasisFunction2DX,
+  //                      arrayDouble & derivativeBasisFunction2DY ) const;
+  void computeDs( const int & iFace,
+                      const int & order,
+                      arrayInt  & faceInfos,
+                      vectorInt & numOfBasisFunctionOnFace,
+                      arrayReal & Js,
+                      arrayReal & globalNodesCoords,
+                      arrayDouble & derivativeBasisFunction2DX,
+                      arrayDouble & derivativeBasisFunction2DY,
+                      vectorReal  & ds ) const;
 
 };
 

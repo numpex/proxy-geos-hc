@@ -100,7 +100,17 @@ protected:
   arrayDouble R;
   vectorDouble massMatrixLocal;
 
-  // end init
+  vectorReal massMatrixGlobal;
+  vectorReal yGlobal;
+  vectorReal pnLocal;
+  vectorReal Y;
 
+  vectorReal ShGlobal;
+  vectorReal ds;
+  vectorReal Sh;
+  vectorInt numOfBasisFunctionOnFace;
+  arrayReal Js;
+  
+  // end init
 };
 #endif //SOLVER_BASE_HPP_

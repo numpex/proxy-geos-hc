@@ -660,16 +660,26 @@ void QkGL::phiIphiJ( const int & nPointsPerElement,
 }
 //**/
 
-vectorReal QkGL::computeDs( const int & iFace,
-                            const int & order,
-                            arrayInt & faceInfos,
-                            arrayReal & globalNodesCoords,
-                            arrayDouble & derivativeBasisFunction2DX,
-                            arrayDouble & derivativeBasisFunction2DY ) const
+//vectorReal QkGL::computeDs( const int & iFace,
+//                            const int & order,
+//                            arrayInt & faceInfos,
+//                            arrayReal & globalNodesCoords,
+//                            arrayDouble & derivativeBasisFunction2DX,
+//                            arrayDouble & derivativeBasisFunction2DY ) const
+
+void QkGL::computeDs( const int & iFace,
+                      const int & order,
+                      arrayInt  & faceInfos,
+                      vectorInt & numOfBasisFunctionOnFace,
+                      arrayReal & Js,
+                      arrayReal & globalNodesCoords,
+                      arrayDouble & derivativeBasisFunction2DX,
+                      arrayDouble & derivativeBasisFunction2DY,
+                      vectorReal  & ds ) const
 {
-  vectorInt numOfBasisFunctionOnFace( order+1 );
-  arrayReal Js( 2, order+1 );
-  vectorReal ds( order+1 );
+  //vectorInt numOfBasisFunctionOnFace( order+1 );
+  //arrayReal Js( 2, order+1 );
+  //vectorReal ds( order+1 );
 
   int face=faceInfos[iFace][1];
   // get basis functions on Boundary faces
@@ -726,5 +736,5 @@ vectorReal QkGL::computeDs( const int & iFace,
     ds[j]=sqrt( Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j] );
     //cout<<"j="<<j<<", ds="<<ds[j]<<", "<<Js[0][j]<<", "<<Js[1][j]<<endl;
   }
-  return ds;
+  //return ds;
 }
