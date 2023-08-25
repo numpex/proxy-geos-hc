@@ -411,23 +411,30 @@ void QkGL::computeJacobianMatrix( const int & nPointsPerElement,
 }
 
 // compute jacobian matrix determinant
-vectorDouble QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
-                                                       arrayDouble & jacobianMatrix ) const
+//vectorDouble QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+//                                                      arrayDouble & jacobianMatrix ) const
+void QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+                                               arrayDouble & jacobianMatrix,
+                                               vectorDouble & detJ ) const
 {
-  vectorDouble detJ( nPointsPerElement );
+  //vectorDouble detJ( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     detJ[i]=(jacobianMatrix[0][i]*jacobianMatrix[3][i]-jacobianMatrix[2][i]*jacobianMatrix[1][i]);
   }
-  return detJ;
+  //return detJ;
 }
 
 // compute inverse of Jacobian Matrix
-arrayDouble QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
-                                            arrayDouble & jacobianMatrix,
-                                            vectorDouble & detJ ) const
+//arrayDouble QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
+//                                            arrayDouble & jacobianMatrix,
+//                                            vectorDouble & detJ ) const
+void QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
+                                     arrayDouble & jacobianMatrix,
+                                     vectorDouble & detJ,
+                                     arrayDouble & invJacobianMatrix ) const
 {
-  arrayDouble invJacobianMatrix( 4, nPointsPerElement );
+  //arrayDouble invJacobianMatrix( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     invJacobianMatrix[0][i]=(jacobianMatrix[3][i]/detJ[i]);
@@ -435,7 +442,7 @@ arrayDouble QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
     invJacobianMatrix[2][i]=(-jacobianMatrix[2][i]/detJ[i]);
     invJacobianMatrix[3][i]=(jacobianMatrix[0][i]/detJ[i]);
   }
-  return invJacobianMatrix;
+  //return invJacobianMatrix;
 }
 
 // compute inverse of Jacobian Matrix

@@ -53,12 +53,19 @@ void solverSEQ::computeOneStep( const float & timeSample,
                               jacobianMatrix );
 
     // compute determinant of jacobian Matrix
-    vectorDouble detJ= Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
-                                                              jacobianMatrix );
+    //vectorDouble detJ= Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
+    //                                                          jacobianMatrix );
+    Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
+                                           jacobianMatrix,
+                                           detJ );
     // compute inverse of Jacobian Matrix
-    arrayDouble invJacobianMatrix= Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
-                                                                jacobianMatrix,
-                                                                detJ );
+    //arrayDouble invJacobianMatrix= Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
+    //                                                            jacobianMatrix,
+    //                                                            detJ );
+    Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
+                                 jacobianMatrix,
+                                 detJ,
+                                 invJacobianMatrix );
     // compute transposed inverse of Jacobian Matrix
     arrayDouble transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
                                                                             jacobianMatrix,

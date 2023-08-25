@@ -93,6 +93,8 @@ protected:
   arrayDouble derivativeBasisFunction2DY;
 
   arrayDouble jacobianMatrix;
+  vectorDouble detJ;
+  arrayDouble invJacobianMatrix;
 
   // end init
 

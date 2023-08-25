@@ -52,7 +52,9 @@ void solverBase::computeFEInit( const int & order,
   derivativeBasisFunction2DX=Qk.getBasisFunction2D( quadraturePoints, derivativeBasisFunction1D, basisFunction1D );
   derivativeBasisFunction2DY=Qk.getBasisFunction2D( quadraturePoints, basisFunction1D, derivativeBasisFunction1D );
 
-  jacobianMatrix=allocateArray2D<arrayDouble>( 4, numberOfPointsPerElement );
+  jacobianMatrix=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
+  detJ=allocateVector<vectorDouble>(numberOfPointsPerElement);
+  invJacobianMatrix=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
 
 }
 

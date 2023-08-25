@@ -57,13 +57,20 @@ public:
                               arrayDouble & jacobianMatrix ) const;
 
   // compute determinant of Jacobian Matrix
-  vectorDouble  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
-                                                    arrayDouble & jacobianMatrix ) const;
+  //vectorDouble  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+  //                                                  arrayDouble & jacobianMatrix ) const;
+  void computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+                                           arrayDouble & jacobianMatrix,
+                                           vectorDouble & detJ ) const;
 
   // compute inverse of Jacobian Matrix
-  arrayDouble  computeInvJacobianMatrix( const int & nPointsPerElement,
+  //arrayDouble  computeInvJacobianMatrix( const int & nPointsPerElement,
+  //                                       arrayDouble & jacobianMatrix,
+  //                                       vectorDouble & detJ ) const;
+  void computeInvJacobianMatrix( const int & nPointsPerElement,
                                          arrayDouble & jacobianMatrix,
-                                         vectorDouble & detJ ) const;
+                                         vectorDouble & detJ,
+                                         arrayDouble & invJacobianMatrix ) const;
 
   // compute tranposed inverse of Jacobian Matrix
   arrayDouble  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
