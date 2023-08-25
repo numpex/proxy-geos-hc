@@ -59,7 +59,7 @@ void solverOMP::computeOneStep( const float & timeSample,
                                        jacobianMatrix,
                                        detJ,
                                        transpInvJacobianMatrix );
-                                       
+                                       !rm
     // compute  geometrical transformation matrix
     Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
 
