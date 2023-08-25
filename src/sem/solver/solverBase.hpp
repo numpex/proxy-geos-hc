@@ -95,6 +95,10 @@ protected:
   arrayDouble jacobianMatrix;
   vectorDouble detJ;
   arrayDouble invJacobianMatrix;
+  arrayDouble transpInvJacobianMatrix;
+  arrayDouble B;
+  arrayDouble R;
+  vectorDouble massMatrixLocal;
 
   // end init
 

@@ -446,11 +446,15 @@ void QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
 }
 
 // compute inverse of Jacobian Matrix
-arrayDouble QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+//arrayDouble QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+//                                                  arrayDouble & jacobianMatrix,
+//                                                  vectorDouble & detJ ) const
+void QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
                                                   arrayDouble & jacobianMatrix,
-                                                  vectorDouble & detJ ) const
+                                                  vectorDouble & detJ,
+                                                  arrayDouble  &transpInvJacobianMatrix ) const
 {
-  arrayDouble transpInvJacobianMatrix( 4, nPointsPerElement );
+  //arrayDouble transpInvJacobianMatrix( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     transpInvJacobianMatrix[0][i]=(jacobianMatrix[3][i]/detJ[i]);
@@ -458,16 +462,21 @@ arrayDouble QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
     transpInvJacobianMatrix[2][i]=(-jacobianMatrix[1][i]/detJ[i]);
     transpInvJacobianMatrix[3][i]=(jacobianMatrix[0][i]/detJ[i]);
   }
-  return transpInvJacobianMatrix;
+  //return transpInvJacobianMatrix;
 }
 
 // compute B the matrix containing the geometrical informations
-arrayDouble QkGL::computeB( const int & nPointsPerElement,
-                            arrayDouble & invJacobianMatrix,
-                            arrayDouble & transpInvJacobianMatrix,
-                            vectorDouble & detJ ) const
+//arrayDouble QkGL::computeB( const int & nPointsPerElement,
+//                            arrayDouble & invJacobianMatrix,
+//                            arrayDouble & transpInvJacobianMatrix,
+//                            vectorDouble & detJ ) const
+void QkGL::computeB( const int & nPointsPerElement,
+                 arrayDouble & invJacobianMatrix,
+                 arrayDouble & transpInvJacobianMatrix,
+                 vectorDouble & detJ,
+                 arrayDouble & B ) const
 {
-  arrayDouble B( 4, nPointsPerElement );
+  //arrayDouble B( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     B[0][i]=(abs( detJ[i] )*(invJacobianMatrix[0][i]*transpInvJacobianMatrix[0][i]+
@@ -479,19 +488,32 @@ arrayDouble QkGL::computeB( const int & nPointsPerElement,
     B[3][i]=(abs( detJ[i] )*(invJacobianMatrix[2][i]*transpInvJacobianMatrix[1][i]+
                              invJacobianMatrix[3][i]*transpInvJacobianMatrix[3][i]));
   }
-  return B;
+  //return B;
 
 }
 
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
 // Marc Durufle Formulae
-arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+//arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+//                                  const int & order,
+//                                  vectorDouble & weights2D,
+//                                  arrayDouble & B,
+//                                  arrayDouble & dPhi ) const
+void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                   const int & order,
                                   vectorDouble & weights2D,
                                   arrayDouble & B,
-                                  arrayDouble & dPhi ) const
+                                  arrayDouble & dPhi,
+                                  arrayDouble & R ) const
 {
-  arrayDouble R( nPointsPerElement, nPointsPerElement );
+  //arrayDouble R( nPointsPerElement, nPointsPerElement );
+  for (int i=0;i<nPointsPerElement;i++)
+  {
+      for (int j=0; j<nPointsPerElement;j++)
+      {
+        R[i][j]=0;
+      }
+  }
   // B11
   for( int i1=0; i1<order+1; i1++ )
   {
@@ -556,17 +578,23 @@ arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
       }
     }
   }
-  return R;
+  //return R;
 }
 ///**
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
-arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+//arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+//                                  vectorDouble & weights2D,
+//                                  arrayDouble & B,
+//                                  arrayDouble & dxPhi,
+//                                  arrayDouble & dyPhi ) const
+void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                   vectorDouble & weights2D,
                                   arrayDouble & B,
                                   arrayDouble & dxPhi,
-                                  arrayDouble & dyPhi ) const
+                                  arrayDouble & dyPhi,
+                                  arrayDouble & R ) const
 {
-  arrayDouble R( nPointsPerElement, nPointsPerElement );
+  //arrayDouble R( nPointsPerElement, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     for( int j=0; j<nPointsPerElement; j++ )
@@ -574,49 +602,61 @@ arrayDouble QkGL::gradPhiGradPhi( const int & nPointsPerElement,
       double tmp=0;
       for( int r=0; r<nPointsPerElement; r++ )
       {
-        R[i][j]+=weights2D[r]*(B[0][r]*dxPhi[i][r]*dxPhi[j][r]+
+        tmp+=weights2D[r]*(B[0][r]*dxPhi[i][r]*dxPhi[j][r]+
                                B[1][r]*dxPhi[i][r]*dyPhi[j][r]+
                                B[2][r]*dyPhi[i][r]*dxPhi[j][r]+
                                B[3][r]*dyPhi[i][r]*dyPhi[j][r]);
       }
+      R[i][j]=tmp;
     }
   }
-  return R;
+  //return R;
 }
 
 //**/
-// compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$
-vectorDouble QkGL::phiIphiJ( const int & nPointsPerElement,
+// compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ (optimized formulation)
+//vectorDouble QkGL::phiIphiJ( const int & nPointsPerElement,
+//                             vectorDouble & weights2D,
+//                             vectorDouble & detJ ) const
+void QkGL::phiIphiJ( const int & nPointsPerElement,
                              vectorDouble & weights2D,
-                             vectorDouble & detJ ) const
+                             vectorDouble & detJ,
+                             vectorDouble & massMatrixLocal ) const
 {
-  vectorDouble M( nPointsPerElement );
+  //vectorDouble massMatrixLocal( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-    M[i]=weights2D[i]*abs( detJ[i] );
+    massMatrixLocal[i]=weights2D[i]*abs( detJ[i] );
   }
-  return M;
+  //return MassMatrixLocal;
 }
 
 ///**
-// compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$
-arrayDouble QkGL::phiIphiJ( const int & nPointsPerElement,
+// compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ (non optimized formulation)
+//arrayDouble QkGL::phiIphiJ( const int & nPointsPerElement,
+//                            vectorDouble & weights2D,
+//                            arrayDouble & phi,
+//                            vectorDouble & detJ ) const
+void QkGL::phiIphiJ( const int & nPointsPerElement,
                             vectorDouble & weights2D,
                             arrayDouble & phi,
-                            vectorDouble & detJ ) const
+                            vectorDouble & detJ,
+                            arrayDouble  & massMatrixLocal) const
 {
-  arrayDouble M( nPointsPerElement, nPointsPerElement );
+  //arrayDouble massMatrixLocal( nPointsPerElement, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     for( int j=0; j<nPointsPerElement; j++ )
     {
+      double tmp=0;
       for( int r=0; r<nPointsPerElement; r++ )
       {
-        M[i][j]+=weights2D[r]*(phi[i][r]*phi[j][r])*abs( detJ[r] );
+        tmp+=weights2D[r]*(phi[i][r]*phi[j][r])*abs( detJ[r] );
       }
+      massMatrixLocal[i][j]=tmp;
     }
   }
-  return M;
+  //return massMatrixLocal;
 }
 //**/
 

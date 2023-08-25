@@ -67,23 +67,30 @@ void solverSEQ::computeOneStep( const float & timeSample,
                                  detJ,
                                  invJacobianMatrix );
     // compute transposed inverse of Jacobian Matrix
-    arrayDouble transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
-                                                                            jacobianMatrix,
-                                                                            detJ );
+    //arrayDouble transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
+    //                                                                        jacobianMatrix,
+    //                                                                        detJ );
+    Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
+                                       jacobianMatrix,
+                                       detJ,
+                                       transpInvJacobianMatrix );
     // compute  geometrical transformation matrix
-    arrayDouble B=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ );
+    //arrayDouble B=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ );
+    Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
 
-    /**
-       // compute stifness and mass matrix
-       vector<vector<double>> const R=Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
-                          derivativeBasisFunction2DY);
-     **/
+    
+    // compute stifness and mass matrix ( non optimized)
+    //vector<vector<double>> const R=Qk.gradPhiGradPhi(numberOfPointsPerElement, weights2D, B, derivativeBasisFunction2DX,
+    //                                                 derivativeBasisFunction2DY);
 
-    // compute stifness and mass matrix
-    arrayDouble R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
+    // compute stifness and mass matrix ( durufle's optimization)
+    //arrayDouble R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
+    Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
 
-    // compute local mass matrix
-    vectorDouble massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
+    // compute local mass matrix ( used optimez version)
+    //vectorDouble massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
+    Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
+
     // get pnGlobal to pnLocal
     vectorReal pnLocal( numberOfPointsPerElement );
     vectorReal Y( numberOfPointsPerElement );

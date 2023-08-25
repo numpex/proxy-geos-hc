@@ -55,6 +55,10 @@ void solverBase::computeFEInit( const int & order,
   jacobianMatrix=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
   detJ=allocateVector<vectorDouble>(numberOfPointsPerElement);
   invJacobianMatrix=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
+  transpInvJacobianMatrix=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
+  B=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
+  R=allocateArray2D<arrayDouble>(numberOfPointsPerElement, numberOfPointsPerElement);
+  massMatrixLocal=allocateVector<vectorDouble>(numberOfPointsPerElement);
 
 }
 

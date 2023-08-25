@@ -73,45 +73,74 @@ public:
                                          arrayDouble & invJacobianMatrix ) const;
 
   // compute tranposed inverse of Jacobian Matrix
-  arrayDouble  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-                                               arrayDouble & jacobianMatrix,
-                                               vectorDouble & detJ ) const;
+  //arrayDouble  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+  //                                             arrayDouble & jacobianMatrix,
+  //                                             vectorDouble & detJ ) const;
+  void computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+                                       arrayDouble & jacobianMatrix,
+                                       vectorDouble & detJ,
+                                       arrayDouble  &transpInvJacobianMatrix ) const;
 
   // compute 𝐵 the matrix containing the geometrical informations
-  arrayDouble  computeB( const int & nPoinsPerElement,
-                         arrayDouble & invJacobianMatrix,
-                         arrayDouble & transpInvJacobianMatrix,
-                         vectorDouble & detJ ) const;
+  //arrayDouble  computeB( const int & nPointsPerElement,
+  //                       arrayDouble & invJacobianMatrix,
+  //                       arrayDouble & transpInvJacobianMatrix,
+  //                       vectorDouble & detJ ) const;
+  void computeB( const int & nPointsPerElement,
+                 arrayDouble & invJacobianMatrix,
+                 arrayDouble & transpInvJacobianMatrix,
+                 vectorDouble & detJ,
+                 arrayDouble & B ) const;
 
+                
   // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
   // Marc Durufle Formulae
-  arrayDouble  gradPhiGradPhi( const int & nPointsPerElement,
-                               const int & order,
-                               vectorDouble & weights,
-                               arrayDouble & B,
-                               arrayDouble & dPhi ) const;
+  //arrayDouble  gradPhiGradPhi( const int & nPointsPerElement,
+  //                             const int & order,
+  //                             vectorDouble & weights,
+  //                             arrayDouble & B,
+  //                             arrayDouble & dPhi ) const;
+  void gradPhiGradPhi( const int & nPointsPerElement,
+                       const int & order,
+                       vectorDouble & weights2D,
+                       arrayDouble & B,
+                       arrayDouble & dPhi,
+                       arrayDouble & R ) const;
   ///**
   // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
-  arrayDouble  gradPhiGradPhi( const int & nPointsPerElement,
-                               vectorDouble & weights,
-                               arrayDouble & B,
-                               arrayDouble & dxPhi,
-                               arrayDouble & dyPhi ) const;
+  //arrayDouble  gradPhiGradPhi( const int & nPointsPerElement,
+  //                             vectorDouble & weights,
+  //                             arrayDouble & B,
+  //                             arrayDouble & dxPhi,
+  //                             arrayDouble & dyPhi ) const;
+  void gradPhiGradPhi( const int & nPointsPerElement,
+                       vectorDouble & weights,
+                       arrayDouble & B,
+                       arrayDouble & dxPhi,
+                       arrayDouble & dyPhi,
+                       arrayDouble & R ) const;
   //**/
 
-  // compute the matrix $M_{i,j}=:w
-  // \int_{K}{{\phi_i}.{\phi_j}dx}$
-  vectorDouble  phiIphiJ( const int & nPointsPerElement,
-                          vectorDouble & weights,
-                          vectorDouble & detJ )const;
-  ///**
-  // compute the matrix $M_{i,j}=:w
-  // \int_{K}{{\phi_i}.{\phi_j}dx}$
-  arrayDouble  phiIphiJ( const int & nPointsPerElement,
-                         vectorDouble & weights,
-                         arrayDouble & phi,
-                         vectorDouble & detJ )const;
-  //**/
+  // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ (optimized formulation)
+  //vectorDouble  phiIphiJ( const int & nPointsPerElement,
+  //                        vectorDouble & weights2D,
+  //                        vectorDouble & detJ )const;
+  void phiIphiJ( const int & nPointsPerElement,
+                 vectorDouble & weights2D,
+                 vectorDouble & detJ,
+                 vectorDouble & massMatrixLocal ) const;
+  
+  // compute the matrix $M_{i,j}= \int_{K}{{\phi_i}.{\phi_j}dx}$ ( non optimized formulation)
+  //arrayDouble  phiIphiJ( const int & nPointsPerElement,
+  //                       vectorDouble & weights2D,
+  //                       arrayDouble & phi,
+  //                       vectorDouble & detJ )const;
+  void phiIphiJ( const int & nPointsPerElement,
+                 vectorDouble & weights2D,
+                 arrayDouble & phi,
+                 vectorDouble & detJ,
+                 arrayDouble  & massMatrixLocal )const;
+  
   // compute dx
   vectorReal computeDs( const int & iFace,
                         const int & order,
