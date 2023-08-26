@@ -10,7 +10,6 @@
 #include <chrono>
 
 #include "RAJA/RAJA.hpp"
-#include "Macros.hpp"
 #include "Array.hpp"
 #include "MallocBuffer.hpp"
 #include "ChaiBuffer.hpp"
@@ -78,7 +77,7 @@ int main( int argc, char *argv[] )
 {
   
   
-  const int nIter=1000000;
+  const int nIter=1000;
   const int n1=1000;
   const int n2=1000;
 

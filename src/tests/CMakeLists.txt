@@ -74,5 +74,12 @@ if (ENABLE_CUDA)
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
     target_include_directories(test_LvArray_cuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
   endif()
+else()
+  if(ENABLE_LVARRAY)
+    blt_add_executable( NAME test_LVARRAY.exe 
+                        SOURCES test_LvArray.cpp
+                        DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+    target_include_directories(test_LVARRAY.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
+  endif()
 endif()
 
