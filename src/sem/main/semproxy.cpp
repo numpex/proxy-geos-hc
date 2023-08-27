@@ -16,12 +16,12 @@ void SEMProxy::init()
   numberOfElements=myMesh.getNumberOfElements();
 
   // set number of rhs and location
-  myRHSLocation[0][0]=501;
-  myRHSLocation[0][1]=501;
-  cout << "Source location: "<<myRHSLocation[0][0]<<", "<<myRHSLocation[0][1]<<endl;
+  myRHSLocation(0,0)=501;
+  myRHSLocation(0,1)=501;
+  cout << "Source location: "<<myRHSLocation(0,0)<<", "<<myRHSLocation(0,1)<<endl;
 
   // get element number of source term
-  myElementSource=myMesh.getElementNumberFromPoints( myRHSLocation[0][0], myRHSLocation[0][1] );
+  myElementSource=myMesh.getElementNumberFromPoints( myRHSLocation(0,0), myRHSLocation(0,1) );
   cout <<"Element number for the source location: "<<myElementSource<<endl;
 
   //float f0=15.;
@@ -31,7 +31,7 @@ void SEMProxy::init()
   vector< float > sourceTerm=myUtils.computeSourceTerm( myNumSamples, myTimeStep, f0, sourceOrder );
   for( int j=0; j<myNumSamples; j++ )
   {
-    myRHSTerm[0][j]=sourceTerm[j];
+    myRHSTerm(0,j)=sourceTerm[j];
   }
 
   for( int i=0; i<myNumSamples; i++ )
@@ -63,7 +63,7 @@ void SEMProxy::run()
     //writes debugging ascii file.
     if( indexTimeStep%50==0 )
     {
-      cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource<<" after computeOneStep = "<< pnGlobal[nodeList[myElementSource][0]][i2]<<endl;
+      cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource<<" after computeOneStep = "<< pnGlobal(nodeList[myElementSource][0],i2)<<endl;
       //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
     }
     swap( i1, i2 );

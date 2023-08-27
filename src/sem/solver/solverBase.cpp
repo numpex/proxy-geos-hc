@@ -90,11 +90,11 @@ void solverBase::addRightAndSides( const int & timeStep,
   for( int i=0; i<numberOfRHS; i++ )
   {
     //extract element number for current rhs
-    float x=rhsLocation[i][0];
-    float y=rhsLocation[i][1];
+    float x=rhsLocation(i,0);
+    float y=rhsLocation(i,1);
     int rhsElement=mesh.getElementNumberFromPoints( x, y );
     // compute global node numbe to add source term to
-    int nodeRHS=nodeList[rhsElement][0];
-    pnGlobal[nodeRHS][i2]+=timeSample*timeSample*model[rhsElement]*model[rhsElement]*rhsTerm[i][timeStep];
+    int nodeRHS=nodeList(rhsElement,0);
+    pnGlobal(nodeRHS,i2)+=timeSample*timeSample*model[rhsElement]*model[rhsElement]*rhsTerm(i,timeStep);
   }
 }

@@ -140,6 +140,21 @@
                                       std::ptrdiff_t,
                                       LvArray::MallocBuffer >;
   #endif
+
+  template<class T>
+  T allocateVector(int n1)
+  {
+     std::cout<<"allocate vector of size "<<n1<<std::endl;
+     T vect(n1);
+    return vect;
+  }
+  template<class T>
+  T allocateArray2D(int n1, int n2)
+  {
+    std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
+    T array(n1, n2);
+    return array;
+  }
 #endif //SEM_USE_LVARRAY
 
 #ifdef SEM_USE_KOKKOS
@@ -165,6 +180,33 @@
     using arrayReal=Array2D< float >;
     using arrayDouble=Array2D< double >;
   #endif //SEM_USE_KOKKOSVECTOR
+  //#define MemSpace Kokkos::CudaUVMSpace
+  #define MemSpace Kokkos::HostSpace
+  using ExecSpace = MemSpace::execution_space;
+  using range_policy = Kokkos::RangePolicy<ExecSpace>;
+
+  typedef Kokkos::View<int*,     Kokkos::LayoutLeft, MemSpace> vectorInt;
+  typedef Kokkos::View<float*,   Kokkos::LayoutLeft, MemSpace> vectorReal;
+  typedef Kokkos::View<double*,  Kokkos::LayoutLeft, MemSpace> vectorDouble;
+
+  typedef Kokkos::View<int**,    Kokkos::LayoutLeft, MemSpace> arrayInt;
+  typedef Kokkos::View<float**,  Kokkos::LayoutLeft, MemSpace> arrayReal;
+  typedef Kokkos::View<double**, Kokkos::LayoutLeft, MemSpace> arrayDouble;
+
+  template<class T>
+  T allocateVector(int n1)
+  {
+     std::cout<<"allocate vector of size "<<n1<<std::endl;
+     T vect("v",n1);
+    return vect;
+  }
+  template<class T>
+  T allocateArray2D(int n1, int n2)
+  {
+    std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
+    T array("a",n1, n2);
+    return array;
+  }
 #endif //SEM_USE_KOKKOS
 
 #endif //DATATYPE_HPP_
