@@ -211,7 +211,7 @@ elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
   if (SEM_USE_KOKKOSVECTOR)
      set (DATA_CONTAINER "KOKKOSVECTOR" CACHE PATH "" FORCE)
   endif()
-  set (kokkosList "-L${Kokkos_ROOT}/../../ -lkokkoscontainers -lkokkoscore -lkokkossimd")
+  set (kokkosList "-L${Kokkos_ROOT}/../../lib -lkokkoscontainers -lkokkoscore -lkokkossimd")
   set (ENABLE_KOKKOS ON CACHE BOOL "")
 
 

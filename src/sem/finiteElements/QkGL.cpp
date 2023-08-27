@@ -313,7 +313,7 @@ arrayDouble QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints
     tmp=shapeFunction1D( order, quadraturePoints[i] );
     for( int j=0; j<order+1; j++ )
     {
-      basisFunction1D[j][i]=tmp[j];
+      basisFunction1D(j,i)=tmp[j];
     }
   }
   return basisFunction1D;
@@ -333,7 +333,7 @@ arrayDouble QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadra
     tmp=derivativeShapeFunction1D( order, quadraturePoints[i] );
     for( int j=0; j<order+1; j++ )
     {
-      derivativeBasisFunction1D[j][i]=tmp[j];
+      derivativeBasisFunction1D(j,i)=tmp[j];
     }
   }
   return derivativeBasisFunction1D;
@@ -370,7 +370,7 @@ arrayDouble QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
       {
         for( int l=0; l<quadraturePoints.size(); l++ )
         {
-          c[i+quadraturePoints.size()*j][l+quadraturePoints.size()*k]=a[i][l]*b[j][k];
+          c(i+quadraturePoints.size()*j,l+quadraturePoints.size()*k)=a(i,l)*b(j,k);
         }
       }
     }
@@ -395,16 +395,16 @@ void QkGL::computeJacobianMatrix( const int & nPointsPerElement,
 
   for( int i=0; i<nPointsPerElement; i++ )
   {
-    jacobianMatrix[0][i]=0;
-    jacobianMatrix[1][i]=0;
-    jacobianMatrix[2][i]=0;
-    jacobianMatrix[3][i]=0;
+    jacobianMatrix(0,i)=0;
+    jacobianMatrix(1,i)=0;
+    jacobianMatrix(2,i)=0;
+    jacobianMatrix(3,i)=0;
     for( int j=0; j<nPointsPerElement; j++ )
     {
-      jacobianMatrix[0][i]+=Xi[j][0]*dxPhi[j][i];
-      jacobianMatrix[1][i]+=Xi[j][0]*dyPhi[j][i];
-      jacobianMatrix[2][i]+=Xi[j][1]*dxPhi[j][i];
-      jacobianMatrix[3][i]+=Xi[j][1]*dyPhi[j][i];
+      jacobianMatrix(0,i)+=Xi(j,0)*dxPhi(j,i);
+      jacobianMatrix(1,i)+=Xi(j,0)*dyPhi(j,i);
+      jacobianMatrix(2,i)+=Xi(j,1)*dxPhi(j,i);
+      jacobianMatrix(3,i)+=Xi(j,1)*dyPhi(j,i);
     }
   }
   //return jacobianMatrix;
@@ -420,7 +420,7 @@ void QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
   //vectorDouble detJ( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-    detJ[i]=(jacobianMatrix[0][i]*jacobianMatrix[3][i]-jacobianMatrix[2][i]*jacobianMatrix[1][i]);
+    detJ[i]=(jacobianMatrix(0,i)*jacobianMatrix(3,i)-jacobianMatrix(2,i)*jacobianMatrix(1,i));
   }
   //return detJ;
 }
@@ -437,10 +437,10 @@ void QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
   //arrayDouble invJacobianMatrix( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-    invJacobianMatrix[0][i]=(jacobianMatrix[3][i]/detJ[i]);
-    invJacobianMatrix[1][i]=(-jacobianMatrix[1][i]/detJ[i]);
-    invJacobianMatrix[2][i]=(-jacobianMatrix[2][i]/detJ[i]);
-    invJacobianMatrix[3][i]=(jacobianMatrix[0][i]/detJ[i]);
+    invJacobianMatrix(0,i)=(jacobianMatrix(3,i)/detJ[i]);
+    invJacobianMatrix(1,i)=(-jacobianMatrix(1,i)/detJ[i]);
+    invJacobianMatrix(2,i)=(-jacobianMatrix(2,i)/detJ[i]);
+    invJacobianMatrix(3,i)=(jacobianMatrix(0,i)/detJ[i]);
   }
   //return invJacobianMatrix;
 }
@@ -457,10 +457,10 @@ void QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
   //arrayDouble transpInvJacobianMatrix( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-    transpInvJacobianMatrix[0][i]=(jacobianMatrix[3][i]/detJ[i]);
-    transpInvJacobianMatrix[1][i]=(-jacobianMatrix[2][i]/detJ[i]);
-    transpInvJacobianMatrix[2][i]=(-jacobianMatrix[1][i]/detJ[i]);
-    transpInvJacobianMatrix[3][i]=(jacobianMatrix[0][i]/detJ[i]);
+    transpInvJacobianMatrix(0,i)=(jacobianMatrix(3,i)/detJ[i]);
+    transpInvJacobianMatrix(1,i)=(-jacobianMatrix(2,i)/detJ[i]);
+    transpInvJacobianMatrix(2,i)=(-jacobianMatrix(1,i)/detJ[i]);
+    transpInvJacobianMatrix(3,i)=(jacobianMatrix(0,i)/detJ[i]);
   }
   //return transpInvJacobianMatrix;
 }
@@ -479,14 +479,14 @@ void QkGL::computeB( const int & nPointsPerElement,
   //arrayDouble B( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-    B[0][i]=(abs( detJ[i] )*(invJacobianMatrix[0][i]*transpInvJacobianMatrix[0][i]+
-                             invJacobianMatrix[1][i]*transpInvJacobianMatrix[2][i]));
-    B[1][i]=(abs( detJ[i] )*(invJacobianMatrix[0][i]*transpInvJacobianMatrix[1][i]+
-                             invJacobianMatrix[1][i]*transpInvJacobianMatrix[3][i]));
-    B[2][i]=(abs( detJ[i] )*(invJacobianMatrix[2][i]*transpInvJacobianMatrix[0][i]+
-                             invJacobianMatrix[3][i]*transpInvJacobianMatrix[2][i]));
-    B[3][i]=(abs( detJ[i] )*(invJacobianMatrix[2][i]*transpInvJacobianMatrix[1][i]+
-                             invJacobianMatrix[3][i]*transpInvJacobianMatrix[3][i]));
+    B(0,i)=(abs( detJ[i] )*(invJacobianMatrix(0,i)*transpInvJacobianMatrix(0,i)+
+                             invJacobianMatrix(1,i)*transpInvJacobianMatrix(2,i)));
+    B(1,i)=(abs( detJ[i] )*(invJacobianMatrix(0,i)*transpInvJacobianMatrix(1,i)+
+                             invJacobianMatrix(1,i)*transpInvJacobianMatrix(3,i)));
+    B(2,i)=(abs( detJ[i] )*(invJacobianMatrix(2,i)*transpInvJacobianMatrix(0,i)+
+                             invJacobianMatrix(3,i)*transpInvJacobianMatrix(2,i)));
+    B(3,i)=(abs( detJ[i] )*(invJacobianMatrix(2,i)*transpInvJacobianMatrix(1,i)+
+                             invJacobianMatrix(3,i)*transpInvJacobianMatrix(3,i)));
   }
   //return B;
 
@@ -511,7 +511,7 @@ void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
   {
       for (int j=0; j<nPointsPerElement;j++)
       {
-        R[i][j]=0;
+        R(i,j)=0;
       }
   }
   // B11
@@ -525,7 +525,7 @@ void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         int j=j1+i2*(order+1);
         for( int m=0; m<order+1; m++ )
         {
-          R[i][j]+=weights2D[m+i2*(order+1)]*(B[0][m+i2*(order+1)]*dPhi[i1][m]*dPhi[j1][m]);
+          R(i,j)+=weights2D[m+i2*(order+1)]*(B(0,m+i2*(order+1))*dPhi(i1,m)*dPhi(j1,m));
         }
       }
     }
@@ -541,7 +541,7 @@ void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-          R[i][j]+=weights2D[i1+j2*(order+1)]*(B[1][i1+j2*(order+1)]*dPhi[i2][j2]*dPhi[j1][i1]);
+          R(i,j)+=weights2D[i1+j2*(order+1)]*(B(1,i1+j2*(order+1))*dPhi(i2,j2)*dPhi(j1,i1));
         }
       }
     }
@@ -557,7 +557,7 @@ void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-          R[i][j]+=weights2D[i2+j1*(order+1)]*(B[2][i2+j1*(order+1)]*dPhi[i1][j1]*dPhi[j2][i2]);
+          R(i,j)+=weights2D[i2+j1*(order+1)]*(B(2,i2+j1*(order+1))*dPhi(i1,j1)*dPhi(j2,i2));
         }
       }
     }
@@ -573,7 +573,7 @@ void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         int j=i1+j2*(order+1);
         for( int n=0; n<order+1; n++ )
         {
-          R[i][j]+=weights2D[i1+n*(order+1)]*(B[3][i1+n*(order+1)]*dPhi[i2][n]*dPhi[j2][n]);
+          R(i,j)+=weights2D[i1+n*(order+1)]*(B(3,i1+n*(order+1))*dPhi(i2,n)*dPhi(j2,n));
         }
       }
     }
@@ -602,10 +602,10 @@ void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
       double tmp=0;
       for( int r=0; r<nPointsPerElement; r++ )
       {
-        tmp+=weights2D[r]*(B[0][r]*dxPhi[i][r]*dxPhi[j][r]+
-                               B[1][r]*dxPhi[i][r]*dyPhi[j][r]+
-                               B[2][r]*dyPhi[i][r]*dxPhi[j][r]+
-                               B[3][r]*dyPhi[i][r]*dyPhi[j][r]);
+        tmp+=weights2D[r]*(B(0,r)*dxPhi(i,r)*dxPhi(j,r)+
+                           B(1,r)*dxPhi(i,r)*dyPhi(j,r)+
+                           B(2,r)*dyPhi(i,r)*dxPhi(j,r)+
+                           B(3,r)*dyPhi(i,r)*dyPhi(j,r));
       }
       R[i][j]=tmp;
     }
@@ -651,9 +651,9 @@ void QkGL::phiIphiJ( const int & nPointsPerElement,
       double tmp=0;
       for( int r=0; r<nPointsPerElement; r++ )
       {
-        tmp+=weights2D[r]*(phi[i][r]*phi[j][r])*abs( detJ[r] );
+        tmp+=weights2D[r]*(phi(i,r)*phi(j,r))*abs( detJ[r] );
       }
-      massMatrixLocal[i][j]=tmp;
+      massMatrixLocal(i,j)=tmp;
     }
   }
   //return massMatrixLocal;
@@ -716,24 +716,24 @@ void QkGL::computeDs( const int & iFace,
   // compute ds
   for( int j=0; j<order+1; j++ )
   {
-    Js[0][j]=0;    // x
-    Js[1][j]=0;    // y
+    Js(0,j)=0;    // x
+    Js(1,j)=0;    // y
     for( int i=0; i<order+1; i++ )
     {
-      float xi=globalNodesCoords[faceInfos[iFace][2+i]][0];
-      float yi=globalNodesCoords[faceInfos[iFace][2+i]][1];
+      float xi=globalNodesCoords(faceInfos(iFace,2+i),0);
+      float yi=globalNodesCoords(faceInfos(iFace,2+i),1);
       if( face==0 || face==2 )
       {
-        Js[0][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*xi;
-        Js[1][j]+=derivativeBasisFunction2DY[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*yi;
+        Js(0,j)+=derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
+        Js(1,j)+=derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
       }
       if( face==1 || face==3 )
       {
-        Js[0][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*xi;
-        Js[1][j]+=derivativeBasisFunction2DX[numOfBasisFunctionOnFace[i]][numOfBasisFunctionOnFace[j]]*yi;
+        Js(0,j)+=derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
+        Js(1,j)+=derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
       }
     }
-    ds[j]=sqrt( Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j] );
+    ds[j]=sqrt( Js(0,j)*Js(0,j)+Js(1,j)*Js(1,j) );
     //cout<<"j="<<j<<", ds="<<ds[j]<<", "<<Js[0][j]<<", "<<Js[1][j]<<endl;
   }
   //return ds;

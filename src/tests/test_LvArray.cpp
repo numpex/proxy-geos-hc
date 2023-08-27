@@ -10,7 +10,6 @@
 #include <chrono>
 
 #include "RAJA/RAJA.hpp"
-#include "Macros.hpp"
 #include "Array.hpp"
 #include "MallocBuffer.hpp"
 #include "ChaiBuffer.hpp"
@@ -28,6 +27,21 @@ using arrayRealCB=LvArray::Array< float,
                                  std::ptrdiff_t,
                                  LvArray::ChaiBuffer >;
               
+
+template<class T>
+  T allocateVector(int n1)
+  {
+     std::cout<<"allocate vector of size "<<n1<<std::endl;
+     T vect(n1);
+    return vect;
+  }
+template<class T>
+  T allocateArray2D(int n1, int n2)
+  {
+    std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
+    T array(n1, n2);
+    return array;
+  }
 // test MallocBuffer MallocBuffer 
 // -------------------------------
 arrayRealMB computeMBMB(int const n1, int const n2,arrayRealMB arrayIn)
@@ -78,13 +92,23 @@ int main( int argc, char *argv[] )
 {
   
   
-  const int nIter=1000000;
+  const int nIter=1000;
   const int n1=1000;
   const int n2=1000;
 
   arrayRealCB arrayView(n1,n2);
-  arrayRealMB arrayIn(n1,n2);
+  //arrayRealMB arrayIn(n1,n2);
 
+  arrayRealMB arrayIn;
+  arrayIn=allocateArray2D<arrayRealMB>(n1,n2);
+
+  for (int i=0; i<n1;i++)
+  {
+    for ( int j=0; j<n2;j++)
+    {
+      arrayIn[i][j]=sqrt(2*i*j);
+    }     
+  }
   // test MallocBuffer MallocBuffer OMP
   // -------------------------------
   std::chrono::time_point< std::chrono::system_clock > startTimeMB = std::chrono::system_clock::now();
