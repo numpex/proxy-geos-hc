@@ -50,7 +50,10 @@ void SEMProxy::run()
   SEM_CALIPER_MARK_BEGIN( "RunTime" );
 
   // loop over time
-  arrayInt nodeList=myMesh.globalNodesList( numberOfElements );
+  //arrayInt nodeList=myMesh.globalNodesList( numberOfElements );
+  arrayInt nodeList;
+  nodeList=allocateArray2D<arrayInt>(numberOfElements,(myOrderNumber+1)*(myOrderNumber+1));
+  myMesh.globalNodesList( numberOfElements, nodeList );
   arrayReal pnGlobal( numberOfNodes, 2 );
 
   mySolver.computeFEInit( myOrderNumber, myMesh, myQk );
@@ -63,7 +66,8 @@ void SEMProxy::run()
     //writes debugging ascii file.
     if( indexTimeStep%50==0 )
     {
-      cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource<<" after computeOneStep = "<< pnGlobal(nodeList[myElementSource][0],i2)<<endl;
+      cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource
+          <<" after computeOneStep = "<< pnGlobal(nodeList[myElementSource][0],i2)<<endl;
       //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
     }
     swap( i1, i2 );
