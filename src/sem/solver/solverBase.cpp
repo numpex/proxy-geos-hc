@@ -15,27 +15,41 @@ void solverBase::computeFEInit( const int & order,
 {
 
   // get infos from mesh
-
-  //interior elements
+  numberOfPointsPerElement = mesh.getNumberOfPointsPerElement();
   numberOfNodes=mesh.getNumberOfNodes();
   numberOfElements=mesh.getNumberOfElements();
   numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
-  globalNodesList=mesh.globalNodesList( numberOfElements );
-  listOfInteriorNodes=mesh.getListOfInteriorNodes( numberOfInteriorNodes );
-  globalNodesCoords=mesh.nodesCoordinates( numberOfNodes );
+  numberOfInteriorElements=mesh.getNumberOfInteriorElements();
+
+  globalNodesList=allocateArray2D<arrayInt>(numberOfElements,numberOfPointsPerElement);
+  mesh.globalNodesList( numberOfElements, globalNodesList );
+
+  listOfInteriorNodes=allocateVector<vectorInt>(numberOfInteriorNodes);
+  mesh.getListOfInteriorNodes( numberOfInteriorNodes, listOfInteriorNodes );
+
+  listOfInteriorElements=allocateVector<vectorInt>(numberOfInteriorElements);
+  mesh.getListOfInteriorElements( numberOfInteriorElements, listOfInteriorElements );
+
+  globalNodesCoords=allocateArray2D<arrayReal>(numberOfNodes,2);
+  mesh.nodesCoordinates( numberOfNodes, globalNodesCoords );
 
   // boundary elements
   numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
   numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
-  listOfBoundaryNodes=mesh.getListOfBoundaryNodes( numberOfBoundaryNodes );
-  faceInfos=mesh.getBoundaryFacesInfos();
-  localFaceNodeToGlobalFaceNode=mesh.getLocalFaceNodeToGlobalFaceNode();
+
+  listOfBoundaryNodes=allocateVector<vectorInt>(numberOfBoundaryNodes);
+  mesh.getListOfBoundaryNodes( numberOfBoundaryNodes, listOfBoundaryNodes );
+  
+  faceInfos=allocateArray2D<arrayInt>(numberOfBoundaryFaces,2+(order+1));
+  mesh.getBoundaryFacesInfos(numberOfBoundaryFaces, faceInfos);
+
+  localFaceNodeToGlobalFaceNode=allocateArray2D<arrayInt>(numberOfBoundaryFaces,order+1);
+  mesh.getLocalFaceNodeToGlobalFaceNode(numberOfBoundaryFaces, localFaceNodeToGlobalFaceNode);
 
   // get model
   model=mesh.getModel( numberOfElements );
 
   //allocate mesh arrays used in kernel
-  numberOfPointsPerElement = ( order + 1 ) * ( order + 1 );
   localToGlobal=allocateVector<vectorInt>(numberOfPointsPerElement);
   Xi=allocateArray2D<arrayDouble>( numberOfPointsPerElement, 2 );
 
@@ -82,10 +96,10 @@ void solverBase::addRightAndSides( const int & timeStep,
                                    arrayReal & rhsLocation,
                                    simpleMesh mesh )
 {
-  static int numberOfNodes=mesh.getNumberOfNodes();
-  static int numberOfElements=mesh.getNumberOfElements();
+  //static int numberOfNodes=mesh.getNumberOfNodes();
+  //static int numberOfElements=mesh.getNumberOfElements();
   static vectorReal model=mesh.getModel( numberOfElements );
-  static arrayInt nodeList=mesh.globalNodesList( numberOfElements );
+  //static arrayInt nodeList=mesh.globalNodesList( numberOfElements );
   int i, rhsElement;
   for( int i=0; i<numberOfRHS; i++ )
   {
@@ -94,7 +108,7 @@ void solverBase::addRightAndSides( const int & timeStep,
     float y=rhsLocation(i,1);
     int rhsElement=mesh.getElementNumberFromPoints( x, y );
     // compute global node numbe to add source term to
-    int nodeRHS=nodeList(rhsElement,0);
+    int nodeRHS=globalNodesList(rhsElement,0);
     pnGlobal(nodeRHS,i2)+=timeSample*timeSample*model[rhsElement]*model[rhsElement]*rhsTerm(i,timeStep);
   }
 }
