@@ -15,6 +15,7 @@
 #include "QkGL.hpp"
 #include "simpleMesh.hpp"
 #include "utils.hpp"
+#include "dataType.hpp"
 
 /**
  * @class SEMProxy
@@ -26,7 +27,9 @@ public:
   /**
    * @brief Constructor of the SEMProxy class
    */
-  SEMProxy(): myRHSLocation( myNumberOfRHS, 2 ), myRHSTerm( myNumberOfRHS, myNumSamples ){};
+  //SEMProxy(): myRHSLocation( myNumberOfRHS, 2 ), myRHSTerm( myNumberOfRHS, myNumSamples ){};
+  SEMProxy(){};
+
   /**
    * @brief Destructor of the SEMProxy class
    */
@@ -45,7 +48,7 @@ public:
    */
   void run();
 
-private:
+protected:
 
   float myTimeMax=1.0;
   float myTimeStep=0.001;
@@ -61,12 +64,20 @@ private:
   arrayReal myRHSLocation;
   arrayReal myRHSTerm;
 
-  simpleMesh const myMesh {50, 50, 1000, 1000, myOrderNumber};
+
+  simpleMesh  myMesh {50, 50, 1000, 1000, myOrderNumber};
   //simpleMesh const myMesh {2, 2, 4000, 4000, myOrderNumber};
   int i1=0;
   int i2=1;
   int numberOfNodes;
   int numberOfElements;
+
+  arrayInt nodeList;
+  //nodeList=allocateArray2D<arrayInt>(numberOfElements,(myOrderNumber+1)*(myOrderNumber+1));
+  //myMesh.globalNodesList( numberOfElements, nodeList );
+
+  arrayReal pnGlobal;
+  //pnGLobal=allocateArray2D<arrayReal>( numberOfNodes, 2 );
 
   QkGL myQk;
   solverUtils myUtils;

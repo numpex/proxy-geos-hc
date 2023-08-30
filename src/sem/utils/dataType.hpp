@@ -159,27 +159,6 @@
 
 #ifdef SEM_USE_KOKKOS
   #include <Kokkos_Core.hpp>
-  #ifdef SEM_USE_KOKKOSVECTOR
-    #include <Kokkos_Vector.hpp>
-    template< class T > class Array2D
-    {
-      public:
-        Array2D( int numRows, int numCols ): data( numRows, Kokkos::vector< T >( numCols )) {}
-        Array2D(): data( 0, Kokkos::vector< T >( 0 )) {}
-
-        Kokkos::vector< T > & operator[]( int index ){return data[index];}
-        T& operator()(size_t row, size_t col) {return data[row][col];}
-
-      private:
-      Kokkos::vector< Kokkos::vector< T > > data;
-    };
-    using vectorInt=Kokkos::vector< int >;
-    using vectorReal=Kokkos::vector< float >;
-    using vectorDouble=Kokkos::vector< double >;
-    using arrayInt=Array2D< int >;
-    using arrayReal=Array2D< float >;
-    using arrayDouble=Array2D< double >;
-  #endif //SEM_USE_KOKKOSVECTOR
   //#define MemSpace Kokkos::CudaUVMSpace
   #define MemSpace Kokkos::HostSpace
   using ExecSpace = MemSpace::execution_space;

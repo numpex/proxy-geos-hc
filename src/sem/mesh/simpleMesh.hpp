@@ -80,7 +80,7 @@ public:
   void getModel( const int & numberOfNodes, vectorReal & model ) const;
 
   // list of neighbours of element e
-  vectorInt neighbors( const int & e ) const;
+  void neighbors( const int & e, vectorInt & neigh ) const;
 
   // get global coordinates of element e
   //arrayDouble getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,

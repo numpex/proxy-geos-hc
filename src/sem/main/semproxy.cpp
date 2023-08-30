@@ -16,6 +16,8 @@ void SEMProxy::init()
   numberOfElements=myMesh.getNumberOfElements();
 
   // set number of rhs and location
+  myRHSLocation=allocateArray2D<arrayReal>( myNumberOfRHS, 2 );
+  myRHSTerm=allocateArray2D<arrayReal>( myNumberOfRHS, myNumSamples );
   myRHSLocation(0,0)=501;
   myRHSLocation(0,1)=501;
   cout << "Source location: "<<myRHSLocation(0,0)<<", "<<myRHSLocation(0,1)<<endl;
@@ -40,6 +42,11 @@ void SEMProxy::init()
       cout<<"Sample "<<i<<"\t: sourceTerm = "<<sourceTerm[i]<<endl;
   }
 
+  nodeList=allocateArray2D<arrayInt>(numberOfElements,(myOrderNumber+1)*(myOrderNumber+1));
+  myMesh.globalNodesList( numberOfElements, nodeList );
+
+  pnGlobal=allocateArray2D<arrayReal>( numberOfNodes, 2 );
+
   SEM_CALIPER_MARK_END( "InitTime" );
 }
 
@@ -50,11 +57,12 @@ void SEMProxy::run()
   SEM_CALIPER_MARK_BEGIN( "RunTime" );
 
   // loop over time
-  //arrayInt nodeList=myMesh.globalNodesList( numberOfElements );
-  arrayInt nodeList;
-  nodeList=allocateArray2D<arrayInt>(numberOfElements,(myOrderNumber+1)*(myOrderNumber+1));
-  myMesh.globalNodesList( numberOfElements, nodeList );
-  arrayReal pnGlobal( numberOfNodes, 2 );
+  //arrayInt nodeList;
+  //nodeList=allocateArray2D<arrayInt>(numberOfElements,(myOrderNumber+1)*(myOrderNumber+1));
+  //myMesh.globalNodesList( numberOfElements, nodeList );
+
+  //arrayReal pnGlobal;
+  //pnGLobal=allocateArray2D<arrayReal>( numberOfNodes, 2 );
 
   mySolver.computeFEInit( myOrderNumber, myMesh, myQk );
 
@@ -67,7 +75,7 @@ void SEMProxy::run()
     if( indexTimeStep%50==0 )
     {
       cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource
-          <<" after computeOneStep = "<< pnGlobal(nodeList[myElementSource][0],i2)<<endl;
+          <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),i2)<<endl;
       //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
     }
     swap( i1, i2 );

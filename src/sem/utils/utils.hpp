@@ -66,7 +66,7 @@ struct solverUtils
     float dy=mesh.getDy();
     for( int i = 0; i< numberOfNodes; i++ )
     {
-      inputVector[i]=pnGlobal[i][i1];
+      inputVector[i]=pnGlobal(i,i1);
     }
     std::vector<std::vector<float>> grid=mesh.projectToGrid( numberOfNodes, inputVector );
     fstream snapFile;

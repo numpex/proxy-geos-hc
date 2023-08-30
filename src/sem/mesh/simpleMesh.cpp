@@ -79,7 +79,7 @@ void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCo
   //arrayReal nodeCoords( numberOfNodes, 2 );
   std::vector<float> coordX( nx );
   std::vector<float> coordY( ny );
-  vectorReal xi( order+1 );
+  std::vector<float> xi( order+1 );
 
   switch( order )
   {
@@ -259,9 +259,9 @@ void simpleMesh::getModel( const int & numberOfElements, vectorReal & model ) co
 // neigh[0] to neigh[3] list neigbours elements
 // neigh[4] if not zero indicate that element e is a boundary element
 // what type of boundary element
-vectorInt simpleMesh::neighbors( const int & e ) const
+void simpleMesh::neighbors( const int & e , vectorInt & neigh) const
 {
-  vectorInt neigh( 5 );
+  //vectorInt neigh( 5 );
   int i=e%ex;
   int j=int((e-i)/ex);
   neigh[0]=e-1;
@@ -293,7 +293,7 @@ vectorInt simpleMesh::neighbors( const int & e ) const
     neigh[3]=-2;
     neigh[4]=-4;
   }
-  return neigh;
+  //return neigh;
 
 }
 
@@ -411,11 +411,11 @@ void  simpleMesh::getBoundaryFacesInfos(arrayInt & faceInfos) const
     int e=j*ex;
     numFace=2*ex+ey+j;
     int offset=j*order*nx;
-    faceInfos[numFace][0]=e;
-    faceInfos[numFace][1]=0;
+    faceInfos(numFace,0)=e;
+    faceInfos(numFace,1)=0;
     for( int k=0; k<order+1; k++ )
     {
-      faceInfos[numFace][2+k]=offset+k*nx;
+      faceInfos(numFace,2+k)=offset+k*nx;
     }
   }
 /**

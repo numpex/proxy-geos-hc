@@ -619,7 +619,7 @@ void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                            B(2,r)*dyPhi(i,r)*dxPhi(j,r)+
                            B(3,r)*dyPhi(i,r)*dyPhi(j,r));
       }
-      R[i][j]=tmp;
+      R(i,j)=tmp;
     }
   }
   //return R;
@@ -693,7 +693,7 @@ void QkGL::computeDs( const int & iFace,
   //arrayReal Js( 2, order+1 );
   //vectorReal ds( order+1 );
 
-  int face=faceInfos[iFace][1];
+  int face=faceInfos(iFace,1);
   // get basis functions on Boundary faces
   switch( face )
   {
