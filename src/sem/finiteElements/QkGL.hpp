@@ -23,27 +23,41 @@ public:
   ~QkGL();
 
   // get Gauss Lobatto quadrature points
-  vectorDouble gaussLobattoQuadraturePoints( int order ) const;
+  //vectorDouble gaussLobattoQuadraturePoints( int order ) const;
+  void gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoints ) const;
 
   // get Gauss Lobatto quadrature weights
-  vectorDouble  gaussLobattoQuadratureWeights( int order ) const;
+  //vectorDouble  gaussLobattoQuadratureWeights( int order ) const;
+  void  gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) const;
 
   // compute  1d shape Functions and derivatives
-  vectorDouble  shapeFunction1D( int order, double xi ) const;
-  vectorDouble  derivativeShapeFunction1D( int order, double xi ) const;
+  std::vector<double>  shapeFunction1D( int order, double xi ) const;
+  std::vector<double>  derivativeShapeFunction1D( int order, double xi ) const;
 
   // get  1d shape Functions and derivatives for all quadrature points
-  arrayDouble  getBasisFunction1D( int order, vectorDouble & quadraturePoints ) const;
-  arrayDouble  getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints ) const;
+  //arrayDouble  getBasisFunction1D( int order, vectorDouble & quadraturePoints ) const;
+  void  getBasisFunction1D( int order, vectorDouble & quadraturePoints ,arrayDouble & basisFunction1D) const;
+
+  //arrayDouble  getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints ) const;
+  void getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints, 
+                                                arrayDouble & derivativeBasisFunction1D ) const;
 
   // compute 2D gauss-lobatto weights
-  vectorDouble  getGaussLobattoWeights( vectorDouble & quadraturePoints,
-                                        vectorDouble & weights ) const;
+  //vectorDouble  getGaussLobattoWeights( vectorDouble & quadraturePoints,
+  //                                      vectorDouble & weights ) const;
+  void getGaussLobattoWeights( vectorDouble & quadraturePoints,
+                                           vectorDouble & weights,
+                                           vectorDouble & W )const;
 
   // get  2d shape Functions  for all quadrature points
-  arrayDouble  getBasisFunction2D( vectorDouble & quadraturePoints,
-                                   arrayDouble & a,
-                                   arrayDouble & b ) const;
+  //arrayDouble  getBasisFunction2D( vectorDouble & quadraturePoints,
+  //                                 arrayDouble & a,
+  //                                 arrayDouble & b ) const;
+
+  void getBasisFunction2D( vectorDouble & quadraturePoints,
+                           arrayDouble & a,
+                           arrayDouble & b,
+                           arrayDouble & c) const;
   // compute Jacobian Matrix
   //arrayDouble  computeJacobianMatrix( const int & nPointsPerElement,
   //                                    arrayDouble & Xi,

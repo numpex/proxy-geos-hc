@@ -8,9 +8,10 @@
 QkGL::QkGL(){};
 QkGL::~QkGL(){};
 
-vectorDouble QkGL::gaussLobattoQuadraturePoints( int order ) const
+//vectorDouble QkGL::gaussLobattoQuadraturePoints( int order ) const
+void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoints ) const
 {
-  vectorDouble quadraturePoints( order+1 );
+  //vectorDouble quadraturePoints( order+1 );
   if( order == 1 )
   {
     quadraturePoints[0]=-1.0;
@@ -46,11 +47,12 @@ vectorDouble QkGL::gaussLobattoQuadraturePoints( int order ) const
     quadraturePoints[4]=0.76505532;
     quadraturePoints[5]=1.0;
   }
-  return quadraturePoints;
+  //return quadraturePoints;
 }
-vectorDouble QkGL::gaussLobattoQuadratureWeights( int order ) const
+//vectorDouble QkGL::gaussLobattoQuadratureWeights( int order ) const
+void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) const
 {
-  vectorDouble weights( order+1 );
+  //vectorDouble weights( order+1 );
 
   if( order == 1 )
   {
@@ -87,12 +89,12 @@ vectorDouble QkGL::gaussLobattoQuadratureWeights( int order ) const
     weights[4]=0.37847496;
     weights[5]=0.06666667;
   }
-  return weights;
+  //return weights;
 }
 
-vectorDouble QkGL::shapeFunction1D( int order, double xi ) const
+std::vector<double> QkGL::shapeFunction1D( int order, double xi ) const
 {
-  vectorDouble shapeFunction( order+1 );
+  std::vector<double> shapeFunction( order+1 );
   if( order==1 )
   {
     shapeFunction[0]=0.5*(1.0-xi);
@@ -166,9 +168,9 @@ vectorDouble QkGL::shapeFunction1D( int order, double xi ) const
   return shapeFunction;
 }
 
-vectorDouble QkGL::derivativeShapeFunction1D( int order, double xi ) const
+std::vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) const
 {
-  vectorDouble derivativeShapeFunction( order+1 );
+  std::vector<double> derivativeShapeFunction( order+1 );
 
   if( order == 1 )
   {
@@ -301,14 +303,15 @@ vectorDouble QkGL::derivativeShapeFunction1D( int order, double xi ) const
 
 // get 1D basis functions @ quadrature points
 // returns 2D vector basisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-arrayDouble QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints ) const
+//arrayDouble QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints ) const
+void QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints, arrayDouble & basisFunction1D ) const
 {
   int nBasisFunction1D=order+1;
-  arrayDouble basisFunction1D( nBasisFunction1D, nBasisFunction1D );
+  //arrayDouble basisFunction1D( nBasisFunction1D, nBasisFunction1D );
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
   {
-    vectorDouble tmp( order+1 );
+    std::vector<double> tmp( order+1 );
     //extract all basis functions  for current quadrature point
     tmp=shapeFunction1D( order, quadraturePoints[i] );
     for( int j=0; j<order+1; j++ )
@@ -316,19 +319,21 @@ arrayDouble QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints
       basisFunction1D(j,i)=tmp[j];
     }
   }
-  return basisFunction1D;
+  //return basisFunction1D;
 }
 
 // get derivative of 1D basis functions @ quadrature points
 // returns 2D vector derivativeBasisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-arrayDouble QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints ) const
+//arrayDouble QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints ) const
+void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints, 
+                                          arrayDouble & derivativeBasisFunction1D ) const
 {
   int nBasisFunction1D=order+1;
-  arrayDouble derivativeBasisFunction1D( nBasisFunction1D, nBasisFunction1D );
+  //arrayDouble derivativeBasisFunction1D( nBasisFunction1D, nBasisFunction1D );
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
   {
-    vectorDouble tmp( order+1 );
+    std::vector<double> tmp( order+1 );
     //extract all basis functions  for current quadrature point
     tmp=derivativeShapeFunction1D( order, quadraturePoints[i] );
     for( int j=0; j<order+1; j++ )
@@ -336,15 +341,18 @@ arrayDouble QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadra
       derivativeBasisFunction1D(j,i)=tmp[j];
     }
   }
-  return derivativeBasisFunction1D;
+  //return derivativeBasisFunction1D;
 }
 
 
 // compute 2D gauss-lobatto weights
-vectorDouble QkGL::getGaussLobattoWeights( vectorDouble & quadraturePoints,
-                                           vectorDouble & weights )const
+//vectorDouble QkGL::getGaussLobattoWeights( vectorDouble & quadraturePoints,
+//                                           vectorDouble & weights )const
+void QkGL::getGaussLobattoWeights( vectorDouble & quadraturePoints,
+                                           vectorDouble & weights,
+                                           vectorDouble & W )const
 {
-  vectorDouble W( quadraturePoints.size()*quadraturePoints.size());
+  //vectorDouble W( quadraturePoints.size()*quadraturePoints.size());
   for( int j=0; j<quadraturePoints.size(); j++ )
   {
     for( int i=0; i<quadraturePoints.size(); i++ )
@@ -352,16 +360,20 @@ vectorDouble QkGL::getGaussLobattoWeights( vectorDouble & quadraturePoints,
       W[i+j*quadraturePoints.size()]= weights[i]*weights[j];
     }
   }
-  return W;
+  //return W;
 }
 
 // returns 2D vector basisFunction2D of dimensions nBasisFunctions,nQuadraturePoints
-arrayDouble QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
-                                      arrayDouble & a,
-                                      arrayDouble & b )const
+//arrayDouble QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
+//                                      arrayDouble & a,
+//                                      arrayDouble & b )const
+void QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
+                               arrayDouble & a,
+                               arrayDouble & b,
+                               arrayDouble & c )const                                      
 {
   int nBasisFunctions=quadraturePoints.size()*quadraturePoints.size();
-  arrayDouble c( nBasisFunctions, nBasisFunctions );
+  //arrayDouble c( nBasisFunctions, nBasisFunctions );
   for( int j = 0; j < quadraturePoints.size(); j++ )
   {
     for( int i = 0; i<quadraturePoints.size(); i++ )
@@ -375,7 +387,7 @@ arrayDouble QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
       }
     }
   }
-  return c;
+  //return c;
 }
 // compute jacobian matrix for element to ref element coordinates
 // Xi[0,..,1][0,..,nPointsPerElement], global coordinate of element

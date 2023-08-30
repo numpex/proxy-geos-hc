@@ -40,17 +40,30 @@ void solverBase::computeFEInit( const int & order,
   Xi=allocateArray2D<arrayDouble>( numberOfPointsPerElement, 2 );
 
   // get quadrature points and weights
-  quadraturePoints=Qk.gaussLobattoQuadraturePoints( order );
-  weights=Qk.gaussLobattoQuadratureWeights( order );
-  weights2D=Qk.getGaussLobattoWeights( quadraturePoints, weights );
+  quadraturePoints=allocateVector<vectorDouble>(order+1);
+  Qk.gaussLobattoQuadraturePoints( order, quadraturePoints );
+
+  weights=allocateVector<vectorDouble>(order+1);
+  Qk.gaussLobattoQuadratureWeights( order, weights );
+  weights2D=allocateVector<vectorDouble>(numberOfPointsPerElement);
+  Qk.getGaussLobattoWeights( quadraturePoints, weights, weights2D );
 
   // get basis function and corresponding derivatives
-  basisFunction1D=Qk.getBasisFunction1D( order, quadraturePoints );
-  derivativeBasisFunction1D=Qk.getDerivativeBasisFunction1D( order, quadraturePoints );
-  basisFunction2D=Qk.getBasisFunction2D( quadraturePoints, basisFunction1D, basisFunction1D );
+  basisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1);
+  Qk.getBasisFunction1D( order, quadraturePoints,basisFunction1D );
 
-  derivativeBasisFunction2DX=Qk.getBasisFunction2D( quadraturePoints, derivativeBasisFunction1D, basisFunction1D );
-  derivativeBasisFunction2DY=Qk.getBasisFunction2D( quadraturePoints, basisFunction1D, derivativeBasisFunction1D );
+  derivativeBasisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1);
+  Qk.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
+
+  int nBasisFunctions=(order+1)*(order+1); 
+  basisFunction2D=allocateArray2D<arrayDouble>(nBasisFunctions,nBasisFunctions);
+  Qk.getBasisFunction2D( quadraturePoints, basisFunction1D, basisFunction1D, basisFunction2D );
+
+  derivativeBasisFunction2DX=allocateArray2D<arrayDouble>(nBasisFunctions,nBasisFunctions);
+  Qk.getBasisFunction2D( quadraturePoints, derivativeBasisFunction1D, basisFunction1D, derivativeBasisFunction2DX );
+  
+  derivativeBasisFunction2DY=allocateArray2D<arrayDouble>(nBasisFunctions,nBasisFunctions);
+  Qk.getBasisFunction2D( quadraturePoints, basisFunction1D, derivativeBasisFunction1D, derivativeBasisFunction2DY );
 
   jacobianMatrix=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
   detJ=allocateVector<vectorDouble>(numberOfPointsPerElement);
