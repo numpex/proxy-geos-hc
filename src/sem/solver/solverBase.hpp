@@ -67,19 +67,14 @@ protected:
   int numberOfBoundaryNodes;
   int numberOfBoundaryFaces;
   int numberOfPointsPerElement;
-  int numberOfInteriorElements;
 
-  vectorInt   localToGlobal;
-  vectorInt   listOfInteriorNodes;
-  vectorInt   listOfInteriorElements;
-  vectorInt   listOfBoundaryNodes;
-
-  arrayInt    globalNodesList;
-  arrayInt    faceInfos;
-  arrayInt    localFaceNodeToGlobalFaceNode; 
-
-  arrayReal   globalNodesCoords;
-
+  vectorInt localToGlobal;
+  arrayInt globalNodesList;
+  vectorInt listOfInteriorNodes;
+  arrayReal globalNodesCoords;
+  vectorInt listOfBoundaryNodes;
+  arrayInt faceInfos;
+  arrayInt localFaceNodeToGlobalFaceNode;
   arrayDouble Xi;
 
   // get model

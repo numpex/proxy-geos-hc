@@ -60,10 +60,10 @@ public:
   int getNumberOfBoundaryNodes() const;
 
   // Initialize nodal coordinates.
-  void nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const;
+  arrayReal nodesCoordinates( const int & numberOfNodes ) const;
 
   //  list of global nodes ( vertices)
-  void globalNodesList( const int & numberOfElements, arrayInt & nodesList ) const;
+  arrayInt globalNodesList( const int & numberOfElements ) const;
 
   // local to global
   //const vectorInt localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList ) const;
@@ -97,29 +97,19 @@ public:
   // provides informations about boundary  faces:
   // element number,
   // orientation of the face
-  //arrayInt getBoundaryFacesInfos()const;
-  void getBoundaryFacesInfos(const int numberOfBoundaryFaces,
-                             arrayInt & faceInfos) const;
+  arrayInt getBoundaryFacesInfos()const;
 
   // get list of interior Elements
-  //vectorInt getListOfInteriorElements() const;
-  void getListOfInteriorElements(const int numberOfInteriorElements,
-                                 vectorInt & listOfInteriorElements) const;
+  vectorInt getListOfInteriorElements() const;
 
   //  get list of global interior nodes
-  //vectorInt getListOfInteriorNodes( const int & numberOfInteriorNodes ) const;
-  void getListOfInteriorNodes( const int & numberOfInteriorNodes,
-                               vectorInt & getListOfInteriorNodes ) const;
+  vectorInt getListOfInteriorNodes( const int & numberOfInteriorNodes ) const;
 
   //  get list of global boundary nodes
-  //vectorInt getListOfBoundaryNodes( const int & numberOfBoundaryNodes ) const;
-  void getListOfBoundaryNodes( const int & numberOfBoundaryNodes,
-                               vectorInt & listOfBoundaryNodes ) const;
+  vectorInt getListOfBoundaryNodes( const int & numberOfBoundaryNodes ) const;
 
   // provides a mapping between local node of a face and global node Face:
-  //arrayInt getLocalFaceNodeToGlobalFaceNode() const;
-  void getLocalFaceNodeToGlobalFaceNode(const int numberOfBoundaryFaces, 
-                                        arrayInt localFaceNodeToGlobalFaceNode) const;
+  arrayInt getLocalFaceNodeToGlobalFaceNode() const;
 
 
 };

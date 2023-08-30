@@ -67,7 +67,6 @@ private:
   int i2=1;
   int numberOfNodes;
   int numberOfElements;
-  int numberOfPointsPerElement;
 
   QkGL myQk;
   solverUtils myUtils;

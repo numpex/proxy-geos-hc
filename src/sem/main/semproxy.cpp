@@ -14,7 +14,6 @@ void SEMProxy::init()
   // get information from mesh
   numberOfNodes=myMesh.getNumberOfNodes();
   numberOfElements=myMesh.getNumberOfElements();
-  numberOfPointsPerElement=(myOrderNumber+1)*(myOrderNumber+1);
 
   // set number of rhs and location
   myRHSLocation(0,0)=501;
@@ -51,9 +50,7 @@ void SEMProxy::run()
   SEM_CALIPER_MARK_BEGIN( "RunTime" );
 
   // loop over time
-  arrayInt nodeList;
-  nodeList=allocateArray2D<arrayInt>(numberOfElements,numberOfPointsPerElement);
-  myMesh.globalNodesList( numberOfElements, nodeList );
+  arrayInt nodeList=myMesh.globalNodesList( numberOfElements );
   arrayReal pnGlobal( numberOfNodes, 2 );
 
   mySolver.computeFEInit( myOrderNumber, myMesh, myQk );
