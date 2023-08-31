@@ -7,6 +7,6 @@ export CAMP_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/camp
 export CHAI_DIR=${SEM_TPL_ROOT_DIR}/chai/share/chai/cmake/
 export UMPIRE_DIR=${SEM_TPL_ROOT_DIR}/chai/lib/cmake/umpire/
 kokkos_install_dir=~/src/geosx/codes/proxyApp/buildInstall/install/kokkos
-export KOKKOS_DIR=$kokkos_install_dir/lib64/cmake/Kokkos
+export KOKKOS_DIR=$kokkos_install_dir/lib/cmake/Kokkos
 export KOKKOS_INCLUDE_DIR=$kokkos_install_dir/include
 

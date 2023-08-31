@@ -15,23 +15,26 @@ void SEMProxy::init()
   numberOfNodes=myMesh.getNumberOfNodes();
   numberOfElements=myMesh.getNumberOfElements();
 
+  // allocate arrays and vectors
+  myRHSLocation=allocateArray2D<arrayReal>( myNumberOfRHS, 2 );
+  myRHSTerm=allocateArray2D<arrayReal>( myNumberOfRHS, myNumSamples );
+  nodeList=allocateArray2D<arrayInt>(numberOfElements,(myOrderNumber+1)*(myOrderNumber+1));
+  pnGlobal=allocateArray2D<arrayReal>( numberOfNodes, 2 );
+
   // set number of rhs and location
-  myRHSLocation[0][0]=501;
-  myRHSLocation[0][1]=501;
-  cout << "Source location: "<<myRHSLocation[0][0]<<", "<<myRHSLocation[0][1]<<endl;
+  myRHSLocation(0,0)=501;
+  myRHSLocation(0,1)=501;
+  cout << "Source location: "<<myRHSLocation(0,0)<<", "<<myRHSLocation(0,1)<<endl;
 
   // get element number of source term
-  myElementSource=myMesh.getElementNumberFromPoints( myRHSLocation[0][0], myRHSLocation[0][1] );
+  myElementSource=myMesh.getElementNumberFromPoints( myRHSLocation(0,0), myRHSLocation(0,1) );
   cout <<"Element number for the source location: "<<myElementSource<<endl;
 
-  //float f0=15.;
-  //int sourceOrder=1;
-
-  // iniatialize source term
+  // initialize source term
   vector< float > sourceTerm=myUtils.computeSourceTerm( myNumSamples, myTimeStep, f0, sourceOrder );
   for( int j=0; j<myNumSamples; j++ )
   {
-    myRHSTerm[0][j]=sourceTerm[j];
+    myRHSTerm(0,j)=sourceTerm[j];
   }
 
   for( int i=0; i<myNumSamples; i++ )
@@ -39,6 +42,10 @@ void SEMProxy::init()
     if( i%100==0 )
       cout<<"Sample "<<i<<"\t: sourceTerm = "<<sourceTerm[i]<<endl;
   }
+
+  // get nodelist 
+  myMesh.globalNodesList( numberOfElements, nodeList );
+
 
   SEM_CALIPER_MARK_END( "InitTime" );
 }
@@ -49,9 +56,6 @@ void SEMProxy::run()
 {
   SEM_CALIPER_MARK_BEGIN( "RunTime" );
 
-  // loop over time
-  arrayInt nodeList=myMesh.globalNodesList( numberOfElements );
-  arrayReal pnGlobal( numberOfNodes, 2 );
 
   mySolver.computeFEInit( myOrderNumber, myMesh, myQk );
 
@@ -63,7 +67,8 @@ void SEMProxy::run()
     //writes debugging ascii file.
     if( indexTimeStep%50==0 )
     {
-      cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource<<" after computeOneStep = "<< pnGlobal[nodeList[myElementSource][0]][i2]<<endl;
+      cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource
+          <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),i2)<<endl;
       //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
     }
     swap( i1, i2 );

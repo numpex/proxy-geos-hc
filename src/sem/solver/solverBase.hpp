@@ -66,18 +66,19 @@ protected:
   int numberOfInteriorNodes;
   int numberOfBoundaryNodes;
   int numberOfBoundaryFaces;
+  int numberOfPointsPerElement;
+
+  vectorInt localToGlobal;
   arrayInt globalNodesList;
   vectorInt listOfInteriorNodes;
   arrayReal globalNodesCoords;
   vectorInt listOfBoundaryNodes;
   arrayInt faceInfos;
   arrayInt localFaceNodeToGlobalFaceNode;
+  arrayDouble Xi;
 
   // get model
   vectorReal model;
-
-  //get infos about finite element order of approximation
-  int numberOfPointsPerElement;
 
   // get quadrature points and weights
   vectorDouble quadraturePoints;
@@ -91,7 +92,25 @@ protected:
   arrayDouble derivativeBasisFunction2DX;
   arrayDouble derivativeBasisFunction2DY;
 
-  // end init
+  arrayDouble jacobianMatrix;
+  vectorDouble detJ;
+  arrayDouble invJacobianMatrix;
+  arrayDouble transpInvJacobianMatrix;
+  arrayDouble B;
+  arrayDouble R;
+  vectorDouble massMatrixLocal;
 
+  vectorReal massMatrixGlobal;
+  vectorReal yGlobal;
+  vectorReal pnLocal;
+  vectorReal Y;
+
+  vectorReal ShGlobal;
+  vectorReal ds;
+  vectorReal Sh;
+  vectorInt numOfBasisFunctionOnFace;
+  arrayReal Js;
+  
+  // end init
 };
 #endif //SOLVER_BASE_HPP_

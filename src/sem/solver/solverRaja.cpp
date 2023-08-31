@@ -20,9 +20,6 @@ void solverRaja::computeOneStep( const float & timeSample,
                                  QkGL Qk )
 {
 
-  static vectorReal massMatrixGlobal( numberOfNodes );
-  static vectorReal yGlobal( numberOfNodes );
-
   RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfNodes ), [=] ( int i ) {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
@@ -34,56 +31,57 @@ void solverRaja::computeOneStep( const float & timeSample,
   {
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
-    vectorInt localToGlobal=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList );
+    mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
 
     //get global coordinates Xi of element e
-    arrayDouble Xi=mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal );
+    mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
 
     // compute jacobian Matrix
-    arrayDouble jacobianMatrix= Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
-                                                          derivativeBasisFunction2DX,
-                                                          derivativeBasisFunction2DY );
+    Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
+                              derivativeBasisFunction2DX,
+                              derivativeBasisFunction2DY,
+                              jacobianMatrix );
+
     // compute determinant of jacobian Matrix
-    vectorDouble detJ= Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
-                                                              jacobianMatrix );
+    Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
+                                           jacobianMatrix,
+                                           detJ );
     // compute inverse of Jacobian Matrix
-    arrayDouble invJacobianMatrix= Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
-                                                                jacobianMatrix,
-                                                                detJ );
+    Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
+                                 jacobianMatrix,
+                                 detJ,
+                                 invJacobianMatrix );
+                                 
     // compute transposed inverse of Jacobian Matrix
-    arrayDouble transpInvJacobianMatrix= Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
-                                                                            jacobianMatrix,
-                                                                            detJ );
+    Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
+                                       jacobianMatrix,
+                                       detJ,
+                                       transpInvJacobianMatrix );
+                        
     // compute  geometrical transformation matrix
-    arrayDouble B=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ );
+    Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
 
-    // compute stifness and mass matrix
-    arrayDouble R=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D );
+    // compute stifness and mass matrix ( durufle's optimization)
+    Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
 
-    // compute local mass matrix
-    vectorDouble massMatrixLocal=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ );
+    // compute local mass matrix ( used optimez version)
+    Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
+
     // get pnGlobal to pnLocal
-    vectorReal pnLocal( numberOfPointsPerElement );
-    vectorReal Y( numberOfPointsPerElement );
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
       massMatrixLocal[i]/=(model[e]*model[e]);
-      pnLocal[i]=pnGlobal[localToGlobal[i]][i2];
+      pnLocal[i]=pnGlobal(localToGlobal[i],i2);
     }
+
+    // compute Y=R*pnLocal
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
       Y[i]=0;
       for( int j=0; j<numberOfPointsPerElement; j++ )
       {
-        Y[i]+=R[i][j]*pnLocal[j];
-
+        Y[i]+=R(i,j)*pnLocal[j];
       }
-    }
-    for( int i=0; i<numberOfPointsPerElement; i++ )
-    {
-      int gIndex=localToGlobal[i];
-      massMatrixGlobal[gIndex]+=massMatrixLocal[i];
-      yGlobal[gIndex]+=Y[i];
     }
   } );
 
@@ -95,28 +93,23 @@ void solverRaja::computeOneStep( const float & timeSample,
   } );
   //cout<<"pressure="<<pnGlobal[5][i1]<<endl;
 
-  // damping terms
-  static vectorReal ShGlobal( numberOfBoundaryNodes );
-
   RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] ( int i ) {
     ShGlobal[i]=0;
   } );
   // Note: this loop is data parallel.
-  RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfBoundaryFaces ), [=] ( int iFace ) {
-    vectorReal ds( order+1 );
-    vectorReal Sh( order+1 );
-    //get ds
-    ds=Qk.computeDs( iFace, order, faceInfos, globalNodesCoords,
-                     derivativeBasisFunction2DX,
-                     derivativeBasisFunction2DY );
+  RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfBoundaryFaces ), [=] ( int iFace ){
+   //get ds
+    Qk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
+                  Js, globalNodesCoords, derivativeBasisFunction2DX,
+                  derivativeBasisFunction2DY,
+                  ds );
     //compute Sh and ShGlobal
     for( int i=0; i<order+1; i++ )
     {
-      int gIndexFaceNode=localFaceNodeToGlobalFaceNode[iFace][i];
-      Sh[i]=weights[i]*ds[i]/(model[faceInfos[iFace][0]]);
+      int gIndexFaceNode=localFaceNodeToGlobalFaceNode(iFace,i);
+      Sh[i]=weights[i]*ds[i]/(model[faceInfos(iFace,0)]);
       ShGlobal[gIndexFaceNode]+=Sh[i];
     }
-
   } );
 
   // update pressure @ boundaries;

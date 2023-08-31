@@ -15,6 +15,7 @@
 #include "QkGL.hpp"
 #include "simpleMesh.hpp"
 #include "utils.hpp"
+#include "dataType.hpp"
 
 /**
  * @class SEMProxy
@@ -26,7 +27,8 @@ public:
   /**
    * @brief Constructor of the SEMProxy class
    */
-  SEMProxy(): myRHSLocation( myNumberOfRHS, 2 ), myRHSTerm( myNumberOfRHS, myNumSamples ){};
+  SEMProxy(){};
+
   /**
    * @brief Destructor of the SEMProxy class
    */
@@ -45,6 +47,7 @@ public:
    */
   void run();
 
+<<<<<<< HEAD
 private:
 
   float myTimeMax=1.0;
@@ -63,10 +66,35 @@ private:
 
   simpleMesh const myMesh {50, 50, 1000, 1000, myOrderNumber};
   //simpleMesh const myMesh {200, 200, 4000, 4000, myOrderNumber};
+=======
+protected:
+>>>>>>> feature/henri/allocateArray
   int i1=0;
   int i2=1;
+  int myElementSource;
+
   int numberOfNodes;
   int numberOfElements;
+
+  const int myNumberOfRHS=1;
+  int   sourceOrder=1;
+  float f0=15.;
+  float myTimeMax=1.0;
+  float myTimeStep=0.001;
+
+  const int myNumSamples=myTimeMax/myTimeStep;
+  const int myOrderNumber=2;
+  
+   // arrays
+  arrayReal myRHSLocation;
+  arrayReal myRHSTerm;
+  arrayInt nodeList;
+  arrayReal pnGlobal;
+
+  // initialize mesh
+  //simpleMesh  myMesh {50, 50, 1000, 1000, myOrderNumber};
+  simpleMesh  myMesh {100, 100, 1000, 1000, myOrderNumber};
+  //simpleMesh const myMesh {2, 2, 4000, 4000, myOrderNumber};
 
   QkGL myQk;
   solverUtils myUtils;

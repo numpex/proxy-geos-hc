@@ -59,16 +59,16 @@ struct solverUtils
   {
 
     int numberOfNodes=mesh.getNumberOfNodes();
-    vectorReal inputVector( numberOfNodes );
+    std::vector<float> inputVector( numberOfNodes );
     int nx=mesh.getNx();
     int ny=mesh.getNy();
     float dx=mesh.getDx();
     float dy=mesh.getDy();
     for( int i = 0; i< numberOfNodes; i++ )
     {
-      inputVector[i]=pnGlobal[i][i1];
+      inputVector[i]=pnGlobal(i,i1);
     }
-    arrayReal grid=mesh.projectToGrid( numberOfNodes, inputVector );
+    std::vector<std::vector<float>> grid=mesh.projectToGrid( numberOfNodes, inputVector );
     fstream snapFile;
     string snapNumber = "snapshot"+to_string( indexTimeStep );
     snapFile.open( snapNumber, ios::out| ios::trunc );

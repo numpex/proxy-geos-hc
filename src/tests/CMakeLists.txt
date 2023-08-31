@@ -81,5 +81,15 @@ else()
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
     target_include_directories(test_LVARRAY.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
   endif()
+<<<<<<< HEAD
+=======
+  if(ENABLE_KOKKOS)
+    message( STATUS "kokkosinclude=${Kokkos_ROOT}/../../../include")
+    blt_add_executable( NAME test_KOKKOS.exe 
+                        SOURCES test_Kokkos.cpp
+                        DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+    target_include_directories(test_KOKKOS.exe PUBLIC "${Kokkos_ROOT}/../../../include")
+  endif()
+>>>>>>> feature/henri/allocateArray
 endif()
 

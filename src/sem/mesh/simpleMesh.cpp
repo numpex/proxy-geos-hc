@@ -34,6 +34,12 @@ int simpleMesh::getNumberOfElements() const
   return numberOfElements;
 }
 
+// get number of points per element
+int simpleMesh::getNumberOfPointsPerElement() const
+{
+  return((order+1)*(order+1));
+}
+
 //get nx
 int simpleMesh::getNx() const
 {return nx;}
@@ -67,12 +73,13 @@ int simpleMesh::getNumberOfBoundaryNodes() const
 {return 2*(nx+ny)-4;}
 
 // Initialize nodal coordinates.
-arrayReal simpleMesh::nodesCoordinates( const int & numberOfNodes ) const
+//arrayReal simpleMesh::nodesCoordinates( const int & numberOfNodes ) const
+void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const
 {
-  arrayReal nodeCoords( numberOfNodes, 2 );
-  vectorReal coordX( nx );
-  vectorReal coordY( ny );
-  vectorReal xi( order+1 );
+  //arrayReal nodeCoords( numberOfNodes, 2 );
+  std::vector<float> coordX( nx );
+  std::vector<float> coordY( ny );
+  std::vector<float> xi( order+1 );
 
   switch( order )
   {
@@ -147,22 +154,21 @@ arrayReal simpleMesh::nodesCoordinates( const int & numberOfNodes ) const
   {
     for( int i=0; i<nx; i++ )
     {
-      //nodeCoords[i+nx*j][0]=coordX[i];
-      //nodeCoords[i+nx*j][1]=coordY[j];
       nodeCoords(i+nx*j,0)=coordX[i];
       nodeCoords(i+nx*j,1)=coordY[j];
       //cout<<"Xi["<<i+nx*j<<"][0]="<<nodeCoords[i+nx*j][0]<<", ";
       //cout<<"Xi["<<i+nx*j<<"][1]="<<nodeCoords[i+nx*j][1]<<endl;
     }
   }
-  return nodeCoords;
+  //return nodeCoords;
 }
 
 //  list of global nodes ( vertices) for each element
-arrayInt simpleMesh::globalNodesList( const int & numberOfElements ) const
+//arrayInt simpleMesh::globalNodesList( const int & numberOfElements ) const
+void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt & nodesList ) const
 {
   int nDof=(order+1)*(order+1);
-  arrayInt nodesList( numberOfElements, nDof );
+  //arrayInt nodesList( numberOfElements, nDof );
 
   for( int j=0; j<ey; j++ )
   {
@@ -177,25 +183,26 @@ arrayInt simpleMesh::globalNodesList( const int & numberOfElements ) const
         {
           int dofLocal=l+k*(order+1);
           int dofGlobal=offset+l+k*nx;
-          nodesList[n0][dofLocal]=dofGlobal;
+          nodesList(n0,dofLocal)=dofGlobal;
           //cout<<nodesList[n0][dofLocal]<<", ";
         }
       }
       //cout<<endl;
     }
   }
-  return nodesList;
+  //return nodesList;
 }
 
 // local to global
-const vectorInt simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList )const
+//const vectorInt simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList )const
+void simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList,  vectorInt &localToGlobal)const
 {
-  vectorInt localToGlobal( nPointsPerElement );
+  //vectorInt localToGlobal( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-    localToGlobal[i]=nodesList[elementNumber][i];
+    localToGlobal[i]=nodesList(elementNumber,i);
   }
-  return localToGlobal;
+  //return localToGlobal;
 }
 
 // compute global node to grid  indexes
@@ -207,9 +214,9 @@ int simpleMesh::Itoij( const int & I, int & i, int & j ) const
 }
 
 // project vector node to grid
-arrayReal simpleMesh::projectToGrid( const int numberOfNodes, const vectorReal inputVector ) const
+std::vector<std::vector<float>> simpleMesh::projectToGrid( const int numberOfNodes, const std::vector<float> inputVector ) const
 {
-  arrayReal grid( nx, ny );
+  std::vector<vector<float>> grid( nx,std::vector<float> (ny) );
   int i, j;
   cout<< " In projecToGrid numberOfNodes="<<numberOfNodes<<endl;
   for( int node=0; node<numberOfNodes; node++ )
@@ -238,22 +245,23 @@ int simpleMesh::getElementNumberFromPoints( const float & x, const float & y ) c
 }
 
 // set model
-vectorReal simpleMesh::getModel( const int & numberOfElements ) const
+//vectorReal simpleMesh::getModel( const int & numberOfElements ) const
+void simpleMesh::getModel( const int & numberOfElements, vectorReal & model ) const
 {
-  vectorReal model( numberOfElements );
+  //vectorReal model( numberOfElements );
   for( int i=0; i<numberOfElements; i++ )
   {
     model[i]=1500;
   }
-  return model;
+  //return model;
 }
 // list neighbors for element e
 // neigh[0] to neigh[3] list neigbours elements
 // neigh[4] if not zero indicate that element e is a boundary element
 // what type of boundary element
-vectorInt simpleMesh::neighbors( const int & e ) const
+void simpleMesh::neighbors( const int & e , vectorInt & neigh) const
 {
-  vectorInt neigh( 5 );
+  //vectorInt neigh( 5 );
   int i=e%ex;
   int j=int((e-i)/ex);
   neigh[0]=e-1;
@@ -285,21 +293,23 @@ vectorInt simpleMesh::neighbors( const int & e ) const
     neigh[3]=-2;
     neigh[4]=-4;
   }
-  return neigh;
+  //return neigh;
 
 }
 
 // get global coordinates of element e
-arrayDouble simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
-                               vectorInt & localToGlobal ) const
+//arrayDouble simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
+//                              vectorInt & localToGlobal ) const
+void simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
+                     vectorInt & localToGlobal , arrayDouble & Xi) const
 {
-  arrayDouble Xi( numberOfPointsPerElement, 2 );
+  //arrayDouble Xi( numberOfPointsPerElement, 2 );
   for( int i=0; i<numberOfPointsPerElement; i++ )
   {
-    Xi[i][0]=globalNodesCoords[localToGlobal[i]][0];
-    Xi[i][1]=globalNodesCoords[localToGlobal[i]][1];
+    Xi(i,0)=globalNodesCoords(localToGlobal[i],0);
+    Xi(i,1)=globalNodesCoords(localToGlobal[i],1);
   }
-  return Xi;
+  //return Xi;
 }
 
 
@@ -311,37 +321,38 @@ arrayDouble simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal &
 //   |           |
 //   |______1____|
 //
-arrayInt simpleMesh::getGlobalDofOfFace( const int & e,
-                                         arrayInt & globalNodesList,
-                                         vectorInt & localToGlobal ) const
+void simpleMesh::getGlobalDofOfFace( const int & e,
+                                         arrayInt  & globalNodesList,
+                                         vectorInt & localToGlobal,
+                                         arrayInt  & nodesFace ) const
 {
-  arrayInt nodesFace( 4, order+1 );
+  //arrayInt nodesFace( 4, order+1 );
 
   //left face
   for( int i=0; i<order+1; i++ )
   {
     int dofLocal=i*(order+1);
-    nodesFace[0][i]=globalNodesList[e][dofLocal];
+    nodesFace(0,i)=globalNodesList(e,dofLocal);
   }
   //bottom face
   for( int i=0; i<order+1; i++ )
   {
     int dofLocal=i;
-    nodesFace[1][i]=globalNodesList[e][dofLocal];
+    nodesFace(1,i)=globalNodesList(e,dofLocal);
   }
   //right face
   for( int i=0; i<order+1; i++ )
   {
     int dofLocal=order+i*(order+1);
-    nodesFace[2][i]=globalNodesList[e][dofLocal];
+    nodesFace(2,i)=globalNodesList(e,dofLocal);
   }
   //top face
   for( int i=0; i<order+1; i++ )
   {
     int dofLocal=i+order*(order+1);
-    nodesFace[3][i]=globalNodesList[e][dofLocal];
+    nodesFace(3,i)=globalNodesList(e,dofLocal);
   }
-  return nodesFace;
+  //return nodesFace;
 }
 
 // provides informations about boundary  faces:
@@ -349,21 +360,22 @@ arrayInt simpleMesh::getGlobalDofOfFace( const int & e,
 // orientation of the face
 // list of global indexes
 // this method is sequential only for omp !!!
-arrayInt simpleMesh::getBoundaryFacesInfos() const
+//arrayInt simpleMesh::getBoundaryFacesInfos() const
+void  simpleMesh::getBoundaryFacesInfos(arrayInt & faceInfos) const
 {
-  int numberOfBoundaryFaces=getNumberOfBoundaryFaces();
+  //int numberOfBoundaryFaces=getNumberOfBoundaryFaces();
   int numFace=0;
-  arrayInt faceInfos( numberOfBoundaryFaces, 2+(order+1));
+  //arrayInt faceInfos( numberOfBoundaryFaces, 2+(order+1));
   // bottom, j=0, l=0
   for( int i=0; i<ex; i++ )
   {
     numFace=i;
-    faceInfos[numFace][0]=i;
-    faceInfos[numFace][1]=1;
+    faceInfos(numFace,0)=i;
+    faceInfos(numFace,1)=1;
     int offset=i*order;
     for( int j=0; j<order+1; j++ )
     {
-      faceInfos[numFace][2+j]=offset+j;
+      faceInfos(numFace,2+j)=offset+j;
     }
   }
   // right i=ex-1 l=order
@@ -372,11 +384,11 @@ arrayInt simpleMesh::getBoundaryFacesInfos() const
     int e=ex-1+j*ex;
     numFace=ex+j;
     int offset=(ex-1)*order+j*order*nx;
-    faceInfos[numFace][0]=e;
-    faceInfos[numFace][1]=2;
+    faceInfos(numFace,0)=e;
+    faceInfos(numFace,1)=2;
     for( int k=0; k<order+1; k++ )
     {
-      faceInfos[numFace][2+k]=offset+order+k*nx;
+      faceInfos(numFace,2+k)=offset+order+k*nx;
     }
   }
   // top j=ey-1, k=order
@@ -384,13 +396,13 @@ arrayInt simpleMesh::getBoundaryFacesInfos() const
   {
     int e=i+(ey-1)*ex;
     numFace=ey+ex+i;
-    faceInfos[numFace][0]=e;
-    faceInfos[numFace][1]=3;
+    faceInfos(numFace,0)=e;
+    faceInfos(numFace,1)=3;
     int offset=i*order+(ey-1)*order*nx;
     int k=order;
     for( int l=0; l<order+1; l++ )
     {
-      faceInfos[numFace][2+l]=offset+l+k*nx;
+      faceInfos(numFace,2+l)=offset+l+k*nx;
     }
   }
   // left, i=0 and l=0
@@ -399,11 +411,11 @@ arrayInt simpleMesh::getBoundaryFacesInfos() const
     int e=j*ex;
     numFace=2*ex+ey+j;
     int offset=j*order*nx;
-    faceInfos[numFace][0]=e;
-    faceInfos[numFace][1]=0;
+    faceInfos(numFace,0)=e;
+    faceInfos(numFace,1)=0;
     for( int k=0; k<order+1; k++ )
     {
-      faceInfos[numFace][2+k]=offset+k*nx;
+      faceInfos(numFace,2+k)=offset+k*nx;
     }
   }
 /**
@@ -415,14 +427,14 @@ arrayInt simpleMesh::getBoundaryFacesInfos() const
       }
    }
  **/
-  return faceInfos;
+  //return faceInfos;
 }
 
 // get list of interior Elements
-vectorInt simpleMesh::getListOfInteriorElements() const
+void simpleMesh::getListOfInteriorElements(vectorInt & listOfInteriorElements) const
 {
-  int numberOfInteriorElements=getNumberOfInteriorElements();
-  vectorInt listOfInteriorElements( numberOfInteriorElements );
+  //int numberOfInteriorElements=getNumberOfInteriorElements();
+  //vectorInt listOfInteriorElements( numberOfInteriorElements );
   int k=0;
   for( int j=1; j<ey-1; j++ )
   {
@@ -430,13 +442,15 @@ vectorInt simpleMesh::getListOfInteriorElements() const
       listOfInteriorElements[k]=i+j*ex;
     k++;
   }
-  return listOfInteriorElements;
+  //return listOfInteriorElements;
 }
 
 //  get list of global interior nodes
-vectorInt simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes ) const
+//vectorInt simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes ) const
+void simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
+                                         vectorInt & listOfInteriorNodes ) const
 {
-  vectorInt listOfInteriorNodes( numberOfInteriorNodes );
+  //vectorInt listOfInteriorNodes( numberOfInteriorNodes );
   int k=0;
   for( int j=1; j<ny-1; j++ )
   {
@@ -446,13 +460,14 @@ vectorInt simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes 
       k++;
     }
   }
-  return listOfInteriorNodes;
+  //return listOfInteriorNodes;
 }
 
 //  get list of global boundary nodes
-vectorInt simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes ) const
+//vectorInt simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes ) const
+void simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt & listOfBoundaryNodes ) const
 {
-  vectorInt listOfBoundaryNodes( numberOfBoundaryNodes );
+  //vectorInt listOfBoundaryNodes( numberOfBoundaryNodes );
   //cout<<"numberOfBoundaryNOdes="<<numberOfBoundaryNodes<<endl;
   int k=0;
   //bottom
@@ -491,16 +506,17 @@ vectorInt simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes 
   //{
   //  cout<<"j="<<j<<", "<<listOfBoundaryNodes[j]<<endl;
   //}
-  return listOfBoundaryNodes;
+  //return listOfBoundaryNodes;
 }
 
 // provides a mapping between local node of a face and global node Face:
-arrayInt simpleMesh::getLocalFaceNodeToGlobalFaceNode() const
+//arrayInt simpleMesh::getLocalFaceNodeToGlobalFaceNode() const
+void simpleMesh::getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFaceNode) const
 {
-  int numberOfBoundaryFaces=getNumberOfBoundaryFaces();
+  //int numberOfBoundaryFaces=getNumberOfBoundaryFaces();
   int numFace=0;
   int offset;
-  arrayInt localFaceNodeToGlobalFaceNode( numberOfBoundaryFaces, order+1 );
+  //arrayInt localFaceNodeToGlobalFaceNode( numberOfBoundaryFaces, order+1 );
   // bottom, j=0, l=0
   for( int i=0; i<ex; i++ )
   {
@@ -508,7 +524,7 @@ arrayInt simpleMesh::getLocalFaceNodeToGlobalFaceNode() const
     offset=i*order;
     for( int j=0; j<order+1; j++ )
     {
-      localFaceNodeToGlobalFaceNode[numFace][j]=offset+j;
+      localFaceNodeToGlobalFaceNode(numFace,j)=offset+j;
     }
   }
   // right i=ex-1 l=order
@@ -516,10 +532,10 @@ arrayInt simpleMesh::getLocalFaceNodeToGlobalFaceNode() const
   {
     int e=ex-1+j*ex;
     numFace=ex+j;
-    int offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
+    int offset=localFaceNodeToGlobalFaceNode(numFace-1,order);
     for( int k=0; k<order+1; k++ )
     {
-      localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;
+      localFaceNodeToGlobalFaceNode(numFace,k)=offset+k;
     }
   }
   // top j=ey-1, k=order
@@ -531,25 +547,25 @@ arrayInt simpleMesh::getLocalFaceNodeToGlobalFaceNode() const
     {
       if( i==0 )
       {
-        offset=localFaceNodeToGlobalFaceNode[numFace-1][order]+1;
+        offset=localFaceNodeToGlobalFaceNode(numFace-1,order)+1;
       }
       else
       {
-        offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
+        offset=localFaceNodeToGlobalFaceNode(numFace-1,order);
       }
       for( int l=0; l<order+1; l++ )
       {
-        localFaceNodeToGlobalFaceNode[numFace][l]=offset+l;
+        localFaceNodeToGlobalFaceNode(numFace,l)=offset+l;
       }
     }
     else if( i==ex-1 )
     {
-      offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
+      offset=localFaceNodeToGlobalFaceNode(numFace-1,order);
       for( int l=0; l<order; l++ )
       {
-        localFaceNodeToGlobalFaceNode[numFace][l]=offset+l;
+        localFaceNodeToGlobalFaceNode(numFace,l)=offset+l;
       }
-      localFaceNodeToGlobalFaceNode[numFace][order]=localFaceNodeToGlobalFaceNode[ex+ey-1][order];
+      localFaceNodeToGlobalFaceNode(numFace,order)=localFaceNodeToGlobalFaceNode(ex+ey-1,order);
     }
 
   }
@@ -559,30 +575,30 @@ arrayInt simpleMesh::getLocalFaceNodeToGlobalFaceNode() const
     numFace=2*ex+ey+j;
     if( j==0 )
     {
-      localFaceNodeToGlobalFaceNode[numFace][0]=0;
+      localFaceNodeToGlobalFaceNode(numFace,0)=0;
       for( int k=1; k<order+1; k++ )
       {
-        offset=localFaceNodeToGlobalFaceNode[numFace-1][order-1];
-        localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;
+        offset=localFaceNodeToGlobalFaceNode(numFace-1,order-1);
+        localFaceNodeToGlobalFaceNode(numFace,k)=offset+k;
       }
     }
     else if( j>0 && j<ey-1 )
     {
       for( int k=0; k<order+1; k++ )
       {
-        offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
-        localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;
+        offset=localFaceNodeToGlobalFaceNode(numFace-1,order);
+        localFaceNodeToGlobalFaceNode(numFace,k)=offset+k;
       }
     }
     else if( j==ey-1 )
     {
       for( int k=0; k<order; k++ )
       {
-        offset=localFaceNodeToGlobalFaceNode[numFace-1][order];
-        localFaceNodeToGlobalFaceNode[numFace][k]=offset+k;
+        offset=localFaceNodeToGlobalFaceNode(numFace-1,order);
+        localFaceNodeToGlobalFaceNode(numFace,k)=offset+k;
       }
-      offset=localFaceNodeToGlobalFaceNode[ex+ey][0];
-      localFaceNodeToGlobalFaceNode[numFace][order]=offset;
+      offset=localFaceNodeToGlobalFaceNode(ex+ey,0);
+      localFaceNodeToGlobalFaceNode(numFace,order)=offset;
     }
 
   }
@@ -593,6 +609,6 @@ arrayInt simpleMesh::getLocalFaceNodeToGlobalFaceNode() const
         cout<<"iFace="<<iFace<<" local number="<<i<<" global number="<<localFaceNodeToGlobalFaceNode[iFace][i]<<endl;
      }
      }**/
-  return localFaceNodeToGlobalFaceNode;
+  //return localFaceNodeToGlobalFaceNode;
 }
 #endif //SIMPLEMESH_HPP_
