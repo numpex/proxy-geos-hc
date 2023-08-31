@@ -120,15 +120,23 @@ int main( int argc, char *argv[] )
   arrayMBIn=allocateArray2D<arrayRealMB>(n1,n2);
   arrayRealMB arrayMBOut;
   arrayMBOut=allocateArray2D<arrayRealMB>(n1,n2);
-
+  
+  #pragma omp parallel for
   for (int i=0; i<n1;i++)
   {
     for ( int j=0; j<n2;j++)
     {
       arrayIn[i][j]=sqrt(2*i*j);
+      arrayOut[i][j]=0;
+    }
+  }
+
+  for (int i=0; i<n1;i++)
+  {
+    for ( int j=0; j<n2;j++)
+    {
       arrayCBIn[i][j]=sqrt(2*i*j);
       arrayMBIn[i][j]=sqrt(2*i*j);
-      arrayOut[i][j]=0;
       arrayCBOut[i][j]=0;
       arrayMBOut[i][j]=0;
     }
@@ -146,8 +154,27 @@ int main( int argc, char *argv[] )
   }
   std::cout << "Elapsed Time OMP loop vector : "<<std::chrono::duration_cast< std::chrono::milliseconds >
             ( std::chrono::system_clock::now() - startTime ).count() / 1000.0 <<" seconds.\n"<<std::endl;
-  
 
+  // test vector vector OMP flat loop
+  // -------------------------------
+  std::chrono::time_point< std::chrono::system_clock > startTimeflat  = std::chrono::system_clock::now();
+  #pragma omp parallel for 
+  for (int e=0; e<nIter; e++)
+  {
+    for (int i=0; i<n1;i++)
+    {
+      for ( int j=0; j<n2;j++)
+      {
+        arrayOut(i,j)=sqrt(2*i*j)*arrayIn[i][j];
+      }     
+    }
+     if (e==nIter-1)
+        std::cout <<"Result OMP vector "<<arrayOut[n1/2][n2/2]<<std::endl;   
+  } 
+  std::cout << "Elapsed Time OMP loop vector : "<<std::chrono::duration_cast< std::chrono::milliseconds >
+            ( std::chrono::system_clock::now() - startTimeflat ).count() / 1000.0 <<" seconds.\n"<<std::endl; 
+
+  
   // test MallocBuffer MallocBuffer OMP
   // -------------------------------
   std::chrono::time_point< std::chrono::system_clock > startTimeMB = std::chrono::system_clock::now();
