@@ -47,28 +47,7 @@ public:
    */
   void run();
 
-<<<<<<< HEAD
-private:
-
-  float myTimeMax=1.0;
-  float myTimeStep=0.001;
-  const int myNumSamples=myTimeMax/myTimeStep;
-  const int myOrderNumber=2;
-
-  // element number of source term
-  int myElementSource;
-  const int myNumberOfRHS=2;
-  float f0=15.;
-  int sourceOrder=1;
-
-  arrayReal myRHSLocation;
-  arrayReal myRHSTerm;
-
-  simpleMesh const myMesh {50, 50, 1000, 1000, myOrderNumber};
-  //simpleMesh const myMesh {200, 200, 4000, 4000, myOrderNumber};
-=======
 protected:
->>>>>>> feature/henri/allocateArray
   int i1=0;
   int i2=1;
   int myElementSource;
