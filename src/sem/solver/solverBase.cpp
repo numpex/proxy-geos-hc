@@ -15,7 +15,7 @@ void solverBase::computeFEInit( const int & order,
 {
 
   // get infos from mesh
-
+  
   //interior elements
   numberOfNodes=mesh.getNumberOfNodes();
   numberOfElements=mesh.getNumberOfElements();
@@ -47,12 +47,9 @@ void solverBase::computeFEInit( const int & order,
   model=allocateVector<vectorReal>(numberOfElements);
   mesh.getModel( numberOfElements, model );
 
-  //allocate mesh arrays used in kernel
-  numberOfPointsPerElement = ( order + 1 ) * ( order + 1 );
-  localToGlobal=allocateVector<vectorInt>(numberOfPointsPerElement);
-  Xi=allocateArray2D<arrayDouble>( numberOfPointsPerElement, 2 );
 
   // get quadrature points and weights
+  numberOfPointsPerElement = ( order + 1 ) * ( order + 1 );
   quadraturePoints=allocateVector<vectorDouble>(order+1);
   Qk.gaussLobattoQuadraturePoints( order, quadraturePoints );
 
@@ -78,24 +75,32 @@ void solverBase::computeFEInit( const int & order,
   derivativeBasisFunction2DY=allocateArray2D<arrayDouble>(nBasisFunctions,nBasisFunctions);
   Qk.getBasisFunction2D( quadraturePoints, basisFunction1D, derivativeBasisFunction1D, derivativeBasisFunction2DY );
 
+  //private arrays
+  localToGlobal=allocateVector<vectorInt>(numberOfPointsPerElement);
+  Xi=allocateArray2D<arrayDouble>( numberOfPointsPerElement, 2 );
+
   jacobianMatrix=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
   detJ=allocateVector<vectorDouble>(numberOfPointsPerElement);
   invJacobianMatrix=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
   transpInvJacobianMatrix=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
+
   B=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
   R=allocateArray2D<arrayDouble>(numberOfPointsPerElement, numberOfPointsPerElement);
+
   massMatrixLocal=allocateVector<vectorDouble>(numberOfPointsPerElement);
   massMatrixGlobal=allocateVector<vectorReal>( numberOfNodes );
-  yGlobal=allocateVector<vectorReal>( numberOfNodes );
+
   pnLocal=allocateVector<vectorReal>( numberOfPointsPerElement );
   Y=allocateVector<vectorReal>( numberOfPointsPerElement );
-
-  ShGlobal=allocateVector<vectorReal>( numberOfBoundaryNodes );
 
   ds=allocateVector<vectorReal>( order+1 );
   Sh=allocateVector<vectorReal>( order+1 );
   numOfBasisFunctionOnFace=allocateVector<vectorInt>( order+1 );
   Js=allocateArray2D<arrayReal>( 2, order+1 );
+
+  //shared arrays
+  yGlobal=allocateVector<vectorReal>( numberOfNodes );
+  ShGlobal=allocateVector<vectorReal>( numberOfBoundaryNodes );
 }
 
 // add right and side

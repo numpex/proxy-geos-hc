@@ -68,15 +68,14 @@ protected:
   int numberOfBoundaryFaces;
   int numberOfPointsPerElement;
 
-  vectorInt localToGlobal;
+  //shared arrays
   arrayInt globalNodesList;
-  vectorInt listOfInteriorNodes;
   arrayReal globalNodesCoords;
+  vectorInt listOfInteriorNodes;
   vectorInt listOfBoundaryNodes;
   arrayInt faceInfos;
   arrayInt localFaceNodeToGlobalFaceNode;
-  arrayDouble Xi;
-
+  
   // get model
   vectorReal model;
 
@@ -92,24 +91,34 @@ protected:
   arrayDouble derivativeBasisFunction2DX;
   arrayDouble derivativeBasisFunction2DY;
 
+
+  // private arrays
+  vectorInt localToGlobal;
+  arrayDouble Xi;
+
   arrayDouble jacobianMatrix;
   vectorDouble detJ;
   arrayDouble invJacobianMatrix;
   arrayDouble transpInvJacobianMatrix;
+
   arrayDouble B;
   arrayDouble R;
-  vectorDouble massMatrixLocal;
 
-  vectorReal massMatrixGlobal;
-  vectorReal yGlobal;
+  vectorDouble massMatrixLocal;
   vectorReal pnLocal;
   vectorReal Y;
-
-  vectorReal ShGlobal;
+  
   vectorReal ds;
   vectorReal Sh;
   vectorInt numOfBasisFunctionOnFace;
   arrayReal Js;
+
+  //shared arrays
+  vectorReal massMatrixGlobal;
+  vectorReal yGlobal;
+  vectorReal ShGlobal;
+  
+  
   
   // end init
 };
