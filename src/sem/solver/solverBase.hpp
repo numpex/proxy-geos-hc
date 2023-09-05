@@ -91,7 +91,7 @@ protected:
   arrayDouble derivativeBasisFunction2DX;
   arrayDouble derivativeBasisFunction2DY;
 
-
+/*
   // private arrays
   vectorInt localToGlobal;
   arrayDouble Xi;
@@ -107,12 +107,12 @@ protected:
   vectorDouble massMatrixLocal;
   vectorReal pnLocal;
   vectorReal Y;
-  
+
   vectorReal ds;
   vectorReal Sh;
   vectorInt numOfBasisFunctionOnFace;
   arrayReal Js;
-
+*/
   //shared arrays
   vectorReal massMatrixGlobal;
   vectorReal yGlobal;

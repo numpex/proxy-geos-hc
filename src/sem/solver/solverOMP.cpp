@@ -20,7 +20,32 @@ void solverOMP::computeOneStep( const float & timeSample,
                                 simpleMesh mesh,
                                 QkGL Qk )
 {
-  #pragma omp parallel for
+  
+
+  #pragma omp parallel
+  { // start parallel section
+    vectorInt localToGlobal(numberOfPointsPerElement);
+    arrayDouble Xi(numberOfPointsPerElement, 2 );
+
+    arrayDouble jacobianMatrix(4, numberOfPointsPerElement);
+    vectorDouble detJ(numberOfPointsPerElement);
+    arrayDouble invJacobianMatrix(4, numberOfPointsPerElement);
+    arrayDouble transpInvJacobianMatrix(4, numberOfPointsPerElement);
+
+    arrayDouble B(4, numberOfPointsPerElement);
+    arrayDouble R(numberOfPointsPerElement, numberOfPointsPerElement);
+
+    vectorDouble massMatrixLocal(numberOfPointsPerElement);
+
+    vectorReal pnLocal( numberOfPointsPerElement );
+    vectorReal Y( numberOfPointsPerElement );
+
+    vectorReal ds( order+1 );
+    vectorReal Sh( order+1 );
+    vectorInt numOfBasisFunctionOnFace( order+1 );
+    arrayReal Js( 2, order+1 );
+
+  #pragma omp for 
   for( int i=0; i<numberOfNodes; i++ )
   {
     massMatrixGlobal[i]=0;
@@ -29,9 +54,10 @@ void solverOMP::computeOneStep( const float & timeSample,
 
 
   // loop over mesh elements
-  #pragma omp parallel for
+  #pragma omp for
   for( int e=0; e<numberOfElements; e++ )
   {
+
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
     mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
@@ -95,9 +121,9 @@ void solverOMP::computeOneStep( const float & timeSample,
       yGlobal[gIndex]+=Y[i];
     }
   }
-
+  
   // update pressure
-  #pragma omp parallel for
+  #pragma omp  for
   for( int i=0; i<numberOfInteriorNodes; i++ )
   {
     int I=listOfInteriorNodes[i];
@@ -105,16 +131,16 @@ void solverOMP::computeOneStep( const float & timeSample,
     pnGlobal[I][i1]=2*pnGlobal[I][i2]-pnGlobal[I][i1]-tmp*yGlobal[I]/massMatrixGlobal[I];
   }
   //cout<<"pressure="<<pnGlobal[5][i1]<<endl;
-
+  
   // damping terms
-  #pragma omp parallel for
+  #pragma omp  for
   for( int i=0; i<numberOfBoundaryNodes; i++ )
   {
     ShGlobal[i]=0;
   }
 
   // Note: this loop is data parallel.
-  #pragma omp parallel for
+  #pragma omp  for
   for( int iFace=0; iFace<numberOfBoundaryFaces; iFace++ )
   {
     //get ds
@@ -133,7 +159,7 @@ void solverOMP::computeOneStep( const float & timeSample,
 
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
-  #pragma omp parallel for
+  #pragma omp  for
   for( int i=0; i<numberOfBoundaryNodes; i++ )
   {
     int I=listOfBoundaryNodes[i];
@@ -141,4 +167,5 @@ void solverOMP::computeOneStep( const float & timeSample,
     float MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
     pnGlobal[I][i1]=invMpSh*(2*massMatrixGlobal[I]*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]-tmp*yGlobal[I]);
   }
+  }// end parallel region
 }
