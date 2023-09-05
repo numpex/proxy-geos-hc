@@ -73,7 +73,7 @@ void compute(int const n1, int const n2,arrayReal  & arrayIn, arrayReal   & arra
 // test MallocBuffer MallocBuffer 
 //
 // -------------------------------
-void computeMBMB(int const n1, int const n2,arrayRealMB const & arrayIn, arrayRealMB const & array) 
+void computeMBMB(int const n1, int const n2,arrayRealMB  const & arrayIn, arrayRealMB const & array) 
 {
   for (int i=0; i<n1;i++)
     {
@@ -86,7 +86,7 @@ void computeMBMB(int const n1, int const n2,arrayRealMB const & arrayIn, arrayRe
 
 // test ChaiBuffer ChaiBuffer 
 // -------------------------------
-void computeCBCB(int const n1, int const n2, arrayRealCB const & arrayIn, arrayRealCB const & array) 
+void computeCBCB(int const n1, int const n2, arrayRealCB  const & arrayIn, arrayRealCB const & array) 
 {
   for (int i=0; i<n1;i++)
     {
@@ -104,11 +104,7 @@ int main( int argc, char *argv[] )
 {
   
   
-<<<<<<< HEAD
-  const int nIter=1000;
-=======
   const int nIter=10000;
->>>>>>> feature/henri/allocateArray
   const int n1=1000;
   const int n2=1000;
 

@@ -34,19 +34,56 @@ public:
    * @brief addRightAndSides function:
    * add right and side
    */
+#ifdef SEM_USE_RAJA
   void addRightAndSides( const int & timeStep,
-                         const int & numberOfRHS,
-                         const int & i2,
-                         const float & timeSample,
-                         arrayReal & pnGlobal,
-                         arrayReal & rhsTerm,
-                         arrayReal & rhsLocation,
-                         simpleMesh mesh );
+                                   const int & numberOfRHS,
+                                   const int & i2,
+                                   const float & timeSample,
+                                   arrayReal const & pnGlobal,
+                                   arrayReal const & rhsTerm,
+                                   arrayReal const & rhsLocation,
+                                   simpleMesh mesh );
+#elif defined SEM_USE_KOKKOS
+  void addRightAndSides( const int & timeStep,
+                                   const int & numberOfRHS,
+                                   const int & i2,
+                                   const float & timeSample,
+                                   arrayReal const & pnGlobal,
+                                   arrayReal const & rhsTerm,
+                                   arrayReal const & rhsLocation,
+                                   simpleMesh mesh );
+#else
+  void addRightAndSides( const int & timeStep,
+                                   const int & numberOfRHS,
+                                   const int & i2,
+                                   const float & timeSample,
+                                   arrayReal & pnGlobal,
+                                   arrayReal & rhsTerm,
+                                   arrayReal & rhsLocation,
+                                   simpleMesh mesh );
+#endif
 
   /**
    * @brief computeFEInit function:
    * compute one time step of wave propagation
    */
+#ifdef SEM_USE_RAJA
+  virtual void computeOneStep( const float & timeSample,
+                               const int & order,
+                               int & i1,
+                               int & i2,
+                               arrayReal const & pnGlobal,
+                               simpleMesh mesh,
+                               QkGL Qk ) = 0;
+#elif defined SEM_USE_KOKKOS
+  virtual void computeOneStep( const float & timeSample,
+                               const int & order,
+                               int & i1,
+                               int & i2,
+                               arrayReal const & pnGlobal,
+                               simpleMesh mesh,
+                               QkGL Qk ) = 0;
+#else
   virtual void computeOneStep( const float & timeSample,
                                const int & order,
                                int & i1,
@@ -54,6 +91,7 @@ public:
                                arrayReal & pnGlobal,
                                simpleMesh mesh,
                                QkGL Qk ) = 0;
+#endif
 
 
 protected:

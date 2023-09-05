@@ -93,7 +93,8 @@ int main( int argc, char *argv[] )
    // Timer products.
   Kokkos::Timer timer;
   std::cout<<"start loop1 \n";
-  Kokkos::parallel_for("loop", nIter , KOKKOS_LAMBDA  ( int e )
+  //Kokkos::parallel_for("loop", nIter , KOKKOS_LAMBDA  ( int e )
+  Kokkos::parallel_for("loop", nIter , [=]  ( int e )
     {   for (int i=0; i<n1;i++)
         {
            for ( int j=0; j<n2;j++)

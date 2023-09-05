@@ -61,8 +61,8 @@ protected:
   float myTimeMax=1.0;
   float myTimeStep=0.001;
 
-  const int myNumSamples=myTimeMax/myTimeStep;
-  const int myOrderNumber=2;
+  const int myNumSamples=100;//myTimeMax/myTimeStep;
+  const int myOrderNumber=1;
   
    // arrays
   arrayReal myRHSLocation;
@@ -71,18 +71,18 @@ protected:
   arrayReal pnGlobal;
 
   // initialize mesh
-  //simpleMesh  myMesh {50, 50, 1000, 1000, myOrderNumber};
-  simpleMesh  myMesh {100, 100, 1000, 1000, myOrderNumber};
-  //simpleMesh const myMesh {2, 2, 4000, 4000, myOrderNumber};
+  simpleMesh  myMesh {50, 50, 1000, 1000, myOrderNumber};
+  //simpleMesh  myMesh {100, 100, 1000, 1000, myOrderNumber};
+  //simpleMesh const myMesh {2, 2, 1000, 1000, myOrderNumber};
 
   QkGL myQk;
   solverUtils myUtils;
 
-#if defined(SEM_USE_RAJA)
+#if defined SEM_USE_RAJA
   solverRaja mySolver;
-#elif defined(SEM_USE_OMP)
+#elif defined SEM_USE_OMP
   solverOMP mySolver;
-#elif defined(SEM_USE_KOKKOS)
+#elif defined SEM_USE_KOKKOS
   solverKokkos mySolver;
 #else
   solverSEQ mySolver;
