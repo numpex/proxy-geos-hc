@@ -14,7 +14,6 @@ void solverBase::computeFEInit( const int & order,
                                 QkGL Qk )
 {
 
-  // following arrays are shared and constant to all threads
   // get infos from mesh
 
   //interior elements
@@ -47,7 +46,12 @@ void solverBase::computeFEInit( const int & order,
   // get model
   model=allocateVector<vectorReal>(numberOfElements);
   mesh.getModel( numberOfElements, model );
- 
+
+  //allocate mesh arrays used in kernel
+  numberOfPointsPerElement = ( order + 1 ) * ( order + 1 );
+  localToGlobal=allocateVector<vectorInt>(numberOfPointsPerElement);
+  Xi=allocateArray2D<arrayDouble>( numberOfPointsPerElement, 2 );
+
   // get quadrature points and weights
   quadraturePoints=allocateVector<vectorDouble>(order+1);
   Qk.gaussLobattoQuadraturePoints( order, quadraturePoints );
@@ -74,15 +78,6 @@ void solverBase::computeFEInit( const int & order,
   derivativeBasisFunction2DY=allocateArray2D<arrayDouble>(nBasisFunctions,nBasisFunctions);
   Qk.getBasisFunction2D( quadraturePoints, basisFunction1D, derivativeBasisFunction1D, derivativeBasisFunction2DY );
 
-
-  // following arrays must be private to each thread
-
-   //allocate mesh arrays used in kernel
-  numberOfPointsPerElement = ( order + 1 ) * ( order + 1 );
-  localToGlobal=allocateVector<vectorInt>(numberOfPointsPerElement);
-  Xi=allocateArray2D<arrayDouble>( numberOfPointsPerElement, 2 );
-
-
   jacobianMatrix=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
   detJ=allocateVector<vectorDouble>(numberOfPointsPerElement);
   invJacobianMatrix=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
@@ -90,42 +85,20 @@ void solverBase::computeFEInit( const int & order,
   B=allocateArray2D<arrayDouble>(4, numberOfPointsPerElement);
   R=allocateArray2D<arrayDouble>(numberOfPointsPerElement, numberOfPointsPerElement);
   massMatrixLocal=allocateVector<vectorDouble>(numberOfPointsPerElement);
- 
-  
+  massMatrixGlobal=allocateVector<vectorReal>( numberOfNodes );
+  yGlobal=allocateVector<vectorReal>( numberOfNodes );
   pnLocal=allocateVector<vectorReal>( numberOfPointsPerElement );
   Y=allocateVector<vectorReal>( numberOfPointsPerElement );
+
+  ShGlobal=allocateVector<vectorReal>( numberOfBoundaryNodes );
 
   ds=allocateVector<vectorReal>( order+1 );
   Sh=allocateVector<vectorReal>( order+1 );
   numOfBasisFunctionOnFace=allocateVector<vectorInt>( order+1 );
   Js=allocateArray2D<arrayReal>( 2, order+1 );
-
-  // following arrays are shared 
-   massMatrixGlobal=allocateVector<vectorReal>( numberOfNodes );
-   yGlobal=allocateVector<vectorReal>( numberOfNodes );
-   ShGlobal=allocateVector<vectorReal>( numberOfBoundaryNodes );
 }
 
 // add right and side
-#ifdef SEM_USE_RAJA
-void solverBase::addRightAndSides( const int & timeStep,
-                                   const int & numberOfRHS,
-                                   const int & i2,
-                                   const float & timeSample,
-                                   arrayReal const & pnGlobal,
-                                   arrayReal const & rhsTerm,
-                                   arrayReal const & rhsLocation,
-                                   simpleMesh mesh )
-#elif defined SEM_USE_KOKKOS
-void solverBase::addRightAndSides( const int & timeStep,
-                                   const int & numberOfRHS,
-                                   const int & i2,
-                                   const float & timeSample,
-                                   arrayReal const & pnGlobal,
-                                   arrayReal const & rhsTerm,
-                                   arrayReal const & rhsLocation,
-                                   simpleMesh mesh )
-#else
 void solverBase::addRightAndSides( const int & timeStep,
                                    const int & numberOfRHS,
                                    const int & i2,
@@ -134,7 +107,6 @@ void solverBase::addRightAndSides( const int & timeStep,
                                    arrayReal & rhsTerm,
                                    arrayReal & rhsLocation,
                                    simpleMesh mesh )
-#endif
 {
   static int numberOfNodes=mesh.getNumberOfNodes();
   static int numberOfElements=mesh.getNumberOfElements();

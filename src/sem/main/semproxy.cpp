@@ -62,11 +62,10 @@ void SEMProxy::run()
   for( int indexTimeStep=0; indexTimeStep<myNumSamples; indexTimeStep++ )
   {
     mySolver.addRightAndSides( indexTimeStep, myNumberOfRHS, i2, myTimeStep, pnGlobal, myRHSTerm, myRHSLocation, myMesh );
-    #pragma omp parallel
     mySolver.computeOneStep( myTimeStep, myOrderNumber, i1, i2, pnGlobal, myMesh, myQk );
 
     //writes debugging ascii file.
-    if( indexTimeStep%1==0 )
+    if( indexTimeStep%50==0 )
     {
       cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource
           <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),i2)<<endl;

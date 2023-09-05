@@ -15,7 +15,7 @@ void solverRaja::computeOneStep( const float & timeSample,
                                  const int & order,
                                  int & i1,
                                  int & i2,
-                                 arrayReal const & pnGlobal,
+                                 arrayReal & pnGlobal,
                                  simpleMesh mesh,
                                  QkGL Qk )
 {
@@ -27,7 +27,7 @@ void solverRaja::computeOneStep( const float & timeSample,
 
 
   // loop over mesh elements
-  RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfElements ), [=] ( int e )
+  RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfElements ), [=, &pnGlobal] ( int e )
   {
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
@@ -35,12 +35,6 @@ void solverRaja::computeOneStep( const float & timeSample,
 
     //get global coordinates Xi of element e
     mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
-    /*cout<<"element "<<e<<"\n";
-    for( int i=0; i<numberOfPointsPerElement; i++ )
-    {
-       cout<<"point "<<i<<" Xi "<<Xi(i,0)<<" "<<Xi(i,1)<<endl;
-    }*/
-
 
     // compute jacobian Matrix
     Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
@@ -92,7 +86,7 @@ void solverRaja::computeOneStep( const float & timeSample,
   } );
 
   // update pressure
-  RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=] ( int i ) {
+  RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=, &pnGlobal] ( int i ) {
     int I=listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
     pnGlobal[I][i1]=2*pnGlobal[I][i2]-pnGlobal[I][i1]-tmp*yGlobal[I]/massMatrixGlobal[I];
@@ -120,7 +114,7 @@ void solverRaja::computeOneStep( const float & timeSample,
 
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
-  RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] ( int i ) {
+  RAJA::forall< RAJA::omp_parallel_for_exec >( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=, &pnGlobal] ( int i ) {
     int I=listOfBoundaryNodes[i];
     float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
     float MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;

@@ -25,7 +25,7 @@ public:
                        const int & order,
                        int & i1,
                        int & i2,
-                       arrayReal const & pnGlobal,
+                       arrayReal & pnGlobal,
                        simpleMesh mesh,
                        QkGL Qk );
 };

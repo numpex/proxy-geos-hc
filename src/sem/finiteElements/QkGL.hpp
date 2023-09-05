@@ -23,195 +23,88 @@ public:
   ~QkGL();
 
   // get Gauss Lobatto quadrature points
-#ifdef SEM_USE_RAJA
-  void gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const;
-#elif defined SEM_USE_KOKKOS
-  void gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const;
-#else
+  //vectorDouble gaussLobattoQuadraturePoints( int order ) const;
   void gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoints ) const;
-#endif
 
   // get Gauss Lobatto quadrature weights
-#ifdef SEM_USE_RAJA
-  void  gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const;
-#elif defined SEM_USE_KOKKOS
-  void  gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const;
-#else
+  //vectorDouble  gaussLobattoQuadratureWeights( int order ) const;
   void  gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) const;
-#endif
+
   // compute  1d shape Functions and derivatives
   std::vector<double>  shapeFunction1D( int order, double xi ) const;
   std::vector<double>  derivativeShapeFunction1D( int order, double xi ) const;
 
   // get  1d shape Functions and derivatives for all quadrature points
   //arrayDouble  getBasisFunction1D( int order, vectorDouble & quadraturePoints ) const;
-#ifdef SEM_USE_RAJA
-  void  getBasisFunction1D( int order, vectorDouble const & quadraturePoints ,arrayDouble const & basisFunction1D) const;
-#elif defined SEM_USE_KOKKOS
-  void  getBasisFunction1D( int order, vectorDouble const & quadraturePoints ,arrayDouble const & basisFunction1D) const;
-#else
   void  getBasisFunction1D( int order, vectorDouble & quadraturePoints ,arrayDouble & basisFunction1D) const;
-#endif
 
   //arrayDouble  getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints ) const;
-#ifdef SEM_USE_RAJA
-  void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
-                                      arrayDouble const & derivativeBasisFunction1D ) const;
-#elif defined SEM_USE_KOKKOS
-  void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
-                                      arrayDouble const & derivativeBasisFunction1D ) const;
-#else
   void getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints, 
-                                     arrayDouble  & derivativeBasisFunction1D ) const;
-#endif
+                                                arrayDouble & derivativeBasisFunction1D ) const;
 
   // compute 2D gauss-lobatto weights
   //vectorDouble  getGaussLobattoWeights( vectorDouble & quadraturePoints,
   //                                      vectorDouble & weights ) const;
-#ifdef SEM_USE_RAJA
-  void getGaussLobattoWeights( vectorDouble const & quadraturePoints,
-                               vectorDouble const & weights,
-                               vectorDouble const & W )const;
-#elif defined SEM_USE_KOKKOS
-  void getGaussLobattoWeights( vectorDouble const & quadraturePoints,
-                               vectorDouble const & weights,
-                               vectorDouble const &  W )const;
-#else
   void getGaussLobattoWeights( vectorDouble & quadraturePoints,
-                               vectorDouble & weights,
-                               vectorDouble & W )const;
-#endif
+                                           vectorDouble & weights,
+                                           vectorDouble & W )const;
 
   // get  2d shape Functions  for all quadrature points
   //arrayDouble  getBasisFunction2D( vectorDouble & quadraturePoints,
   //                                 arrayDouble & a,
   //                                 arrayDouble & b ) const;
-#ifdef SEM_USE_RAJA
-  void getBasisFunction2D( vectorDouble const & quadraturePoints,
-                           arrayDouble const & a,
-                           arrayDouble const & b,
-                           arrayDouble const & c) const;
-#elif defined SEM_USE_KOKKOS
-  void getBasisFunction2D( vectorDouble const & quadraturePoints,
-                           arrayDouble const & a,
-                           arrayDouble const & b,
-                           arrayDouble const & c) const;
-#else
+
   void getBasisFunction2D( vectorDouble & quadraturePoints,
                            arrayDouble & a,
                            arrayDouble & b,
                            arrayDouble & c) const;
-#endif
   // compute Jacobian Matrix
   //arrayDouble  computeJacobianMatrix( const int & nPointsPerElement,
   //                                    arrayDouble & Xi,
   //                                    arrayDouble & dxPhi,
   //                                    arrayDouble & dyPhi ) const;
-#ifdef SEM_USE_RAJA
-  void computeJacobianMatrix( const int & nPointsPerElement,
-                              arrayDouble const & Xi,
-                              arrayDouble const & dxPhi,
-                              arrayDouble const & dyPhi,
-                              arrayDouble const & jacobianMatrix ) const;
-#elif defined SEM_USE_KOKKOS
-  void computeJacobianMatrix( const int & nPointsPerElement,
-                              arrayDouble const & Xi,
-                              arrayDouble const & dxPhi,
-                              arrayDouble const & dyPhi,
-                              arrayDouble const & jacobianMatrix ) const;
-#else
+
   void computeJacobianMatrix( const int & nPointsPerElement,
                               arrayDouble & Xi,
                               arrayDouble & dxPhi,
                               arrayDouble & dyPhi,
                               arrayDouble & jacobianMatrix ) const;
-#endif
 
   // compute determinant of Jacobian Matrix
   //vectorDouble  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
   //                                                  arrayDouble & jacobianMatrix ) const;
-#ifdef SEM_USE_RAJA
-  void computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
-                                           arrayDouble const & jacobianMatrix,
-                                           vectorDouble const & detJ ) const;
-
-#elif defined SEM_USE_KOKKOS
-  void computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
-                                           arrayDouble  const & jacobianMatrix,
-                                           vectorDouble const & detJ ) const;
-
-#else
   void computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
                                            arrayDouble & jacobianMatrix,
                                            vectorDouble & detJ ) const;
 
-#endif
   // compute inverse of Jacobian Matrix
   //arrayDouble  computeInvJacobianMatrix( const int & nPointsPerElement,
   //                                       arrayDouble & jacobianMatrix,
   //                                       vectorDouble & detJ ) const;
-#ifdef SEM_USE_RAJA
-  void computeInvJacobianMatrix( const int & nPointsPerElement,
-                                         arrayDouble  const & jacobianMatrix,
-                                         vectorDouble const & detJ,
-                                         arrayDouble  const & invJacobianMatrix ) const;
-#elif defined SEM_USE_KOKKOS
-  void computeInvJacobianMatrix( const int & nPointsPerElement,
-                                         arrayDouble  const & jacobianMatrix,
-                                         vectorDouble const & detJ,
-                                         arrayDouble  const & invJacobianMatrix ) const;
-#else
   void computeInvJacobianMatrix( const int & nPointsPerElement,
                                          arrayDouble & jacobianMatrix,
                                          vectorDouble & detJ,
                                          arrayDouble & invJacobianMatrix ) const;
-#endif
 
   // compute tranposed inverse of Jacobian Matrix
   //arrayDouble  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
   //                                             arrayDouble & jacobianMatrix,
   //                                             vectorDouble & detJ ) const;
-#ifdef SEM_USE_RAJA
-  void computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-                                       arrayDouble  const & jacobianMatrix,
-                                       vectorDouble const & detJ,
-                                       arrayDouble  const & transpInvJacobianMatrix ) const;
-#elif defined SEM_USE_KOKKOS
-  void computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-                                       arrayDouble  const & jacobianMatrix,
-                                       vectorDouble const & detJ,
-                                       arrayDouble  const & transpInvJacobianMatrix ) const;
-#else
   void computeTranspInvJacobianMatrix( const int & nPointsPerElement,
                                        arrayDouble & jacobianMatrix,
                                        vectorDouble & detJ,
-                                       arrayDouble  & transpInvJacobianMatrix ) const;
-#endif
+                                       arrayDouble  &transpInvJacobianMatrix ) const;
 
   // compute 𝐵 the matrix containing the geometrical informations
   //arrayDouble  computeB( const int & nPointsPerElement,
   //                       arrayDouble & invJacobianMatrix,
   //                       arrayDouble & transpInvJacobianMatrix,
   //                       vectorDouble & detJ ) const;
-#ifdef SEM_USE_RAJA
-  void computeB( const int & nPointsPerElement,
-                 arrayDouble  const & invJacobianMatrix,
-                 arrayDouble  const & transpInvJacobianMatrix,
-                 vectorDouble const & detJ,
-                 arrayDouble  const & B ) const;
-#elif defined SEM_USE_KOKKOS
-  void computeB( const int & nPointsPerElement,
-                 arrayDouble  const & invJacobianMatrix,
-                 arrayDouble  const & transpInvJacobianMatrix,
-                 vectorDouble const & detJ,
-                 arrayDouble  const & B ) const;
-#else
   void computeB( const int & nPointsPerElement,
                  arrayDouble & invJacobianMatrix,
                  arrayDouble & transpInvJacobianMatrix,
                  vectorDouble & detJ,
                  arrayDouble & B ) const;
-#endif
 
                 
   // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
@@ -221,28 +114,12 @@ public:
   //                             vectorDouble & weights,
   //                             arrayDouble & B,
   //                             arrayDouble & dPhi ) const;
-#ifdef SEM_USE_RAJA
-  void gradPhiGradPhi( const int & nPointsPerElement,
-                       const int & order,
-                       vectorDouble const & weights2D,
-                       arrayDouble  const & B,
-                       arrayDouble  const & dPhi,
-                       arrayDouble  const & R ) const;
-#elif defined SEM_USE_KOKKOS
-  void gradPhiGradPhi( const int & nPointsPerElement,
-                       const int & order,
-                       vectorDouble const & weights2D,
-                       arrayDouble  const & B,
-                       arrayDouble  const & dPhi,
-                       arrayDouble  const & R ) const;
-#else
   void gradPhiGradPhi( const int & nPointsPerElement,
                        const int & order,
                        vectorDouble & weights2D,
                        arrayDouble & B,
                        arrayDouble & dPhi,
                        arrayDouble & R ) const;
-#endif
   ///**
   // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
   //arrayDouble  gradPhiGradPhi( const int & nPointsPerElement,
@@ -250,74 +127,33 @@ public:
   //                             arrayDouble & B,
   //                             arrayDouble & dxPhi,
   //                             arrayDouble & dyPhi ) const;
-#ifdef SEM_USE_RAJA
-  void gradPhiGradPhi( const int & nPointsPerElement,
-                       vectorDouble const & weights,
-                       arrayDouble  const & B,
-                       arrayDouble  const & dxPhi,
-                       arrayDouble  const & dyPhi,
-                       arrayDouble  const & R ) const;
-#elif defined SEM_USE_KOKKOS
-  void gradPhiGradPhi( const int & nPointsPerElement,
-                       vectorDouble const & weights,
-                       arrayDouble  const & B,
-                       arrayDouble  const & dxPhi,
-                       arrayDouble  const & dyPhi,
-                       arrayDouble  const & R ) const;
-#else
   void gradPhiGradPhi( const int & nPointsPerElement,
                        vectorDouble & weights,
                        arrayDouble & B,
                        arrayDouble & dxPhi,
                        arrayDouble & dyPhi,
                        arrayDouble & R ) const;
-#endif
   //**/
 
   // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ (optimized formulation)
   //vectorDouble  phiIphiJ( const int & nPointsPerElement,
   //                        vectorDouble & weights2D,
   //                        vectorDouble & detJ )const;
-#ifdef SEM_USE_RAJA
-  void phiIphiJ( const int & nPointsPerElement,
-                 vectorDouble const & weights2D,
-                 vectorDouble const & detJ,
-                 vectorDouble const & massMatrixLocal ) const;
-#elif defined SEM_USE_KOKKOS
-  void phiIphiJ( const int & nPointsPerElement,
-                 vectorDouble const & weights2D,
-                 vectorDouble const & detJ,
-                 vectorDouble const & massMatrixLocal ) const;
-#else
   void phiIphiJ( const int & nPointsPerElement,
                  vectorDouble & weights2D,
                  vectorDouble & detJ,
                  vectorDouble & massMatrixLocal ) const;
-#endif
+  
   // compute the matrix $M_{i,j}= \int_{K}{{\phi_i}.{\phi_j}dx}$ ( non optimized formulation)
   //arrayDouble  phiIphiJ( const int & nPointsPerElement,
   //                       vectorDouble & weights2D,
   //                       arrayDouble & phi,
   //                       vectorDouble & detJ )const;
-#ifdef SEM_USE_RAJA
-  void phiIphiJ( const int & nPointsPerElement,
-                 vectorDouble const & weights2D,
-                 arrayDouble  const & phi,
-                 vectorDouble const & detJ,
-                 arrayDouble  const & massMatrixLocal )const;
-#elif defined SEM_USE_KOKKOS
-  void phiIphiJ( const int & nPointsPerElement,
-                 vectorDouble const & weights2D,
-                 arrayDouble  const & phi,
-                 vectorDouble const & detJ,
-                 arrayDouble  const & massMatrixLocal )const;
-#else
   void phiIphiJ( const int & nPointsPerElement,
                  vectorDouble & weights2D,
-                 arrayDouble  & phi,
+                 arrayDouble & phi,
                  vectorDouble & detJ,
                  arrayDouble  & massMatrixLocal )const;
-#endif
   
   // compute dx
   //vectorReal computeDs( const int & iFace,
@@ -326,27 +162,6 @@ public:
   //                      arrayReal & globalNodesCoords,
   //                      arrayDouble & derivativeBasisFunction2DX,
   //                      arrayDouble & derivativeBasisFunction2DY ) const;
-#ifdef SEM_USE_RAJA
-  void computeDs( const int & iFace,
-                      const int & order,
-                      arrayInt  const & faceInfos,
-                      vectorInt const & numOfBasisFunctionOnFace,
-                      arrayReal const & Js,
-                      arrayReal const & globalNodesCoords,
-                      arrayDouble const & derivativeBasisFunction2DX,
-                      arrayDouble const & derivativeBasisFunction2DY,
-                      vectorReal  const & ds ) const;
-#elif defined SEM_USE_KOKKOS
-  void computeDs( const int & iFace,
-                      const int & order,
-                      arrayInt  const & faceInfos,
-                      vectorInt const & numOfBasisFunctionOnFace,
-                      arrayReal const & Js,
-                      arrayReal const & globalNodesCoords,
-                      arrayDouble const & derivativeBasisFunction2DX,
-                      arrayDouble const & derivativeBasisFunction2DY,
-                      vectorReal  const & ds ) const;
-#else
   void computeDs( const int & iFace,
                       const int & order,
                       arrayInt  & faceInfos,
@@ -357,7 +172,6 @@ public:
                       arrayDouble & derivativeBasisFunction2DY,
                       vectorReal  & ds ) const;
 
-#endif
 };
 
 #endif //QKGL_HPP_
