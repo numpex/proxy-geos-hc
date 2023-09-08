@@ -11,8 +11,8 @@
 #include <Kokkos_Macros.hpp>
 #include <Kokkos_Core.hpp>
 
-//#define MemSpace Kokkos::CudaUVMSpace
-#define MemSpace Kokkos::HostSpace
+#define MemSpace Kokkos::CudaUVMSpace
+//#define MemSpace Kokkos::HostSpace
 
 
 using ExecSpace = MemSpace::execution_space;

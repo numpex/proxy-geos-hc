@@ -14,6 +14,9 @@
 #include    "simpleMesh.hpp"
 #include    "dataType.hpp"
 
+using namespace grid;
+using namespace FE;
+
 class solverBase
 {
 public:
@@ -91,7 +94,8 @@ protected:
   arrayDouble derivativeBasisFunction2DX;
   arrayDouble derivativeBasisFunction2DY;
 
-/*
+
+#ifndef SEM_USE_OMP
   // private arrays
   vectorInt localToGlobal;
   arrayDouble Xi;
@@ -112,7 +116,8 @@ protected:
   vectorReal Sh;
   vectorInt numOfBasisFunctionOnFace;
   arrayReal Js;
-*/
+#endif
+
   //shared arrays
   vectorReal massMatrixGlobal;
   vectorReal yGlobal;

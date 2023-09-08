@@ -44,10 +44,6 @@ if (ENABLE_CUDA)
     blt_add_executable( NAME test_KOKKOS.exe 
                         SOURCES test_Kokkos.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
-    blt_add_executable( NAME test1_KOKKOS.exe 
-                        SOURCES test1_Kokkos.cpp
-                        DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
-    target_include_directories(test_KOKKOS.exe PUBLIC "${Kokkos_ROOT}/../../../include")
   endif()
   if(ENABLE_LVARRAY)
     blt_add_executable( NAME test_LvArrayRAJACuda.exe 

@@ -78,8 +78,8 @@ message(STATUS "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
 
 blt_add_executable( NAME sem${SOLVER}_${DATA_CONTAINER}.exe 
                     SOURCES ${sem_sources}
-		    HEADERS ${sem_headers}
-		    DEPENDS_ON ${extraComponentsLinkList} ${dependencyList} )
+                    HEADERS ${sem_headers}
+                    DEPENDS_ON ${extraComponentsLinkList} ${dependencyList} )
 if (SEM_USE_LVARRAY)
 	target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../LvArray/src)
 	target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_BINARY_DIR}/include)

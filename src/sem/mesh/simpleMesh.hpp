@@ -11,6 +11,8 @@ using    namespace std;
 /*
  *  simple 2D quadrangle element mesh
  */
+namespace grid
+{
 
 class simpleMesh
 {
@@ -61,15 +63,33 @@ public:
 
   // Initialize nodal coordinates.
   //arrayReal nodesCoordinates( const int & numberOfNodes ) const;
+#ifdef SEM_USE_RAJA
+  void nodesCoordinates( const int & numberOfNodes, arrayReal const & nodeCoords ) const;
+#elif defined SEM_USE_KOKKOS
+  void nodesCoordinates( const int & numberOfNodes, arrayReal const & nodeCoords ) const;
+#else
   void nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const;
+#endif
 
   //  list of global nodes ( vertices)
   //arrayInt globalNodesList( const int & numberOfElements ) const;
+#ifdef SEM_USE_RAJA
+  void globalNodesList(const int & numberOfElements, arrayInt const & nodesList ) const;
+#elif defined SEM_USE_KOKKOS
+  void globalNodesList(const int & numberOfElements, arrayInt const & nodesList ) const;
+#else
   void globalNodesList(const int & numberOfElements, arrayInt & nodesList ) const;
+#endif
 
   // local to global
   //const vectorInt localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList ) const;
-  void localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList, vectorInt & localToGlobal) const;
+#ifdef SEM_USE_RAJA
+  int localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt const & nodesList, vectorInt const & localToGlobal) const;
+#elif defined SEM_USE_KOKKOS
+  KOKKOS_INLINE_FUNCTION int localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt const & nodesList, vectorInt const & localToGlobal) const;
+#else
+  int localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList, vectorInt & localToGlobal) const;
+#endif
   
 
   // compute element e where (x,y) belongs to
@@ -77,41 +97,103 @@ public:
 
   // set model
   //vectorReal getModel( const int & numberOfNodes ) const;
+#ifdef SEM_USE_RAJA
+  void getModel( const int & numberOfNodes, vectorReal const & model ) const;
+#elif defined SEM_USE_KOKKOS
+  void getModel( const int & numberOfNodes, vectorReal const & model ) const;
+#else
   void getModel( const int & numberOfNodes, vectorReal & model ) const;
+#endif
 
   // list of neighbours of element e
+#ifdef SEM_USE_RAJA
+  void neighbors( const int & e, vectorInt const & neigh ) const;
+#elif defined SEM_USE_KOKKOS
+  void neighbors( const int & e, vectorInt const & neigh ) const;
+#else
   void neighbors( const int & e, vectorInt & neigh ) const;
+#endif
 
   // get global coordinates of element e
   //arrayDouble getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
   //                   vectorInt & localToGlobal ) const;
-  void getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
+#ifdef SEM_USE_RAJA
+  int  getXi( const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
+                     vectorInt const & localToGlobal , arrayDouble const & Xi) const;
+#elif defined SEM_USE_KOKKOS
+  KOKKOS_INLINE_FUNCTION int  getXi( const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
+                     vectorInt const & localToGlobal , arrayDouble const & Xi) const;
+#else
+  int  getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
                      vectorInt & localToGlobal , arrayDouble & Xi) const;
+#endif
 
   // get global DOF belonging to the faces of element e
-  void getGlobalDofOfFace( const int & e,
+#ifdef SEM_USE_RAJA
+  int getGlobalDofOfFace( const int & e,
+                               arrayInt  const & globalNodesList,
+                               vectorInt const & localToGlobal,
+                               arrayInt  const & nodesFace ) const;
+#elif defined SEM_USE_KOKKOS
+  KOKKOS_INLINE_FUNCTION int getGlobalDofOfFace( const int & e,
+                               arrayInt  const & globalNodesList,
+                               vectorInt const & localToGlobal,
+                               arrayInt  const & nodesFace ) const;
+#else
+  int getGlobalDofOfFace( const int & e,
                                arrayInt  & globalNodesList,
                                vectorInt & localToGlobal,
                                arrayInt  & nodesFace ) const;
+#endif
 
   // provides informations about boundary  faces:
   // element number,
   // orientation of the face
+#ifdef SEM_USE_RAJA
+  void getBoundaryFacesInfos(arrayInt const & faceInfos)const;
+#elif defined SEM_USE_KOKKOS
+  void getBoundaryFacesInfos(arrayInt const & faceInfos)const;
+#else
   void getBoundaryFacesInfos(arrayInt & faceInfos)const;
+#endif
 
   // get list of interior Elements
+#ifdef SEM_USE_RAJA
+  void getListOfInteriorElements(vectorInt const & listOfInteriorElements) const;
+#elif defined SEM_USE_KOKKOS
+  void getListOfInteriorElements(vectorInt const & listOfInteriorElements) const;
+#else
   void getListOfInteriorElements(vectorInt & listOfInteriorElements) const;
+#endif
 
   //  get list of global interior nodes
   //vectorInt getListOfInteriorNodes( const int & numberOfInteriorNodes ) const;
-  void getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt & listOfInteriorNodes ) const;
+#ifdef SEM_USE_RAJA
+  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt const & listOfInteriorNodes ) const;
+#elif defined SEM_USE_KOKKOS
+  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt const & listOfInteriorNodes ) const;
+#else
+  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt & listOfInteriorNodes ) const;
+#endif
 
   //  get list of global boundary nodes
   //vectorInt getListOfBoundaryNodes( const int & numberOfBoundaryNodes ) const;
-  void getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt & listOfBoundaryNodes ) const;
+#ifdef SEM_USE_RAJA
+  int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt const & listOfBoundaryNodes ) const;
+#elif defined SEM_USE_KOKKOS
+  int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt const & listOfBoundaryNodes ) const;
+#else
+  int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt & listOfBoundaryNodes ) const;
+#endif
 
   // provides a mapping between local node of a face and global node Face:
+#ifdef SEM_USE_RAJA
+  void getLocalFaceNodeToGlobalFaceNode(arrayInt const &localFaceNodeToGlobalFaceNode) const;
+#elif defined SEM_USE_KOKKOS
+  void getLocalFaceNodeToGlobalFaceNode(arrayInt const &localFaceNodeToGlobalFaceNode) const;
+#else
   void getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFaceNode) const;
+#endif
 
   // compute global to local node indes
   int Itoij( const int & I, int & i, int & j ) const;
@@ -119,4 +201,6 @@ public:
   // project vector node to grid
   std::vector<std::vector<float>> projectToGrid( const int numberOfNodes, const std::vector<float> inputVector ) const;
 };
+
+}
 #endif //SIMPLE_MESH_

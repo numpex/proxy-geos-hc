@@ -9,7 +9,6 @@
 //************************************************************************
 
 #include "solverKokkos.hpp"
-
  
 // compute one step of the time dynamic wave equation solver
 void solverKokkos::computeOneStep( const float & timeSample,
@@ -24,52 +23,52 @@ void solverKokkos::computeOneStep( const float & timeSample,
   //static vectorReal massMatrixGlobal( numberOfNodes );
   //static vectorReal yGlobal( numberOfNodes );
 
-  Kokkos::parallel_for( numberOfNodes, [=] ( const int i )
+  Kokkos::parallel_for( numberOfNodes, KOKKOS_LAMBDA ( const int i )
   {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
   } );
 
   // loop over mesh elements
-  Kokkos::parallel_for( numberOfElements, [=, &pnGlobal] ( const int e )
+  Kokkos::parallel_for( numberOfElements, KOKKOS_LAMBDA ( const int e )
   {
      // extract global coordinates of element e
     // get local to global indexes of nodes of element e
-    mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
+    int i=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
 
     //get global coordinates Xi of element e
-    mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
+    int j=mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
 
     // compute jacobian Matrix
-    Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
+    int k=Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
                               derivativeBasisFunction2DX,
                               derivativeBasisFunction2DY,
                               jacobianMatrix );
 
     // compute determinant of jacobian Matrix
-    Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
+    int l=Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
                                            jacobianMatrix,
                                            detJ );
     // compute inverse of Jacobian Matrix
-    Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
+    int m=Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
                                  jacobianMatrix,
                                  detJ,
                                  invJacobianMatrix );
                                  
     // compute transposed inverse of Jacobian Matrix
-    Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
+    int n=Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
                                        jacobianMatrix,
                                        detJ,
                                        transpInvJacobianMatrix );
                         
     // compute  geometrical transformation matrix
-    Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
+    int p=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
 
     // compute stifness and mass matrix ( durufle's optimization)
-    Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
+    int q=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
 
     // compute local mass matrix ( used optimez version)
-    Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
+    int r=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
 
     // get pnGlobal to pnLocal
     for( int i=0; i<numberOfPointsPerElement; i++ )
@@ -99,7 +98,7 @@ void solverKokkos::computeOneStep( const float & timeSample,
   } );
 
   // update pressure
-  Kokkos::parallel_for( numberOfInteriorNodes, [=, &pnGlobal] ( const int i )
+  Kokkos::parallel_for( numberOfInteriorNodes, KOKKOS_LAMBDA ( const int i )
   {
     int I=listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
@@ -115,10 +114,10 @@ void solverKokkos::computeOneStep( const float & timeSample,
     ShGlobal[i]=0;
   }
   // Note: this loop is data parallel.
-  Kokkos::parallel_for( numberOfBoundaryFaces, [=] ( const int iFace )
+  Kokkos::parallel_for( numberOfBoundaryFaces, KOKKOS_LAMBDA ( const int iFace )
   {
     //get ds
-    Qk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
+    int i=Qk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
                   Js, globalNodesCoords, derivativeBasisFunction2DX,
                   derivativeBasisFunction2DY,
                   ds );
@@ -133,7 +132,7 @@ void solverKokkos::computeOneStep( const float & timeSample,
 
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
-  Kokkos::parallel_for( numberOfBoundaryNodes, [=, &pnGlobal] ( const int i )
+  Kokkos::parallel_for( numberOfBoundaryNodes, KOKKOS_LAMBDA  ( const int i )
   {
     int I=listOfBoundaryNodes[i];
     float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);

@@ -5,11 +5,21 @@
 #include "QkGL.hpp"
 #include "commonMacro.hpp"
 
+
+namespace FE
+{
+
 QkGL::QkGL(){};
 QkGL::~QkGL(){};
 
 //vectorDouble QkGL::gaussLobattoQuadraturePoints( int order ) const
+#ifdef SEM_USE_RAJA
+void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
+#elif defined SEM_USE_KOKKOS
+void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
+#else
 void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoints ) const
+#endif
 {
   //vectorDouble quadraturePoints( order+1 );
   if( order == 1 )
@@ -50,7 +60,13 @@ void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoi
   //return quadraturePoints;
 }
 //vectorDouble QkGL::gaussLobattoQuadratureWeights( int order ) const
+#ifdef SEM_USE_RAJA
+void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const
+#elif defined SEM_USE_KOKKOS
+void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const
+#else
 void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) const
+#endif
 {
   //vectorDouble weights( order+1 );
 
@@ -304,9 +320,15 @@ std::vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) cons
 // get 1D basis functions @ quadrature points
 // returns 2D vector basisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
 //arrayDouble QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints ) const
+#ifdef SEM_USE_RAJA
+void QkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble const & basisFunction1D ) const
+#elif defined SEM_USE_KOKKOS
+void QkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble const & basisFunction1D ) const
+#else
 void QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints, arrayDouble & basisFunction1D ) const
+#endif
 {
-  int nBasisFunction1D=order+1;
+  //int nBasisFunction1D=order+1;
   //arrayDouble basisFunction1D( nBasisFunction1D, nBasisFunction1D );
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -325,10 +347,18 @@ void QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints, array
 // get derivative of 1D basis functions @ quadrature points
 // returns 2D vector derivativeBasisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
 //arrayDouble QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints ) const
+#ifdef SEM_USE_RAJA
+void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
+                                          arrayDouble const & derivativeBasisFunction1D ) const
+#elif defined SEM_USE_KOKKOS
+void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
+                                          arrayDouble const & derivativeBasisFunction1D ) const
+#else
 void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints, 
                                           arrayDouble & derivativeBasisFunction1D ) const
+#endif
 {
-  int nBasisFunction1D=order+1;
+  //int nBasisFunction1D=order+1;
   //arrayDouble derivativeBasisFunction1D( nBasisFunction1D, nBasisFunction1D );
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -348,9 +378,19 @@ void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoi
 // compute 2D gauss-lobatto weights
 //vectorDouble QkGL::getGaussLobattoWeights( vectorDouble & quadraturePoints,
 //                                           vectorDouble & weights )const
+#ifdef SEM_USE_RAJA
+void QkGL::getGaussLobattoWeights( vectorDouble const & quadraturePoints,
+                                           vectorDouble const & weights,
+                                           vectorDouble const & W )const
+#elif defined SEM_USE_KOKKOS
+void QkGL::getGaussLobattoWeights( vectorDouble const & quadraturePoints,
+                                           vectorDouble const & weights,
+                                           vectorDouble const & W )const
+#else
 void QkGL::getGaussLobattoWeights( vectorDouble & quadraturePoints,
                                            vectorDouble & weights,
                                            vectorDouble & W )const
+#endif
 {
   //vectorDouble W( quadraturePoints.size()*quadraturePoints.size());
   for( int j=0; j<quadraturePoints.size(); j++ )
@@ -367,10 +407,22 @@ void QkGL::getGaussLobattoWeights( vectorDouble & quadraturePoints,
 //arrayDouble QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
 //                                      arrayDouble & a,
 //                                      arrayDouble & b )const
+#ifdef SEM_USE_RAJA
+void QkGL::getBasisFunction2D( vectorDouble const & quadraturePoints,
+                               arrayDouble const & a,
+                               arrayDouble const & b,
+                               arrayDouble const & c )const                                      
+#elif defined SEM_USE_KOKKOS
+void QkGL::getBasisFunction2D( vectorDouble const & quadraturePoints,
+                               arrayDouble const & a,
+                               arrayDouble const & b,
+                               arrayDouble const & c )const                                      
+#else
 void QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
                                arrayDouble & a,
                                arrayDouble & b,
                                arrayDouble & c )const                                      
+#endif
 {
   int nBasisFunctions=quadraturePoints.size()*quadraturePoints.size();
   //arrayDouble c( nBasisFunctions, nBasisFunctions );
@@ -397,11 +449,25 @@ void QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
 //                                         arrayDouble & dxPhi,
 //                                         arrayDouble & dyPhi )const
 
-void QkGL::computeJacobianMatrix( const int & nPointsPerElement,
+#ifdef SEM_USE_RAJA
+int QkGL::computeJacobianMatrix( const int & nPointsPerElement,
+                                  arrayDouble const & Xi,
+                                  arrayDouble const & dxPhi,
+                                  arrayDouble const & dyPhi,
+                                  arrayDouble const & jacobianMatrix )const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int QkGL::computeJacobianMatrix( const int & nPointsPerElement,
+                                  arrayDouble const & Xi,
+                                  arrayDouble const & dxPhi,
+                                  arrayDouble const & dyPhi,
+                                  arrayDouble const & jacobianMatrix )const
+#else
+int QkGL::computeJacobianMatrix( const int & nPointsPerElement,
                                   arrayDouble & Xi,
                                   arrayDouble & dxPhi,
                                   arrayDouble & dyPhi,
                                   arrayDouble & jacobianMatrix )const
+#endif
 {
   //arrayDouble jacobianMatrix( 4, nPointsPerElement );
 
@@ -419,21 +485,33 @@ void QkGL::computeJacobianMatrix( const int & nPointsPerElement,
       jacobianMatrix(3,i)+=Xi(j,1)*dyPhi(j,i);
     }
   }
+  return 0;
   //return jacobianMatrix;
 }
 
 // compute jacobian matrix determinant
 //vectorDouble QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
 //                                                      arrayDouble & jacobianMatrix ) const
-void QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+#ifdef SEM_USE_RAJA
+KOKKOS_INLINE_FUNCTION int QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+                                               arrayDouble const & jacobianMatrix,
+                                               vectorDouble const & detJ ) const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+                                               arrayDouble const & jacobianMatrix,
+                                               vectorDouble const & detJ ) const
+#else
+int QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
                                                arrayDouble & jacobianMatrix,
                                                vectorDouble & detJ ) const
+#endif
 {
   //vectorDouble detJ( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     detJ[i]=(jacobianMatrix(0,i)*jacobianMatrix(3,i)-jacobianMatrix(2,i)*jacobianMatrix(1,i));
   }
+  return 0;
   //return detJ;
 }
 
@@ -441,10 +519,22 @@ void QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
 //arrayDouble QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
 //                                            arrayDouble & jacobianMatrix,
 //                                            vectorDouble & detJ ) const
-void QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
+#ifdef SEM_USE_RAJA
+KOKKOS_INLINE_FUNCTION int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
+                                     arrayDouble const & jacobianMatrix,
+                                     vectorDouble const & detJ,
+                                     arrayDouble const & invJacobianMatrix ) const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
+                                     arrayDouble const & jacobianMatrix,
+                                     vectorDouble const & detJ,
+                                     arrayDouble const & invJacobianMatrix ) const
+#else
+int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
                                      arrayDouble & jacobianMatrix,
                                      vectorDouble & detJ,
                                      arrayDouble & invJacobianMatrix ) const
+#endif
 {
   //arrayDouble invJacobianMatrix( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
@@ -454,6 +544,7 @@ void QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
     invJacobianMatrix(2,i)=(-jacobianMatrix(2,i)/detJ[i]);
     invJacobianMatrix(3,i)=(jacobianMatrix(0,i)/detJ[i]);
   }
+  return 0;
   //return invJacobianMatrix;
 }
 
@@ -461,10 +552,22 @@ void QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
 //arrayDouble QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 //                                                  arrayDouble & jacobianMatrix,
 //                                                  vectorDouble & detJ ) const
-void QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+#ifdef SEM_USE_RAJA
+KOKKOS_INLINE_FUNCTION int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+                                                  arrayDouble const & jacobianMatrix,
+                                                  vectorDouble const & detJ,
+                                                  arrayDouble  const &transpInvJacobianMatrix ) const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+                                                  arrayDouble const & jacobianMatrix,
+                                                  vectorDouble const & detJ,
+                                                  arrayDouble  const &transpInvJacobianMatrix ) const
+#else
+int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
                                                   arrayDouble & jacobianMatrix,
                                                   vectorDouble & detJ,
                                                   arrayDouble  &transpInvJacobianMatrix ) const
+#endif
 {
   //arrayDouble transpInvJacobianMatrix( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
@@ -474,6 +577,7 @@ void QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
     transpInvJacobianMatrix(2,i)=(-jacobianMatrix(1,i)/detJ[i]);
     transpInvJacobianMatrix(3,i)=(jacobianMatrix(0,i)/detJ[i]);
   }
+  return 0;
   //return transpInvJacobianMatrix;
 }
 
@@ -482,11 +586,25 @@ void QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 //                            arrayDouble & invJacobianMatrix,
 //                            arrayDouble & transpInvJacobianMatrix,
 //                            vectorDouble & detJ ) const
-void QkGL::computeB( const int & nPointsPerElement,
+#ifdef SEM_USE_RAJA
+KOKKOS_INLINE_FUNCTION int QkGL::computeB( const int & nPointsPerElement,
+                 arrayDouble const & invJacobianMatrix,
+                 arrayDouble const & transpInvJacobianMatrix,
+                 vectorDouble const & detJ,
+                 arrayDouble const & B ) const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int QkGL::computeB( const int & nPointsPerElement,
+                 arrayDouble const & invJacobianMatrix,
+                 arrayDouble const & transpInvJacobianMatrix,
+                 vectorDouble const & detJ,
+                 arrayDouble const & B ) const
+#else
+int QkGL::computeB( const int & nPointsPerElement,
                  arrayDouble & invJacobianMatrix,
                  arrayDouble & transpInvJacobianMatrix,
                  vectorDouble & detJ,
                  arrayDouble & B ) const
+#endif
 {
   //arrayDouble B( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
@@ -500,6 +618,7 @@ void QkGL::computeB( const int & nPointsPerElement,
     B(3,i)=(abs( detJ[i] )*(invJacobianMatrix(2,i)*transpInvJacobianMatrix(1,i)+
                              invJacobianMatrix(3,i)*transpInvJacobianMatrix(3,i)));
   }
+  return 0;
   //return B;
 
 }
@@ -511,12 +630,28 @@ void QkGL::computeB( const int & nPointsPerElement,
 //                                  vectorDouble & weights2D,
 //                                  arrayDouble & B,
 //                                  arrayDouble & dPhi ) const
-void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+#ifdef SEM_USE_RAJA
+KOKKOS_INLINE_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+                                  const int & order,
+                                  vectorDouble const & weights2D,
+                                  arrayDouble const & B,
+                                  arrayDouble const & dPhi,
+                                  arrayDouble const & R ) const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+                                  const int & order,
+                                  vectorDouble const & weights2D,
+                                  arrayDouble const & B,
+                                  arrayDouble const & dPhi,
+                                  arrayDouble const & R ) const
+#else
+int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                   const int & order,
                                   vectorDouble & weights2D,
                                   arrayDouble & B,
                                   arrayDouble & dPhi,
                                   arrayDouble & R ) const
+#endif
 {
   //arrayDouble R( nPointsPerElement, nPointsPerElement );
   for (int i=0;i<nPointsPerElement;i++)
@@ -590,6 +725,7 @@ void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
       }
     }
   }
+  return 0;
   //return R;
 }
 ///**
@@ -599,12 +735,28 @@ void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 //                                  arrayDouble & B,
 //                                  arrayDouble & dxPhi,
 //                                  arrayDouble & dyPhi ) const
-void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+#ifdef SEM_USE_RAJA
+KOKKOS_INLINE_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+                                  vectorDouble const & weights2D,
+                                  arrayDouble const & B,
+                                  arrayDouble const & dxPhi,
+                                  arrayDouble const & dyPhi,
+                                  arrayDouble const & R ) const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+                                  vectorDouble const & weights2D,
+                                  arrayDouble const & B,
+                                  arrayDouble const & dxPhi,
+                                  arrayDouble const & dyPhi,
+                                  arrayDouble const & R ) const
+#else
+int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                   vectorDouble & weights2D,
                                   arrayDouble & B,
                                   arrayDouble & dxPhi,
                                   arrayDouble & dyPhi,
                                   arrayDouble & R ) const
+#endif
 {
   //arrayDouble R( nPointsPerElement, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
@@ -622,6 +774,7 @@ void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
       R(i,j)=tmp;
     }
   }
+  return 0;
   //return R;
 }
 
@@ -630,16 +783,29 @@ void QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 //vectorDouble QkGL::phiIphiJ( const int & nPointsPerElement,
 //                             vectorDouble & weights2D,
 //                             vectorDouble & detJ ) const
-void QkGL::phiIphiJ( const int & nPointsPerElement,
+#ifdef SEM_USE_RAJA
+KOKKOS_INLINE_FUNCTION int QkGL::phiIphiJ( const int & nPointsPerElement,
+                             vectorDouble const & weights2D,
+                             vectorDouble const & detJ,
+                             vectorDouble const & massMatrixLocal ) const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int QkGL::phiIphiJ( const int & nPointsPerElement,
+                             vectorDouble const & weights2D,
+                             vectorDouble const & detJ,
+                             vectorDouble const & massMatrixLocal ) const
+#else
+int QkGL::phiIphiJ( const int & nPointsPerElement,
                              vectorDouble & weights2D,
                              vectorDouble & detJ,
                              vectorDouble & massMatrixLocal ) const
+#endif
 {
   //vectorDouble massMatrixLocal( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
     massMatrixLocal[i]=weights2D[i]*abs( detJ[i] );
   }
+  return 0;
   //return MassMatrixLocal;
 }
 
@@ -649,11 +815,25 @@ void QkGL::phiIphiJ( const int & nPointsPerElement,
 //                            vectorDouble & weights2D,
 //                            arrayDouble & phi,
 //                            vectorDouble & detJ ) const
-void QkGL::phiIphiJ( const int & nPointsPerElement,
+#ifdef SEM_USE_RAJA
+KOKKOS_INLINE_FUNCTION int QkGL::phiIphiJ( const int & nPointsPerElement,
+                            vectorDouble const & weights2D,
+                            arrayDouble const & phi,
+                            vectorDouble const & detJ,
+                            arrayDouble  const & massMatrixLocal) const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int QkGL::phiIphiJ( const int & nPointsPerElement,
+                            vectorDouble const & weights2D,
+                            arrayDouble const & phi,
+                            vectorDouble const & detJ,
+                            arrayDouble  const & massMatrixLocal) const
+#else
+int QkGL::phiIphiJ( const int & nPointsPerElement,
                             vectorDouble & weights2D,
                             arrayDouble & phi,
                             vectorDouble & detJ,
                             arrayDouble  & massMatrixLocal) const
+#endif
 {
   //arrayDouble massMatrixLocal( nPointsPerElement, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
@@ -668,6 +848,7 @@ void QkGL::phiIphiJ( const int & nPointsPerElement,
       massMatrixLocal(i,j)=tmp;
     }
   }
+  return 0;
   //return massMatrixLocal;
 }
 //**/
@@ -679,7 +860,28 @@ void QkGL::phiIphiJ( const int & nPointsPerElement,
 //                            arrayDouble & derivativeBasisFunction2DX,
 //                            arrayDouble & derivativeBasisFunction2DY ) const
 
-void QkGL::computeDs( const int & iFace,
+#ifdef SEM_USE_RAJA
+KOKKOS_INLINE_FUNCTION int QkGL::computeDs( const int & iFace,
+                      const int & order,
+                      arrayInt  const & faceInfos,
+                      vectorInt const & numOfBasisFunctionOnFace,
+                      arrayReal const & Js,
+                      arrayReal const & globalNodesCoords,
+                      arrayDouble const & derivativeBasisFunction2DX,
+                      arrayDouble const & derivativeBasisFunction2DY,
+                      vectorReal  const & ds ) const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int QkGL::computeDs( const int & iFace,
+                      const int & order,
+                      arrayInt  const & faceInfos,
+                      vectorInt const & numOfBasisFunctionOnFace,
+                      arrayReal const & Js,
+                      arrayReal const & globalNodesCoords,
+                      arrayDouble const & derivativeBasisFunction2DX,
+                      arrayDouble const & derivativeBasisFunction2DY,
+                      vectorReal  const & ds ) const
+#else
+int QkGL::computeDs( const int & iFace,
                       const int & order,
                       arrayInt  & faceInfos,
                       vectorInt & numOfBasisFunctionOnFace,
@@ -688,6 +890,7 @@ void QkGL::computeDs( const int & iFace,
                       arrayDouble & derivativeBasisFunction2DX,
                       arrayDouble & derivativeBasisFunction2DY,
                       vectorReal  & ds ) const
+#endif
 {
   //vectorInt numOfBasisFunctionOnFace( order+1 );
   //arrayReal Js( 2, order+1 );
@@ -722,7 +925,7 @@ void QkGL::computeDs( const int & iFace,
       }
       break;
     default:
-      cout<<"error in element flag, should be set to: 0, 1, 2, 3"<<endl;
+      //cout<<"error in element flag, should be set to: 0, 1, 2, 3"<<endl;
       break;
   }
   // compute ds
@@ -748,5 +951,8 @@ void QkGL::computeDs( const int & iFace,
     ds[j]=sqrt( Js(0,j)*Js(0,j)+Js(1,j)*Js(1,j) );
     //cout<<"j="<<j<<", ds="<<ds[j]<<", "<<Js[0][j]<<", "<<Js[1][j]<<endl;
   }
+  return 0;
   //return ds;
+}
+
 }

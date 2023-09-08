@@ -75,7 +75,8 @@ void solverBase::computeFEInit( const int & order,
   derivativeBasisFunction2DY=allocateArray2D<arrayDouble>(nBasisFunctions,nBasisFunctions);
   Qk.getBasisFunction2D( quadraturePoints, basisFunction1D, derivativeBasisFunction1D, derivativeBasisFunction2DY );
 
-/*
+///*
+#ifndef SEM_USE_OMP
   //private arrays
   localToGlobal=allocateVector<vectorInt>(numberOfPointsPerElement);
   Xi=allocateArray2D<arrayDouble>( numberOfPointsPerElement, 2 );
@@ -98,7 +99,9 @@ void solverBase::computeFEInit( const int & order,
   Sh=allocateVector<vectorReal>( order+1 );
   numOfBasisFunctionOnFace=allocateVector<vectorInt>( order+1 );
   Js=allocateArray2D<arrayReal>( 2, order+1 );
-*/
+#endif
+//*/
+
   //shared arrays
   massMatrixGlobal=allocateVector<vectorReal>( numberOfNodes );
   yGlobal=allocateVector<vectorReal>( numberOfNodes );

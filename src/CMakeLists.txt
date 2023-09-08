@@ -34,7 +34,8 @@ set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
 
 
 set (CMAKE_CXX_STANDARD 17)
-set (CMAKE_CXX_FLAGS "-O3 -std=c++17  " CACHE STRING "" FORCE)
+set (CMAKE_CXX_FLAGS "-O3 -std=c++17 --extended-lambda " CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 
 # allow to install only one target
 set (CMAKE_SKIP_INSTALL_ALL_DEPENDENCY "True" CACHE STRING "" FORCE)
@@ -86,10 +87,9 @@ if(SEM_USE_CUDA)
     set(CMAKE_CUDA_ARCHITECTURES 70 CACHE STRING "")
     set(CUDA_ARCH sm_70 CACHE STRING "")
     set(CMAKE_CUDA_STANDARD 17 CACHE STRING "")
+    set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
     # --expt-extended-lambda --expt-relaxed-constexpr: important for compilation  are not set by default
-    set(CMAKE_CUDA_FLAGS "-restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17" CACHE STRING "")
-    set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -DNDEBUG -Xcompiler -DNDEBUG -Xcompiler -O3 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le" CACHE STRING "")
-    set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "-g -lineinfo ${CMAKE_CUDA_FLAGS_RELEASE}" CACHE STRING "")
+    set(CMAKE_CUDA_FLAGS "-O3 -DNDEBUG -Xcompiler -DNDEBUG -Xcompiler -O3 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le  --expt-extended-lambda -lcudart" CACHE STRING "")
     set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
   else()
     message(FATAL_ERROR "You must have CUDA_ROOT environment variable set, we advise loading module cuda/11.0.3")

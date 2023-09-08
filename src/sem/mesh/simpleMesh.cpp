@@ -6,6 +6,8 @@
 #include "dataType.hpp"
 #include "simpleMesh.hpp"
 
+namespace grid
+{
 simpleMesh::simpleMesh( const int & ex_in, const int & ey_in, const float & lx_in, const float & ly_in, const int & order_in )
 {
   order=order_in;
@@ -74,7 +76,13 @@ int simpleMesh::getNumberOfBoundaryNodes() const
 
 // Initialize nodal coordinates.
 //arrayReal simpleMesh::nodesCoordinates( const int & numberOfNodes ) const
+#ifdef SEM_USE_RAJA
+void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayReal const & nodeCoords ) const
+#elif defined SEM_USE_KOKKOS
+void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayReal const & nodeCoords ) const
+#else
 void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const
+#endif
 {
   //arrayReal nodeCoords( numberOfNodes, 2 );
   std::vector<float> coordX( nx );
@@ -165,9 +173,15 @@ void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCo
 
 //  list of global nodes ( vertices) for each element
 //arrayInt simpleMesh::globalNodesList( const int & numberOfElements ) const
+#ifdef SEM_USE_RAJA
+void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt const & nodesList ) const
+#elif defined SEM_USE_KOKKOS
+void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt const & nodesList ) const
+#else
 void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt & nodesList ) const
+#endif
 {
-  int nDof=(order+1)*(order+1);
+  //int nDof=(order+1)*(order+1);
   //arrayInt nodesList( numberOfElements, nDof );
 
   for( int j=0; j<ey; j++ )
@@ -195,7 +209,13 @@ void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt & nodes
 
 // local to global
 //const vectorInt simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList )const
-void simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList,  vectorInt &localToGlobal)const
+#ifdef SEM_USE_RAJA
+int simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt const & nodesList,  vectorInt const &localToGlobal)const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt const & nodesList,  vectorInt const &localToGlobal)const
+#else
+int simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList,  vectorInt &localToGlobal)const
+#endif
 {
   //vectorInt localToGlobal( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
@@ -203,6 +223,7 @@ void simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPoi
     localToGlobal[i]=nodesList(elementNumber,i);
   }
   //return localToGlobal;
+  return 0;
 }
 
 // compute global node to grid  indexes
@@ -246,7 +267,13 @@ int simpleMesh::getElementNumberFromPoints( const float & x, const float & y ) c
 
 // set model
 //vectorReal simpleMesh::getModel( const int & numberOfElements ) const
+#ifdef SEM_USE_RAJA
+void simpleMesh::getModel( const int & numberOfElements, vectorReal const & model ) const
+#elif defined SEM_USE_KOKKOS
+void simpleMesh::getModel( const int & numberOfElements, vectorReal const & model ) const
+#else
 void simpleMesh::getModel( const int & numberOfElements, vectorReal & model ) const
+#endif
 {
   //vectorReal model( numberOfElements );
   for( int i=0; i<numberOfElements; i++ )
@@ -259,7 +286,13 @@ void simpleMesh::getModel( const int & numberOfElements, vectorReal & model ) co
 // neigh[0] to neigh[3] list neigbours elements
 // neigh[4] if not zero indicate that element e is a boundary element
 // what type of boundary element
-void simpleMesh::neighbors( const int & e , vectorInt & neigh) const
+#ifdef SEM_USE_RAJA
+void simpleMesh::neighbors( const int & e , vectorInt const & neigh) const
+#elif defined SEM_USE_KOKKOS
+void simpleMesh::neighbors( const int & e , vectorInt const & neigh) const
+#else
+void simpleMesh::neighbors( const int & e , vectorInt const & neigh) const
+#endif
 {
   //vectorInt neigh( 5 );
   int i=e%ex;
@@ -300,8 +333,16 @@ void simpleMesh::neighbors( const int & e , vectorInt & neigh) const
 // get global coordinates of element e
 //arrayDouble simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
 //                              vectorInt & localToGlobal ) const
-void simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
+#ifdef SEM_USE_RAJA
+int simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
+                     vectorInt const & localToGlobal , arrayDouble const & Xi) const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
+                     vectorInt const & localToGlobal , arrayDouble const & Xi) const
+#else
+int simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
                      vectorInt & localToGlobal , arrayDouble & Xi) const
+#endif
 {
   //arrayDouble Xi( numberOfPointsPerElement, 2 );
   for( int i=0; i<numberOfPointsPerElement; i++ )
@@ -310,6 +351,7 @@ void simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & global
     Xi(i,1)=globalNodesCoords(localToGlobal[i],1);
   }
   //return Xi;
+  return 0;
 }
 
 
@@ -321,10 +363,22 @@ void simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & global
 //   |           |
 //   |______1____|
 //
-void simpleMesh::getGlobalDofOfFace( const int & e,
+#ifdef SEM_USE_RAJA
+int simpleMesh::getGlobalDofOfFace( const int & e,
+                                         arrayInt  const & globalNodesList,
+                                         vectorInt const & localToGlobal,
+                                         arrayInt  const & nodesFace ) const
+#elif defined SEM_USE_KOKKOS
+KOKKOS_INLINE_FUNCTION int simpleMesh::getGlobalDofOfFace( const int & e,
+                                         arrayInt  const & globalNodesList,
+                                         vectorInt const & localToGlobal,
+                                         arrayInt  const & nodesFace ) const
+#else
+int simpleMesh::getGlobalDofOfFace( const int & e,
                                          arrayInt  & globalNodesList,
                                          vectorInt & localToGlobal,
                                          arrayInt  & nodesFace ) const
+#endif
 {
   //arrayInt nodesFace( 4, order+1 );
 
@@ -353,6 +407,7 @@ void simpleMesh::getGlobalDofOfFace( const int & e,
     nodesFace(3,i)=globalNodesList(e,dofLocal);
   }
   //return nodesFace;
+  return 0;
 }
 
 // provides informations about boundary  faces:
@@ -361,7 +416,13 @@ void simpleMesh::getGlobalDofOfFace( const int & e,
 // list of global indexes
 // this method is sequential only for omp !!!
 //arrayInt simpleMesh::getBoundaryFacesInfos() const
+#ifdef SEM_USE_RAJA
+void  simpleMesh::getBoundaryFacesInfos(arrayInt const & faceInfos) const
+#elif defined SEM_USE_KOKKOS
+void  simpleMesh::getBoundaryFacesInfos(arrayInt const & faceInfos) const
+#else
 void  simpleMesh::getBoundaryFacesInfos(arrayInt & faceInfos) const
+#endif
 {
   //int numberOfBoundaryFaces=getNumberOfBoundaryFaces();
   int numFace=0;
@@ -431,7 +492,13 @@ void  simpleMesh::getBoundaryFacesInfos(arrayInt & faceInfos) const
 }
 
 // get list of interior Elements
+#ifdef SEM_USE_RAJA
+void simpleMesh::getListOfInteriorElements(vectorInt const & listOfInteriorElements) const
+#elif defined SEM_USE_KOKKOS
+void simpleMesh::getListOfInteriorElements(vectorInt const & listOfInteriorElements) const
+#else
 void simpleMesh::getListOfInteriorElements(vectorInt & listOfInteriorElements) const
+#endif
 {
   //int numberOfInteriorElements=getNumberOfInteriorElements();
   //vectorInt listOfInteriorElements( numberOfInteriorElements );
@@ -447,8 +514,16 @@ void simpleMesh::getListOfInteriorElements(vectorInt & listOfInteriorElements) c
 
 //  get list of global interior nodes
 //vectorInt simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes ) const
-void simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
+#ifdef SEM_USE_RAJA
+int simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
+                                         vectorInt const & listOfInteriorNodes ) const
+#elif defined SEM_USE_KOKKOS
+int simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
+                                         vectorInt const & listOfInteriorNodes ) const
+#else
+int simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
                                          vectorInt & listOfInteriorNodes ) const
+#endif
 {
   //vectorInt listOfInteriorNodes( numberOfInteriorNodes );
   int k=0;
@@ -461,11 +536,18 @@ void simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
     }
   }
   //return listOfInteriorNodes;
+  return 0;
 }
 
 //  get list of global boundary nodes
 //vectorInt simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes ) const
-void simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt & listOfBoundaryNodes ) const
+#ifdef SEM_USE_RAJA
+int simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt const & listOfBoundaryNodes ) const
+#elif defined SEM_USE_KOKKOS
+int simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt const & listOfBoundaryNodes ) const
+#else
+int simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt & listOfBoundaryNodes ) const
+#endif
 {
   //vectorInt listOfBoundaryNodes( numberOfBoundaryNodes );
   //cout<<"numberOfBoundaryNOdes="<<numberOfBoundaryNodes<<endl;
@@ -507,11 +589,18 @@ void simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vect
   //  cout<<"j="<<j<<", "<<listOfBoundaryNodes[j]<<endl;
   //}
   //return listOfBoundaryNodes;
+  return 0;
 }
 
 // provides a mapping between local node of a face and global node Face:
 //arrayInt simpleMesh::getLocalFaceNodeToGlobalFaceNode() const
+#ifdef SEM_USE_RAJA
+void simpleMesh::getLocalFaceNodeToGlobalFaceNode(arrayInt const &localFaceNodeToGlobalFaceNode) const
+#elif defined SEM_USE_KOKKOS
+void simpleMesh::getLocalFaceNodeToGlobalFaceNode(arrayInt const &localFaceNodeToGlobalFaceNode) const
+#else
 void simpleMesh::getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFaceNode) const
+#endif
 {
   //int numberOfBoundaryFaces=getNumberOfBoundaryFaces();
   int numFace=0;
@@ -530,7 +619,7 @@ void simpleMesh::getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGloba
   // right i=ex-1 l=order
   for( int j=0; j<ey; j++ )
   {
-    int e=ex-1+j*ex;
+    //int e=ex-1+j*ex;
     numFace=ex+j;
     int offset=localFaceNodeToGlobalFaceNode(numFace-1,order);
     for( int k=0; k<order+1; k++ )
@@ -610,5 +699,7 @@ void simpleMesh::getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGloba
      }
      }**/
   //return localFaceNodeToGlobalFaceNode;
+}
+
 }
 #endif //SIMPLEMESH_HPP_
