@@ -60,41 +60,41 @@ void solverOMP::computeOneStep( const float & timeSample,
 
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
-    mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
+    int a=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
 
     //get global coordinates Xi of element e
-    mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
+    int b=mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
 
     // compute jacobian Matrix
-    Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
+    int c=Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
                               derivativeBasisFunction2DX,
                               derivativeBasisFunction2DY,
                               jacobianMatrix );
 
     // compute determinant of jacobian Matrix
-    Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
+    int d=Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
                                            jacobianMatrix,
                                            detJ );
     // compute inverse of Jacobian Matrix
-    Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
+    int f=Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
                                  jacobianMatrix,
                                  detJ,
                                  invJacobianMatrix );
                                  
     // compute transposed inverse of Jacobian Matrix
-    Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
+    int g=Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
                                        jacobianMatrix,
                                        detJ,
                                        transpInvJacobianMatrix );
                         
     // compute  geometrical transformation matrix
-    Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
+    int h=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
 
     // compute stifness and mass matrix ( durufle's optimization)
-    Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
+    int i=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
 
     // compute local mass matrix ( used optimez version)
-    Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
+    int j=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
 
     // get pnGlobal to pnLocal
     for( int i=0; i<numberOfPointsPerElement; i++ )
@@ -144,7 +144,7 @@ void solverOMP::computeOneStep( const float & timeSample,
   for( int iFace=0; iFace<numberOfBoundaryFaces; iFace++ )
   {
     //get ds
-    Qk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
+    int i=Qk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
                   Js, globalNodesCoords, derivativeBasisFunction2DX,
                   derivativeBasisFunction2DY,
                   ds );

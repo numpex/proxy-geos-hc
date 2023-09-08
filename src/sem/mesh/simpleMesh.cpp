@@ -291,7 +291,7 @@ void simpleMesh::neighbors( const int & e , vectorInt const & neigh) const
 #elif defined SEM_USE_KOKKOS
 void simpleMesh::neighbors( const int & e , vectorInt const & neigh) const
 #else
-void simpleMesh::neighbors( const int & e , vectorInt const & neigh) const
+void simpleMesh::neighbors( const int & e , vectorInt  & neigh) const
 #endif
 {
   //vectorInt neigh( 5 );

@@ -127,7 +127,7 @@ public:
                               arrayDouble const & dyPhi,
                               arrayDouble const & jacobianMatrix ) const;
 #else
-  KOKKOS_INLINE_FUNCTION int  computeJacobianMatrix( const int & nPointsPerElement,
+  int  computeJacobianMatrix( const int & nPointsPerElement,
                               arrayDouble & Xi,
                               arrayDouble & dxPhi,
                               arrayDouble & dyPhi,
@@ -138,7 +138,7 @@ public:
   //vectorDouble  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
   //                                                  arrayDouble & jacobianMatrix ) const;
 #ifdef SEM_USE_RAJA
-  KOKKOS_INLINE_FUNCTION int  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+  int  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
                                            arrayDouble const & jacobianMatrix,
                                            vectorDouble const & detJ ) const;
 #elif defined SEM_USE_KOKKOS
@@ -146,9 +146,9 @@ public:
                                            arrayDouble const & jacobianMatrix,
                                            vectorDouble const & detJ ) const;
 #else
-  KOKKOS_INLINE_FUNCTION int  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
-                                           arrayDouble const & jacobianMatrix,
-                                           vectorDouble const & detJ ) const;
+  int  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+                                           arrayDouble & jacobianMatrix,
+                                           vectorDouble & detJ ) const;
 #endif
 
   // compute inverse of Jacobian Matrix
@@ -156,7 +156,7 @@ public:
   //                                       arrayDouble & jacobianMatrix,
   //                                       vectorDouble & detJ ) const;
 #ifdef SEM_USE_RAJA
-  KOKKOS_INLINE_FUNCTION int  computeInvJacobianMatrix( const int & nPointsPerElement,
+  int  computeInvJacobianMatrix( const int & nPointsPerElement,
                                          arrayDouble const & jacobianMatrix,
                                          vectorDouble const & detJ,
                                          arrayDouble const & invJacobianMatrix ) const;
@@ -166,7 +166,7 @@ public:
                                          vectorDouble const & detJ,
                                          arrayDouble const & invJacobianMatrix ) const;
 #else
-  KOKKOS_INLINE_FUNCTION int  computeInvJacobianMatrix( const int & nPointsPerElement,
+  int  computeInvJacobianMatrix( const int & nPointsPerElement,
                                          arrayDouble & jacobianMatrix,
                                          vectorDouble & detJ,
                                          arrayDouble & invJacobianMatrix ) const;
@@ -177,7 +177,7 @@ public:
   //                                             arrayDouble & jacobianMatrix,
   //                                             vectorDouble & detJ ) const;
 #ifdef SEM_USE_RAJA
-KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 				     arrayDouble const & jacobianMatrix,
 				     vectorDouble const & detJ,
 				     arrayDouble  const &transpInvJacobianMatrix ) const;
@@ -187,7 +187,7 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
 				     vectorDouble const & detJ,
 				     arrayDouble  const &transpInvJacobianMatrix ) const;
 #else
-KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 				     arrayDouble & jacobianMatrix,
 				     vectorDouble & detJ,
 				     arrayDouble  &transpInvJacobianMatrix ) const;
@@ -199,7 +199,7 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
   //                       arrayDouble & transpInvJacobianMatrix,
   //                       vectorDouble & detJ ) const;
 #ifdef SEM_USE_RAJA
-  KOKKOS_INLINE_FUNCTION int  computeB( const int & nPointsPerElement,
+  int  computeB( const int & nPointsPerElement,
                  arrayDouble const & invJacobianMatrix,
                  arrayDouble const & transpInvJacobianMatrix,
                  vectorDouble const & detJ,
@@ -211,7 +211,7 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
                  vectorDouble const & detJ,
                  arrayDouble const & B ) const;
 #else
-  KOKKOS_INLINE_FUNCTION int  computeB( const int & nPointsPerElement,
+  int  computeB( const int & nPointsPerElement,
                  arrayDouble & invJacobianMatrix,
                  arrayDouble & transpInvJacobianMatrix,
                  vectorDouble & detJ,
@@ -227,21 +227,21 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
   //                             arrayDouble & B,
   //                             arrayDouble & dPhi ) const;
 #ifdef SEM_USE_RAJA
-  KOKKOS_INLINE_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
+  int  gradPhiGradPhi( const int & nPointsPerElement,
                        const int & order,
                        vectorDouble const & weights2D,
                        arrayDouble const & B,
                        arrayDouble const & dPhi,
                        arrayDouble const & R ) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
+  int  gradPhiGradPhi( const int & nPointsPerElement,
                        const int & order,
                        vectorDouble const & weights2D,
                        arrayDouble const & B,
                        arrayDouble const & dPhi,
                        arrayDouble const & R ) const;
 #else
-  KOKKOS_INLINE_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
+  int  gradPhiGradPhi( const int & nPointsPerElement,
                        const int & order,
                        vectorDouble & weights2D,
                        arrayDouble & B,
@@ -256,7 +256,7 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
   //                             arrayDouble & dxPhi,
   //                             arrayDouble & dyPhi ) const;
 #ifdef SEM_USE_RAJA
-  KOKKOS_INLINE_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
+  int  gradPhiGradPhi( const int & nPointsPerElement,
                        vectorDouble const & weights,
                        arrayDouble const & B,
                        arrayDouble const & dxPhi,
@@ -270,7 +270,7 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
                        arrayDouble const & dyPhi,
                        arrayDouble const & R ) const;
 #else
-  KOKKOS_INLINE_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
+  int  gradPhiGradPhi( const int & nPointsPerElement,
                        vectorDouble & weights,
                        arrayDouble & B,
                        arrayDouble & dxPhi,
@@ -284,7 +284,7 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
   //                        vectorDouble & weights2D,
   //                        vectorDouble & detJ )const;
 #ifdef SEM_USE_RAJA
-  KOKKOS_INLINE_FUNCTION int  phiIphiJ( const int & nPointsPerElement,
+  int  phiIphiJ( const int & nPointsPerElement,
                  vectorDouble const & weights2D,
                  vectorDouble const & detJ,
                  vectorDouble const & massMatrixLocal ) const;
@@ -294,7 +294,7 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
                  vectorDouble const & detJ,
                  vectorDouble const & massMatrixLocal ) const;
 #else
-  KOKKOS_INLINE_FUNCTION int  phiIphiJ( const int & nPointsPerElement,
+  int  phiIphiJ( const int & nPointsPerElement,
                  vectorDouble & weights2D,
                  vectorDouble & detJ,
                  vectorDouble & massMatrixLocal ) const;
@@ -306,7 +306,7 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
   //                       arrayDouble & phi,
   //                       vectorDouble & detJ )const;
 #ifdef SEM_USE_RAJA
-  KOKKOS_INLINE_FUNCTION int  phiIphiJ( const int & nPointsPerElement,
+  int  phiIphiJ( const int & nPointsPerElement,
                  vectorDouble const & weights2D,
                  arrayDouble const & phi,
                  vectorDouble const & detJ,
@@ -318,7 +318,7 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
                  vectorDouble const & detJ,
                  arrayDouble  const & massMatrixLocal )const;
 #else
-  KOKKOS_INLINE_FUNCTION int  phiIphiJ( const int & nPointsPerElement,
+  int  phiIphiJ( const int & nPointsPerElement,
                  vectorDouble & weights2D,
                  arrayDouble & phi,
                  vectorDouble & detJ,
@@ -333,7 +333,7 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
   //                      arrayDouble & derivativeBasisFunction2DX,
   //                      arrayDouble & derivativeBasisFunction2DY ) const;
 #ifdef SEM_USE_RAJA
-  KOKKOS_INLINE_FUNCTION int  computeDs( const int & iFace,
+  int  computeDs( const int & iFace,
                       const int & order,
                       arrayInt  const & faceInfos,
                       vectorInt const & numOfBasisFunctionOnFace,
@@ -355,7 +355,7 @@ KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsP
                       vectorReal  const & ds ) const;
 
 #else
-  KOKKOS_INLINE_FUNCTION int  computeDs( const int & iFace,
+  int  computeDs( const int & iFace,
                       const int & order,
                       arrayInt  & faceInfos,
                       vectorInt & numOfBasisFunctionOnFace,
