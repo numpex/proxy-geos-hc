@@ -177,17 +177,17 @@ public:
   //                                             arrayDouble & jacobianMatrix,
   //                                             vectorDouble & detJ ) const;
 #ifdef SEM_USE_RAJA
-int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+  int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 				     arrayDouble const & jacobianMatrix,
 				     vectorDouble const & detJ,
 				     arrayDouble  const &transpInvJacobianMatrix ) const;
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+  KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 				     arrayDouble const & jacobianMatrix,
 				     vectorDouble const & detJ,
 				     arrayDouble  const &transpInvJacobianMatrix ) const;
 #else
-int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+  int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 				     arrayDouble & jacobianMatrix,
 				     vectorDouble & detJ,
 				     arrayDouble  &transpInvJacobianMatrix ) const;
