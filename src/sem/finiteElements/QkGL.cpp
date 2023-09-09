@@ -456,7 +456,7 @@ int QkGL::computeJacobianMatrix( const int & nPointsPerElement,
                                   arrayDouble const & dyPhi,
                                   arrayDouble const & jacobianMatrix )const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int QkGL::computeJacobianMatrix( const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::computeJacobianMatrix( const int & nPointsPerElement,
                                   arrayDouble const & Xi,
                                   arrayDouble const & dxPhi,
                                   arrayDouble const & dyPhi,
@@ -497,7 +497,7 @@ int QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
                                                arrayDouble const & jacobianMatrix,
                                                vectorDouble const & detJ ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
                                                arrayDouble const & jacobianMatrix,
                                                vectorDouble const & detJ ) const
 #else
@@ -525,7 +525,7 @@ int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
                                      vectorDouble const & detJ,
                                      arrayDouble const & invJacobianMatrix ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
                                      arrayDouble const & jacobianMatrix,
                                      vectorDouble const & detJ,
                                      arrayDouble const & invJacobianMatrix ) const
@@ -558,7 +558,7 @@ int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
                                                   vectorDouble const & detJ,
                                                   arrayDouble  const &transpInvJacobianMatrix ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
                                                   arrayDouble const & jacobianMatrix,
                                                   vectorDouble const & detJ,
                                                   arrayDouble  const &transpInvJacobianMatrix ) const
@@ -593,7 +593,7 @@ int QkGL::computeB( const int & nPointsPerElement,
                  vectorDouble const & detJ,
                  arrayDouble const & B ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int QkGL::computeB( const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::computeB( const int & nPointsPerElement,
                  arrayDouble const & invJacobianMatrix,
                  arrayDouble const & transpInvJacobianMatrix,
                  vectorDouble const & detJ,
@@ -638,7 +638,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                   arrayDouble const & dPhi,
                                   arrayDouble const & R ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                   const int & order,
                                   vectorDouble const & weights2D,
                                   arrayDouble const & B,
@@ -743,7 +743,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                   arrayDouble const & dyPhi,
                                   arrayDouble const & R ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                   vectorDouble const & weights2D,
                                   arrayDouble const & B,
                                   arrayDouble const & dxPhi,
@@ -789,7 +789,7 @@ int QkGL::phiIphiJ( const int & nPointsPerElement,
                              vectorDouble const & detJ,
                              vectorDouble const & massMatrixLocal ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int QkGL::phiIphiJ( const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::phiIphiJ( const int & nPointsPerElement,
                              vectorDouble const & weights2D,
                              vectorDouble const & detJ,
                              vectorDouble const & massMatrixLocal ) const
@@ -822,7 +822,7 @@ int QkGL::phiIphiJ( const int & nPointsPerElement,
                             vectorDouble const & detJ,
                             arrayDouble  const & massMatrixLocal) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int QkGL::phiIphiJ( const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::phiIphiJ( const int & nPointsPerElement,
                             vectorDouble const & weights2D,
                             arrayDouble const & phi,
                             vectorDouble const & detJ,
@@ -871,7 +871,7 @@ int QkGL::computeDs( const int & iFace,
                       arrayDouble const & derivativeBasisFunction2DY,
                       vectorReal  const & ds ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int QkGL::computeDs( const int & iFace,
+KOKKOS_FUNCTION int QkGL::computeDs( const int & iFace,
                       const int & order,
                       arrayInt  const & faceInfos,
                       vectorInt const & numOfBasisFunctionOnFace,

@@ -161,6 +161,7 @@
   #include <Kokkos_Core.hpp>
   #define MemSpace Kokkos::CudaUVMSpace
   //#define MemSpace Kokkos::HostSpace
+  #define KOKKOS_FUNCTION=__device__
   using ExecSpace = MemSpace::execution_space;
   using range_policy = Kokkos::RangePolicy<ExecSpace>;
 

@@ -121,7 +121,7 @@ public:
                               arrayDouble const & dyPhi,
                               arrayDouble const & jacobianMatrix ) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int  computeJacobianMatrix( const int & nPointsPerElement,
+  KOKKOS_FUNCTION int  computeJacobianMatrix( const int & nPointsPerElement,
                               arrayDouble const & Xi,
                               arrayDouble const & dxPhi,
                               arrayDouble const & dyPhi,
@@ -142,7 +142,7 @@ public:
                                            arrayDouble const & jacobianMatrix,
                                            vectorDouble const & detJ ) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+  KOKKOS_FUNCTION int  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
                                            arrayDouble const & jacobianMatrix,
                                            vectorDouble const & detJ ) const;
 #else
@@ -161,7 +161,7 @@ public:
                                          vectorDouble const & detJ,
                                          arrayDouble const & invJacobianMatrix ) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int  computeInvJacobianMatrix( const int & nPointsPerElement,
+  KOKKOS_FUNCTION int  computeInvJacobianMatrix( const int & nPointsPerElement,
                                          arrayDouble const & jacobianMatrix,
                                          vectorDouble const & detJ,
                                          arrayDouble const & invJacobianMatrix ) const;
@@ -182,7 +182,7 @@ public:
 				     vectorDouble const & detJ,
 				     arrayDouble  const &transpInvJacobianMatrix ) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+  KOKKOS_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 				     arrayDouble const & jacobianMatrix,
 				     vectorDouble const & detJ,
 				     arrayDouble  const &transpInvJacobianMatrix ) const;
@@ -205,7 +205,7 @@ public:
                  vectorDouble const & detJ,
                  arrayDouble const & B ) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int  computeB( const int & nPointsPerElement,
+  KOKKOS_FUNCTION int  computeB( const int & nPointsPerElement,
                  arrayDouble const & invJacobianMatrix,
                  arrayDouble const & transpInvJacobianMatrix,
                  vectorDouble const & detJ,
@@ -263,7 +263,7 @@ public:
                        arrayDouble const & dyPhi,
                        arrayDouble const & R ) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
+  KOKKOS_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
                        vectorDouble const & weights,
                        arrayDouble const & B,
                        arrayDouble const & dxPhi,
@@ -289,7 +289,7 @@ public:
                  vectorDouble const & detJ,
                  vectorDouble const & massMatrixLocal ) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int  phiIphiJ( const int & nPointsPerElement,
+  KOKKOS_FUNCTION int  phiIphiJ( const int & nPointsPerElement,
                  vectorDouble const & weights2D,
                  vectorDouble const & detJ,
                  vectorDouble const & massMatrixLocal ) const;
@@ -312,7 +312,7 @@ public:
                  vectorDouble const & detJ,
                  arrayDouble  const & massMatrixLocal )const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int  phiIphiJ( const int & nPointsPerElement,
+  KOKKOS_FUNCTION int  phiIphiJ( const int & nPointsPerElement,
                  vectorDouble const & weights2D,
                  arrayDouble const & phi,
                  vectorDouble const & detJ,
@@ -344,7 +344,7 @@ public:
                       vectorReal  const & ds ) const;
 
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int  computeDs( const int & iFace,
+  KOKKOS_FUNCTION int  computeDs( const int & iFace,
                       const int & order,
                       arrayInt  const & faceInfos,
                       vectorInt const & numOfBasisFunctionOnFace,

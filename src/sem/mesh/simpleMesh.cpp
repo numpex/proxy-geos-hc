@@ -212,7 +212,7 @@ void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt & nodes
 #ifdef SEM_USE_RAJA
 int simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt const & nodesList,  vectorInt const &localToGlobal)const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt const & nodesList,  vectorInt const &localToGlobal)const
+KOKKOS_FUNCTION int simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt const & nodesList,  vectorInt const &localToGlobal)const
 #else
 int simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList,  vectorInt &localToGlobal)const
 #endif
@@ -337,7 +337,7 @@ void simpleMesh::neighbors( const int & e , vectorInt  & neigh) const
 int simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
                      vectorInt const & localToGlobal , arrayDouble const & Xi) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
+KOKKOS_FUNCTION int simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
                      vectorInt const & localToGlobal , arrayDouble const & Xi) const
 #else
 int simpleMesh::getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
@@ -369,7 +369,7 @@ int simpleMesh::getGlobalDofOfFace( const int & e,
                                          vectorInt const & localToGlobal,
                                          arrayInt  const & nodesFace ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_INLINE_FUNCTION int simpleMesh::getGlobalDofOfFace( const int & e,
+KOKKOS_FUNCTION int simpleMesh::getGlobalDofOfFace( const int & e,
                                          arrayInt  const & globalNodesList,
                                          vectorInt const & localToGlobal,
                                          arrayInt  const & nodesFace ) const

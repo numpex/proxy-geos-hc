@@ -86,7 +86,7 @@ public:
 #ifdef SEM_USE_RAJA
   int localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt const & nodesList, vectorInt const & localToGlobal) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt const & nodesList, vectorInt const & localToGlobal) const;
+  KOKKOS_FUNCTION int localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt const & nodesList, vectorInt const & localToGlobal) const;
 #else
   int localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList, vectorInt & localToGlobal) const;
 #endif
@@ -121,7 +121,7 @@ public:
   int  getXi( const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
                      vectorInt const & localToGlobal , arrayDouble const & Xi) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int  getXi( const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
+  KOKKOS_FUNCTION int  getXi( const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
                      vectorInt const & localToGlobal , arrayDouble const & Xi) const;
 #else
   int  getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
@@ -135,7 +135,7 @@ public:
                                vectorInt const & localToGlobal,
                                arrayInt  const & nodesFace ) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_INLINE_FUNCTION int getGlobalDofOfFace( const int & e,
+  KOKKOS_FUNCTION int getGlobalDofOfFace( const int & e,
                                arrayInt  const & globalNodesList,
                                vectorInt const & localToGlobal,
                                arrayInt  const & nodesFace ) const;
