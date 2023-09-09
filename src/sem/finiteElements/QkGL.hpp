@@ -234,7 +234,7 @@ public:
                        arrayDouble const & dPhi,
                        arrayDouble const & R ) const;
 #elif defined SEM_USE_KOKKOS
-  int  gradPhiGradPhi( const int & nPointsPerElement,
+  KOKKOS_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
                        const int & order,
                        vectorDouble const & weights2D,
                        arrayDouble const & B,
