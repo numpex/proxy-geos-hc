@@ -28,10 +28,30 @@ void solverKokkos::computeOneStep( const float & timeSample,
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
   } );
-
+//Kokkos::parallel_for(
+//    Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(
+//        Kokkos::DefaultExecutionSpace(), 0, 42
+//    ),
+//    KOKKOS_LAMBDA(int n) { /* ... */ }
+//);
   // loop over mesh elements
-  Kokkos::parallel_for( numberOfElements, KOKKOS_LAMBDA ( const int e )
+  Kokkos::parallel_for(range_policy(0,numberOfElements), KOKKOS_LAMBDA ( const int e )
   {
+  Kokkos::View<int*>localToGlobal("localToGlobal",numberOfPointsPerElement);
+  Kokkos::View<double**>Xi("Xi",numberOfPointsPerElement, 2 );
+
+  Kokkos::View<double**> jacobianMatrix("jM",4, numberOfPointsPerElement);
+  Kokkos::View<double*>detJ("detJ",numberOfPointsPerElement);
+  Kokkos::View<double**> invJacobianMatrix("iJM",4, numberOfPointsPerElement);
+  Kokkos::View<double**> transpInvJacobianMatrix("tIJM",4, numberOfPointsPerElement);
+
+  Kokkos::View<double**> B("B",4, numberOfPointsPerElement);
+  Kokkos::View<double**> R("R",numberOfPointsPerElement, numberOfPointsPerElement);
+
+  Kokkos::View<double*> massMatrixLocal("mML",numberOfPointsPerElement);
+  Kokkos::View<float*>pnLocal("pnLocal", numberOfPointsPerElement );
+  Kokkos::View<float*>Y("Y",numberOfPointsPerElement );
+  
      // extract global coordinates of element e
     // get local to global indexes of nodes of element e
     int i=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
@@ -98,7 +118,7 @@ void solverKokkos::computeOneStep( const float & timeSample,
   } );
 
   // update pressure
-  Kokkos::parallel_for( numberOfInteriorNodes, KOKKOS_LAMBDA ( const int i )
+  Kokkos::parallel_for( range_policy(0,numberOfInteriorNodes), KOKKOS_LAMBDA ( const int i )
   {
     int I=listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
@@ -114,8 +134,12 @@ void solverKokkos::computeOneStep( const float & timeSample,
     ShGlobal[i]=0;
   }
   // Note: this loop is data parallel.
-  Kokkos::parallel_for( numberOfBoundaryFaces, KOKKOS_LAMBDA ( const int iFace )
+  Kokkos::parallel_for( range_policy(0,numberOfBoundaryFaces), KOKKOS_LAMBDA ( const int iFace )
   {
+  vectorReal ds("ds", order+1 );
+  vectorReal Sh( "Sh",order+1 );
+  vectorInt numOfBasisFunctionOnFace("nBF", order+1 );
+  arrayReal Js("Js", 2, order+1 );
     //get ds
     int i=Qk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
                   Js, globalNodesCoords, derivativeBasisFunction2DX,
@@ -132,7 +156,7 @@ void solverKokkos::computeOneStep( const float & timeSample,
 
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
-  Kokkos::parallel_for( numberOfBoundaryNodes, KOKKOS_LAMBDA  ( const int i )
+  Kokkos::parallel_for( range_policy(0,numberOfBoundaryNodes), KOKKOS_LAMBDA  ( const int i )
   {
     int I=listOfBoundaryNodes[i];
     float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
