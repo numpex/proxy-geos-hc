@@ -69,6 +69,7 @@ protected:
   arrayReal myRHSTerm;
   arrayInt nodeList;
   arrayReal pnGlobal;
+  array3DReal test3D;
 
   // initialize mesh
   simpleMesh  myMesh {50, 50, 1000, 1000, myOrderNumber};

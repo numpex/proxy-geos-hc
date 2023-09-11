@@ -21,6 +21,9 @@ void SEMProxy::init()
   nodeList=allocateArray2D<arrayInt>(numberOfElements,(myOrderNumber+1)*(myOrderNumber+1));
   pnGlobal=allocateArray2D<arrayReal>( numberOfNodes, 2 );
 
+  test3D=allocateArray3D<array3DReal>(100,100,100);
+  test3D(50,50,50)=0;
+
   // set number of rhs and location
   myRHSLocation(0,0)=501;
   myRHSLocation(0,1)=501;

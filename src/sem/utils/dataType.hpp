@@ -38,6 +38,18 @@
   private:
     std::vector< std::vector< T > > data;
   };
+  template< class T > class Array3D
+  {
+  public:
+    Array3D( int X, int Y, int Z ): data( X, std::vector<std::vector<T>>(Y,std::vector<T>(Z))) {}
+    Array3D(): data( 0, std::vector< std::vector<T>>( 0 )) {}
+
+    std::vector< T > & operator[]( int index ){return data[index];}
+    T& operator()(size_t X, size_t Y, size_t Z) {return data[X][Y][Z];}
+
+  private:
+    std::vector<std::vector<std::vector<T> > > data;
+  };
   using vectorInt=std::vector< int >;
   using vectorReal=std::vector< float >;
   using vectorDouble=std::vector< double >;
@@ -47,6 +59,9 @@
   using arrayInt=Array2D< int >;
   using arrayReal=Array2D< float >;
   using arrayDouble=Array2D< double >;
+  using array3DInt=Array3D< int >;
+  using array3DReal=Array3D< float >;
+  using array3DDouble=Array3D< double >;
 
   #ifdef SEM_USE_RAJA
     #include "RAJA/RAJA.hpp"
@@ -64,6 +79,13 @@
   {
     std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
     T array(n1, n2);
+    return array;
+  }
+  template<class T>
+  T allocateArray3D(int n1, int n2, int n3)
+  {
+    std::cout<<"allocate array of size "<<n1<<", "<<n2<<", "<<n3<<std::endl;
+    T array(n1, n2, n3);
     return array;
   }
 
@@ -106,6 +128,21 @@
                                       camp::idx_seq< 0, 1 >,
                                       std::ptrdiff_t,
                                       LvArray::ChaiBuffer >;
+    using array3DInt=LvArray::Array< int,
+                                   3,
+                                   camp::idx_seq< 0, 1, 2 >,
+                                   std::ptrdiff_t,
+                                   LvArray::ChaiBuffer >;
+    using array3DReal=LvArray::Array< float,
+                                    3,
+                                    camp::idx_seq< 0, 1, 2 >,
+                                    std::ptrdiff_t,
+                                    LvArray::ChaiBuffer >;
+    using array3DDouble=LvArray::Array< double,
+                                      3,
+                                      camp::idx_seq< 0, 1, 2 >,
+                                      std::ptrdiff_t,
+                                      LvArray::ChaiBuffer >;
   #else
     #include "MallocBuffer.hpp"
     // Create an 1D array of integers.
@@ -139,6 +176,21 @@
                                       camp::idx_seq< 0, 1 >,
                                       std::ptrdiff_t,
                                       LvArray::MallocBuffer >;
+    using array3DInt=LvArray::Array< int,
+                                      3,
+                                      camp::idx_seq< 0, 1, 2 >,
+                                      std::ptrdiff_t,
+                                      LvArray::MallocBuffer >;
+    using array3DReal=LvArray::Array< float,
+                                      3,
+                                      camp::idx_seq< 0, 1, 2 >,
+                                      std::ptrdiff_t,
+                                      LvArray::MallocBuffer >;
+    using array3DDouble=LvArray::Array< double,
+                                        3,
+                                        camp::idx_seq< 0, 1, 2 >,
+                                        std::ptrdiff_t,
+                                        LvArray::MallocBuffer >;
   #endif
 
   template<class T>
@@ -153,6 +205,13 @@
   {
     std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
     T array(n1, n2);
+    return array;
+  }
+  template<class T>
+  T allocateArray3D(int n1, int n2, int n3)
+  {
+    std::cout<<"allocate array of size "<<n1<<", "<<n2<<", "<<n3<<std::endl;
+    T array(n1, n2, n3);
     return array;
   }
 #endif //SEM_USE_LVARRAY
@@ -173,6 +232,10 @@
   typedef Kokkos::View<float**,  Kokkos::LayoutRight, MemSpace> arrayReal;
   typedef Kokkos::View<double**, Kokkos::LayoutRight, MemSpace> arrayDouble;
 
+  typedef Kokkos::View<int***,    Kokkos::LayoutRight, MemSpace> array3DInt;
+  typedef Kokkos::View<float***,  Kokkos::LayoutRight, MemSpace> array3DReal;
+  typedef Kokkos::View<double***, Kokkos::LayoutRight, MemSpace> array3DDouble;
+
   template<class T>
   T allocateVector(int n1)
   {
@@ -185,6 +248,13 @@
   {
     std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
     T array("a",n1, n2);
+    return array;
+  }
+  template<class T>
+  T allocateArray3D(int n1, int n2, int n3)
+  {
+    std::cout<<"allocate array of size "<<n1<<", "<<n2<<", "<<n3<<std::endl;
+    T array("a",n1, n2, n3);
     return array;
   }
 #endif //SEM_USE_KOKKOS
