@@ -62,7 +62,7 @@ public:
 protected:
 
   int i1=0, i2=1;
-  int numberOfThreads=16;
+  int numberOfThreads=32;
 
   // get infos from mesh
   int numberOfNodes;
