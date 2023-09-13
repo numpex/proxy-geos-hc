@@ -45,7 +45,7 @@ void solverOMP::computeOneStep( const float & timeSample,
     vectorInt numOfBasisFunctionOnFace( order+1 );
     arrayReal Js( 2, order+1 );
 
-  #pragma omp for 
+#pragma omp for 
   for( int i=0; i<numberOfNodes; i++ )
   {
     massMatrixGlobal[i]=0;
@@ -100,6 +100,9 @@ void solverOMP::computeOneStep( const float & timeSample,
     {
       massMatrixLocal[i]/=(model[e]*model[e]);
       pnLocal[i]=pnGlobal[localToGlobal[i]][i2];
+      cout<<"element "<<e<<" massM "<<i<<" "<<massMatrixLocal[i];
+      cout<<"locToGLob "<<i<<" "<<localToGlobal[i]<<" "<<i2;
+      cout<<" pnLocal "<<i<<" "<<pnLocal[i]<<endl;
     }
 
     // compute Y=R*pnLocal
@@ -110,7 +113,9 @@ void solverOMP::computeOneStep( const float & timeSample,
       {
         Y[i]+=R[i][j]*pnLocal[j];
       }
+           cout<<" element "<<e<<" Y "<<i<<" "<<Y[i];
     }
+    cout<<endl;
 
     //compute gloval mass Matrix and global stiffness vector
     for( int i=0; i<numberOfPointsPerElement; i++ )
@@ -118,6 +123,8 @@ void solverOMP::computeOneStep( const float & timeSample,
       int gIndex=localToGlobal[i];
       massMatrixGlobal[gIndex]+=massMatrixLocal[i];
       yGlobal[gIndex]+=Y[i];
+      cout<<"element "<<e<<" massG "<<gIndex<<" "<<massMatrixGlobal[gIndex];
+      cout<<" yGLobal "<<gIndex<<" "<<yGlobal[gIndex]<<endl;
     }
   }
   

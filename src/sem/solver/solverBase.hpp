@@ -62,6 +62,7 @@ public:
 protected:
 
   int i1=0, i2=1;
+  int numberOfThreads=16;
 
   // get infos from mesh
   int numberOfNodes;
@@ -96,26 +97,26 @@ protected:
 
 
 #ifndef SEM_USE_OMP
-  // private arrays
-  vectorInt localToGlobal;
-  arrayDouble Xi;
+  // private arrays (for Kokkos And LvArray)
+  arrayInt localToGlobal;
+  array3DDouble Xi;
 
-  arrayDouble jacobianMatrix;
-  vectorDouble detJ;
-  arrayDouble invJacobianMatrix;
-  arrayDouble transpInvJacobianMatrix;
+  array3DDouble jacobianMatrix;
+  arrayDouble detJ;
+  array3DDouble invJacobianMatrix;
+  array3DDouble transpInvJacobianMatrix;
 
-  arrayDouble B;
-  arrayDouble R;
+  array3DDouble B;
+  array3DDouble R;
 
-  vectorDouble massMatrixLocal;
-  vectorReal pnLocal;
-  vectorReal Y;
+  arrayDouble massMatrixLocal;
+  arrayReal pnLocal;
+  arrayReal Y;
 
-  vectorReal ds;
-  vectorReal Sh;
-  vectorInt numOfBasisFunctionOnFace;
-  arrayReal Js;
+  arrayReal ds;
+  arrayReal Sh;
+  arrayInt numOfBasisFunctionOnFace;
+  array3DReal Js;
 #endif
 
   //shared arrays

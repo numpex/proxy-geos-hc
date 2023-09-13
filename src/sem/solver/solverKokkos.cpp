@@ -34,88 +34,92 @@ void solverKokkos::computeOneStep( const float & timeSample,
 //    ),
 //    KOKKOS_LAMBDA(int n) { /* ... */ }
 //);
-  // loop over mesh elements
-  Kokkos::parallel_for(range_policy(0,numberOfElements), KOKKOS_LAMBDA ( const int e )
+// loop over mesh elements
+
+for( int irange=0;irange<numberOfElements;irange+=numberOfThreads)
+{
+  int rangeMin=irange;
+  int rangeMax=irange+numberOfThreads;
+  if(rangeMax>numberOfElements)rangeMax=numberOfElements;
+  //cout<<rangeMin<<" "<<rangeMax<<endl;
+  Kokkos::parallel_for(range_policy(rangeMin,rangeMax), KOKKOS_LAMBDA ( const int e )
   {
-  Kokkos::View<int*>localToGlobal("localToGlobal",numberOfPointsPerElement);
-  Kokkos::View<double**>Xi("Xi",numberOfPointsPerElement, 2 );
-
-  Kokkos::View<double**> jacobianMatrix("jM",4, numberOfPointsPerElement);
-  Kokkos::View<double*>detJ("detJ",numberOfPointsPerElement);
-  Kokkos::View<double**> invJacobianMatrix("iJM",4, numberOfPointsPerElement);
-  Kokkos::View<double**> transpInvJacobianMatrix("tIJM",4, numberOfPointsPerElement);
-
-  Kokkos::View<double**> B("B",4, numberOfPointsPerElement);
-  Kokkos::View<double**> R("R",numberOfPointsPerElement, numberOfPointsPerElement);
-
-  Kokkos::View<double*> massMatrixLocal("mML",numberOfPointsPerElement);
-  Kokkos::View<float*>pnLocal("pnLocal", numberOfPointsPerElement );
-  Kokkos::View<float*>Y("Y",numberOfPointsPerElement );
+    int threadId=e-rangeMin;
+    //cout<<threadId<<" "<<irange<<" "<<e<<endl;
   
      // extract global coordinates of element e
     // get local to global indexes of nodes of element e
-    int i=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
+    int i=mesh.localToGlobalNodes(threadId, e, numberOfPointsPerElement, globalNodesList, localToGlobal );
 
     //get global coordinates Xi of element e
-    int j=mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
-
+    int j=mesh.getXi(threadId, numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
+    
     // compute jacobian Matrix
-    int k=Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
-                              derivativeBasisFunction2DX,
-                              derivativeBasisFunction2DY,
-                              jacobianMatrix );
+    int k=Qk.computeJacobianMatrix( threadId, numberOfPointsPerElement, Xi,
+                                    derivativeBasisFunction2DX,
+                                    derivativeBasisFunction2DY,
+                                    jacobianMatrix );
 
     // compute determinant of jacobian Matrix
-    int l=Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
-                                           jacobianMatrix,
-                                           detJ );
+    int l=Qk.computeDeterminantOfJacobianMatrix( threadId, numberOfPointsPerElement,
+                                                 jacobianMatrix,
+                                                 detJ );
     // compute inverse of Jacobian Matrix
-    int m=Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
-                                 jacobianMatrix,
-                                 detJ,
-                                 invJacobianMatrix );
-                                 
-    // compute transposed inverse of Jacobian Matrix
-    int n=Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
+    int m=Qk.computeInvJacobianMatrix( threadId, numberOfPointsPerElement,
                                        jacobianMatrix,
                                        detJ,
-                                       transpInvJacobianMatrix );
+                                       invJacobianMatrix );
+                                 
+    // compute transposed inverse of Jacobian Matrix
+    int n=Qk.computeTranspInvJacobianMatrix( threadId,numberOfPointsPerElement,
+                                             jacobianMatrix,
+                                             detJ,
+                                             transpInvJacobianMatrix );
                         
     // compute  geometrical transformation matrix
-    int p=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
+    int p=Qk.computeB(threadId, numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
 
     // compute stifness and mass matrix ( durufle's optimization)
-    int q=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
+    int q=Qk.gradPhiGradPhi(threadId, numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
 
     // compute local mass matrix ( used optimez version)
-    int r=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
+    int r=Qk.phiIphiJ(threadId, numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
 
     // get pnGlobal to pnLocal
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
-      massMatrixLocal[i]/=(model[e]*model[e]);
-      pnLocal[i]=pnGlobal(localToGlobal[i],i2);
+      massMatrixLocal(threadId,i)/=(model[e]*model[e]);
+      pnLocal(threadId,i)=pnGlobal(localToGlobal(threadId,i),i2);
+
+      //cout<<"element "<<e<<" massM "<<i<<" "<<massMatrixLocal(threadId,i);
+      //cout<<"locToGLob "<<i<<" "<<localToGlobal(threadId,i)<<" "<<i2;
+      //cout<<" pnLocal "<<i<<" "<<pnLocal(threadId,i)<<endl;
     }
 
     // compute Y=R*pnLocal
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
-      Y[i]=0;
+      Y(threadId,i)=0;
       for( int j=0; j<numberOfPointsPerElement; j++ )
       {
-        Y[i]+=R(i,j)*pnLocal[j];
+        Y(threadId,i)+=R(threadId,i,j)*pnLocal(threadId,j);
       }
+      //cout<<"element "<<e<<" Y "<<i<<" "<<Y(threadId,i);
     }
+    //cout<<endl;
 
     //compute gloval mass Matrix and global stiffness vector
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
-      int gIndex=localToGlobal[i];
-      massMatrixGlobal[gIndex]+=massMatrixLocal[i];
-      yGlobal[gIndex]+=Y[i];
+      int gIndex=localToGlobal(threadId,i);
+      massMatrixGlobal[gIndex]+=massMatrixLocal(threadId,i);
+      yGlobal[gIndex]+=Y(threadId,i);
+      //cout<<" element "<<e<<" massG "<<gIndex<<" "<<massMatrixGlobal[gIndex];
+      //cout<<" yGLobal "<<gIndex<<" "<<yGlobal[gIndex]<<endl;
     } 
   
   } );
+}
 
   // update pressure
   Kokkos::parallel_for( range_policy(0,numberOfInteriorNodes), KOKKOS_LAMBDA ( const int i )
@@ -133,27 +137,30 @@ void solverKokkos::computeOneStep( const float & timeSample,
   {
     ShGlobal[i]=0;
   }
-  // Note: this loop is data parallel.
-  Kokkos::parallel_for( range_policy(0,numberOfBoundaryFaces), KOKKOS_LAMBDA ( const int iFace )
+for( int irange=0;irange<numberOfBoundaryFaces;irange+=numberOfThreads)
+{
+  int rangeMin=irange;
+  int rangeMax=irange+numberOfThreads;
+  if(rangeMax>numberOfBoundaryFaces)rangeMax=numberOfBoundaryFaces;
+  Kokkos::parallel_for(range_policy(rangeMin,rangeMax), KOKKOS_LAMBDA ( const int iFace )
   {
-  vectorReal ds("ds", order+1 );
-  vectorReal Sh( "Sh",order+1 );
-  vectorInt numOfBasisFunctionOnFace("nBF", order+1 );
-  arrayReal Js("Js", 2, order+1 );
+    int threadId=iFace-rangeMin;
+  
     //get ds
-    int i=Qk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
-                  Js, globalNodesCoords, derivativeBasisFunction2DX,
-                  derivativeBasisFunction2DY,
-                  ds );
+    int i=Qk.computeDs( threadId, iFace, order, faceInfos,numOfBasisFunctionOnFace,
+                        Js, globalNodesCoords, derivativeBasisFunction2DX,
+                        derivativeBasisFunction2DY,
+                        ds );
+  
     //compute Sh and ShGlobal
     for( int i=0; i<order+1; i++ )
     {
       int gIndexFaceNode=localFaceNodeToGlobalFaceNode(iFace,i);
-      Sh[i]=weights[i]*ds[i]/(model[faceInfos(iFace,0)]);
-      ShGlobal[gIndexFaceNode]+=Sh[i];
+      Sh(threadId,i)=weights[i]*ds(threadId,i)/(model[faceInfos(iFace,0)]);
+      ShGlobal[gIndexFaceNode]+=Sh(threadId,i);
     }
   } );
-
+}
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
   Kokkos::parallel_for( range_policy(0,numberOfBoundaryNodes), KOKKOS_LAMBDA  ( const int i )
