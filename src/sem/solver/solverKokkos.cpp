@@ -45,7 +45,7 @@ for( int irange=0;irange<numberOfElements;irange+=numberOfThreads)
   Kokkos::parallel_for(range_policy(rangeMin,rangeMax), KOKKOS_LAMBDA ( const int e )
   {
     int threadId=e-rangeMin;
-    //cout<<threadId<<" "<<irange<<" "<<e<<endl;
+    //cd bui  cout<<threadId<<" "<<irange<<" "<<e<<endl;
   
      // extract global coordinates of element e
     // get local to global indexes of nodes of element e
@@ -112,8 +112,10 @@ for( int irange=0;irange<numberOfElements;irange+=numberOfThreads)
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
       int gIndex=localToGlobal(threadId,i);
-      massMatrixGlobal[gIndex]+=massMatrixLocal(threadId,i);
-      yGlobal[gIndex]+=Y(threadId,i);
+      //massMatrixGlobal[gIndex]+=massMatrixLocal(threadId,i)
+      //yGlobal[gIndex]+=Y(threadId,i);
+      Kokkos::atomic_add(&massMatrixGlobal[gIndex],massMatrixLocal(threadId,i));
+      Kokkos::atomic_add(&yGlobal[gIndex],Y(threadId,i));
       //cout<<" element "<<e<<" massG "<<gIndex<<" "<<massMatrixGlobal[gIndex];
       //cout<<" yGLobal "<<gIndex<<" "<<yGlobal[gIndex]<<endl;
     } 
@@ -157,7 +159,8 @@ for( int irange=0;irange<numberOfBoundaryFaces;irange+=numberOfThreads)
     {
       int gIndexFaceNode=localFaceNodeToGlobalFaceNode(iFace,i);
       Sh(threadId,i)=weights[i]*ds(threadId,i)/(model[faceInfos(iFace,0)]);
-      ShGlobal[gIndexFaceNode]+=Sh(threadId,i);
+      //ShGlobal[gIndexFaceNode]+=Sh(threadId,i);
+      Kokkos::atomic_add(&ShGlobal[gIndexFaceNode],Sh(threadId,i));
     }
   } );
 }
