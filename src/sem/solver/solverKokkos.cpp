@@ -27,14 +27,9 @@ void solverKokkos::computeOneStep( const float & timeSample,
   {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
+    pnGlobal(i,2)=pnGlobal(i,1); // pnm1=pn
+    pnGlobal(i,1)=pnGlobal(i,0);//pn=pnp1
   } );
-//Kokkos::parallel_for(
-//    Kokkos::RangePolicy<Kokkos::DefaultExecutionSpace>(
-//        Kokkos::DefaultExecutionSpace(), 0, 42
-//    ),
-//    KOKKOS_LAMBDA(int n) { /* ... */ }
-//);
-// loop over mesh elements
 
 for( int irange=0;irange<numberOfElements;irange+=numberOfThreads)
 {
@@ -89,7 +84,8 @@ for( int irange=0;irange<numberOfElements;irange+=numberOfThreads)
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
       massMatrixLocal(threadId,i)/=(model[e]*model[e]);
-      pnLocal(threadId,i)=pnGlobal(localToGlobal(threadId,i),i2);
+      //pnLocal(threadId,i)=pnGlobal(localToGlobal(threadId,i),i2);
+      pnLocal(threadId,i)=pnGlobal(localToGlobal(threadId,i),1);
 
       //cout<<"element "<<e<<" massM "<<i<<" "<<massMatrixLocal(threadId,i);
       //cout<<"locToGLob "<<i<<" "<<localToGlobal(threadId,i)<<" "<<i2;
@@ -128,7 +124,8 @@ for( int irange=0;irange<numberOfElements;irange+=numberOfThreads)
   {
     int I=listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
-    pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-tmp*yGlobal[I]/massMatrixGlobal[I];
+    //pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-tmp*yGlobal[I]/massMatrixGlobal[I];
+    pnGlobal(I,0)=2*pnGlobal(I,1)-pnGlobal(I,2)-tmp*yGlobal[I]/massMatrixGlobal[I];
   } );
   //cout<<"pressure="<<pnGlobal(5,i1)<<endl;
 
@@ -171,8 +168,11 @@ for( int irange=0;irange<numberOfBoundaryFaces;irange+=numberOfThreads)
     int I=listOfBoundaryNodes[i];
     float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
     float MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
-    pnGlobal(I,i1)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,i2)-MmSh*pnGlobal(I,i1)-tmp*yGlobal[I]);
+    //pnGlobal(I,i1)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,i2)-MmSh*pnGlobal(I,i1)-tmp*yGlobal[I]);
+    pnGlobal(I,0)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,1)-MmSh*pnGlobal(I,2)-tmp*yGlobal[I]);
   } );
+
+  
 
   /**
      for ( int i=0 ; i< numberOfBoundaryNodes; i++)

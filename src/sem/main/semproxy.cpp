@@ -19,7 +19,7 @@ void SEMProxy::init()
   myRHSLocation=allocateArray2D<arrayReal>( myNumberOfRHS, 2 );
   myRHSTerm=allocateArray2D<arrayReal>( myNumberOfRHS, myNumSamples );
   nodeList=allocateArray2D<arrayInt>(numberOfElements,(myOrderNumber+1)*(myOrderNumber+1));
-  pnGlobal=allocateArray2D<arrayReal>( numberOfNodes, 2 );
+  pnGlobal=allocateArray2D<arrayReal>( numberOfNodes, 3 );
 
   test3D=allocateArray3D<array3DReal>(100,100,100);
   test3D(50,50,50)=0;
@@ -64,15 +64,15 @@ void SEMProxy::run()
 
   for( int indexTimeStep=0; indexTimeStep<myNumSamples; indexTimeStep++ )
   {
-    mySolver.addRightAndSides( indexTimeStep, myNumberOfRHS, i2, myTimeStep, pnGlobal, myRHSTerm, myRHSLocation, myMesh );
+    mySolver.addRightAndSides( indexTimeStep, myNumberOfRHS, i1, myTimeStep, pnGlobal, myRHSTerm, myRHSLocation, myMesh );
     mySolver.computeOneStep( myTimeStep, myOrderNumber, i1, i2, pnGlobal, myMesh, myQk );
 
     //writes debugging ascii file.
     if( indexTimeStep%50==0 )
     {
       cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource
-          <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),i2)<<endl;
-      //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
+          <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),0)<<endl;
+      myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
     }
     swap( i1, i2 );
   }
