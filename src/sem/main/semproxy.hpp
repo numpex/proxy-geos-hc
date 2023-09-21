@@ -84,6 +84,7 @@ protected:
 #elif defined(SEM_USE_OMP)
   solverOMP mySolver;
 #elif defined(SEM_USE_KOKKOS)
+  vectorInt rhsElement;
   solverKokkos mySolver;
 #else
   solverSEQ mySolver;

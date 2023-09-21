@@ -49,6 +49,17 @@ void SEMProxy::init()
   // get nodelist 
   myMesh.globalNodesList( numberOfElements, nodeList );
 
+#ifdef SEM_USE_KOKKOS
+  rhsElement=allocateVector<vectorInt>(myNumberOfRHS);
+  for( int i=0; i<myNumberOfRHS; i++ )
+  {
+    //extract element number for current rhs
+    float x=myRHSLocation(i,0);
+    float y=myRHSLocation(i,1);
+    int rhsE=myMesh.getElementNumberFromPoints( x, y );
+    rhsElement[i]=rhsE;
+  }
+#endif
 
   SEM_CALIPER_MARK_END( "InitTime" );
 }
@@ -64,15 +75,19 @@ void SEMProxy::run()
 
   for( int indexTimeStep=0; indexTimeStep<myNumSamples; indexTimeStep++ )
   {
-    mySolver.addRightAndSides( indexTimeStep, myNumberOfRHS, i1, myTimeStep, pnGlobal, myRHSTerm, myRHSLocation, myMesh );
-    mySolver.computeOneStep( myTimeStep, myOrderNumber, i1, i2, pnGlobal, myMesh, myQk );
+    #ifdef SEM_USE_OMP
+      mySolver.addRightAndSides( indexTimeStep, myNumberOfRHS, i2, myTimeStep, pnGlobal, myRHSTerm, myRHSLocation, myMesh );
+      mySolver.computeOneStep( myTimeStep, myOrderNumber, i1, i2, pnGlobal, myMesh, myQk );
+    #elif defined SEM_USE_KOKKOS
+      mySolver.computeOneStep( indexTimeStep, myTimeStep, myOrderNumber, i1, i2, myNumberOfRHS, rhsElement, myRHSTerm, pnGlobal, myMesh, myQk  );
+    #endif
 
     //writes debugging ascii file.
     if( indexTimeStep%50==0 )
     {
       cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource
           <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),0)<<endl;
-      myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
+      //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
     }
     swap( i1, i2 );
   }

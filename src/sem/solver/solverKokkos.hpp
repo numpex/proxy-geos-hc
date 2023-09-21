@@ -21,12 +21,16 @@ public:
   solverKokkos(){};
   ~solverKokkos(){};
 
-  void computeOneStep( const float & timeSample,
+  void computeOneStep( const int & timeStep,
+                       const float & timeSample,
                        const int & order,
                        int & i1,
                        int & i2,
+                       const int & numberOfRHS,
+                       vectorInt & rhsElement,
+                       arrayReal & rhsTerm,
                        arrayReal & pnGlobal,
                        simpleMesh mesh,
-                       QkGL Qk );
+                       QkGL Qk  );
 };
 #endif //SOLVER_Kokkos_HPP_

@@ -33,6 +33,7 @@ public:
                        simpleMesh mesh,
                        QkGL Qk );
 
+  #ifdef SEM_USE_OMP
   /**
    * @brief addRightAndSides function:
    * add right and side
@@ -45,11 +46,6 @@ public:
                          arrayReal & rhsTerm,
                          arrayReal & rhsLocation,
                          simpleMesh mesh );
-
-  /**
-   * @brief computeFEInit function:
-   * compute one time step of wave propagation
-   */
   virtual void computeOneStep( const float & timeSample,
                                const int & order,
                                int & i1,
@@ -57,6 +53,19 @@ public:
                                arrayReal & pnGlobal,
                                simpleMesh mesh,
                                QkGL Qk ) = 0;
+  #else
+  virtual void computeOneStep( const int & indexTimeStep,
+                               const float & timeSample,
+                               const int & order,
+                               int & i1,
+                               int & i2,
+                               const int & numberOfRHS,
+                               vectorInt & rhsElement,
+                               arrayReal & rhsTerm,
+                               arrayReal & pnGlobal,
+                               simpleMesh mesh,
+                               QkGL Qk ) = 0;
+  #endif
 
 
 protected:

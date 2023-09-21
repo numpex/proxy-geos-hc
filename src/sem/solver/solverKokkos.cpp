@@ -11,10 +11,14 @@
 #include "solverKokkos.hpp"
  
 // compute one step of the time dynamic wave equation solver
-void solverKokkos::computeOneStep( const float & timeSample,
+void solverKokkos::computeOneStep( const int & timeStep,
+                                   const float & timeSample,
                                    const int & order,
                                    int & i1,
                                    int & i2,
+                                   const int & numberOfRHS,
+                                   vectorInt & rhsElement,
+                                   arrayReal & rhsTerm,
                                    arrayReal & pnGlobal,
                                    simpleMesh mesh,
                                    QkGL Qk )
@@ -30,6 +34,13 @@ void solverKokkos::computeOneStep( const float & timeSample,
     pnGlobal(i,2)=pnGlobal(i,1); // pnm1=pn
     pnGlobal(i,1)=pnGlobal(i,0);//pn=pnp1
   } );
+
+  // update pnGLobal with right hade side
+  Kokkos::parallel_for(numberOfRHS,[=] (const int i)
+  {
+    int nodeRHS=globalNodesList(rhsElement[i],0);
+    pnGlobal(nodeRHS,1)+=timeSample*timeSample*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
+  });
 
 for( int irange=0;irange<numberOfElements;irange+=numberOfThreads)
 {

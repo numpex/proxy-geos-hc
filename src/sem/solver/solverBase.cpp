@@ -111,6 +111,7 @@ void solverBase::computeFEInit( const int & order,
   ShGlobal=allocateVector<vectorReal>( numberOfBoundaryNodes );
 }
 
+#ifdef SEM_USE_OMP
 // add right and side
 void solverBase::addRightAndSides( const int & timeStep,
                                    const int & numberOfRHS,
@@ -132,8 +133,10 @@ void solverBase::addRightAndSides( const int & timeStep,
     float x=rhsLocation(i,0);
     float y=rhsLocation(i,1);
     int rhsElement=mesh.getElementNumberFromPoints( x, y );
-    // compute global node numbe to add source term to
+    // compute global node numbe to add source term, by defaut forced to node 0 of element ( ust be changed)
     int nodeRHS=globalNodesList(rhsElement,0);
     pnGlobal(nodeRHS,i2)+=timeSample*timeSample*model[rhsElement]*model[rhsElement]*rhsTerm(i,timeStep);
   }
 }
+#endif
+
