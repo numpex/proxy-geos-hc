@@ -208,6 +208,9 @@ elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
   set (Kokkos_INCLUDE_DIRS "${Kokkos_ROOT}/../../../include")
   include_directories(${Kokkos_INCLUDE_DIRS})
 
+  if (SEM_USE_KOKKOSVECTOR)
+     set (DATA_CONTAINER "KOKKOSVECTOR" CACHE PATH "" FORCE)
+  endif()
   set (kokkosList "-L${Kokkos_ROOT}/../.. -lkokkoscontainers -lkokkoscore -lkokkossimd")
   set (ENABLE_KOKKOS ON CACHE BOOL "")
 

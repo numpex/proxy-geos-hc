@@ -180,7 +180,7 @@ void nodesCoordinates( const int & nx, const int & ny, const int & order, const 
   //return nodeCoords;
 }
 
-KOKKOS_FUNCTION int localToGlobalNodes( const int & threadId,const int & e,
+KOKKOS_INLINE_FUNCTION int localToGlobalNodes( const int & threadId,const int & e,
                                         const int & nPointsPerElement, arrayInt const & nodesList,
                                         arrayInt const & localToGlobal)
 {
@@ -194,7 +194,7 @@ KOKKOS_FUNCTION int localToGlobalNodes( const int & threadId,const int & e,
   return 0;
 }
 
-KOKKOS_FUNCTION int getXi( const int & e, const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
+KOKKOS_INLINE_FUNCTION int getXi( const int & e, const int & numberOfPointsPerElement, arrayReal const & globalNodesCoords,
                            arrayInt const & localToGlobal , array3DDouble const & Xi)
 {
   //arrayDouble Xi( numberOfPointsPerElement, 2 );

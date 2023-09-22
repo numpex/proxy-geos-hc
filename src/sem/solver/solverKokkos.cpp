@@ -25,7 +25,7 @@ void solverKokkos::computeOneStep( const int & timeStep,
                                    QkGL Qk )
 {
   
-  int nthreads=numberOfThreads;
+  //int nthreads=numberOfThreads;
   Kokkos::parallel_for( numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
   {
     massMatrixGlobal[i]=0;
@@ -40,16 +40,18 @@ void solverKokkos::computeOneStep( const int & timeStep,
     int nodeRHS=globalNodesList(rhsElement[i],0);
     pnGlobal(nodeRHS,1)+=timeSample*timeSample*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   });
-  Kokkos::fence();
+  //Kokkos::fence();
  
   //typedef Kokkos::TeamPolicy<ExecSpace>::member_type member_type;
-  // Create an instance of the policy
+  //// Create an instance of the policy
   //Kokkos::TeamPolicy<ExecSpace> policy ((numberOfElements+nthreads-1)/nthreads, nthreads );
-  //Kokkos::TeamPolicy<ExecSpace> policy (numberOfElements/2, Kokkos::AUTO() );
+  //Kokkos::TeamPolicy<ExecSpace> policy (numberOfElements, Kokkos::AUTO() );
   //Kokkos::parallel_for (policy, KOKKOS_CLASS_LAMBDA (member_type team_member)
   //{
   //   int e=team_member.league_rank () * team_member.team_size () + team_member.team_rank ();
   //   int threadId= team_member.team_rank ();
+  //   //printf("e=%d threadId=%d\n",e,threadId);
+  //   //printf("teamsize=%d\n",team_member.team_size ());
   for( int irange=0;irange<numberOfElements;irange+=numberOfThreads)
   {
     int rangeMin=irange;
@@ -57,11 +59,10 @@ void solverKokkos::computeOneStep( const int & timeStep,
     if(rangeMax>numberOfElements)rangeMax=numberOfElements;
     Kokkos::parallel_for(range_policy(rangeMin,rangeMax), KOKKOS_CLASS_LAMBDA ( const int e)
     {
-      int threadId=e-rangeMin;
-      //printf("threadId=%d\n",threadId);
-      //printf("teamsize=%d\n",team_member.team_size ());
+       int threadId=e-rangeMin;
+       //printf("threadId=%d\n",threadId);
   
-       // extract global coordinates of element e
+      // extract global coordinates of element e
       // get local to global indexes of nodes of element e
       int i=mesh.localToGlobalNodes(threadId, e, numberOfPointsPerElement, globalNodesList, localToGlobal );
 
@@ -137,7 +138,8 @@ void solverKokkos::computeOneStep( const int & timeStep,
   
     } );
     //Kokkos::fence();
-  }
+  }//end loop for( int irange=0;irange<numberOfElements;irange+=numberOfThreads)
+
   // update pressure
   Kokkos::parallel_for( range_policy(0,numberOfInteriorNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {
@@ -150,8 +152,6 @@ void solverKokkos::computeOneStep( const int & timeStep,
   //cout<<"pressure="<<pnGlobal(5,i1)<<endl;
 
   // damping terms
-  //static vectorReal ShGlobal( numberOfBoundaryNodes );
-
   //for( int i=0; i<numberOfBoundaryNodes; i++ )
   Kokkos::parallel_for( range_policy(0,numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {
@@ -187,8 +187,9 @@ void solverKokkos::computeOneStep( const int & timeStep,
         Kokkos::atomic_add(&ShGlobal[gIndexFaceNode],Sh(threadId,i));
       }
     } );
-  }
+  } // end loop for( int irange=0;irange<numberOfBoundaryFaces;irange+=numberOfThreads)
   //Kokkos::fence();
+
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
   Kokkos::parallel_for( range_policy(0,numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA  ( const int i )
