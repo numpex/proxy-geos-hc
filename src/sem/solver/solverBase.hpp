@@ -71,7 +71,7 @@ public:
 protected:
 
   int i1=0, i2=1;
-  int numberOfThreads=4;
+  int numberOfThreads=64;
 
   // get infos from mesh
   int numberOfNodes;
@@ -104,7 +104,7 @@ protected:
   arrayDouble derivativeBasisFunction2DX;
   arrayDouble derivativeBasisFunction2DY;
 
-
+///*
 #ifndef SEM_USE_OMP
   // private arrays (for Kokkos And LvArray)
   arrayInt localToGlobal;
@@ -132,6 +132,7 @@ protected:
   vectorReal massMatrixGlobal;
   vectorReal yGlobal;
   vectorReal ShGlobal;
+//*/
   
   
   

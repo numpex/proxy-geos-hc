@@ -22,7 +22,15 @@ private:
 public:
 
   QkGL();
+
+#ifdef SEM_USE_RAJA
   ~QkGL();
+#elif defined SEM_USE_KOKKOS
+KOKKOS_FUNCTION ~QkGL();
+#else
+  ~QkGL();
+#endif
+
 
   // get Gauss Lobatto quadrature points
   //vectorDouble gaussLobattoQuadraturePoints( int order ) const;

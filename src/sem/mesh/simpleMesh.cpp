@@ -22,7 +22,14 @@ simpleMesh::simpleMesh( const int & ex_in, const int & ey_in, const float & lx_i
   cout <<"simpleMesh initiliazed\n";
   cout<<"nx, ny="<<nx<<", "<<ny<<endl;
 }
+
+#ifdef SEM_USE_RAJA
 simpleMesh::~simpleMesh(){};
+#elif defined SEM_USE_KOKKOS
+KOKKOS_FUNCTION simpleMesh::~simpleMesh(){};
+#else
+simpleMesh::~simpleMesh(){};
+#endif
 
 int simpleMesh::getNumberOfNodes() const
 {

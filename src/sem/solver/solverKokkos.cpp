@@ -9,6 +9,7 @@
 //************************************************************************
 
 #include "solverKokkos.hpp"
+#include <cstdio>
  
 // compute one step of the time dynamic wave equation solver
 void solverKokkos::computeOneStep( const int & timeStep,
@@ -24,31 +25,33 @@ void solverKokkos::computeOneStep( const int & timeStep,
                                    QkGL Qk )
 {
   
-  //static vectorReal massMatrixGlobal( numberOfNodes );
-  //static vectorReal yGlobal( numberOfNodes );
   int nthreads=numberOfThreads;
-  Kokkos::parallel_for( numberOfNodes, KOKKOS_LAMBDA ( const int i )
+  Kokkos::parallel_for( numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
   {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
     pnGlobal(i,2)=pnGlobal(i,1); // pnm1=pn
     pnGlobal(i,1)=pnGlobal(i,0);//pn=pnp1
   } );
-
+  Kokkos::fence();
   // update pnGLobal with right hade side
-  Kokkos::parallel_for(numberOfRHS,[=] (const int i)
+  Kokkos::parallel_for(numberOfRHS,KOKKOS_CLASS_LAMBDA (const int i)
   {
     int nodeRHS=globalNodesList(rhsElement[i],0);
     pnGlobal(nodeRHS,1)+=timeSample*timeSample*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   });
+  Kokkos::fence();
  
   typedef Kokkos::TeamPolicy<ExecSpace>::member_type member_type;
   // Create an instance of the policy
   Kokkos::TeamPolicy<ExecSpace> policy ((numberOfElements+nthreads-1)/nthreads, nthreads );
-  Kokkos::parallel_for (policy, KOKKOS_LAMBDA (member_type team_member)
+  //Kokkos::TeamPolicy<ExecSpace> policy (numberOfElements/2, Kokkos::AUTO() );
+  Kokkos::parallel_for (policy, KOKKOS_CLASS_LAMBDA (member_type team_member)
   {
      int e=team_member.league_rank () * team_member.team_size () + team_member.team_rank ();
      int threadId= team_member.team_rank ();
+     printf("threadId=%d\n",threadId);
+     printf("teamsize=%d\n",team_member.team_size ());
   
      // extract global coordinates of element e
     // get local to global indexes of nodes of element e
@@ -125,28 +128,31 @@ void solverKokkos::computeOneStep( const int & timeStep,
     } 
   
   } );
-//}
+  Kokkos::fence();
 
   // update pressure
-  Kokkos::parallel_for( range_policy(0,numberOfInteriorNodes), KOKKOS_LAMBDA ( const int i )
+  Kokkos::parallel_for( range_policy(0,numberOfInteriorNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {
     int I=listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
     //pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-tmp*yGlobal[I]/massMatrixGlobal[I];
     pnGlobal(I,0)=2*pnGlobal(I,1)-pnGlobal(I,2)-tmp*yGlobal[I]/massMatrixGlobal[I];
   } );
+  Kokkos::fence();
   //cout<<"pressure="<<pnGlobal(5,i1)<<endl;
 
   // damping terms
   //static vectorReal ShGlobal( numberOfBoundaryNodes );
 
-  for( int i=0; i<numberOfBoundaryNodes; i++ )
+  //for( int i=0; i<numberOfBoundaryNodes; i++ )
+  Kokkos::parallel_for( range_policy(0,numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {
     ShGlobal[i]=0;
-  }
-
+  });
+  Kokkos::fence();
   Kokkos::TeamPolicy<ExecSpace> policy1 ((numberOfBoundaryFaces+nthreads-1)/nthreads, nthreads );
-  Kokkos::parallel_for (policy1, KOKKOS_LAMBDA (member_type team_member)
+  //Kokkos::TeamPolicy<ExecSpace> policy1 (numberOfBoundaryFaces, Kokkos::AUTO() );
+  Kokkos::parallel_for (policy1, KOKKOS_CLASS_LAMBDA (member_type team_member)
   {
      int iFace=team_member.league_rank () * team_member.team_size () + team_member.team_rank ();
      int threadId= team_member.team_rank ();
@@ -167,9 +173,10 @@ void solverKokkos::computeOneStep( const int & timeStep,
     }
   } );
 
+  Kokkos::fence();
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
-  Kokkos::parallel_for( range_policy(0,numberOfBoundaryNodes), KOKKOS_LAMBDA  ( const int i )
+  Kokkos::parallel_for( range_policy(0,numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA  ( const int i )
   {
     int I=listOfBoundaryNodes[i];
     float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
@@ -178,6 +185,7 @@ void solverKokkos::computeOneStep( const int & timeStep,
     pnGlobal(I,0)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,1)-MmSh*pnGlobal(I,2)-tmp*yGlobal[I]);
   } );
 
+  Kokkos::fence();
   
 
   /**

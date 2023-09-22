@@ -219,22 +219,21 @@
 #ifdef SEM_USE_KOKKOS
   #include <Kokkos_Core.hpp>
   //#define MemSpace Kokkos::SharedSpace;
-  #define MemSpace Kokkos::SharedSpace
-  //#define KOKKOS_FUNCTION=__device__
+  #define MemSpace Kokkos::HostSpace
   using ExecSpace = MemSpace::execution_space;
   using range_policy = Kokkos::RangePolicy<>;
 
-  typedef Kokkos::View<int*,     Kokkos::LayoutRight, MemSpace> vectorInt;
-  typedef Kokkos::View<float*,   Kokkos::LayoutRight, MemSpace> vectorReal;
-  typedef Kokkos::View<double*,  Kokkos::LayoutRight, MemSpace> vectorDouble;
+  typedef Kokkos::View<int*,     MemSpace> vectorInt;
+  typedef Kokkos::View<float*,   MemSpace> vectorReal;
+  typedef Kokkos::View<double*,  MemSpace> vectorDouble;
 
-  typedef Kokkos::View<int**,    Kokkos::LayoutRight, MemSpace> arrayInt;
-  typedef Kokkos::View<float**,  Kokkos::LayoutRight, MemSpace> arrayReal;
-  typedef Kokkos::View<double**, Kokkos::LayoutRight, MemSpace> arrayDouble;
+  typedef Kokkos::View<int**,    MemSpace> arrayInt;
+  typedef Kokkos::View<float**,  MemSpace> arrayReal;
+  typedef Kokkos::View<double**, MemSpace> arrayDouble;
 
-  typedef Kokkos::View<int***,    Kokkos::LayoutRight, MemSpace> array3DInt;
-  typedef Kokkos::View<float***,  Kokkos::LayoutRight, MemSpace> array3DReal;
-  typedef Kokkos::View<double***, Kokkos::LayoutRight, MemSpace> array3DDouble;
+  typedef Kokkos::View<int***,    MemSpace> array3DInt;
+  typedef Kokkos::View<float***,  MemSpace> array3DReal;
+  typedef Kokkos::View<double***, MemSpace> array3DDouble;
 
   template<class T>
   T allocateVector(int n1)

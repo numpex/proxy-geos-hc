@@ -26,7 +26,13 @@ private:
 public:
 
   simpleMesh( const int & ex_in, const int & ey_in, const float & lx_in, const float & ly_in, const int & order_in );
+ #ifdef SEM_USE_RAJA
   ~simpleMesh();
+ #elif defined SEM_USE_KOKKOS
+  KOKKOS_FUNCTION ~simpleMesh();
+ #else
+  ~simpleMesh();
+ #endif
 
   // Returns number of Nodes in the mesh
   int  getNumberOfNodes() const;

@@ -10,7 +10,16 @@ namespace FE
 {
 
 QkGL::QkGL(){};
-QkGL::~QkGL(){};
+
+#ifdef SEM_USE_RAJA
+ QkGL::~QkGL(){};
+#elif defined SEM_USE_KOKKOS
+KOKKOS_FUNCTION QkGL::~QkGL(){};
+#else
+  QkGL::~QkGL(){};
+#endif
+
+
 
 //vectorDouble QkGL::gaussLobattoQuadraturePoints( int order ) const
 #ifdef SEM_USE_RAJA

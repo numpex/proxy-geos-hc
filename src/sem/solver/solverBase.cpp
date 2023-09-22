@@ -9,7 +9,7 @@
 
 #include "solverBase.hpp"
 
-void solverBase::computeFEInit( const int & order,
+void solverBase::computeFEInit( const int    & order,
                                 simpleMesh mesh,
                                 QkGL Qk )
 {
@@ -20,7 +20,7 @@ void solverBase::computeFEInit( const int & order,
   numberOfNodes=mesh.getNumberOfNodes();
   numberOfElements=mesh.getNumberOfElements();
   numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
-
+  
   globalNodesList=allocateArray2D<arrayInt>(numberOfElements,(order+1)*(order+1));
   mesh.globalNodesList( numberOfElements, globalNodesList );
 
@@ -109,6 +109,8 @@ void solverBase::computeFEInit( const int & order,
   massMatrixGlobal=allocateVector<vectorReal>( numberOfNodes );
   yGlobal=allocateVector<vectorReal>( numberOfNodes );
   ShGlobal=allocateVector<vectorReal>( numberOfBoundaryNodes );
+  std::cout<<"end of shared arrays initialization\n";
+
 }
 
 #ifdef SEM_USE_OMP
