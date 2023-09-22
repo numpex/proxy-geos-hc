@@ -218,8 +218,8 @@
 
 #ifdef SEM_USE_KOKKOS
   #include <Kokkos_Core.hpp>
-  //#define MemSpace Kokkos::SharedSpace;
-  #define MemSpace Kokkos::HostSpace
+  #define MemSpace Kokkos::SharedSpace
+  //#define MemSpace Kokkos::HostSpace
   using ExecSpace = MemSpace::execution_space;
   using range_policy = Kokkos::RangePolicy<>;
 
