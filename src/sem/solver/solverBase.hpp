@@ -13,6 +13,7 @@
 #include    "QkGL.hpp"
 #include    "simpleMesh.hpp"
 #include    "dataType.hpp"
+#include    "omp.h"
 
 using namespace grid;
 using namespace FE;
@@ -71,7 +72,7 @@ public:
 protected:
 
   int i1=0, i2=1;
-  int numberOfThreads=128;
+  int numberOfThreads=omp_get_max_threads();
 
   // get infos from mesh
   int numberOfNodes;
