@@ -40,16 +40,23 @@ target_include_directories(test_LvArray.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../
 
 if (ENABLE_CUDA)
   if(ENABLE_KOKKOS)
-	  message( STATUS "kokkosinclude=${Kokkos_ROOT}/../../../include")
+    message( STATUS "kokkosinclude=${Kokkos_ROOT}/../../../include")
     blt_add_executable( NAME test_KOKKOS.exe 
                         SOURCES test_Kokkos.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+    blt_add_executable( NAME test_KOKKOS1.exe 
+                        SOURCES test_Kokkos1.cpp
+                        DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
   endif()
   if(ENABLE_LVARRAY)
+    blt_add_executable( NAME test_LvArrayRAJACudaStencil.exe 
+                        SOURCES test_LvArrayRAJACudaStencil.cpp
+                        DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+    target_include_directories(test_LvArrayRAJACudaStencil.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
     blt_add_executable( NAME test_LvArrayRAJACuda.exe 
                         SOURCES test_LvArrayRAJACuda.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
-		target_include_directories(test_LvArrayRAJACuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
+    target_include_directories(test_LvArrayRAJACuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
     blt_add_executable( NAME    test_cuda.exe
                         SOURCES test_cuda.cpp
                         DEPENDS_ON cuda)
@@ -83,6 +90,10 @@ else()
                         SOURCES test_Kokkos.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
     target_include_directories(test_KOKKOS.exe PUBLIC "${Kokkos_ROOT}/../../../include")
+    blt_add_executable( NAME test_KOKKOS1.exe 
+                        SOURCES test_Kokkos1.cpp
+                        DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+    target_include_directories(test_KOKKOS1.exe PUBLIC "${Kokkos_ROOT}/../../../include")
   endif()
 endif()
 

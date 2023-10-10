@@ -31,7 +31,7 @@ void solverKokkos::computeOneStep( const int & timeStep,
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
   } );
-  Kokkos::fence();
+  //Kokkos::fence();
 
   // update pnGLobal with right hade side
   Kokkos::parallel_for(numberOfRHS,KOKKOS_CLASS_LAMBDA (const int i)
@@ -39,13 +39,12 @@ void solverKokkos::computeOneStep( const int & timeStep,
     int nodeRHS=globalNodesList(rhsElement[i],0);
     pnGlobal(nodeRHS,i2)+=timeSample*timeSample*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   });
-  Kokkos::fence();
+  //Kokkos::fence();
  
   typedef Kokkos::TeamPolicy<ExecSpace>::member_type member_type;
   
   //Create an instance of the policy
   Kokkos::TeamPolicy<ExecSpace> policy ((numberOfElements+nthreads-1)/nthreads, nthreads );
-
   //Kokkos::TeamPolicy<ExecSpace> policy (numberOfElements, Kokkos::AUTO() );
   Kokkos::parallel_for (policy, KOKKOS_CLASS_LAMBDA (member_type team_member)
   {
@@ -123,7 +122,6 @@ void solverKokkos::computeOneStep( const int & timeStep,
       } 
     });
     //Kokkos::fence();
-  //}//end loop for( int irange=0;irange<numberOfElements;irange+=numberOfThreads)
 
   // update pressure
   Kokkos::parallel_for( range_policy(0,numberOfInteriorNodes), KOKKOS_CLASS_LAMBDA ( const int i )
@@ -132,37 +130,40 @@ void solverKokkos::computeOneStep( const int & timeStep,
     float tmp=timeSample*timeSample;
     pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-tmp*yGlobal[I]/massMatrixGlobal[I];
   } );
-  Kokkos::fence();
+  //Kokkos::fence();
 
   // damping terms
   Kokkos::parallel_for( range_policy(0,numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {
     ShGlobal[i]=0;
   });
-  Kokkos::fence();
+
   Kokkos::TeamPolicy<ExecSpace> policy1 ((numberOfBoundaryFaces+nthreads-1)/nthreads, nthreads );
   //Kokkos::TeamPolicy<ExecSpace> policy1 (numberOfBoundaryFaces, Kokkos::AUTO() );
   Kokkos::parallel_for (policy1, KOKKOS_CLASS_LAMBDA (member_type team_member)
   {
     int iFace=team_member.league_rank () * team_member.team_size () + team_member.team_rank ();
-    int threadId= team_member.team_rank ();
-  
-    //get ds
-    int i=Qk.computeDs( threadId, iFace, order, faceInfos,numOfBasisFunctionOnFace,
-                        Js, globalNodesCoords, derivativeBasisFunction2DX,
-                        derivativeBasisFunction2DY,
-                        ds );
-  
-    //compute Sh and ShGlobal
-    for( int i=0; i<order+1; i++ )
+    if(iFace<numberOfBoundaryFaces)
     {
-      int gIndexFaceNode=localFaceNodeToGlobalFaceNode(iFace,i);
-      Sh(threadId,i)=weights[i]*ds(threadId,i)/(model[faceInfos(iFace,0)]);
-      //ShGlobal[gIndexFaceNode]+=Sh(threadId,i);
-      Kokkos::atomic_add(&ShGlobal[gIndexFaceNode],Sh(threadId,i));
+      int threadId= team_member.team_rank ();
+  
+      //get ds
+      int i=Qk.computeDs( threadId, iFace, order, faceInfos,numOfBasisFunctionOnFace,
+                          Js, globalNodesCoords, derivativeBasisFunction2DX,
+                          derivativeBasisFunction2DY,
+                          ds );
+  
+      //compute Sh and ShGlobal
+      for( int i=0; i<order+1; i++ )
+      {
+        int gIndexFaceNode=localFaceNodeToGlobalFaceNode(iFace,i);
+        Sh(threadId,i)=weights[i]*ds(threadId,i)/(model[faceInfos(iFace,0)]);
+        //ShGlobal[gIndexFaceNode]+=Sh(threadId,i);
+        Kokkos::atomic_add(&ShGlobal[gIndexFaceNode],Sh(threadId,i));
+      }
     }
-  } );
-  Kokkos::fence();
+  });
+  //Kokkos::fence();
 
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
@@ -174,7 +175,7 @@ void solverKokkos::computeOneStep( const int & timeStep,
     pnGlobal(I,i1)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,i2)-MmSh*pnGlobal(I,i1)-tmp*yGlobal[I]);
   } );
 
-  Kokkos::fence();
+ // Kokkos::fence();
   
 
   /**
