@@ -105,30 +105,6 @@ protected:
   arrayDouble derivativeBasisFunction2DX;
   arrayDouble derivativeBasisFunction2DY;
 
-///*
-#ifndef SEM_USE_OMP
-  // private arrays (for Kokkos And LvArray)
-  arrayInt localToGlobal;
-  array3DDouble Xi;
-
-  array3DDouble jacobianMatrix;
-  arrayDouble detJ;
-  array3DDouble invJacobianMatrix;
-  array3DDouble transpInvJacobianMatrix;
-
-  array3DDouble B;
-  array3DDouble R;
-
-  arrayDouble massMatrixLocal;
-  arrayReal pnLocal;
-  arrayReal Y;
-
-  arrayReal ds;
-  arrayReal Sh;
-  arrayInt numOfBasisFunctionOnFace;
-  array3DReal Js;
-#endif
-
   //shared arrays
   vectorReal massMatrixGlobal;
   vectorReal yGlobal;

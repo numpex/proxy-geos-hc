@@ -93,18 +93,17 @@ public:
   int localToGlobalNodes( const int & elementNumber, 
                           const int & nPointsPerElement, 
                           arrayInt const & nodesList, 
-                          vectorInt const & localToGlobal) const;
+                          int localToGlobal[]) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_FUNCTION int localToGlobalNodes( const int & threadId,
-                                          const int & elementNumber,
+  KOKKOS_FUNCTION int localToGlobalNodes( const int & elementNumber, 
                                           const int & nPointsPerElement, 
                                           arrayInt const & nodesList, 
-                                          arrayInt const & localToGlobal) const;
+                                          int localToGlobal[]) const;
 #else
   int localToGlobalNodes( const int & elementNumber, 
                           const int & nPointsPerElement, 
-                          arrayInt & nodesList, 
-                          vectorInt & localToGlobal) const;
+                          arrayInt  & nodesList, 
+                          int localToGlobal[]) const;
 #endif
   
 
@@ -136,37 +135,36 @@ public:
 #ifdef SEM_USE_RAJA
   int  getXi( const int & numberOfPointsPerElement,
               arrayReal const & globalNodesCoords,
-              vectorInt const & localToGlobal , 
-              arrayDouble const & Xi) const;
+              int const  localToGlobal[] , 
+              double  Xi[][2]) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_FUNCTION int  getXi( const int & threadId,
-                              const int & numberOfPointsPerElement, 
+  KOKKOS_FUNCTION int  getXi( const int & numberOfPointsPerElement,
                               arrayReal const & globalNodesCoords,
-                              arrayInt const & localToGlobal , array3DDouble const & Xi) const;
+                              int const  localToGlobal[] , 
+                              double  Xi[][2]) const;
 #else
   int  getXi( const int & numberOfPointsPerElement,
-              arrayReal & globalNodesCoords,
-              vectorInt & localToGlobal ,
-              arrayDouble & Xi) const;
+              arrayReal  & globalNodesCoords,
+              int const  localToGlobal[] , 
+              double  Xi[][2]) const;
 #endif
 
   // get global DOF belonging to the faces of element e
 #ifdef SEM_USE_RAJA
-  int getGlobalDofOfFace( const int & e,
-                               arrayInt  const & globalNodesList,
-                               vectorInt const & localToGlobal,
-                               arrayInt  const & nodesFace ) const;
+  int getGlobalDofOfFace(  const int & e,
+                           arrayInt  const & globalNodesList,
+                           int const localToGlobal[],
+                           int  nodesFace[][6] ) const;
 #elif defined SEM_USE_KOKKOS
-  KOKKOS_FUNCTION int getGlobalDofOfFace( const int & e,
-                                          const int & threadId,
-                                          arrayInt  const & globalNodesList,
-                                          arrayInt const & localToGlobal,
-                                          array3DInt  const & nodesFace ) const;
+  KOKKOS_FUNCTION int getGlobalDofOfFace(  const int & e,
+                                           arrayInt  const & globalNodesList,
+                                           int const localToGlobal[],
+                                           int  nodesFace[][6] ) const;
 #else
   int getGlobalDofOfFace( const int & e,
-                               arrayInt  & globalNodesList,
-                               vectorInt & localToGlobal,
-                               arrayInt  & nodesFace ) const;
+                          arrayInt  & globalNodesList,
+                          int const localToGlobal[],
+                          int  nodesFace[][6]) const;
 #endif
 
   // provides informations about boundary  faces:

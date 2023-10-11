@@ -220,28 +220,23 @@ void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt & nodes
 int simpleMesh::localToGlobalNodes( const int & elementNumber, 
                                     const int & nPointsPerElement, 
                                     arrayInt const & nodesList,  
-                                    vectorInt const & localToGlobal)const
+                                    int   localToGlobal[])const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int simpleMesh::localToGlobalNodes( const int & threadId,
-                                                    const int & elementNumber, 
-                                                    const int & nPointsPerElement,
-                                                    arrayInt const & nodesList,
-                                                    arrayInt const & localToGlobal)const
+KOKKOS_FUNCTION int simpleMesh::localToGlobalNodes(const int & elementNumber, 
+                                                   const int & nPointsPerElement, 
+                                                   arrayInt const & nodesList,  
+                                                   int  localToGlobal[])const
 #else
 int simpleMesh::localToGlobalNodes( const int & elementNumber, 
                                     const int & nPointsPerElement, 
                                     arrayInt & nodesList,  
-                                    vectorInt & localToGlobal)const
+                                    int  localToGlobal[])const
 #endif
 {
   //vectorInt localToGlobal( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-#ifdef SEM_USE_OMP
     localToGlobal[i]=nodesList(elementNumber,i);
-#else
-    localToGlobal(threadId,i)=nodesList(elementNumber,i);
-#endif
   }
   //return localToGlobal;
   return 0;
@@ -357,29 +352,25 @@ void simpleMesh::neighbors( const int & e , vectorInt  & neigh) const
 #ifdef SEM_USE_RAJA
 int simpleMesh::getXi( const int & numberOfPointsPerElement, 
                        arrayReal const & globalNodesCoords,
-                       vectorInt const & localToGlobal ,
-                       arrayDouble const & Xi) const
+                       int const  localToGlobal[] ,
+                       double Xi[][2]) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int simpleMesh::getXi( const int & threadId,
-                                       const int & numberOfPointsPerElement,
+KOKKOS_FUNCTION int simpleMesh::getXi( const int & numberOfPointsPerElement, 
                                        arrayReal const & globalNodesCoords,
-                                       arrayInt const & localToGlobal , array3DDouble const & Xi) const
+                                       int const  localToGlobal[] ,
+                                       double Xi[][2]) const
 #else
 int simpleMesh::getXi( const int & numberOfPointsPerElement, 
-                       arrayReal & globalNodesCoords,
-                       vectorInt & localToGlobal , arrayDouble & Xi) const
+                       arrayReal  & globalNodesCoords,
+                       int const  localToGlobal[] ,
+                       double Xi[][2]) const
 #endif
 {
   //arrayDouble Xi( numberOfPointsPerElement, 2 );
   for( int i=0; i<numberOfPointsPerElement; i++ )
   {
-#ifdef SEM_USE_OMP
-    Xi(i,0)=globalNodesCoords(localToGlobal[i],0);
-    Xi(i,1)=globalNodesCoords(localToGlobal[i],1);
-#else
-    Xi(threadId,i,0)=globalNodesCoords(localToGlobal(threadId,i),0);
-    Xi(threadId,i,1)=globalNodesCoords(localToGlobal(threadId,i),1);  
-#endif
+    Xi[i][0]=globalNodesCoords(localToGlobal[i],0);
+    Xi[i][1]=globalNodesCoords(localToGlobal[i],1);
   }
   //return Xi;
   return 0;
@@ -397,74 +388,46 @@ int simpleMesh::getXi( const int & numberOfPointsPerElement,
 #ifdef SEM_USE_RAJA
 int simpleMesh::getGlobalDofOfFace( const int & e,
                                     arrayInt  const & globalNodesList,
-                                   vectorInt const & localToGlobal,
-                                   arrayInt  const & nodesFace ) const
+                                    int const localToGlobal[],
+                                    int  nodesFace[][6] ) const
 #elif defined SEM_USE_KOKKOS
 KOKKOS_FUNCTION int simpleMesh::getGlobalDofOfFace( const int & e,
-                                                    const int & threadId,
                                                     arrayInt  const & globalNodesList,
-                                                    arrayInt const & localToGlobal,
-                                                    array3DInt  const & nodesFace ) const
+                                                    int const localToGlobal[],
+                                                    int  nodesFace[][6] ) const
 #else
 int simpleMesh::getGlobalDofOfFace( const int & e,
                                     arrayInt  & globalNodesList,
-                                    vectorInt & localToGlobal,
-                                    arrayInt  & nodesFace ) const
+                                    int const localToGlobal[],
+                                    int  nodesFace[][6]) const
 #endif
 {
-#ifdef SEM_USE_OMP
   //arrayInt nodesFace( 4, order+1 );
 
   //left face
   for( int i=0; i<order+1; i++ )
   {
     int dofLocal=i*(order+1);
-    nodesFace(0,i)=globalNodesList(e,dofLocal);
+    nodesFace[0][i]=globalNodesList(e,dofLocal);
   }
   //bottom face
   for( int i=0; i<order+1; i++ )
   {
     int dofLocal=i;
-    nodesFace(1,i)=globalNodesList(e,dofLocal);
+    nodesFace[1][i]=globalNodesList(e,dofLocal);
   }
   //right face
   for( int i=0; i<order+1; i++ )
   {
     int dofLocal=order+i*(order+1);
-    nodesFace(2,i)=globalNodesList(e,dofLocal);
+    nodesFace[2][i]=globalNodesList(e,dofLocal);
   }
   //top face
   for( int i=0; i<order+1; i++ )
   {
     int dofLocal=i+order*(order+1);
-    nodesFace(3,i)=globalNodesList(e,dofLocal);
+    nodesFace[3][i]=globalNodesList(e,dofLocal);
   }
-#else
-  //left face
-  for( int i=0; i<order+1; i++ )
-  {
-    int dofLocal=i*(order+1);
-    nodesFace(threadId,0,i)=globalNodesList(e,dofLocal);
-  }
-  //bottom face
-  for( int i=0; i<order+1; i++ )
-  {
-    int dofLocal=i;
-    nodesFace(threadId,1,i)=globalNodesList(e,dofLocal);
-  }
-  //right face
-  for( int i=0; i<order+1; i++ )
-  {
-    int dofLocal=order+i*(order+1);
-    nodesFace(threadId,2,i)=globalNodesList(e,dofLocal);
-  }
-  //top face
-  for( int i=0; i<order+1; i++ )
-  {
-    int dofLocal=i+order*(order+1);
-    nodesFace(threadId,3,i)=globalNodesList(e,dofLocal);
-  }
-#endif
   //return nodesFace;
   return 0;
 }

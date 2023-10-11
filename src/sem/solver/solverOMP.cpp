@@ -24,26 +24,26 @@ void solverOMP::computeOneStep( const float & timeSample,
 
 #pragma omp parallel
   { // start parallel section
-    vectorInt localToGlobal(numberOfPointsPerElement);
-    arrayDouble Xi(numberOfPointsPerElement, 2 );
+    int localToGlobal[36];
+    double Xi[36][2];
 
-    arrayDouble jacobianMatrix(4, numberOfPointsPerElement);
-    vectorDouble detJ(numberOfPointsPerElement);
-    arrayDouble invJacobianMatrix(4, numberOfPointsPerElement);
-    arrayDouble transpInvJacobianMatrix(4, numberOfPointsPerElement);
+    double jacobianMatrix[36][4];
+    double detJ[36];
+    double invJacobianMatrix[36][4];
+    double transpInvJacobianMatrix[36][4];
 
-    arrayDouble B(4, numberOfPointsPerElement);
-    arrayDouble R(numberOfPointsPerElement, numberOfPointsPerElement);
+    double B[36][4];
+    double R[36][36];
 
-    vectorDouble massMatrixLocal(numberOfPointsPerElement);
+    double massMatrixLocal[36];
 
-    vectorReal pnLocal( numberOfPointsPerElement );
-    vectorReal Y( numberOfPointsPerElement );
+    double pnLocal[36];
+    double Y[36];
 
-    vectorReal ds( order+1 );
-    vectorReal Sh( order+1 );
-    vectorInt numOfBasisFunctionOnFace( order+1 );
-    arrayReal Js( 2, order+1 );
+    float ds[6];
+    float Sh[6];
+    int numOfBasisFunctionOnFace[6];
+    float Js[2][6];
 
 #pragma omp for 
   for( int i=0; i<numberOfNodes; i++ )
@@ -56,13 +56,34 @@ void solverOMP::computeOneStep( const float & timeSample,
 #pragma omp for
   for( int e=0; e<numberOfElements; e++ )
   {
+    // start parallel section
+    int localToGlobal[36];
+    double Xi[36][2];
 
+    double jacobianMatrix[36][4];
+    double detJ[36];
+    double invJacobianMatrix[36][4];
+    double transpInvJacobianMatrix[36][4];
+
+    double B[36][4];
+    double R[36][36];
+
+    double massMatrixLocal[36];
+
+    double pnLocal[36];
+    double Y[36];
+
+    float ds[6];
+    float Sh[6];
+    int numOfBasisFunctionOnFace[6];
+    float Js[2][6];
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
     int a=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
-
+    
     //get global coordinates Xi of element e
     int b=mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
+    //if(e<10)printf("%lf %lf %lf %lf %lf %lf %lf %lf\n",Xi[0][0],Xi[0][1],Xi[1][0],Xi[1][1],Xi[2][0],Xi[2][1],Xi[3][0],Xi[3][1]);
 
     // compute jacobian Matrix
     int c=Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,

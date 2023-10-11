@@ -77,34 +77,6 @@ void solverBase::computeFEInit( const int    & order,
 
   cout<<"fin allocation  shared:"<<endl;
 
-
-  //private arrays
-#ifndef SEM_USE_OMP
-  localToGlobal=allocateArray2D<arrayInt>(numberOfThreads,numberOfPointsPerElement);
-  Xi=allocateArray3D<array3DDouble>( numberOfThreads, numberOfPointsPerElement, 2 );
-
-  jacobianMatrix=allocateArray3D<array3DDouble>(numberOfThreads,4, numberOfPointsPerElement);
-  detJ=allocateArray2D<arrayDouble>(numberOfThreads,numberOfPointsPerElement);
-  invJacobianMatrix=allocateArray3D<array3DDouble>(numberOfThreads,4, numberOfPointsPerElement);
-  transpInvJacobianMatrix=allocateArray3D<array3DDouble>(numberOfThreads,4, numberOfPointsPerElement);
-
-  B=allocateArray3D<array3DDouble>(numberOfThreads,4, numberOfPointsPerElement);
-  R=allocateArray3D<array3DDouble>(numberOfThreads,numberOfPointsPerElement, numberOfPointsPerElement);
-
-  massMatrixLocal=allocateArray2D<arrayDouble>(numberOfThreads,numberOfPointsPerElement);
-  
-
-  pnLocal=allocateArray2D<arrayReal>(numberOfThreads, numberOfPointsPerElement );
-  Y=allocateArray2D<arrayReal>(numberOfThreads, numberOfPointsPerElement );
-
-  ds=allocateArray2D<arrayReal>(numberOfThreads, order+1 );
-  Sh=allocateArray2D<arrayReal>(numberOfThreads, order+1 );
-  numOfBasisFunctionOnFace=allocateArray2D<arrayInt>(numberOfThreads, order+1 );
-  Js=allocateArray3D<array3DReal>(numberOfThreads, 2, order+1 );
-  cout<<"end of private arrays allocation\n";
-#endif
-
-
   //shared arrays
   massMatrixGlobal=allocateVector<vectorReal>( numberOfNodes );
   yGlobal=allocateVector<vectorReal>( numberOfNodes );

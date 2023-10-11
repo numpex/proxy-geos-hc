@@ -460,57 +460,41 @@ void QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
 
 #ifdef SEM_USE_RAJA
 int QkGL::computeJacobianMatrix(  const int & nPointsPerElement,
-                                  arrayDouble const & Xi,
+                                  double const  Xi[][2],
                                   arrayDouble const & dxPhi,
                                   arrayDouble const & dyPhi,
-                                  arrayDouble const & jacobianMatrix )const
+                                  double  jacobianMatrix[][4] )const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeJacobianMatrix( const int & threadId,
-                                                 const int & nPointsPerElement,
-                                                 array3DDouble const & Xi,
+KOKKOS_FUNCTION int QkGL::computeJacobianMatrix( const int & nPointsPerElement,
+                                                 double const Xi[][2],
                                                  arrayDouble const & dxPhi,
                                                  arrayDouble const & dyPhi,
-                                                 array3DDouble const & jacobianMatrix )const
+                                                 double  jacobianMatrix[][4] )const
 #else
 int QkGL::computeJacobianMatrix(  const int & nPointsPerElement,
-                                  arrayDouble & Xi,
+                                  double const  Xi[][2],
                                   arrayDouble & dxPhi,
                                   arrayDouble & dyPhi,
-                                  arrayDouble & jacobianMatrix )const
+                                  double  jacobianMatrix[][4] )const
 #endif
 {
   //arrayDouble jacobianMatrix( 4, nPointsPerElement );
 
   for( int i=0; i<nPointsPerElement; i++ )
   {
-#ifdef SEM_USE_OMP
-    jacobianMatrix(0,i)=0;
-    jacobianMatrix(1,i)=0;
-    jacobianMatrix(2,i)=0;
-    jacobianMatrix(3,i)=0;
+    jacobianMatrix[i][0]=0;
+    jacobianMatrix[i][1]=0;
+    jacobianMatrix[i][2]=0;
+    jacobianMatrix[i][3]=0;
     for( int j=0; j<nPointsPerElement; j++ )
     {
-      jacobianMatrix(0,i)+=Xi(j,0)*dxPhi(j,i);
-      jacobianMatrix(1,i)+=Xi(j,0)*dyPhi(j,i);
-      jacobianMatrix(2,i)+=Xi(j,1)*dxPhi(j,i);
-      jacobianMatrix(3,i)+=Xi(j,1)*dyPhi(j,i);
+      jacobianMatrix[i][0]+=Xi[j][0]*dxPhi(j,i);
+      jacobianMatrix[i][1]+=Xi[j][0]*dyPhi(j,i);
+      jacobianMatrix[i][2]+=Xi[j][1]*dxPhi(j,i);
+      jacobianMatrix[i][3]+=Xi[j][1]*dyPhi(j,i);
     }
-#else
-    jacobianMatrix(threadId,0,i)=0;
-    jacobianMatrix(threadId,1,i)=0;
-    jacobianMatrix(threadId,2,i)=0;
-    jacobianMatrix(threadId,3,i)=0;
-    for( int j=0; j<nPointsPerElement; j++ )
-    {
-      jacobianMatrix(threadId,0,i)+=Xi(threadId,j,0)*dxPhi(j,i);
-      jacobianMatrix(threadId,1,i)+=Xi(threadId,j,0)*dyPhi(j,i);
-      jacobianMatrix(threadId,2,i)+=Xi(threadId,j,1)*dxPhi(j,i);
-      jacobianMatrix(threadId,3,i)+=Xi(threadId,j,1)*dyPhi(j,i);
-    }
-#endif
   }
   return 0;
-  //return jacobianMatrix;
 }
 
 // compute jacobian matrix determinant
@@ -518,30 +502,22 @@ int QkGL::computeJacobianMatrix(  const int & nPointsPerElement,
 //                                                      arrayDouble & jacobianMatrix ) const
 #ifdef SEM_USE_RAJA
 int QkGL::computeDeterminantOfJacobianMatrix(  const int & nPointsPerElement,
-                                               arrayDouble const & jacobianMatrix,
-                                               vectorDouble const & detJ ) const
+                                               double const jacobianMatrix[][4],
+                                               double detJ[] ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeDeterminantOfJacobianMatrix( const int & threadId,
-                                                              const int & nPointsPerElement,
-                                                              array3DDouble const & jacobianMatrix,
-                                                              arrayDouble const & detJ ) const
+KOKKOS_FUNCTION int QkGL::computeDeterminantOfJacobianMatrix(  const int & nPointsPerElement,
+                                                               double const jacobianMatrix[][4],
+                                                               double detJ[] ) const
 #else
 int QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
-                                               arrayDouble & jacobianMatrix,
-                                               vectorDouble & detJ ) const
+                                              double const jacobianMatrix[][4],
+                                              double detJ[]  ) const
 #endif
 {
   //vectorDouble detJ( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-#ifdef SEM_USE_OMP
-    detJ[i]=(jacobianMatrix(0,i)*jacobianMatrix(3,i)-jacobianMatrix(2,i)*jacobianMatrix(1,i));
-    //cout<<"det["<<i<<"]="<<detJ[i]<<endl;
-#else
-    detJ(threadId,i)=(jacobianMatrix(threadId,0,i)*jacobianMatrix(threadId,3,i)
-                     -jacobianMatrix(threadId,2,i)*jacobianMatrix(threadId,1,i));
-    //cout<<"det["<<i<<"]="<<detJ(threadId,i)<<endl;            
-#endif
+    detJ[i]=(jacobianMatrix[i][0]*jacobianMatrix[i][3]-jacobianMatrix[i][2]*jacobianMatrix[i][1]);
   }
   return 0;
   //return detJ;
@@ -553,40 +529,29 @@ int QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
 //                                            vectorDouble & detJ ) const
 #ifdef SEM_USE_RAJA
 int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
-                                    arrayDouble const & jacobianMatrix,
-                                    vectorDouble const & detJ,
-                                    arrayDouble const & invJacobianMatrix ) const
+                                    double const  jacobianMatrix[][4],
+                                    double const  detJ[],
+                                    double invJacobianMatrix [][4]) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeInvJacobianMatrix( const int &threadId,
-                                                    const int & nPointsPerElement,
-                                                    array3DDouble const & jacobianMatrix,
-                                                    arrayDouble const & detJ,
-                                                    array3DDouble const & invJacobianMatrix ) const
+KOKKOS_FUNCTION int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
+                                                    double const  jacobianMatrix[][4],
+                                                    double const  detJ[],
+                                                    double invJacobianMatrix [][4] ) const
 #else
 int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
-                                     arrayDouble & jacobianMatrix,
-                                     vectorDouble & detJ,
-                                     arrayDouble & invJacobianMatrix ) const
+                                    double const  jacobianMatrix[][4],
+                                    double const  detJ[],
+                                    double invJacobianMatrix [][4]  ) const
 #endif
 {
-#ifdef SEM_USE_OMP
   //arrayDouble invJacobianMatrix( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-    invJacobianMatrix(0,i)=(jacobianMatrix(3,i)/detJ[i]);
-    invJacobianMatrix(1,i)=(-jacobianMatrix(1,i)/detJ[i]);
-    invJacobianMatrix(2,i)=(-jacobianMatrix(2,i)/detJ[i]);
-    invJacobianMatrix(3,i)=(jacobianMatrix(0,i)/detJ[i]);
+    invJacobianMatrix[i][0]=(jacobianMatrix[i][3]/detJ[i]);
+    invJacobianMatrix[i][1]=(-jacobianMatrix[i][1]/detJ[i]);
+    invJacobianMatrix[i][2]=(-jacobianMatrix[i][2]/detJ[i]);
+    invJacobianMatrix[i][3]=(jacobianMatrix[i][0]/detJ[i]);
   }
-#else
-  for( int i=0; i<nPointsPerElement; i++ )
-  {
-    invJacobianMatrix(threadId,0,i)=(jacobianMatrix(threadId,3,i)/detJ(threadId,i));
-    invJacobianMatrix(threadId,1,i)=(-jacobianMatrix(threadId,1,i)/detJ(threadId,i));
-    invJacobianMatrix(threadId,2,i)=(-jacobianMatrix(threadId,2,i)/detJ(threadId,i));
-    invJacobianMatrix(threadId,3,i)=(jacobianMatrix(threadId,0,i)/detJ(threadId,i));
-  } 
-#endif
   return 0;
   //return invJacobianMatrix;
 }
@@ -597,36 +562,28 @@ int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
 //                                                  vectorDouble & detJ ) const
 #ifdef SEM_USE_RAJA
 int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-                                                  arrayDouble const & jacobianMatrix,
-                                                  vectorDouble const & detJ,
-                                                  arrayDouble  const & transpInvJacobianMatrix ) const
+                                          double const  jacobianMatrix[][4],
+                                          double const detJ[],
+                                          double  transpInvJacobianMatrix[][4] ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeTranspInvJacobianMatrix( const int & threadId,
-                                                          const int & nPointsPerElement,
-                                                          array3DDouble const & jacobianMatrix,
-                                                          arrayDouble const & detJ,
-                                                          array3DDouble  const & transpInvJacobianMatrix ) const
+KOKKOS_FUNCTION int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+                                                          double const  jacobianMatrix[][4],
+                                                          double const detJ[],
+                                                          double transpInvJacobianMatrix[][4] ) const
 #else
 int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-                                          arrayDouble & jacobianMatrix,
-                                          vectorDouble & detJ,
-                                          arrayDouble  & transpInvJacobianMatrix ) const
+                                          double const  jacobianMatrix[][4],
+                                          double const detJ[],
+                                          double  transpInvJacobianMatrix[][4] ) const
 #endif
 {
   //arrayDouble transpInvJacobianMatrix( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-#ifdef SEM_USE_OMP
-    transpInvJacobianMatrix(0,i)=(jacobianMatrix(3,i)/detJ[i]);
-    transpInvJacobianMatrix(1,i)=(-jacobianMatrix(2,i)/detJ[i]);
-    transpInvJacobianMatrix(2,i)=(-jacobianMatrix(1,i)/detJ[i]);
-    transpInvJacobianMatrix(3,i)=(jacobianMatrix(0,i)/detJ[i]);
-#else
-    transpInvJacobianMatrix(threadId,0,i)=(jacobianMatrix(threadId,3,i)/detJ(threadId,i));
-    transpInvJacobianMatrix(threadId,1,i)=(-jacobianMatrix(threadId,2,i)/detJ(threadId,i));
-    transpInvJacobianMatrix(threadId,2,i)=(-jacobianMatrix(threadId,1,i)/detJ(threadId,i));
-    transpInvJacobianMatrix(threadId,3,i)=(jacobianMatrix(threadId,0,i)/detJ(threadId,i));
-#endif
+    transpInvJacobianMatrix[i][0]=(jacobianMatrix[i][3]/detJ[i]);
+    transpInvJacobianMatrix[i][1]=(-jacobianMatrix[i][2]/detJ[i]);
+    transpInvJacobianMatrix[i][2]=(-jacobianMatrix[i][1]/detJ[i]);
+    transpInvJacobianMatrix[i][3]=(jacobianMatrix[i][0]/detJ[i]);
   }
   return 0;
   //return transpInvJacobianMatrix;
@@ -639,50 +596,36 @@ int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 //                            vectorDouble & detJ ) const
 #ifdef SEM_USE_RAJA
 int QkGL::computeB( const int & nPointsPerElement,
-                    arrayDouble const & invJacobianMatrix,
-                    arrayDouble const & transpInvJacobianMatrix,
-                    vectorDouble const & detJ,
-                    arrayDouble const & B ) const
+                    double const invJacobianMatrix[][4],
+                    double const transpInvJacobianMatrix[][4],
+                    double const detJ[],
+                    double   B[][4] ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeB( const int & threadId,
-                                    const int & nPointsPerElement,
-                                    array3DDouble const & invJacobianMatrix,
-                                    array3DDouble const & transpInvJacobianMatrix,
-                                    arrayDouble const & detJ,
-                                    array3DDouble const & B ) const
+KOKKOS_FUNCTION int QkGL::computeB( const int & nPointsPerElement,
+                                    double const invJacobianMatrix[][4],
+                                    double const transpInvJacobianMatrix[][4],
+                                    double const detJ[],
+                                    double   B[][4]) const
 #else
 int QkGL::computeB( const int & nPointsPerElement,
-                    arrayDouble & invJacobianMatrix,
-                    arrayDouble & transpInvJacobianMatrix,
-                    vectorDouble & detJ,
-                    arrayDouble & B ) const
+                    double const invJacobianMatrix[][4],
+                    double const transpInvJacobianMatrix[][4],
+                    double const detJ[],
+                    double   B[][4]) const
 #endif
 {
   //arrayDouble B( 4, nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-#ifdef SEM_USE_OMP
-    B(0,i)=(abs( detJ[i] )*(invJacobianMatrix(0,i)*transpInvJacobianMatrix(0,i)+
-                             invJacobianMatrix(1,i)*transpInvJacobianMatrix(2,i)));
-    B(1,i)=(abs( detJ[i] )*(invJacobianMatrix(0,i)*transpInvJacobianMatrix(1,i)+
-                             invJacobianMatrix(1,i)*transpInvJacobianMatrix(3,i)));
-    B(2,i)=(abs( detJ[i] )*(invJacobianMatrix(2,i)*transpInvJacobianMatrix(0,i)+
-                             invJacobianMatrix(3,i)*transpInvJacobianMatrix(2,i)));
-    B(3,i)=(abs( detJ[i] )*(invJacobianMatrix(2,i)*transpInvJacobianMatrix(1,i)+
-                             invJacobianMatrix(3,i)*transpInvJacobianMatrix(3,i)));
+    B[i][0]=(abs( detJ[i] )*(invJacobianMatrix[i][0]*transpInvJacobianMatrix[i][0]+
+                             invJacobianMatrix[i][1]*transpInvJacobianMatrix[i][2]));
+    B[i][1]=(abs( detJ[i] )*(invJacobianMatrix[i][0]*transpInvJacobianMatrix[i][1]+
+                             invJacobianMatrix[i][1]*transpInvJacobianMatrix[i][3]));
+    B[i][2]=(abs( detJ[i] )*(invJacobianMatrix[i][2]*transpInvJacobianMatrix[i][0]+
+                             invJacobianMatrix[i][3]*transpInvJacobianMatrix[i][2]));
+    B[i][3]=(abs( detJ[i] )*(invJacobianMatrix[i][2]*transpInvJacobianMatrix[i][1]+
+                             invJacobianMatrix[i][3]*transpInvJacobianMatrix[i][3]));
     //cout<<"B["<<i<<"]="<<B(0,i)<<" "<<B(1,i)<<" "<<B(2,i)<<" "<<B(3,i);
-#else
-    B(threadId,0,i)=(abs( detJ(threadId,i) )*(invJacobianMatrix(threadId,0,i)*transpInvJacobianMatrix(threadId,0,i)+
-                             invJacobianMatrix(threadId,1,i)*transpInvJacobianMatrix(threadId,2,i)));
-    B(threadId,1,i)=(abs( detJ(threadId,i) )*(invJacobianMatrix(threadId,0,i)*transpInvJacobianMatrix(threadId,1,i)+
-                             invJacobianMatrix(threadId,1,i)*transpInvJacobianMatrix(threadId,3,i)));
-    B(threadId,2,i)=(abs( detJ(threadId,i) )*(invJacobianMatrix(threadId,2,i)*transpInvJacobianMatrix(threadId,0,i)+
-                             invJacobianMatrix(threadId,3,i)*transpInvJacobianMatrix(threadId,2,i)));
-    B(threadId,3,i)=(abs( detJ(threadId,i) )*(invJacobianMatrix(threadId,2,i)*transpInvJacobianMatrix(threadId,1,i)+
-                             invJacobianMatrix(threadId,3,i)*transpInvJacobianMatrix(threadId,3,i)));
-    //cout<<"B["<<i<<"]="<<B(threadId,0,i)<<" "<<B(threadId,1,i)<<" "<<B(threadId,2,i)<<" "<<B(threadId,3,i);
-#endif
-    //cout<<endl;
   }
   return 0;
   //return B;
@@ -700,24 +643,23 @@ int QkGL::computeB( const int & nPointsPerElement,
 int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                           const int & order,
                           vectorDouble const & weights2D,
-                          arrayDouble const & B,
+                          double const  B[][4],
                           arrayDouble const & dPhi,
-                          arrayDouble const & R ) const
+                          double   R[][36] ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & threadId,
-                                          const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                           const int & order,
                                           vectorDouble const & weights2D,
-                                          array3DDouble const & B,
+                                          double const  B[][4],
                                           arrayDouble const & dPhi,
-                                          array3DDouble const & R ) const
+                                          double   R[][36] ) const
 #else
 int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                           const int & order,
-                          vectorDouble & weights2D,
-                          arrayDouble & B,
+                          vectorDouble  & weights2D,
+                          double const  B[][4],
                           arrayDouble & dPhi,
-                          arrayDouble & R ) const
+                          double   R[][36] ) const
 #endif
 {
   //arrayDouble R( nPointsPerElement, nPointsPerElement );
@@ -725,11 +667,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
   {
       for (int j=0; j<nPointsPerElement;j++)
       {
-#ifdef SEM_USE_OMP
-        R(i,j)=0;
-#else
-        R(threadId,i,j)=0;
-#endif
+        R[j][i]=0;
       }
   }
   // B11
@@ -743,12 +681,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         int j=j1+i2*(order+1);
         for( int m=0; m<order+1; m++ )
         {
-#ifdef SEM_USE_OMP
-          R(i,j)+=weights2D[m+i2*(order+1)]*(B(0,m+i2*(order+1))*dPhi(i1,m)*dPhi(j1,m));
-#else
-          R(threadId,i,j)+=weights2D[m+i2*(order+1)]*(B(threadId,0,m+i2*(order+1))*dPhi(i1,m)*dPhi(j1,m));
-#endif
-
+          R[j][i]+=weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*dPhi(i1,m)*dPhi(j1,m));
         }
       }
     }
@@ -764,12 +697,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-#ifdef SEM_USE_OMP
-          R(i,j)+=weights2D[i1+j2*(order+1)]*(B(1,i1+j2*(order+1))*dPhi(i2,j2)*dPhi(j1,i1));
-#else
-          R(threadId,i,j)+=weights2D[i1+j2*(order+1)]*(B(threadId,1,i1+j2*(order+1))*dPhi(i2,j2)*dPhi(j1,i1));
-#endif
-
+          R[j][i]+=weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*dPhi(i2,j2)*dPhi(j1,i1));
         }
       }
     }
@@ -785,11 +713,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-#ifdef SEM_USE_OMP
-          R(i,j)+=weights2D[i2+j1*(order+1)]*(B(2,i2+j1*(order+1))*dPhi(i1,j1)*dPhi(j2,i2));
-#else
-          R(threadId,i,j)+=weights2D[i2+j1*(order+1)]*(B(threadId,2,i2+j1*(order+1))*dPhi(i1,j1)*dPhi(j2,i2));
-#endif
+          R[j][i]+=weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*dPhi(i1,j1)*dPhi(j2,i2));
         }
       }
     }
@@ -805,12 +729,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         int j=i1+j2*(order+1);
         for( int n=0; n<order+1; n++ )
         {
-#ifdef SEM_USE_OMP
-          R(i,j)+=weights2D[i1+n*(order+1)]*(B(3,i1+n*(order+1))*dPhi(i2,n)*dPhi(j2,n));
-#else
-          R(threadId,i,j)+=weights2D[i1+n*(order+1)]*(B(threadId,3,i1+n*(order+1))*dPhi(i2,n)*dPhi(j2,n));
-#endif
-
+          R[j][i]+=weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*dPhi(i2,n)*dPhi(j2,n));
         }
       }
     }
@@ -840,25 +759,24 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 #ifdef SEM_USE_RAJA
 int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                           vectorDouble const & weights2D,
-                          arrayDouble const & B,
+                          double const  B[][4],
                           arrayDouble const & dxPhi,
                           arrayDouble const & dyPhi,
-                          arrayDouble const & R ) const
+                          double  R[][36] ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & threadId,
-                                          const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                           vectorDouble const & weights2D,
-                                          array3DDouble const & B,
+                                          double const  B[][4],
                                           arrayDouble const & dxPhi,
                                           arrayDouble const & dyPhi,
-                                          array3DDouble const & R ) const
+                                          double  R[][36] ) const
 #else
 int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                          vectorDouble & weights2D,
-                          arrayDouble & B,
-                          arrayDouble & dxPhi,
-                          arrayDouble & dyPhi,
-                          arrayDouble & R ) const
+                          vectorDouble const & weights2D,
+                          double const  B[][4],
+                          arrayDouble  & dxPhi,
+                          arrayDouble  & dyPhi,
+                          double  R[][36]) const
 #endif
 {
   //arrayDouble R( nPointsPerElement, nPointsPerElement );
@@ -869,23 +787,13 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
       double tmp=0;
       for( int r=0; r<nPointsPerElement; r++ )
       {
-#ifdef SEM_USE_OMP
-        tmp+=weights2D[r]*(B(0,r)*dxPhi(i,r)*dxPhi(j,r)+
-                           B(1,r)*dxPhi(i,r)*dyPhi(j,r)+
-                           B(2,r)*dyPhi(i,r)*dxPhi(j,r)+
-                           B(3,r)*dyPhi(i,r)*dyPhi(j,r));
-#else
-        tmp+=weights2D[r]*(B(threadId,0,r)*dxPhi(i,r)*dxPhi(j,r)+
-                           B(threadId,1,r)*dxPhi(i,r)*dyPhi(j,r)+
-                           B(threadId,2,r)*dyPhi(i,r)*dxPhi(j,r)+
-                           B(threadId,3,r)*dyPhi(i,r)*dyPhi(j,r));
-#endif
+        tmp+=weights2D[r]*(B[r][0]*dxPhi(i,r)*dxPhi(j,r)+
+                           B[r][1]*dxPhi(i,r)*dyPhi(j,r)+
+                           B[r][2]*dyPhi(i,r)*dxPhi(j,r)+
+                           B[r][3]*dyPhi(i,r)*dyPhi(j,r));
+
       }
-#ifdef SEM_USE_OMP
-      R(i,j)=tmp;
-#else
-      R(threadId,i,j)=tmp;
-#endif
+      R[j][i]=tmp;
     }
   }
   return 0;
@@ -900,90 +808,28 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 #ifdef SEM_USE_RAJA
 int QkGL::phiIphiJ( const int & nPointsPerElement,
                     vectorDouble const & weights2D,
-                    vectorDouble const & detJ,
-                    vectorDouble const & massMatrixLocal ) const
+                    double const  detJ[],
+                    double massMatrixLocal[] ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::phiIphiJ( const int & threadId,
-                                    const int & nPointsPerElement,
+KOKKOS_FUNCTION int QkGL::phiIphiJ( const int & nPointsPerElement,
                                     vectorDouble const & weights2D,
-                                    arrayDouble const & detJ,
-                                    arrayDouble const & massMatrixLocal ) const
+                                    double const  detJ[],
+                                    double massMatrixLocal[] ) const
 #else
 int QkGL::phiIphiJ( const int & nPointsPerElement,
                     vectorDouble & weights2D,
-                    vectorDouble & detJ,
-                    vectorDouble & massMatrixLocal ) const
+                    double const  detJ[],
+                    double massMatrixLocal[]) const
 #endif
 {
   //vectorDouble massMatrixLocal( nPointsPerElement );
   for( int i=0; i<nPointsPerElement; i++ )
   {
-#ifdef SEM_USE_OMP
     massMatrixLocal[i]=weights2D[i]*abs( detJ[i] );
-    //cout<<"massMatrixLocal["<<i<<"]="<<massMatrixLocal[i]<<endl;
-#else
-    massMatrixLocal(threadId,i)=weights2D[i]*abs( detJ(threadId,i) );
-    //cout<<"massMatrixLocal["<<i<<"]="<<massMatrixLocal(threadId,i)<<endl;
-#endif
   }
   return 0;
   //return MassMatrixLocal;
 }
-
-///**
-// compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ (non optimized formulation)
-//arrayDouble QkGL::phiIphiJ( const int & nPointsPerElement,
-//                            vectorDouble & weights2D,
-//                            arrayDouble & phi,
-//                            vectorDouble & detJ ) const
-#ifdef SEM_USE_RAJA
-int QkGL::phiIphiJ( const int & nPointsPerElement,
-                    vectorDouble const & weights2D,
-                    arrayDouble const & phi,
-                    vectorDouble const & detJ,
-                    arrayDouble  const & massMatrixLocal) const
-#elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::phiIphiJ( const int & threadId,
-                                    const int & nPointsPerElement,
-                                    vectorDouble const & weights2D,
-                                    arrayDouble const & phi,
-                                    arrayDouble const & detJ,
-                                    array3DDouble  const & massMatrixLocal) const
-#else
-int QkGL::phiIphiJ( const int & nPointsPerElement,
-                    vectorDouble & weights2D,
-                    arrayDouble & phi,
-                    vectorDouble & detJ,
-                    arrayDouble  & massMatrixLocal) const
-#endif
-{
-  //arrayDouble massMatrixLocal( nPointsPerElement, nPointsPerElement );
-  for( int i=0; i<nPointsPerElement; i++ )
-  {
-    for( int j=0; j<nPointsPerElement; j++ )
-    {
-#ifdef SEM_USE_OMP
-      double tmp=0;
-      for( int r=0; r<nPointsPerElement; r++ )
-      {
-        tmp+=weights2D[r]*(phi(i,r)*phi(j,r))*abs( detJ[r] );
-      }
-      massMatrixLocal(i,j)=tmp;
-    }
-#else
-      double tmp=0;
-      for( int r=0; r<nPointsPerElement; r++ )
-      {
-        tmp+=weights2D[r]*(phi(i,r)*phi(j,r))*abs( detJ(threadId,r) );
-      }
-      massMatrixLocal(threadId,i,j)=tmp;
-    }
-#endif
-  }
-  return 0;
-  //return massMatrixLocal;
-}
-//**/
 
 //vectorReal QkGL::computeDs( const int & iFace,
 //                            const int & order,
@@ -993,36 +839,35 @@ int QkGL::phiIphiJ( const int & nPointsPerElement,
 //                            arrayDouble & derivativeBasisFunction2DY ) const
 
 #ifdef SEM_USE_RAJA
-int QkGL::computeDs( const int & iFace,
+int QkGL::computeDs(  const int & iFace,
                       const int & order,
-                      arrayInt  const & faceInfos,
-                      vectorInt const & numOfBasisFunctionOnFace,
-                      arrayReal const & Js,
-                      arrayReal const & globalNodesCoords,
+                      arrayIntnt & faceInfos,
+                      int  numOfBasisFunctionOnFace[],
+                      float  Js[][6],
+                      arrayReal   const & globalNodesCoords,
                       arrayDouble const & derivativeBasisFunction2DX,
                       arrayDouble const & derivativeBasisFunction2DY,
-                      vectorReal  const & ds ) const
+                      float  ds[]  ) const
 #elif defined SEM_USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeDs(  const int &threadId,
-                                      const int & iFace,
+KOKKOS_FUNCTION int QkGL::computeDs(  const int & iFace,
                                       const int & order,
-                                      arrayInt  const & faceInfos,
-                                      arrayInt const & numOfBasisFunctionOnFace,
-                                      array3DReal const & Js,
-                                      arrayReal const & globalNodesCoords,
+                                      arrayIntnt & faceInfos,
+                                      int  numOfBasisFunctionOnFace[],
+                                      float  Js[][6],
+                                      arrayReal   const & globalNodesCoords,
                                       arrayDouble const & derivativeBasisFunction2DX,
                                       arrayDouble const & derivativeBasisFunction2DY,
-                                      arrayReal  const & ds ) const
+                                      float  ds[] ) const
 #else
 int QkGL::computeDs(  const int & iFace,
                       const int & order,
-                      arrayInt  & faceInfos,
-                      vectorInt & numOfBasisFunctionOnFace,
-                      arrayReal & Js,
-                      arrayReal & globalNodesCoords,
-                      arrayDouble & derivativeBasisFunction2DX,
-                      arrayDouble & derivativeBasisFunction2DY,
-                      vectorReal  & ds ) const
+                      arrayInt & faceInfos,
+                      int  numOfBasisFunctionOnFace[],
+                      float  Js[][6],
+                      arrayReal    & globalNodesCoords,
+                      arrayDouble  & derivativeBasisFunction2DX,
+                      arrayDouble  & derivativeBasisFunction2DY,
+                      float  ds[] ) const
 #endif
 {
   //vectorInt numOfBasisFunctionOnFace( order+1 );
@@ -1036,98 +881,54 @@ int QkGL::computeDs(  const int & iFace,
     case 0:     // left
       for( int i=0; i<order+1; i++ )
       {
-#ifdef SEM_USE_OMP
         numOfBasisFunctionOnFace[i]=i*(order+1);
-#else
-        numOfBasisFunctionOnFace(threadId,i)=i*(order+1);
-#endif
       }
       break;
     case 1:     // bottom
       for( int i=0; i<order+1; i++ )
       {
-#ifdef SEM_USE_OMP
         numOfBasisFunctionOnFace[i]=i;
-#else
-        numOfBasisFunctionOnFace(threadId,i)=i;
-#endif
       }
       break;
     case 2:         //right
       for( int i=0; i<order+1; i++ )
       {
-#ifdef SEM_USE_OMP
         numOfBasisFunctionOnFace[i]=order+i*(order+1);
-#else
-        numOfBasisFunctionOnFace(threadId,i)=order+i*(order+1);
-#endif
       }
       break;
     case 3:         //top
       for( int i=0; i<order+1; i++ )
       {
-#ifdef SEM_USE_OMP
         numOfBasisFunctionOnFace[i]=i+order*(order+1);
-#else
-        numOfBasisFunctionOnFace(threadId,i)=i+order*(order+1);
-#endif
       }
       break;
     default:
       //cout<<"error in element flag, should be set to: 0, 1, 2, 3"<<endl;
       break;
   }
-#ifdef SEM_USE_OMP
   // compute ds
   for( int j=0; j<order+1; j++ )
   {
-    Js(0,j)=0;    // x
-    Js(1,j)=0;    // y
+    Js[0][j]=0;    // x
+    Js[1][j]=0;    // y
     for( int i=0; i<order+1; i++ )
     {
       float xi=globalNodesCoords(faceInfos(iFace,2+i),0);
       float yi=globalNodesCoords(faceInfos(iFace,2+i),1);
       if( face==0 || face==2 )
       {
-        Js(0,j)+=derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
-        Js(1,j)+=derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
+        Js[0][j]+=derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
+        Js[1][j]+=derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
       }
       if( face==1 || face==3 )
       {
-        Js(0,j)+=derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
-        Js(1,j)+=derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
+        Js[0][j]+=derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
+        Js[1][j]+=derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
       }
     }
-    ds[j]=sqrt( Js(0,j)*Js(0,j)+Js(1,j)*Js(1,j) );
+    ds[j]=sqrt( Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j] );
     //cout<<"j="<<j<<", ds="<<ds[j]<<", "<<Js[0][j]<<", "<<Js[1][j]<<endl;
   }
-#else
-  // compute ds
-  for( int j=0; j<order+1; j++ )
-  {
-    Js(threadId,0,j)=0;    // x
-    Js(threadId,1,j)=0;    // y
-    for( int i=0; i<order+1; i++ )
-    {
-      float xi=globalNodesCoords(faceInfos(iFace,2+i),0);
-      float yi=globalNodesCoords(faceInfos(iFace,2+i),1);
-      int i1=numOfBasisFunctionOnFace(threadId,i);
-      int j1=numOfBasisFunctionOnFace(threadId,j);
-      if( face==0 || face==2 )
-      {
-        Js(threadId,0,j)+=derivativeBasisFunction2DY(i1,j1)*xi;
-        Js(threadId,1,j)+=derivativeBasisFunction2DY(i1,j1)*yi;
-      }
-      if( face==1 || face==3 )
-      {
-        Js(threadId,0,j)+=derivativeBasisFunction2DX(i1,j1)*xi;
-        Js(threadId,1,j)+=derivativeBasisFunction2DX(i1,j1)*yi;
-      }
-    }
-    ds(threadId,j)=sqrt( Js(threadId,0,j)*Js(threadId,0,j)+Js(threadId,1,j)*Js(threadId,1,j) );
-    //cout<<"j="<<j<<", ds="<<ds(threadId,j)<<", "<<Js(threadId,0,j)<<", "<<Js(threadId,1,j)<<endl;
-  }
-#endif
   return 0;
   //return ds;
 }
