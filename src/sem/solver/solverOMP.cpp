@@ -73,10 +73,7 @@ void solverOMP::computeOneStep( const float & timeSample,
     double pnLocal[36];
     double Y[36];
 
-    float ds[6];
-    float Sh[6];
-    int numOfBasisFunctionOnFace[6];
-    float Js[2][6];
+  
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
     int a=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
@@ -170,6 +167,10 @@ void solverOMP::computeOneStep( const float & timeSample,
 #pragma omp  for
   for( int iFace=0; iFace<numberOfBoundaryFaces; iFace++ )
   {
+    float ds[6];
+    float Sh[6];
+    int numOfBasisFunctionOnFace[6];
+    float Js[2][6];
     //get ds
     int i=Qk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
                   Js, globalNodesCoords, derivativeBasisFunction2DX,

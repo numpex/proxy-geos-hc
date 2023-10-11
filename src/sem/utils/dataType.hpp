@@ -218,11 +218,11 @@
 
 #ifdef SEM_USE_KOKKOS
   #include <Kokkos_Core.hpp>
-  #define MemSpace Kokkos::SharedSpace
-  //#define MemSpace Kokkos::HostSpace
+  //#define MemSpace Kokkos::SharedSpace
+  #define MemSpace Kokkos::HostSpace
   using ExecSpace = MemSpace::execution_space;
   using range_policy = Kokkos::RangePolicy<>;
-  using Layout=Kokkos::LayoutRight;
+  using Layout=Kokkos::LayoutLeft;
   typedef Kokkos::View<int*,     Layout, MemSpace> vectorInt;
   typedef Kokkos::View<float*,   Layout,  MemSpace> vectorReal;
   typedef Kokkos::View<double*,  Layout, MemSpace> vectorDouble;

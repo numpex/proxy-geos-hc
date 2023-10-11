@@ -240,14 +240,14 @@ KOKKOS_FUNCTION ~QkGL();
                        const int & order,
                        vectorDouble const & weights2D,
                        double const B[][4],
-                       arrayDdouble const & dPhi,
+                       arrayDouble const & dPhi,
                        double  R[][36] ) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
                                        const int & order,
                                        vectorDouble const & weights2D,
                                        double const B[][4],
-                                       arrayDdouble const & dPhi,
+                                       arrayDouble const & dPhi,
                                        double  R[][36] ) const;
 #else
   int  gradPhiGradPhi( const int & nPointsPerElement,
@@ -319,7 +319,7 @@ KOKKOS_FUNCTION ~QkGL();
 #ifdef SEM_USE_RAJA
   int  computeDs( const int & iFace,
                   const int & order,
-                  arrayInt & faceInfos,
+                  arrayInt const & faceInfos,
                   int  numOfBasisFunctionOnFace[],
                   float  Js[][6],
                   arrayReal   const & globalNodesCoords,
@@ -330,7 +330,7 @@ KOKKOS_FUNCTION ~QkGL();
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  computeDs( const int & iFace,
                                   const int & order,
-                                  arrayInt &  faceInfos,
+                                  arrayInt  const & faceInfos,
                                   int  numOfBasisFunctionOnFace[],
                                   float  Js[][6],
                                   arrayReal   const & globalNodesCoords,
