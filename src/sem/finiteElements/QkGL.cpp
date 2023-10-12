@@ -459,11 +459,11 @@ void QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
 //                                         arrayDouble & dyPhi )const
 
 #ifdef SEM_USE_RAJA
-int QkGL::computeJacobianMatrix(  const int & nPointsPerElement,
-                                  double const  Xi[][2],
-                                  arrayDouble const & dxPhi,
-                                  arrayDouble const & dyPhi,
-                                  double  jacobianMatrix[][4] )const
+LVARRAY_HOST_DEVICE int QkGL::computeJacobianMatrix(  const int & nPointsPerElement,
+                                                      double const  Xi[][2],
+                                                      arrayDoubleView const & dxPhi,
+                                                      arrayDoubleView const & dyPhi,
+                                                      double  jacobianMatrix[][4] )const
 #elif defined SEM_USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::computeJacobianMatrix( const int & nPointsPerElement,
                                                  double const Xi[][2],
@@ -501,9 +501,9 @@ int QkGL::computeJacobianMatrix(  const int & nPointsPerElement,
 //vectorDouble QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
 //                                                      arrayDouble & jacobianMatrix ) const
 #ifdef SEM_USE_RAJA
-int QkGL::computeDeterminantOfJacobianMatrix(  const int & nPointsPerElement,
-                                               double const jacobianMatrix[][4],
-                                               double detJ[] ) const
+LVARRAY_HOST_DEVICE int QkGL::computeDeterminantOfJacobianMatrix(  const int & nPointsPerElement,
+                                                                   double const jacobianMatrix[][4],
+                                                                   double detJ[] ) const
 #elif defined SEM_USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::computeDeterminantOfJacobianMatrix(  const int & nPointsPerElement,
                                                                double const jacobianMatrix[][4],
@@ -528,10 +528,10 @@ int QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
 //                                            arrayDouble & jacobianMatrix,
 //                                            vectorDouble & detJ ) const
 #ifdef SEM_USE_RAJA
-int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
-                                    double const  jacobianMatrix[][4],
-                                    double const  detJ[],
-                                    double invJacobianMatrix [][4]) const
+LVARRAY_HOST_DEVICE int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
+                                                        double const  jacobianMatrix[][4],
+                                                        double const  detJ[],
+                                                        double invJacobianMatrix [][4]) const
 #elif defined SEM_USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
                                                     double const  jacobianMatrix[][4],
@@ -561,10 +561,10 @@ int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
 //                                                  arrayDouble & jacobianMatrix,
 //                                                  vectorDouble & detJ ) const
 #ifdef SEM_USE_RAJA
-int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-                                          double const  jacobianMatrix[][4],
-                                          double const detJ[],
-                                          double  transpInvJacobianMatrix[][4] ) const
+LVARRAY_HOST_DEVICE int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+                                                              double const  jacobianMatrix[][4],
+                                                              double const detJ[],
+                                                              double  transpInvJacobianMatrix[][4] ) const
 #elif defined SEM_USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
                                                           double const  jacobianMatrix[][4],
@@ -595,11 +595,11 @@ int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 //                            arrayDouble & transpInvJacobianMatrix,
 //                            vectorDouble & detJ ) const
 #ifdef SEM_USE_RAJA
-int QkGL::computeB( const int & nPointsPerElement,
-                    double const invJacobianMatrix[][4],
-                    double const transpInvJacobianMatrix[][4],
-                    double const detJ[],
-                    double   B[][4] ) const
+LVARRAY_HOST_DEVICE int QkGL::computeB( const int & nPointsPerElement,
+                                        double const invJacobianMatrix[][4],
+                                        double const transpInvJacobianMatrix[][4],
+                                        double const detJ[],
+                                        double   B[][4] ) const
 #elif defined SEM_USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::computeB( const int & nPointsPerElement,
                                     double const invJacobianMatrix[][4],
@@ -640,12 +640,12 @@ int QkGL::computeB( const int & nPointsPerElement,
 //                                  arrayDouble & B,
 //                                  arrayDouble & dPhi ) const
 #ifdef SEM_USE_RAJA
-int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                          const int & order,
-                          vectorDouble const & weights2D,
-                          double const  B[][4],
-                          arrayDouble const & dPhi,
-                          double   R[][36] ) const
+LVARRAY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+                                              const int & order,
+                                              vectorDoubleView const & weights2D,
+                                              double const  B[][4],
+                                              arrayDoubleView const & dPhi,
+                                              double   R[][36] ) const
 #elif defined SEM_USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                           const int & order,
@@ -757,12 +757,12 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 //                                  arrayDouble & dxPhi,
 //                                  arrayDouble & dyPhi ) const
 #ifdef SEM_USE_RAJA
-int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                          vectorDouble const & weights2D,
-                          double const  B[][4],
-                          arrayDouble const & dxPhi,
-                          arrayDouble const & dyPhi,
-                          double  R[][36] ) const
+LVARRAY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+                                              vectorDoubleView const & weights2D,
+                                              double const  B[][4],
+                                              arrayDoubleView const & dxPhi,
+                                              arrayDoubleView const & dyPhi,
+                                              double  R[][36] ) const
 #elif defined SEM_USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                           vectorDouble const & weights2D,
@@ -806,10 +806,10 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 //                             vectorDouble & weights2D,
 //                             vectorDouble & detJ ) const
 #ifdef SEM_USE_RAJA
-int QkGL::phiIphiJ( const int & nPointsPerElement,
-                    vectorDouble const & weights2D,
-                    double const  detJ[],
-                    double massMatrixLocal[] ) const
+LVARRAY_HOST_DEVICE int QkGL::phiIphiJ( const int & nPointsPerElement,
+                                        vectorDoubleView const & weights2D,
+                                        double const  detJ[],
+                                        double massMatrixLocal[] ) const
 #elif defined SEM_USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::phiIphiJ( const int & nPointsPerElement,
                                     vectorDouble const & weights2D,
@@ -839,15 +839,15 @@ int QkGL::phiIphiJ( const int & nPointsPerElement,
 //                            arrayDouble & derivativeBasisFunction2DY ) const
 
 #ifdef SEM_USE_RAJA
-int QkGL::computeDs(  const int & iFace,
-                      const int & order,
-                      arrayInt const & faceInfos,
-                      int  numOfBasisFunctionOnFace[],
-                      float  Js[][6],
-                      arrayReal   const & globalNodesCoords,
-                      arrayDouble const & derivativeBasisFunction2DX,
-                      arrayDouble const & derivativeBasisFunction2DY,
-                      float  ds[]  ) const
+LVARRAY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
+                                          const int & order,
+                                          arrayIntView const & faceInfos,
+                                          int  numOfBasisFunctionOnFace[],
+                                          float  Js[][6],
+                                          arrayRealView   const & globalNodesCoords,
+                                          arrayDoubleView const & derivativeBasisFunction2DX,
+                                          arrayDoubleView const & derivativeBasisFunction2DY,
+                                          float  ds[]  ) const
 #elif defined SEM_USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::computeDs(  const int & iFace,
                                       const int & order,

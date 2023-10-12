@@ -69,7 +69,6 @@ protected:
   arrayReal myRHSTerm;
   arrayInt nodeList;
   arrayReal pnGlobal;
-  array3DReal test3D;
 
   // initialize mesh
   simpleMesh  myMesh {50, 50, 1000, 1000, myOrderNumber};
@@ -80,6 +79,7 @@ protected:
   solverUtils myUtils;
 
 #if defined(SEM_USE_RAJA)
+  vectorInt rhsElement;
   solverRaja mySolver;
 #elif defined(SEM_USE_OMP)
   solverOMP mySolver;

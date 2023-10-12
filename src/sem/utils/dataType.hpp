@@ -95,103 +95,109 @@
 
   #include "RAJA/RAJA.hpp"
   #include "Array.hpp"
-  #ifdef SEM_USE_CUDA
-    #include "ChaiBuffer.hpp"
-    // Create an 1D array of integers.
-    using vectorInt=LvArray::Array< int,
-                                    1,
-                                    camp::idx_seq< 0 >,
-                                    std::ptrdiff_t,
-                                    LvArray::ChaiBuffer >;
-    using vectorReal=LvArray::Array< float,
+  #include "ChaiBuffer.hpp"
+  using exec_policy=RAJA::omp_parallel_for_exec;
+  using atomic_policy=RAJA::omp_atomic;
+  #ifdef ENABLE_OPENMP
+    using exec_policy=RAJA::omp_parallel_for_exec;
+    using atomic_policy=RAJA::omp_atomic;
+  #elif defined ENABLE_CUDA
+    using atomic_policy=RAJA::cuda_atomic;
+    using execPolicy=RAJA::cuda_exec<32>;
+  #endif
+  // define vectors and  arrays.
+  using vectorInt=LvArray::Array< int,
+                                  1,
+                                  camp::idx_seq< 0 >,
+                                  std::ptrdiff_t,
+                                  LvArray::ChaiBuffer >;
+  using vectorReal=LvArray::Array< float,
+                                   1,
+                                   camp::idx_seq< 0 >,
+                                   std::ptrdiff_t,
+                                   LvArray::ChaiBuffer>;
+  using vectorDouble=LvArray::Array< double,
                                      1,
                                      camp::idx_seq< 0 >,
                                      std::ptrdiff_t,
                                      LvArray::ChaiBuffer >;
-    using vectorDouble=LvArray::Array< double,
-                                       1,
-                                       camp::idx_seq< 0 >,
-                                       std::ptrdiff_t,
-                                       LvArray::ChaiBuffer >;
-    using arrayInt=LvArray::Array< int,
-                                   2,
-                                   camp::idx_seq< 0, 1 >,
-                                   std::ptrdiff_t,
-                                   LvArray::ChaiBuffer >;
-    using arrayReal=LvArray::Array< float,
+  using arrayInt=LvArray::Array< int,
+                                 2,
+                                 camp::idx_seq< 0, 1 >,
+                                 std::ptrdiff_t,
+                                 LvArray::ChaiBuffer>;
+  using arrayReal=LvArray::Array< float,
+                                  2,
+                                  camp::idx_seq< 0, 1 >,
+                                  std::ptrdiff_t,
+                                  LvArray::ChaiBuffer >;
+  using arrayDouble=LvArray::Array< double,
                                     2,
                                     camp::idx_seq< 0, 1 >,
                                     std::ptrdiff_t,
                                     LvArray::ChaiBuffer >;
-    using arrayDouble=LvArray::Array< double,
-                                      2,
-                                      camp::idx_seq< 0, 1 >,
-                                      std::ptrdiff_t,
-                                      LvArray::ChaiBuffer >;
-    using array3DInt=LvArray::Array< int,
-                                   3,
-                                   camp::idx_seq< 0, 1, 2 >,
-                                   std::ptrdiff_t,
-                                   LvArray::ChaiBuffer >;
-    using array3DReal=LvArray::Array< float,
+  using array3DInt=LvArray::Array< int,
+                                 3,
+                                 camp::idx_seq< 0, 1, 2 >,
+                                 std::ptrdiff_t,
+                                 LvArray::ChaiBuffer >;
+  using array3DReal=LvArray::Array< float,
+                                  3,
+                                  camp::idx_seq< 0, 1, 2 >,
+                                  std::ptrdiff_t,
+                                  LvArray::ChaiBuffer >;
+  using array3DDouble=LvArray::Array< double,
                                     3,
                                     camp::idx_seq< 0, 1, 2 >,
                                     std::ptrdiff_t,
                                     LvArray::ChaiBuffer >;
-    using array3DDouble=LvArray::Array< double,
-                                      3,
-                                      camp::idx_seq< 0, 1, 2 >,
-                                      std::ptrdiff_t,
-                                      LvArray::ChaiBuffer >;
-  #else
-    #include "MallocBuffer.hpp"
-    // Create an 1D array of integers.
-    using vectorInt=LvArray::Array< int,
-                                    1,
-                                    camp::idx_seq< 0 >,
-                                    std::ptrdiff_t,
-                                    LvArray::MallocBuffer >;
-    using vectorReal=LvArray::Array< float,
-                                     1,
-                                     camp::idx_seq< 0 >,
-                                     std::ptrdiff_t,
-                                     LvArray::MallocBuffer >;
-    using vectorDouble=LvArray::Array< double,
-                                       1,
-                                       camp::idx_seq< 0 >,
-                                       std::ptrdiff_t,
-                                       LvArray::MallocBuffer >;
-    using arrayInt=LvArray::Array< int,
-                                   2,
-                                   camp::idx_seq< 0, 1 >,
-                                   std::ptrdiff_t,
-                                   LvArray::MallocBuffer >;
-    using arrayReal=LvArray::Array< float,
-                                    2,
-                                    camp::idx_seq< 0, 1 >,
-                                    std::ptrdiff_t,
-                                    LvArray::MallocBuffer >;
-    using arrayDouble=LvArray::Array< double,
-                                      2,
-                                      camp::idx_seq< 0, 1 >,
-                                      std::ptrdiff_t,
-                                      LvArray::MallocBuffer >;
-    using array3DInt=LvArray::Array< int,
-                                      3,
-                                      camp::idx_seq< 0, 1, 2 >,
-                                      std::ptrdiff_t,
-                                      LvArray::MallocBuffer >;
-    using array3DReal=LvArray::Array< float,
-                                      3,
-                                      camp::idx_seq< 0, 1, 2 >,
-                                      std::ptrdiff_t,
-                                      LvArray::MallocBuffer >;
-    using array3DDouble=LvArray::Array< double,
-                                        3,
-                                        camp::idx_seq< 0, 1, 2 >,
-                                        std::ptrdiff_t,
-                                        LvArray::MallocBuffer >;
-  #endif
+    // defines Views
+  using vectorIntView=LvArray::ArrayView< int,
+                                          1,
+                                          0,
+                                          std::ptrdiff_t,
+                                          LvArray::ChaiBuffer >;
+  using vectorRealView=LvArray::ArrayView< float,
+                                           1,
+                                           0,
+                                           std::ptrdiff_t,
+                                           LvArray::ChaiBuffer >;
+  using vectorDoubleView=LvArray::ArrayView< double,
+                                             1,
+                                             0,
+                                             std::ptrdiff_t,
+                                             LvArray::ChaiBuffer>;
+  using arrayIntView=LvArray::ArrayView< int,
+                                         2,
+                                         1,
+                                         std::ptrdiff_t,
+                                         LvArray::ChaiBuffer>;
+  using arrayRealView=LvArray::ArrayView< float,
+                                          2,
+                                          1,
+                                          std::ptrdiff_t,
+                                          LvArray::ChaiBuffer >;
+  using arrayDoubleView=LvArray::ArrayView< double,
+                                            2,
+                                            1,
+                                            std::ptrdiff_t,
+                                            LvArray::ChaiBuffer >;
+  using array3DIntView=LvArray::ArrayView< int,
+                                           3,
+                                           2,
+                                           std::ptrdiff_t,
+                                           LvArray::ChaiBuffer >;
+  using array3DRealView=LvArray::ArrayView< float,
+                                            3,
+                                            2,
+                                            std::ptrdiff_t,
+                                            LvArray::ChaiBuffer >;
+  using array3DDoubleView=LvArray::ArrayView< double,
+                                              3,
+                                              2,
+                                              std::ptrdiff_t,
+                                              LvArray::ChaiBuffer >;
+  
 
   template<class T>
   T allocateVector(int n1)

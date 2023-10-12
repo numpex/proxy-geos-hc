@@ -123,11 +123,11 @@ KOKKOS_FUNCTION ~QkGL();
   //                                    arrayDouble & dyPhi ) const;
 
 #ifdef SEM_USE_RAJA
-  int  computeJacobianMatrix( const int & nPointsPerElement,
-                              double const Xi[][2],
-                              arrayDouble const & dxPhi,
-                              arrayDouble const & dyPhi,
-                              double jacobianMatrix[][4] ) const;
+  LVARRAY_HOST_DEVICE int  computeJacobianMatrix( const int & nPointsPerElement,
+                                                  double const Xi[][2],
+                                                  arrayDoubleView const & dxPhi,
+                                                  arrayDoubleView const & dyPhi,
+                                                  double jacobianMatrix[][4] ) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  computeJacobianMatrix( const int & nPointsPerElement,
                                               double const Xi[][2],
@@ -147,9 +147,9 @@ KOKKOS_FUNCTION ~QkGL();
   //vectorDouble  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
   //                                                  arrayDouble & jacobianMatrix ) const;
 #ifdef SEM_USE_RAJA
-  int  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
-                                           double  const  jacobianMatrix[][4],
-                                           double  detJ[] ) const;
+  LVARRAY_HOST_DEVICE int  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
+                                                               double  const  jacobianMatrix[][4],
+                                                               double  detJ[] ) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
                                                            double const jacobianMatrix[][4],
@@ -165,10 +165,10 @@ KOKKOS_FUNCTION ~QkGL();
   //                                       arrayDouble & jacobianMatrix,
   //                                       vectorDouble & detJ ) const;
 #ifdef SEM_USE_RAJA
-  int  computeInvJacobianMatrix( const int & nPointsPerElement,
-                                 double const  jacobianMatrix[][4],
-                                 double const  detJ[],
-                                 double  invJacobianMatrix[][4] ) const;
+  LVARRAY_HOST_DEVICE int  computeInvJacobianMatrix( const int & nPointsPerElement,
+                                                     double const  jacobianMatrix[][4],
+                                                     double const  detJ[],
+                                                     double  invJacobianMatrix[][4] ) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  computeInvJacobianMatrix( const int & nPointsPerElement,
                                                  double const  jacobianMatrix[][4],
@@ -186,10 +186,10 @@ KOKKOS_FUNCTION ~QkGL();
   //                                             arrayDouble & jacobianMatrix,
   //                                             vectorDouble & detJ ) const;
 #ifdef SEM_USE_RAJA
-  int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-				                               double const  jacobianMatrix[][4],
-                                       double const  detJ[],
-                                       double  transpInvJacobianMatrix[][4] ) const;
+  LVARRAY_HOST_DEVICE int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
+	                    			                               double const  jacobianMatrix[][4],
+                                                           double const  detJ[],
+                                                           double  transpInvJacobianMatrix[][4] ) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 				                                               double const  jacobianMatrix[][4],
@@ -208,11 +208,11 @@ KOKKOS_FUNCTION ~QkGL();
   //                       arrayDouble & transpInvJacobianMatrix,
   //                       vectorDouble & detJ ) const;
 #ifdef SEM_USE_RAJA
-  int  computeB( const int & nPointsPerElement,
-                 double const invJacobianMatrix[][4],
-                 double const transpInvJacobianMatrix[][4],
-                 double const detJ[],
-                 double B[][4] ) const;
+  LVARRAY_HOST_DEVICE int  computeB( const int & nPointsPerElement,
+                                     double const invJacobianMatrix[][4],
+                                     double const transpInvJacobianMatrix[][4],
+                                     double const detJ[],
+                                     double B[][4] ) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  computeB( const int & nPointsPerElement,
                                  double const invJacobianMatrix[][4],
@@ -236,12 +236,12 @@ KOKKOS_FUNCTION ~QkGL();
   //                             arrayDouble & B,
   //                             arrayDouble & dPhi ) const;
 #ifdef SEM_USE_RAJA
-  int  gradPhiGradPhi( const int & nPointsPerElement,
-                       const int & order,
-                       vectorDouble const & weights2D,
-                       double const B[][4],
-                       arrayDouble const & dPhi,
-                       double  R[][36] ) const;
+  LVARRAY_HOST_DEVICE int  gradPhiGradPhi( const int & nPointsPerElement,
+                                           const int & order,
+                                           vectorDoubleView const & weights2D,
+                                           double const B[][4],
+                                           arrayDoubleView const & dPhi,
+                                           double  R[][36] ) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
                                        const int & order,
@@ -265,12 +265,12 @@ KOKKOS_FUNCTION ~QkGL();
   //                             arrayDouble & dxPhi,
   //                             arrayDouble & dyPhi ) const;
 #ifdef SEM_USE_RAJA
-  int  gradPhiGradPhi( const int & nPointsPerElement,
-                       vectorDouble const & weights,
-                       double const B[][4],
-                       arrayDouble const & dxPhi,
-                       arrayDouble const & dyPhi,
-                       double  R[][36] ) const;
+  LVARRAY_HOST_DEVICE int  gradPhiGradPhi( const int & nPointsPerElement,
+                                           vectorDoubleView const & weights,
+                                           double const B[][4],
+                                           arrayDoubleView const & dxPhi,
+                                           arrayDoubleView const & dyPhi,
+                                           double  R[][36] ) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
                                        vectorDouble const & weights,
@@ -293,10 +293,10 @@ KOKKOS_FUNCTION ~QkGL();
   //                        vectorDouble & weights2D,
   //                        vectorDouble & detJ )const;
 #ifdef SEM_USE_RAJA
-  int  phiIphiJ( const int & nPointsPerElement,
-                 vectorDouble const & weights2D,
-                 double const  detJ[],
-                 double  massMatrixLocal[] ) const;
+  LVARRAY_HOST_DEVICE int  phiIphiJ( const int & nPointsPerElement,
+                                     vectorDoubleView const & weights2D,
+                                     double const  detJ[],
+                                     double  massMatrixLocal[] ) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  phiIphiJ( const int & nPointsPerElement,
                                  vectorDouble const & weights2D,
@@ -317,15 +317,15 @@ KOKKOS_FUNCTION ~QkGL();
   //                      arrayDouble & derivativeBasisFunction2DX,
   //                      arrayDouble & derivativeBasisFunction2DY ) const;
 #ifdef SEM_USE_RAJA
-  int  computeDs( const int & iFace,
-                  const int & order,
-                  arrayInt const & faceInfos,
-                  int  numOfBasisFunctionOnFace[],
-                  float  Js[][6],
-                  arrayReal   const & globalNodesCoords,
-                  arrayDouble const & derivativeBasisFunction2DX,
-                  arrayDouble const & derivativeBasisFunction2DY,
-                  float  ds[] ) const;
+  LVARRAY_HOST_DEVICE int  computeDs( const int & iFace,
+                                      const int & order,
+                                      arrayIntView const & faceInfos,
+                                      int  numOfBasisFunctionOnFace[],
+                                      float  Js[][6],
+                                      arrayRealView   const & globalNodesCoords,
+                                      arrayDoubleView const & derivativeBasisFunction2DX,
+                                      arrayDoubleView const & derivativeBasisFunction2DY,
+                                      float  ds[] ) const;
 
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  computeDs( const int & iFace,

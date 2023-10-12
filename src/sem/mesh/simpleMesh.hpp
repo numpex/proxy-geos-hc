@@ -90,10 +90,10 @@ public:
   // local to global
   //const vectorInt localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList ) const;
 #ifdef SEM_USE_RAJA
-  int localToGlobalNodes( const int & elementNumber, 
-                          const int & nPointsPerElement, 
-                          arrayInt const & nodesList, 
-                          int localToGlobal[]) const;
+  LVARRAY_HOST_DEVICE int localToGlobalNodes( const int & elementNumber, 
+                                              const int & nPointsPerElement, 
+                                              arrayIntView const & nodesList, 
+                                              int localToGlobal[]) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int localToGlobalNodes( const int & elementNumber, 
                                           const int & nPointsPerElement, 
@@ -133,10 +133,10 @@ public:
   //arrayDouble getXi( const int & numberOfPointsPerElement, arrayReal & globalNodesCoords,
   //                   vectorInt & localToGlobal ) const;
 #ifdef SEM_USE_RAJA
-  int  getXi( const int & numberOfPointsPerElement,
-              arrayReal const & globalNodesCoords,
-              int const  localToGlobal[] , 
-              double  Xi[][2]) const;
+  LVARRAY_HOST_DEVICE int  getXi( const int & numberOfPointsPerElement,
+                                  arrayRealView const & globalNodesCoords,
+                                  int const  localToGlobal[] , 
+                                  double  Xi[][2]) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int  getXi( const int & numberOfPointsPerElement,
                               arrayReal const & globalNodesCoords,
@@ -151,10 +151,10 @@ public:
 
   // get global DOF belonging to the faces of element e
 #ifdef SEM_USE_RAJA
-  int getGlobalDofOfFace(  const int & e,
-                           arrayInt  const & globalNodesList,
-                           int const localToGlobal[],
-                           int  nodesFace[][6] ) const;
+  LVARRAY_HOST_DEVICE int getGlobalDofOfFace(  const int & e,
+                                               arrayIntView  const & globalNodesList,
+                                               int const localToGlobal[],
+                                               int  nodesFace[][6] ) const;
 #elif defined SEM_USE_KOKKOS
   KOKKOS_FUNCTION int getGlobalDofOfFace(  const int & e,
                                            arrayInt  const & globalNodesList,

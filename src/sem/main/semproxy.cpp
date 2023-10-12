@@ -21,9 +21,6 @@ void SEMProxy::init()
   nodeList=allocateArray2D<arrayInt>(numberOfElements,(myOrderNumber+1)*(myOrderNumber+1));
   pnGlobal=allocateArray2D<arrayReal>( numberOfNodes, 2 );
 
-  test3D=allocateArray3D<array3DReal>(100,100,100);
-  test3D(50,50,50)=0;
-
   // set number of rhs and location
   myRHSLocation(0,0)=501;
   myRHSLocation(0,1)=501;
@@ -49,7 +46,19 @@ void SEMProxy::init()
   // get nodelist 
   myMesh.globalNodesList( numberOfElements, nodeList );
 
-#ifdef SEM_USE_KOKKOS
+#ifdef SEM_USE_KOKKOS 
+  rhsElement=allocateVector<vectorInt>(myNumberOfRHS);
+  for( int i=0; i<myNumberOfRHS; i++ )
+  {
+    //extract element number for current rhs
+    float x=myRHSLocation(i,0);
+    float y=myRHSLocation(i,1);
+    int rhsE=myMesh.getElementNumberFromPoints( x, y );
+    rhsElement[i]=rhsE;
+  }
+#endif
+
+#ifdef SEM_USE_RAJA
   rhsElement=allocateVector<vectorInt>(myNumberOfRHS);
   for( int i=0; i<myNumberOfRHS; i++ )
   {
@@ -79,6 +88,8 @@ void SEMProxy::run()
       mySolver.addRightAndSides( indexTimeStep, myNumberOfRHS, i2, myTimeStep, pnGlobal, myRHSTerm, myRHSLocation, myMesh );
       mySolver.computeOneStep( myTimeStep, myOrderNumber, i1, i2, pnGlobal, myMesh, myQk );
     #elif defined SEM_USE_KOKKOS
+      mySolver.computeOneStep( indexTimeStep, myTimeStep, myOrderNumber, i1, i2, myNumberOfRHS, rhsElement, myRHSTerm, pnGlobal, myMesh, myQk  );
+    #else 
       mySolver.computeOneStep( indexTimeStep, myTimeStep, myOrderNumber, i1, i2, myNumberOfRHS, rhsElement, myRHSTerm, pnGlobal, myMesh, myQk  );
     #endif
 

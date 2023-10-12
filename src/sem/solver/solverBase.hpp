@@ -106,8 +106,8 @@ protected:
   arrayDouble derivativeBasisFunction2DY;
 
   //shared arrays
-  vectorReal massMatrixGlobal;
-  vectorReal yGlobal;
+  vectorDouble massMatrixGlobal;
+  vectorDouble yGlobal;
   vectorReal ShGlobal;
 //*/
   
