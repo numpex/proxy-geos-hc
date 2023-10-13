@@ -96,15 +96,10 @@
   #include "RAJA/RAJA.hpp"
   #include "Array.hpp"
   #include "ChaiBuffer.hpp"
-  using exec_policy=RAJA::omp_parallel_for_exec;
-  using atomic_policy=RAJA::omp_atomic;
-  #ifdef ENABLE_OPENMP
-    using exec_policy=RAJA::omp_parallel_for_exec;
-    using atomic_policy=RAJA::omp_atomic;
-  #elif defined ENABLE_CUDA
-    using atomic_policy=RAJA::cuda_atomic;
-    using execPolicy=RAJA::cuda_exec<32>;
-  #endif
+  //using exec_policy=RAJA::omp_parallel_for_exec;
+  //using atomic_policy=RAJA::omp_atomic;
+  using atomic_policy=RAJA::cuda_atomic;
+  using exec_policy=RAJA::cuda_exec<32>;
   // define vectors and  arrays.
   using vectorInt=LvArray::Array< int,
                                   1,
@@ -224,8 +219,8 @@
 
 #ifdef SEM_USE_KOKKOS
   #include <Kokkos_Core.hpp>
-  //#define MemSpace Kokkos::SharedSpace
-  #define MemSpace Kokkos::HostSpace
+  #define MemSpace Kokkos::SharedSpace
+  //#define MemSpace Kokkos::HostSpace
   using ExecSpace = MemSpace::execution_space;
   using range_policy = Kokkos::RangePolicy<>;
   using Layout=Kokkos::LayoutLeft;

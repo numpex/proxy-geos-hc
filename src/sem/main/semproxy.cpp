@@ -84,20 +84,20 @@ void SEMProxy::run()
 
   for( int indexTimeStep=0; indexTimeStep<myNumSamples; indexTimeStep++ )
   {
-    #ifdef SEM_USE_OMP
+#ifdef SEM_USE_OMP
       mySolver.addRightAndSides( indexTimeStep, myNumberOfRHS, i2, myTimeStep, pnGlobal, myRHSTerm, myRHSLocation, myMesh );
       mySolver.computeOneStep( myTimeStep, myOrderNumber, i1, i2, pnGlobal, myMesh, myQk );
-    #elif defined SEM_USE_KOKKOS
+#elif defined SEM_USE_KOKKOS
       mySolver.computeOneStep( indexTimeStep, myTimeStep, myOrderNumber, i1, i2, myNumberOfRHS, rhsElement, myRHSTerm, pnGlobal, myMesh, myQk  );
-    #else 
+#else 
       mySolver.computeOneStep( indexTimeStep, myTimeStep, myOrderNumber, i1, i2, myNumberOfRHS, rhsElement, myRHSTerm, pnGlobal, myMesh, myQk  );
-    #endif
+#endif
 
     //writes debugging ascii file.
     if( indexTimeStep%50==0 )
     {
       cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource
-          <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),0)<<endl;
+          <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),i1)<<endl;
       //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
     }
     swap( i1, i2 );

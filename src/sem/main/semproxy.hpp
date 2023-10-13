@@ -71,7 +71,8 @@ protected:
   arrayReal pnGlobal;
 
   // initialize mesh
-  simpleMesh  myMesh {50, 50, 1000, 1000, myOrderNumber};
+  //simpleMesh  myMesh {50, 50, 1000, 1000, myOrderNumber};
+  simpleMesh  myMesh {500, 500, 5000, 5000, myOrderNumber};
   //simpleMesh  myMesh {100, 100, 1000, 1000, myOrderNumber};
   //simpleMesh const myMesh {2, 2, 1000, 1000, myOrderNumber};
 

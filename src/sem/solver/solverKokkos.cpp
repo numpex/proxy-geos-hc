@@ -25,7 +25,6 @@ void solverKokkos::computeOneStep( const int & timeStep,
                                    QkGL Qk )
 {
   
-  int nthreads=numberOfThreads;
   Kokkos::parallel_for( numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
   {
     massMatrixGlobal[i]=0;

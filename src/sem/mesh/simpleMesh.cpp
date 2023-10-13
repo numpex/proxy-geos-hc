@@ -217,7 +217,7 @@ void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt & nodes
 // local to global
 //const vectorInt simpleMesh::localToGlobalNodes( const int & elementNumber, const int & nPointsPerElement, arrayInt & nodesList )const
 #ifdef SEM_USE_RAJA
-LVARRAY_HOST_DEVICE int simpleMesh::localToGlobalNodes( const int & elementNumber, 
+LVARRAY_HOST_DEVICE  int simpleMesh::localToGlobalNodes( const int & elementNumber, 
                                                         const int & nPointsPerElement, 
                                                         arrayIntView const & nodesList,  
                                                         int   localToGlobal[])const
