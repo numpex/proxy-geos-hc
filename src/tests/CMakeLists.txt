@@ -52,6 +52,10 @@ if (ENABLE_CUDA)
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
   endif()
   if(ENABLE_LVARRAY)
+    blt_add_executable( NAME test_RAJAInline.exe 
+		        SOURCES test_RAJAInline.cpp
+                        DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+    target_include_directories(test_RAJAInline.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
     blt_add_executable( NAME test_FDTDRAJA.exe 
 		        SOURCES test_FDTDRAJA.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
