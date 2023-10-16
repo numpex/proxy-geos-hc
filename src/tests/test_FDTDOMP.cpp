@@ -166,7 +166,7 @@ int main( int argc, char *argv[] )
     float vmax=1500;
     float cfl=0.80;
 
-    double coef0=-6.*(coef[1]+coef[2]+coef[3]+coef[4]);
+    float coef0=-6.*(coef[1]+coef[2]+coef[3]+coef[4]);
     float ftmp = 0;
     ftmp += fabsf(coef[0]) + fabsf(coef[0]) + fabsf(coef[0]);
     for (int i = 1; i < ncoefs; i++) {
@@ -209,9 +209,9 @@ int main( int argc, char *argv[] )
            for ( int k=0;k<n3;k++)
            {
              vp(i,j,k)=1500.*1500./dx2;
-             pnp1(i,j,k)=0.0;
-             pn(i,j,k)=0.0;
-             pnm1(i,j,k)=0.0;
+             pnp1(i,j,k)=0;
+             pn(i,j,k)=0;
+             pnm1(i,j,k)=0;
            }
 	}
     }
@@ -228,21 +228,21 @@ int main( int argc, char *argv[] )
              for ( int k=4;k<n3-4;k++)
              {
                 float lapx=coef[1]*(pn(i+1,j,k)+pn(i-1,j,k))
-	                  +coef[2]*(pn(i+2,j,k)+pn(i-2,j,k))
-                          +coef[3]*(pn(i+3,j,k)+pn(i-3,j,k));
+	                        +coef[2]*(pn(i+2,j,k)+pn(i-2,j,k))
+                          +coef[3]*(pn(i+3,j,k)+pn(i-3,j,k))
                           +coef[4]*(pn(i+4,j,k)+pn(i-4,j,k));
                 float lapy=coef[1]*(pn(i,j+1,k)+pn(i,j-1,k))
-	                  +coef[2]*(pn(i,j+2,k)+pn(i,j-2,k))
-		          +coef[3]*(pn(i,j+3,k)+pn(i,j-3,k));
-              		   +coef[4]*(pn(i,j+4,k)+pn(i,j-4,k));
+	                        +coef[2]*(pn(i,j+2,k)+pn(i,j-2,k))
+		                      +coef[3]*(pn(i,j+3,k)+pn(i,j-3,k))
+              		        +coef[4]*(pn(i,j+4,k)+pn(i,j-4,k));
                 float lapz=coef[1]*(pn(i,j,k+1)+pn(i,j,k-1))
-	                  +coef[2]*(pn(i,j,k+2)+pn(i,j,k-2))
-		          +coef[3]*(pn(i,j,k+3)+pn(i,j,k-3));
-		          +coef[4]*(pn(i,j,k+4)+pn(i,j,k-4));
+	                        +coef[2]*(pn(i,j,k+2)+pn(i,j,k-2))
+		                      +coef[3]*(pn(i,j,k+3)+pn(i,j,k-3))
+		                      +coef[4]*(pn(i,j,k+4)+pn(i,j,k-4));
                 pnp1(i,j,k)=2.*pn(i,j,k)-pnm1(i,j,k)+timeStep2*vp(i,j,k)*(coef0*pn(i,j,k)+lapx+lapy+lapz);
-              	//if(i==xs && j==ys && k==zs)printf("%f %f %f\n",coef0*pn(i,j,k),lapx+lapy+lapz,pn(i,j,k));
-              	//if(i==xs && j==ys && k==zs)printf("exact %f %f\n",coef0,6.*(coef[1]+coef[2]+coef[3]+coef[4]));
-              	//if(i==xs && j==ys && k==zs)printf("exact %f\n",coef0+6*(coef[1]+coef[2]+coef[3]+coef[4]));
+              	//if(i==xs && j==ys && k==zs)printf("%lf %lf %lf\n",coef0*pn(i,j,k),lapx+lapy+lapz,pn(i,j,k));
+              	//if(i==xs && j==ys && k==zs)printf("exact %lf %lf\n",coef0,6.*(coef[1]+coef[2]+coef[3]+coef[4]));
+              	//if(i==xs && j==ys && k==zs)printf("exact %lf\n",coef0+6*(coef[1]+coef[2]+coef[3]+coef[4]));
              }
 	  }
       }
