@@ -41,6 +41,9 @@ target_include_directories(test_LvArray.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../
 if (ENABLE_CUDA)
   if(ENABLE_KOKKOS)
     message( STATUS "kokkosinclude=${Kokkos_ROOT}/../../../include")
+    blt_add_executable( NAME test_FDTDKOKKOS.exe 
+                SOURCES test_FDTDKokkos.cpp
+                        DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
     blt_add_executable( NAME test_KOKKOS.exe 
                         SOURCES test_Kokkos.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
@@ -68,24 +71,26 @@ if (ENABLE_CUDA)
     target_include_directories(test_cuda_runtime.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
 
     blt_add_executable( NAME    test_Raja_cuda.exe
-	                      SOURCES test_Raja_cuda.cpp
+                      SOURCES test_Raja_cuda.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
     target_include_directories(test_Raja_cuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
 
     blt_add_executable( NAME    test_LvArray_cuda.exe
-	                      SOURCES test_LvArray_cuda.cpp
+                        SOURCES test_LvArray_cuda.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
     target_include_directories(test_LvArray_cuda.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
   endif()
-else()
-  if(ENABLE_LVARRAY)
+elseif(ENABLE_LVARRAY AND ENABLE_OPENMP)
     blt_add_executable( NAME test_LVARRAY.exe 
                         SOURCES test_LvArray.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
     target_include_directories(test_LVARRAY.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
-  endif()
-  if(ENABLE_KOKKOS)
+elseif(ENABLE_KOKKOS AND ENABLE_OPENMP)
     message( STATUS "kokkosinclude=${Kokkos_ROOT}/../../../include")
+    blt_add_executable( NAME test_FDTDKOKKOS.exe 
+                        SOURCES test_FDTDKokkos.cpp
+                        DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+    target_include_directories(test_FDTDKOKKOS.exe PUBLIC "${Kokkos_ROOT}/../../../include")
     blt_add_executable( NAME test_KOKKOS.exe 
                         SOURCES test_Kokkos.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
@@ -94,6 +99,10 @@ else()
                         SOURCES test_Kokkos1.cpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
     target_include_directories(test_KOKKOS1.exe PUBLIC "${Kokkos_ROOT}/../../../include")
-  endif()
+elseif(ENABLE_OPENMP)
+     blt_add_executable( NAME test_FDTDOMP.exe 
+                       SOURCES test_FDTDOMP.cpp
+                       DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
+     target_include_directories(test_FDTDOMP.exe PUBLIC "${Kokkos_ROOT}/../../../include")
 endif()
 

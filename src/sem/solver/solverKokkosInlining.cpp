@@ -8,10 +8,11 @@
 //
 //************************************************************************
 
-#include "solverRaja.hpp"
+#include "solverKokkos.hpp"
+#include <cstdio>
 
 // compute one step of the time dynamic wave equation solver
-void solverRaja::computeOneStep(  const int & timeStep,
+void solverKokkos::computeOneStep(  const int & timeStep,
                                   const float & timeSample,
                                   const int & order,
                                   int & i1,
@@ -24,53 +25,23 @@ void solverRaja::computeOneStep(  const int & timeStep,
                                   QkGL Qk )
 {
 
-  vectorIntView d_rhsElement=rhsElement.toView();
-  arrayRealView d_rhsTerm=rhsTerm.toView();
-  arrayRealView d_pnGlobal=pnGlobal.toView();
 
-  //shared arrays
-  arrayIntView d_globalNodesList=globalNodesList.toView();
-  arrayRealView d_globalNodesCoords=globalNodesCoords.toView();
-  vectorIntView d_listOfInteriorNodes=listOfInteriorNodes.toView();
-  vectorIntView d_listOfBoundaryNodes=listOfBoundaryNodes.toView();
-  arrayIntView d_faceInfos=faceInfos.toView();
-  arrayIntView d_localFaceNodeToGlobalFaceNode=localFaceNodeToGlobalFaceNode.toView();
-  
-  // get model
-  vectorRealView d_model=model.toView();
-
-  // get quadrature points and weights
-  vectorDoubleView d_quadraturePoints=quadraturePoints.toView();
-  vectorDoubleView d_weights=weights.toView();
-  vectorDoubleView d_weights2D=weights2D.toView();
-
-  // get basis function and corresponding derivatives
-  arrayDoubleView d_basisFunction1D=basisFunction1D.toView();
-  arrayDoubleView d_derivativeBasisFunction1D=derivativeBasisFunction1D.toView();
-  arrayDoubleView d_basisFunction2D=basisFunction2D.toView();
-  arrayDoubleView d_derivativeBasisFunction2DX=derivativeBasisFunction2DX.toView();
-  arrayDoubleView d_derivativeBasisFunction2DY=derivativeBasisFunction2DY.toView();
-
-  //shared arrays
-  vectorDoubleView d_massMatrixGlobal=massMatrixGlobal.toView();
-  vectorDoubleView d_yGlobal=yGlobal.toView();
-  vectorRealView d_ShGlobal=ShGlobal.toView();
-
-  RAJA::forall< exec_policy >( RAJA::RangeSegment( 0, numberOfNodes ),  [=] LVARRAY_HOST_DEVICE  ( int i ) {
-    d_massMatrixGlobal[i]=0;
-    d_yGlobal[i]=0;
+  Kokkos::parallel_for(numberOfNodes,KOKKOS_LAMBDA (const int i)
+  { 
+    massMatrixGlobal[i]=0;
+    yGlobal[i]=0;
   } );
-
+/*
   // update pnGLobal with right hade side
-  RAJA::forall< exec_policy >( RAJA::RangeSegment( 0, numberOfRHS ), [=] LVARRAY_HOST_DEVICE  ( int i ) 
+  Kokkos::parallel_for(numberOfRHS,KOKKOS_LAMBDA (const int i)
   {
-    int nodeRHS=d_globalNodesList(d_rhsElement[i],0);
-    d_pnGlobal(nodeRHS,i2)+=timeSample*timeSample*d_model[d_rhsElement[i]]*d_model[d_rhsElement[i]]*d_rhsTerm(i,timeStep);
+    int nodeRHS=globalNodesList(rhsElement[i],0);
+    pnGlobal(nodeRHS,i2)+=timeSample*timeSample*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   });
  
 
   // loop over mesh elements
-  RAJA::forall< exec_policy >( RAJA::RangeSegment( 0, numberOfElements ), [=] LVARRAY_HOST_DEVICE ( int e )
+  Kokkos::parallel_for(numberOfElements,KOKKOS_LAMBDA (const int e)
   {
     int nPointsPerElement=(order+1)*(order+1);
     // start parallel section
@@ -91,20 +62,20 @@ void solverRaja::computeOneStep(  const int & timeStep,
     double Y[36];
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
-    //int i=mesh.localToGlobalNodes( e, numberOfPointsPerElement, d_globalNodesList, localToGlobal );
+    //int i=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
     //get global coordinates Xi of element e
-    //mesh.getXi( nPointsPerElement, d_globalNodesCoords, localToGlobal, Xi );
+    //mesh.getXi( nPointsPerElement, globalNodesCoords, localToGlobal, Xi );
     for( int i=0; i<nPointsPerElement; i++ )
     {
-      localToGlobal[i]=d_globalNodesList(e,i);
-      Xi[i][0]=d_globalNodesCoords(localToGlobal[i],0);
-      Xi[i][1]=d_globalNodesCoords(localToGlobal[i],1);
+      localToGlobal[i]=globalNodesList(e,i);
+      Xi[i][0]=globalNodesCoords(localToGlobal[i],0);
+      Xi[i][1]=globalNodesCoords(localToGlobal[i],1);
     }
 
     // compute jacobian Matrix
     //Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
-    //                          d_derivativeBasisFunction2DX,
-    //                          d_derivativeBasisFunction2DY,
+    //                          derivativeBasisFunction2DX,
+    //                          derivativeBasisFunction2DY,
     //                          jacobianMatrix );
     for( int i=0; i<nPointsPerElement; i++ )
     {
@@ -114,10 +85,10 @@ void solverRaja::computeOneStep(  const int & timeStep,
       jacobianMatrix[i][3]=0;
       for( int j=0; j<nPointsPerElement; j++ )
       {
-        jacobianMatrix[i][0]+=Xi[j][0]*d_derivativeBasisFunction2DX(j,i);
-        jacobianMatrix[i][1]+=Xi[j][0]*d_derivativeBasisFunction2DY(j,i);
-        jacobianMatrix[i][2]+=Xi[j][1]*d_derivativeBasisFunction2DX(j,i);
-        jacobianMatrix[i][3]+=Xi[j][1]*d_derivativeBasisFunction2DY(j,i);
+        jacobianMatrix[i][0]+=Xi[j][0]*derivativeBasisFunction2DX(j,i);
+        jacobianMatrix[i][1]+=Xi[j][0]*derivativeBasisFunction2DY(j,i);
+        jacobianMatrix[i][2]+=Xi[j][1]*derivativeBasisFunction2DX(j,i);
+        jacobianMatrix[i][3]+=Xi[j][1]*derivativeBasisFunction2DY(j,i);
       }
     }
 
@@ -171,7 +142,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
   }
 
     // compute stifness and mass matrix ( durufle's optimization)
-    //Qk.gradPhiGradPhi( numberOfPointsPerElement, order, d_weights2D, B, d_derivativeBasisFunction1D, R );
+    //Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
     for( int i=0;i<nPointsPerElement;i++)
     {
        for(int j=0; j<nPointsPerElement;j++)
@@ -190,7 +161,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
           int j=j1+i2*(order+1);
           for( int m=0; m<order+1; m++ )
           {
-            R[j][i]+=d_weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*d_derivativeBasisFunction1D(i1,m)*d_derivativeBasisFunction1D(j1,m));
+            R[j][i]+=weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*derivativeBasisFunction1D(i1,m)*derivativeBasisFunction1D(j1,m));
           }
         }
       }
@@ -206,7 +177,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
           for( int j2=0; j2<order+1; j2++ )
           {
             int j=j1+j2*(order+1);
-            R[j][i]+=d_weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*d_derivativeBasisFunction1D(i2,j2)*d_derivativeBasisFunction1D(j1,i1));
+            R[j][i]+=weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*derivativeBasisFunction1D(i2,j2)*derivativeBasisFunction1D(j1,i1));
           }
         }
       }
@@ -222,7 +193,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
           for( int j2=0; j2<order+1; j2++ )
           {
             int j=j1+j2*(order+1);
-            R[j][i]+=d_weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*d_derivativeBasisFunction1D(i1,j1)*d_derivativeBasisFunction1D(j2,i2));
+            R[j][i]+=weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*derivativeBasisFunction1D(i1,j1)*derivativeBasisFunction1D(j2,i2));
           }
         }
       }
@@ -238,23 +209,23 @@ void solverRaja::computeOneStep(  const int & timeStep,
           int j=i1+j2*(order+1);
           for( int n=0; n<order+1; n++ )
           {
-          R[j][i]+=d_weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*d_derivativeBasisFunction1D(i2,n)*d_derivativeBasisFunction1D(j2,n));
+          R[j][i]+=weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*derivativeBasisFunction1D(i2,n)*derivativeBasisFunction1D(j2,n));
           }
         }
       }
     }
     // compute local mass matrix ( used optimez version)
-    //Qk.phiIphiJ( numberOfPointsPerElement, d_weights2D, detJ, massMatrixLocal );
+    //Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
     for( int i=0; i<nPointsPerElement; i++ )
     {
-      massMatrixLocal[i]=d_weights2D[i]*abs( detJ[i] );
+      massMatrixLocal[i]=weights2D[i]*abs( detJ[i] );
     }
 
     // get pnGlobal to pnLocal
     for( int i=0; i<nPointsPerElement; i++ )
     {
-      massMatrixLocal[i]/=(d_model[e]*d_model[e]);
-      pnLocal[i]=d_pnGlobal(localToGlobal[i],i2);
+      massMatrixLocal[i]/=(model[e]*model[e]);
+      pnLocal[i]=pnGlobal(localToGlobal[i],i2);
     }
 
     // compute Y=R*pnLocal
@@ -273,34 +244,37 @@ void solverRaja::computeOneStep(  const int & timeStep,
       int gIndex=localToGlobal[i];
       //massMatrixGlobal[gIndex]+=massMatrixLocal(threadId,i)
       //yGlobal[gIndex]+=Y(threadId,i);
-      RAJA::atomicAdd< atomic_policy >(&d_massMatrixGlobal[gIndex],massMatrixLocal[i]);
-      RAJA::atomicAdd< atomic_policy>(&d_yGlobal[gIndex],Y[i]);
+      Kokkos::atomic_add(&massMatrixGlobal[gIndex],massMatrixLocal[i]);
+      Kokkos::atomic_add(&yGlobal[gIndex],Y[i]);
     } 
   } );
 
   // update pressure
-  RAJA::forall< exec_policy>( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
-    int I=d_listOfInteriorNodes[i];
+  Kokkos::parallel_for(numberOfInteriorNodes,KOKKOS_LAMBDA (const int i)
+  {
+    int I=listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
-    d_pnGlobal[I][i1]=2*d_pnGlobal[I][i2]-d_pnGlobal[I][i1]-tmp*d_yGlobal[I]/d_massMatrixGlobal[I];
+    pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-tmp*yGlobal[I]/massMatrixGlobal[I];
   } );
 
-  RAJA::forall< exec_policy>( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
-    d_ShGlobal[i]=0;
+  Kokkos::parallel_for(numberOfBoundaryNodes,KOKKOS_LAMBDA (const int i)
+  {
+    ShGlobal[i]=0;
   } );
   // Note: this loop is data parallel.
-  RAJA::forall< exec_policy >( RAJA::RangeSegment( 0, numberOfBoundaryFaces ), [=] LVARRAY_HOST_DEVICE ( int iFace ){
+  Kokkos::parallel_for(numberOfBoundaryFaces,KOKKOS_LAMBDA (const int iFace)
+  {
     //get ds
     float ds[6];
     float Sh[6];
     int numOfBasisFunctionOnFace[6];
     float Js[2][6];
 
-    //Qk.computeDs( iFace, order, d_faceInfos,numOfBasisFunctionOnFace,
-    //              Js, d_globalNodesCoords, d_derivativeBasisFunction2DX,
-    //              d_derivativeBasisFunction2DY,
+    //Qk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
+    //              Js, globalNodesCoords, derivativeBasisFunction2DX,
+    //              derivativeBasisFunction2DY,
     //              ds );
-    int face=d_faceInfos(iFace,1);
+    int face=faceInfos(iFace,1);
     // get basis functions on Boundary faces
     switch( face )
     {
@@ -339,17 +313,17 @@ void solverRaja::computeOneStep(  const int & timeStep,
       Js[1][j]=0;    // y
       for( int i=0; i<order+1; i++ )
       {
-        float xi=d_globalNodesCoords(d_faceInfos(iFace,2+i),0);
-        float yi=d_globalNodesCoords(d_faceInfos(iFace,2+i),1);
+        float xi=globalNodesCoords(faceInfos(iFace,2+i),0);
+        float yi=globalNodesCoords(faceInfos(iFace,2+i),1);
         if( face==0 || face==2 )
         {
-          Js[0][j]+=d_derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
-          Js[1][j]+=d_derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
+          Js[0][j]+=derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
+          Js[1][j]+=derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
         }
         if( face==1 || face==3 )
         {
-          Js[0][j]+=d_derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
-          Js[1][j]+=d_derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
+          Js[0][j]+=derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
+          Js[1][j]+=derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
         }
       }
       ds[j]=sqrt( Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j] );
@@ -357,27 +331,21 @@ void solverRaja::computeOneStep(  const int & timeStep,
     //compute Sh and ShGlobal
     for( int i=0; i<order+1; i++ )
     {
-      int gIndexFaceNode=d_localFaceNodeToGlobalFaceNode(iFace,i);
-      Sh[i]=d_weights[i]*ds[i]/(d_model[d_faceInfos(iFace,0)]);
-      RAJA::atomicAdd< atomic_policy >(&d_ShGlobal[gIndexFaceNode],Sh[i]);
+      int gIndexFaceNode=localFaceNodeToGlobalFaceNode(iFace,i);
+      Sh[i]=weights[i]*ds[i]/(model[faceInfos(iFace,0)]);
+      Kokkos::atomic_add(&ShGlobal[gIndexFaceNode],Sh[i]);
     }
   } );
 
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
-  RAJA::forall< exec_policy >( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
-    int I=d_listOfBoundaryNodes[i];
-    float invMpSh=1/(d_massMatrixGlobal[I]+timeSample*d_ShGlobal[i]*0.5);
-    float MmSh=d_massMatrixGlobal[I]-timeSample*d_ShGlobal[i]*0.5;
-    d_pnGlobal[I][i1]=invMpSh*(2*d_massMatrixGlobal[I]*d_pnGlobal[I][i2]-MmSh*d_pnGlobal[I][i1]-tmp*d_yGlobal[I]);
-  } );
-
-  if(timeStep%200==0)
+  Kokkos::parallel_for(numberOfBoundaryNodes,KOKKOS_LAMBDA (const int i)
   {
-     int nodeRHS=d_globalNodesList(d_rhsElement[0],0);
-     RAJA::forall< RAJA::seq_exec>( RAJA::RangeSegment( 0, numberOfNodes ), [=] LVARRAY_HOST_DEVICE ( int i )
-     {
-	  pnGlobal(nodeRHS,i1)=d_pnGlobal(nodeRHS,i1);
-     });
-  }
+    int I=listOfBoundaryNodes[i];
+    float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
+    float MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
+    pnGlobal(I,i1)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,i2)-MmSh*pnGlobal(I,i1)-tmp*yGlobal[I]);
+  } );
+*/
+  Kokkos::fence();
 }

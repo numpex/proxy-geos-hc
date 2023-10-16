@@ -32,9 +32,20 @@
 # the solver is using sequential mode by default
 set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
 
+# CC options
+set(CMAKE_C_COMPILER gcc-11 CACHE PATH "")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "")
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
 
-set (CMAKE_CXX_STANDARD 17)
+# C++ options
+set(CMAKE_CXX_COMPILER g++ CACHE PATH "")
 set (CMAKE_CXX_FLAGS "-O3 -std=c++17  " CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG " CACHE STRING "")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
+
 
 # allow to install only one target
 set (CMAKE_SKIP_INSTALL_ALL_DEPENDENCY "True" CACHE STRING "" FORCE)
@@ -66,6 +77,7 @@ if(SEM_USE_OMP)
     message(STATUS "BUILDING SOLVER including OMP ")
     set (SEM_USE_KOKKOS OFF CACHE BOOL "")
     set (SEM_USE_RAJA OFF CACHE BOOL "")
+    set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
     if(SEM_USE_LVARRAY)
       set( DATA_CONTAINER "LVARRAY" CACHE STRING "" FORCE)
       message(FATAL_ERROR "SEM_USE_OMP can  be used with SEM_USE_VECTOR=ON only")
@@ -76,24 +88,23 @@ endif()
 # at this point User have to know if SEM_TPL is built with CUDA support.
 if(SEM_USE_CUDA)
   set( ENABLE_CUDA ON CACHE STRING "" FORCE)
-  # Cuda options for pangea3
-  if (ENABLE_CUDA)
-    set(CUDA_ROOT "/data_local/sw/cuda/11.0.3-rhel8" CACHE PATH "")
+endif()
+# Cuda options 
+if (ENABLE_CUDA)
+    set(CUDA_ROOT "/usr" CACHE PATH "")
     set(ENABLE_CUDA_NVTOOLSEXT ON CACHE BOOL "")
     set(CUDA_TOOLKIT_ROOT_DIR $ENV{CUDA_ROOT} CACHE PATH "")
     set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "")
     set(CMAKE_CUDA_COMPILER ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc CACHE STRING "")
-    set(CMAKE_CUDA_ARCHITECTURES 70 CACHE STRING "")
-    set(CUDA_ARCH sm_70 CACHE STRING "")
+    set(CMAKE_CUDA_ARCHITECTURES 50 CACHE STRING "")
+    set(CUDA_ARCH sm_50 CACHE STRING "")
     set(CMAKE_CUDA_STANDARD 17 CACHE STRING "")
     set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
     # --expt-extended-lambda --expt-relaxed-constexpr: important for compilation  are not set by default
     set(CMAKE_CUDA_FLAGS "-restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17" CACHE STRING "")
-    set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -DNDEBUG -Xcompiler -DNDEBUG -Xcompiler -O3 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le" CACHE STRING "")
+    #set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --relocatable-device-code=true" CACHE STRING "" FORCE)
+    message(STATUS "CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS}")
     set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
-  else()
-    message(FATAL_ERROR "You must have CUDA_ROOT environment variable set, we advise loading module cuda/11.0.3")
-  endif()
 endif()
 
 include( ../blt/SetupBLT.cmake )

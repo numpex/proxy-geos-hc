@@ -18,8 +18,8 @@ class solverKokkos : public solverBase
 
 public:
 
-  solverKokkos(){};
-  ~solverKokkos(){};
+KOKKOS_FUNCTION  solverKokkos(){};
+KOKKOS_FUNCTION  ~solverKokkos(){};
 
   void computeOneStep( const int & timeStep,
                        const float & timeSample,

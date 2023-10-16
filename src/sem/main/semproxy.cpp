@@ -96,7 +96,11 @@ void SEMProxy::run()
     //writes debugging ascii file.
     if( indexTimeStep%50==0 )
     {
-      cout<<"TimeStep="<<indexTimeStep<<"\t: pnGlobal @ elementSource location "<<myElementSource
+      cout<<"TimeStep="<<indexTimeStep<<endl;
+    }
+    if( indexTimeStep%200==0 )
+    {
+      cout<<" pnGlobal @ elementSource location "<<myElementSource
           <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),i1)<<endl;
       //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
     }
