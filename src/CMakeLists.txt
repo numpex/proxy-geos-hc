@@ -101,7 +101,7 @@ if (ENABLE_CUDA)
     set(CMAKE_CUDA_STANDARD 17 CACHE STRING "")
     set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
     # --expt-extended-lambda --expt-relaxed-constexpr: important for compilation  are not set by default
-    set(CMAKE_CUDA_FLAGS "-restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17" CACHE STRING "")
+    set(CMAKE_CUDA_FLAGS "-O3 -restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17" CACHE STRING "")
     #set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} --relocatable-device-code=true" CACHE STRING "" FORCE)
     message(STATUS "CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS}")
     set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
