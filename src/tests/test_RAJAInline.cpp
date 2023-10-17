@@ -11,68 +11,7 @@
 #include <chrono>
 #include <omp.h>
 
-#include <vector>
-#include "Array.hpp"
-#include "RAJA/RAJA.hpp"
-#include "Macros.hpp"
-#include "ChaiBuffer.hpp"
-
-// test lvArray
-using vectorInt=LvArray::Array< int,
-                                1,
-                                camp::idx_seq< 0 >,
-                                std::ptrdiff_t,
-                                LvArray::ChaiBuffer >;
-using vectorIntView=LvArray::ArrayView< int,
-                                        1,
-                                        0,
-                                        std::ptrdiff_t,
-                                        LvArray::ChaiBuffer >;
-using arrayInt=LvArray::Array< int,
-                                 2,
-                                 camp::idx_seq< 1,0 >,
-                                 std::ptrdiff_t,
-                                 LvArray::ChaiBuffer >;
-using arrayIntView=LvArray::ArrayView< int,
-                                         2,
-                                         0,
-                                         std::ptrdiff_t,
-                                         LvArray::ChaiBuffer >;
-using arrayReal=LvArray::Array< float,
-                                 2,
-                                 camp::idx_seq< 1,0 >,
-                                 std::ptrdiff_t,
-                                 LvArray::ChaiBuffer >;
-using arrayRealView=LvArray::ArrayView< float,
-                                         2,
-                                         0,
-                                         std::ptrdiff_t,
-                                         LvArray::ChaiBuffer >;
-using array2DDouble=LvArray::Array< double,
-                                 2,
-                                 camp::idx_seq< 1,0 >,
-                                 std::ptrdiff_t,
-                                 LvArray::ChaiBuffer >;
-using array2DDoubleView=LvArray::ArrayView< double,
-                                         2,
-                                         0,
-                                         std::ptrdiff_t,
-                                         LvArray::ChaiBuffer >;
-template<class T>
-  T allocateVector(int n1)
-  {
-     std::cout<<"allocate vector of size "<<n1<<std::endl;
-     T vect("v",n1);
-    return vect;
-  }
-template<class T>
-  T allocateArray2D(int n1, int n2)
-  {
-    std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
-    T array("a",n1, n2);
-    return array;
-  }
-
+#include "test_RAJAInline.hpp"
 
 
 void globalNodesList( const int & order, const int & ex, const int & ey, const int & nx, arrayInt const & nodesList )
@@ -168,31 +107,6 @@ void nodesCoordinates( const int & nx, const int & ny, const int & order, const 
   //return nodeCoords;
 }
 
-LVARRAY_HOST_DEVICE inline int localToGlobalNodes( const int & e,
-                                            const int & nPointsPerElement, arrayIntView const & nodesList,
-                                            int  localToGlobal[])
-{
-  //vectorInt localToGlobal( nPointsPerElement );
-  for( int i=0; i<nPointsPerElement; i++ )
-  {
-    localToGlobal[i]=nodesList(e,i);
-    //if(e==0)printf("i=%d %d\n",i,localToGlobal(e,i));
-  }
-  //return localToGlobal;
-  return 0;
-}
-
-LVARRAY_HOST_DEVICE inline int getXi( const int & numberOfPointsPerElement, arrayRealView const & globalNodesCoords,
-                               int const  localToGlobal[] , double  Xi[][2])
-{
-  for( int i=0; i<numberOfPointsPerElement; i++ )
-  {
-    Xi[i][0]=globalNodesCoords(localToGlobal[i],0);
-    Xi[i][1]=globalNodesCoords(localToGlobal[i],1);
-  }
-  return 0;
-}
-
 
 int main( int argc, char *argv[] )
 {
@@ -209,6 +123,8 @@ int main( int argc, char *argv[] )
   int numberOfElements=ex*ey;
   int numberOfPointsPerElement=(order+1)*(order+1);
   int numberOfNodes=(ex*order+1)*(ey*order+1);
+
+  mesh m;
 
   arrayInt nodesList( numberOfElements, numberOfPointsPerElement );
   arrayReal nodeCoords(numberOfNodes,2);
@@ -235,9 +151,9 @@ int main( int argc, char *argv[] )
   {
      int localToGlobal[9];
      double Xi[9][2];
-     int i=localToGlobalNodes( e, numberOfPointsPerElement, d_nodesList, localToGlobal );
+     int i=m.localToGlobalNodes( e, numberOfPointsPerElement, d_nodesList, localToGlobal );
      //get global coordinates Xi of element e
-     int j=getXi(numberOfPointsPerElement, d_nodeCoords, localToGlobal, Xi );
+     int j=m.getXi(numberOfPointsPerElement, d_nodeCoords, localToGlobal, Xi );
 
      if(e<10)printf("e=%d %f %f %f  %f %f %f %f %f  \n ",e,Xi[0][0],Xi[0][1],Xi[1][0],Xi[1][1],Xi[2][0],Xi[2][1],Xi[3][0],Xi[3][1]);
   });
