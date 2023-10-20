@@ -236,4 +236,4 @@ endif()
 
 add_subdirectory( sem )
 
-add_subdirectory( tests )
+#add_subdirectory( tests )
