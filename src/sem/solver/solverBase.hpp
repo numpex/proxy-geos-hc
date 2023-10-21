@@ -14,6 +14,7 @@
 #include    "simpleMesh.hpp"
 #include    "dataType.hpp"
 #include    "omp.h"
+//#include "test_RAJAInline_mesh.hpp"
 
 using namespace grid;
 using namespace FE;
@@ -68,6 +69,7 @@ public:
                                QkGL Qk ) = 0;
   #endif
 
+  int numberOfPointsPerElement;
 
 protected:
 
@@ -79,7 +81,6 @@ protected:
   int numberOfInteriorNodes;
   int numberOfBoundaryNodes;
   int numberOfBoundaryFaces;
-  int numberOfPointsPerElement;
 
   //shared arrays
   arrayInt globalNodesList;
@@ -110,7 +111,9 @@ protected:
   vectorReal ShGlobal;
 //*/
   
-  
+  simpleMesh mesh01test {500, 500, 5000, 5000, 2};
+  //simpleMesh mesh01test {10, 10, 100, 100, 2};
+  QkGL myQk01test;
   
   // end init
 };
