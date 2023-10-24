@@ -12,15 +12,15 @@
 
 // compute one step of the time dynamic wave equation solver
 
-void computeOneStep( const int & timeStep,
-                     const float & timeSample,
-                     const int & order,
-                     int & i1,
-                     int & i2,
-                     const int & numberOfRHS,
-                     vectorInt & rhsElement,
-                     arrayReal & rhsTerm,
-                     arrayReal & pnGlobal)
+void solverOMP::computeOneStep( const int & timeStep,
+                                const float & timeSample,
+                                const int & order,
+                                int & i1,
+                                int & i2,
+                                const int & numberOfRHS,
+                                vectorInt & rhsElement,
+                                arrayReal & rhsTerm,
+                                arrayReal & pnGlobal)
 {
 #pragma omp parallel
   { // start parallel section
