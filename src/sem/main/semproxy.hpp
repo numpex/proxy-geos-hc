@@ -71,21 +71,17 @@ protected:
   arrayReal pnGlobal;
 
   // initialize mesh
-  //simpleMesh  myMesh {50, 50, 1000, 1000, myOrderNumber};
   simpleMesh  myMesh {500, 500, 5000, 5000, myOrderNumber};
-  //simpleMesh  myMesh {100, 100, 1000, 1000, myOrderNumber};
-  //simpleMesh const myMesh {2, 2, 1000, 1000, myOrderNumber};
 
   QkGL myQk;
   solverUtils myUtils;
 
-#if defined(SEM_USE_RAJA)
   vectorInt rhsElement;
+#if defined(SEM_USE_RAJA)
   solverRaja mySolver;
 #elif defined(SEM_USE_OMP)
   solverOMP mySolver;
 #elif defined(SEM_USE_KOKKOS)
-  vectorInt rhsElement;
   solverKokkos mySolver;
 #else
   solverSEQ mySolver;

@@ -14,7 +14,6 @@
 #include    "simpleMesh.hpp"
 #include    "dataType.hpp"
 #include    "omp.h"
-//#include "test_RAJAInline_mesh.hpp"
 
 using namespace grid;
 using namespace FE;
@@ -24,38 +23,21 @@ class solverBase
 public:
 
   solverBase(){};
+#ifdef SEM_USE_RAJA
+  LVARRAY_HOST_DEVICE ~solverBase(){};
+#elif defined SEM_USE_KOKKOS
+  KOKKOS_FUNCTION ~solverBase(){};
+#else
   ~solverBase(){};
+#endif
 
   /**
    * @brief computeFEInit function:
    * init all FE components for computing mass and stiffness matrices
    * method defines here because shared by all derived classes
    */
-  void computeFEInit ( const int & order,
-                       simpleMesh mesh,
-                       QkGL Qk );
+  void computeFEInit ( const int & order,simpleMesh mesh, QkGL Qk);
 
-  #ifdef SEM_USE_OMP
-  /**
-   * @brief addRightAndSides function:
-   * add right and side
-   */
-  void addRightAndSides( const int & timeStep,
-                         const int & numberOfRHS,
-                         const int & i2,
-                         const float & timeSample,
-                         arrayReal & pnGlobal,
-                         arrayReal & rhsTerm,
-                         arrayReal & rhsLocation,
-                         simpleMesh mesh );
-  virtual void computeOneStep( const float & timeSample,
-                               const int & order,
-                               int & i1,
-                               int & i2,
-                               arrayReal & pnGlobal,
-                               simpleMesh mesh,
-                               QkGL Qk ) = 0;
-  #else
   virtual void computeOneStep( const int & indexTimeStep,
                                const float & timeSample,
                                const int & order,
@@ -64,20 +46,17 @@ public:
                                const int & numberOfRHS,
                                vectorInt & rhsElement,
                                arrayReal & rhsTerm,
-                               arrayReal & pnGlobal,
-                               simpleMesh mesh,
-                               QkGL Qk ) = 0;
-  #endif
+                               arrayReal & pnGlobal) = 0;
 
-  int numberOfPointsPerElement;
 
-protected:
+public:
 
   int i1=0, i2=1;
 
   // get infos from mesh
   int numberOfNodes;
   int numberOfElements;
+  int numberOfPointsPerElement;
   int numberOfInteriorNodes;
   int numberOfBoundaryNodes;
   int numberOfBoundaryFaces;
@@ -109,12 +88,9 @@ protected:
   vectorDouble massMatrixGlobal;
   vectorDouble yGlobal;
   vectorReal ShGlobal;
-//*/
   
-  simpleMesh mesh01test {500, 500, 5000, 5000, 2};
-  //simpleMesh mesh01test {10, 10, 100, 100, 2};
-  QkGL myQk01test;
+  simpleMesh mesh;
+  QkGL Qk;
   
-  // end init
 };
 #endif //SOLVER_BASE_HPP_

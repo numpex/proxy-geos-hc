@@ -29,8 +29,6 @@ KOKKOS_FUNCTION  ~solverKokkos(){};
                        const int & numberOfRHS,
                        vectorInt & rhsElement,
                        arrayReal & rhsTerm,
-                       arrayReal & pnGlobal,
-                       simpleMesh mesh,
-                       QkGL Qk  );
+                       arrayReal & pnGlobal);
 };
 #endif //SOLVER_Kokkos_HPP_

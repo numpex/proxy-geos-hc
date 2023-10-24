@@ -12,16 +12,16 @@
 
 // compute one step of the time dynamic wave equation solver
 
-void solverOMP::computeOneStep( const float & timeSample,
-                                const int & order,
-                                int & i1,
-                                int & i2,
-                                arrayReal & pnGlobal,
-                                simpleMesh mesh,
-                                QkGL Qk )
+void computeOneStep( const int & timeStep,
+                     const float & timeSample,
+                     const int & order,
+                     int & i1,
+                     int & i2,
+                     const int & numberOfRHS,
+                     vectorInt & rhsElement,
+                     arrayReal & rhsTerm,
+                     arrayReal & pnGlobal)
 {
-  
-
 #pragma omp parallel
   { // start parallel section
     int localToGlobal[36];
@@ -52,28 +52,17 @@ void solverOMP::computeOneStep( const float & timeSample,
     yGlobal[i]=0;
   }
 
+  // update pnGLobal with right hade side
+#pragma omp for 
+  for( int i=0; i<numberOfRHS;i++)
+  { 
+    int nodeRHS=globalNodesList(rhsElement[i],0);
+    pnGlobal(nodeRHS,i2)+=timeSample*timeSample*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
+  }
   // loop over mesh elements
 #pragma omp for
   for( int e=0; e<numberOfElements; e++ )
   {
-    // start parallel section
-    int localToGlobal[36];
-    double Xi[36][2];
-
-    double jacobianMatrix[36][4];
-    double detJ[36];
-    double invJacobianMatrix[36][4];
-    double transpInvJacobianMatrix[36][4];
-
-    double B[36][4];
-    double R[36][36];
-
-    double massMatrixLocal[36];
-
-    double pnLocal[36];
-    double Y[36];
-
-  
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
     int a=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
@@ -195,5 +184,5 @@ void solverOMP::computeOneStep( const float & timeSample,
     float MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
     pnGlobal[I][i1]=invMpSh*(2*massMatrixGlobal[I]*pnGlobal[I][i2]-MmSh*pnGlobal[I][i1]-tmp*yGlobal[I]);
   }
-  }// end parallel region
+}// end parallel region
 }

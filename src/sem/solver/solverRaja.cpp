@@ -19,9 +19,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
                                   const int & numberOfRHS,
                                   vectorInt & rhsElement,
                                   arrayReal & rhsTerm,
-                                  arrayReal & pnGlobal,
-                                  simpleMesh mesh,
-                                  QkGL Qk )
+                                  arrayReal & pnGlobal)
 {
 
   vectorIntView d_rhsElement=rhsElement.toView();
@@ -94,12 +92,10 @@ void solverRaja::computeOneStep(  const int & timeStep,
 
     // extract global coordinates of element e
     // get local to global indexes of nodes of element e
-    //printf("Test Test numberOfPointsPerElement=%d\n", numberOfPointsPerElement);
-    int i=mesh01test.localToGlobalNodes( e, numberOfPointsPerElement, d_globalNodesList, localToGlobal );
+    int i=mesh.localToGlobalNodes( e, numberOfPointsPerElement, d_globalNodesList, localToGlobal );
     
     //get global coordinates Xi of element e
-    mesh01test.getXi( nPointsPerElement, d_globalNodesCoords, localToGlobal, Xi );
-    //if(e<10)printf("e=%d %f %f %f  %f %f %f %f %f  \n ",e,Xi[0][0],Xi[0][1],Xi[1][0],Xi[1][1],Xi[2][0],Xi[2][1],Xi[3][0],Xi[3][1]);
+    mesh.getXi( nPointsPerElement, d_globalNodesCoords, localToGlobal, Xi );
     
     /*
     for( int i=0; i<nPointsPerElement; i++ )
@@ -111,7 +107,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     */
 
     // compute jacobian Matrix
-    myQk01test.computeJacobianMatrix( numberOfPointsPerElement, Xi,
+    Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
                               d_derivativeBasisFunction2DX,
                               d_derivativeBasisFunction2DY,
                               jacobianMatrix );
@@ -133,7 +129,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     */ 
 
     // compute determinant of jacobian Matrix
-    myQk01test.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
+    Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
                                            jacobianMatrix,
                                            detJ );
     /*
@@ -144,7 +140,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     */
 
     // compute inverse of Jacobian Matrix
-    myQk01test.computeInvJacobianMatrix( numberOfPointsPerElement,
+    Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
                                  jacobianMatrix,
                                  detJ,
                                  invJacobianMatrix );
@@ -159,7 +155,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     */
                                  
     // compute transposed inverse of Jacobian Matrix
-    myQk01test.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
+    Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
                                        jacobianMatrix,
                                        detJ,
                                        transpInvJacobianMatrix );
@@ -174,7 +170,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     */
                         
     // compute  geometrical transformation matrix
-    myQk01test.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
+    Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
     /*
     for( int i=0; i<nPointsPerElement; i++ )
     {
@@ -190,7 +186,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     */
 
     // compute stifness and mass matrix ( durufle's optimization)
-    myQk01test.gradPhiGradPhi( numberOfPointsPerElement, order, d_weights2D, B, d_derivativeBasisFunction1D, R );
+    Qk.gradPhiGradPhi( numberOfPointsPerElement, order, d_weights2D, B, d_derivativeBasisFunction1D, R );
     /*
     for( int i=0;i<nPointsPerElement;i++)
     {
@@ -265,7 +261,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     }
     */
     // compute local mass matrix ( used optimez version)
-    myQk01test.phiIphiJ( numberOfPointsPerElement, d_weights2D, detJ, massMatrixLocal );
+    Qk.phiIphiJ( numberOfPointsPerElement, d_weights2D, detJ, massMatrixLocal );
     /*
     for( int i=0; i<nPointsPerElement; i++ )
     {
@@ -321,7 +317,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     float Js[2][6];
 
     
-    myQk01test.computeDs( iFace, order, d_faceInfos,numOfBasisFunctionOnFace,
+    Qk.computeDs( iFace, order, d_faceInfos,numOfBasisFunctionOnFace,
                   Js, d_globalNodesCoords, d_derivativeBasisFunction2DX,
                   d_derivativeBasisFunction2DY,
                   ds );
@@ -400,7 +396,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     d_pnGlobal[I][i1]=invMpSh*(2*d_massMatrixGlobal[I]*d_pnGlobal[I][i2]-MmSh*d_pnGlobal[I][i1]-tmp*d_yGlobal[I]);
   } );
 
-  if(timeStep%200==0)
+  if(timeStep%900==0)
   {
      int nodeRHS=d_globalNodesList(d_rhsElement[0],0);
      RAJA::forall< RAJA::seq_exec>( RAJA::RangeSegment( 0, numberOfNodes ), [=] LVARRAY_HOST_DEVICE ( int i )

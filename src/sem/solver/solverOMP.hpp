@@ -21,12 +21,15 @@ public:
   solverOMP(){};
   ~solverOMP(){};
 
-  void computeOneStep( const float & timeSample,
+  void computeOneStep( const int & timeStep,
+                       const float & timeSample,
                        const int & order,
                        int & i1,
                        int & i2,
-                       arrayReal & pnGlobal,
-                       simpleMesh mesh,
-                       QkGL Qk );
+                       const int & numberOfRHS,
+                       vectorInt & rhsElement,
+                       arrayReal & rhsTerm,
+                       arrayReal & pnGlobal);
+
 };
 #endif //SOLVER_OMP_HPP_

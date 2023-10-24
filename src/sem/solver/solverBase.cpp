@@ -9,9 +9,7 @@
 
 #include "solverBase.hpp"
 
-void solverBase::computeFEInit( const int    & order,
-                                simpleMesh mesh,
-                                QkGL Qk )
+void solverBase::computeFEInit( const int & order, simpleMesh mesh, QkGL Qk)
 {
 
   // get infos from mesh
@@ -20,6 +18,7 @@ void solverBase::computeFEInit( const int    & order,
   numberOfNodes=mesh.getNumberOfNodes();
   numberOfElements=mesh.getNumberOfElements();
   numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
+  printf("numberOfNodes %d numberOfElements %d \n",numberOfNodes,numberOfElements);
   
   globalNodesList=allocateArray2D<arrayInt>(numberOfElements,(order+1)*(order+1));
   mesh.globalNodesList( numberOfElements, globalNodesList );
@@ -84,33 +83,4 @@ void solverBase::computeFEInit( const int    & order,
   std::cout<<"end of shared arrays initialization\n";
 
 }
-
-#ifdef SEM_USE_OMP
-// add right and side
-void solverBase::addRightAndSides( const int & timeStep,
-                                   const int & numberOfRHS,
-                                   const int & i2,
-                                   const float & timeSample,
-                                   arrayReal & pnGlobal,
-                                   arrayReal & rhsTerm,
-                                   arrayReal & rhsLocation,
-                                   simpleMesh mesh )
-{
-  static int numberOfNodes=mesh.getNumberOfNodes();
-  static int numberOfElements=mesh.getNumberOfElements();
-  mesh.getModel( numberOfElements, model );
-  mesh.globalNodesList( numberOfElements, globalNodesList );
-  int i, rhsElement;
-  for( int i=0; i<numberOfRHS; i++ )
-  {
-    //extract element number for current rhs
-    float x=rhsLocation(i,0);
-    float y=rhsLocation(i,1);
-    int rhsElement=mesh.getElementNumberFromPoints( x, y );
-    // compute global node numbe to add source term, by defaut forced to node 0 of element ( ust be changed)
-    int nodeRHS=globalNodesList(rhsElement,0);
-    pnGlobal(nodeRHS,i2)+=timeSample*timeSample*model[rhsElement]*model[rhsElement]*rhsTerm(i,timeStep);
-  }
-}
-#endif
 

@@ -18,8 +18,8 @@ class solverRaja : public solverBase
 
 public:
 
-  solverRaja(){};
-  ~solverRaja(){};
+LVARRAY_HOST_DEVICE  solverRaja(){};
+LVARRAY_HOST_DEVICE  ~solverRaja(){};
 
   void computeOneStep( const int & timeStep,
                        const float & timeSample,
@@ -29,8 +29,6 @@ public:
                       const int & numberOfRHS,
                       vectorInt & rhsElement,
                       arrayReal & rhsTerm,
-                      arrayReal & pnGlobal,
-                      simpleMesh mesh,
-                      QkGL Qk );
+                      arrayReal & pnGlobal);
 };
 #endif //SOLVER_Raja_HPP_
