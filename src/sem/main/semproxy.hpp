@@ -84,7 +84,7 @@ protected:
 #elif defined(SEM_USE_KOKKOS)
   solverKokkos mySolver;
 #else
-  solverSEQ mySolver;
+  solverSEQUENTIAL mySolver;
 #endif
 
 };

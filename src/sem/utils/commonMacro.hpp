@@ -14,7 +14,7 @@
 
 #else
 
-#include "solverSequential.hpp"
+#include "solverSEQUENTIAL.hpp"
 
 #endif
 
