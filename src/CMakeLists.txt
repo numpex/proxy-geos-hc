@@ -88,6 +88,9 @@ endif()
 # at this point User have to know if SEM_TPL is built with CUDA support.
 if(SEM_USE_CUDA)
   set( ENABLE_CUDA ON CACHE STRING "" FORCE)
+  if(P9)
+    set(X86 OFF CACHE STRING "" FORCE)
+  endif()
 endif()
 # Cuda options 
 if(X86)
