@@ -9,6 +9,11 @@ project( sem )
 set (CMAKE_VERBOSE_MAKEFILE ON )
 
 #-----------------------------------------------------
+# architecture 
+#-----------------------------------------------------
+option (X86 "X86 architecture  default" ON)
+option (P9 "Power9 architecture  " OFF)
+#-----------------------------------------------------
 # Setup the flags for users to select programming models
 #-----------------------------------------------------
 
