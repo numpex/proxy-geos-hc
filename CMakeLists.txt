@@ -8,9 +8,11 @@ project( sem )
 
 set (CMAKE_VERBOSE_MAKEFILE ON )
 
-#set (CMAKE_C_COMPILER "/hrtc/apps/devtools/llvm/x86_64/centos8/17.0.0/gcc12/bin/clang")
-#set (CMAKE_CXX_COMPILER "/hrtc/apps/devtools/llvm/x86_64/centos8/17.0.0/gcc12/bin/clang++")
-
+#-----------------------------------------------------
+# architecture 
+#-----------------------------------------------------
+option (X86 "X86 architecture  default" ON)
+option (P9 "Power9 architecture  " OFF)
 #-----------------------------------------------------
 # Setup the flags for users to select programming models
 #-----------------------------------------------------
@@ -34,6 +36,9 @@ option (SEM_USE_VECTOR "Use standard vectors as data containers" OFF)
 # use LvArray for vectors and arrays
 option (SEM_USE_LVARRAY "Use LVARRAY as data containers" OFF)
 
+# use Kokkos::vector for vectors and arrays
+option (SEM_USE_KOKKOSVECTOR "Use Kokkos::Vector as data containers" OFF)
+
 #-----------------------------------------------------
 # Setup the flags for profiling using caliper
 #-----------------------------------------------------
@@ -42,9 +47,10 @@ option (SEM_USE_CALIPER "Use CALIPER for profiling" OFF)
 # setup the flags for python interface
 option (SEM_USE_PYTHON "bind python" OFF)
 
-# setup the flags for using Chai
+#-----------------------------------------------------
+# Setup the flags for Chai memory manager
+#-----------------------------------------------------
 option (SEM_USE_CHAI "Use Chai as memory manager" OFF)
 
 add_subdirectory(src)
-
 

@@ -8,7 +8,7 @@ do for [ n=0:ARG1] {
 print " display snapshot:",n
 name=sprintf('snapshot%d',n*ARG2)
 print name
-splot name every 4:4 
+splot name every 2:2 
 pause 1
 }
 
