@@ -71,7 +71,7 @@ protected:
   arrayReal pnGlobal;
 
   // initialize mesh
-  simpleMesh  myMesh {500, 500, 5000, 5000, myOrderNumber};
+  simpleMesh  myMesh {250, 250, 5000, 5000, myOrderNumber};
 
   QkGL myQk;
   solverUtils myUtils;

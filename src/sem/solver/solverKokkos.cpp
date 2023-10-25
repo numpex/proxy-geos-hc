@@ -61,6 +61,7 @@ void solverKokkos::computeOneStep( const int & timeStep,
         // compute determinant of jacobian Matrix
         int l=Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
                                                      jacobianMatrix,
+						     detJ);
         // compute inverse of Jacobian Matrix
         int m=Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
                                            jacobianMatrix,
