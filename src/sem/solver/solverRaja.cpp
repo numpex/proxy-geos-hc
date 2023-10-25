@@ -94,11 +94,12 @@ void solverRaja::computeOneStep(  const int & timeStep,
     // get local to global indexes of nodes of element e
     int i=mesh.localToGlobalNodes( e, numberOfPointsPerElement, d_globalNodesList, localToGlobal );
     //get global coordinates Xi of element e
- RAJA::forall< exec_policy>( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
+    RAJA::forall< exec_policy>( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
     int I=d_listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
     d_pnGlobal[I][i1]=2*d_pnGlobal[I][i2]-d_pnGlobal[I][i1]-tmp*d_yGlobal[I]/d_massMatrixGlobal[I];
-  } );    int j=mesh.getXi( nPointsPerElement, d_globalNodesCoords, localToGlobal, Xi );
+     } );    
+    int j=mesh.getXi( nPointsPerElement, d_globalNodesCoords, localToGlobal, Xi );
     // compute jacobian Matrix
     int k=Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
                               d_derivativeBasisFunction2DX,
