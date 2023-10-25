@@ -94,32 +94,37 @@ void solverRaja::computeOneStep(  const int & timeStep,
     // get local to global indexes of nodes of element e
     int i=mesh.localToGlobalNodes( e, numberOfPointsPerElement, d_globalNodesList, localToGlobal );
     //get global coordinates Xi of element e
-    mesh.getXi( nPointsPerElement, d_globalNodesCoords, localToGlobal, Xi );
+    RAJA::forall< exec_policy>( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
+    int I=d_listOfInteriorNodes[i];
+    float tmp=timeSample*timeSample;
+    d_pnGlobal[I][i1]=2*d_pnGlobal[I][i2]-d_pnGlobal[I][i1]-tmp*d_yGlobal[I]/d_massMatrixGlobal[I];
+     } );    
+    int j=mesh.getXi( nPointsPerElement, d_globalNodesCoords, localToGlobal, Xi );
     // compute jacobian Matrix
-    Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
+    int k=Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
                               d_derivativeBasisFunction2DX,
                               d_derivativeBasisFunction2DY,
                               jacobianMatrix );
     // compute determinant of jacobian Matrix
-    Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
+    int l=Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
                                            jacobianMatrix,
                                            detJ );
     // compute inverse of Jacobian Matrix
-    Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
+    int m=Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
                                  jacobianMatrix,
                                  detJ,
                                  invJacobianMatrix );
     // compute transposed inverse of Jacobian Matrix
-    Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
+    int n=Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
                                        jacobianMatrix,
                                        detJ,
                                        transpInvJacobianMatrix );
     // compute  geometrical transformation matrix
-    Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
+    int o=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
     // compute stifness and mass matrix ( durufle's optimization)
-    Qk.gradPhiGradPhi( numberOfPointsPerElement, order, d_weights2D, B, d_derivativeBasisFunction1D, R );
+    int p=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, d_weights2D, B, d_derivativeBasisFunction1D, R );
     // compute local mass matrix ( used optimez version)
-    Qk.phiIphiJ( numberOfPointsPerElement, d_weights2D, detJ, massMatrixLocal );
+    int q=Qk.phiIphiJ( numberOfPointsPerElement, d_weights2D, detJ, massMatrixLocal );
     // get pnGlobal to pnLocal
     for( int i=0; i<nPointsPerElement; i++ )
     {
@@ -162,7 +167,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     float Js[2][6];
 
     
-    Qk.computeDs( iFace, order, d_faceInfos,numOfBasisFunctionOnFace,
+    int i=Qk.computeDs( iFace, order, d_faceInfos,numOfBasisFunctionOnFace,
                   Js, d_globalNodesCoords, d_derivativeBasisFunction2DX,
                   d_derivativeBasisFunction2DY,
                   ds );
