@@ -54,13 +54,13 @@ void solverRaja::computeOneStep(  const int & timeStep,
   vectorDoubleView d_yGlobal=yGlobal.toView();
   vectorRealView d_ShGlobal=ShGlobal.toView();
 
-  RAJA::forall< exec_policy >( RAJA::RangeSegment( 0, numberOfNodes ),  [=] LVARRAY_HOST_DEVICE  ( int i ) {
+  RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfNodes ),  [=] LVARRAY_HOST_DEVICE  ( int i ) {
     d_massMatrixGlobal[i]=0;
     d_yGlobal[i]=0;
   } );
 
   // update pnGLobal with right hade side
-  RAJA::forall< exec_policy >( RAJA::RangeSegment( 0, numberOfRHS ), [=] LVARRAY_HOST_DEVICE  ( int i ) 
+  RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfRHS ), [=] LVARRAY_HOST_DEVICE  ( int i ) 
   {
     int nodeRHS=d_globalNodesList(d_rhsElement[i],0);
     d_pnGlobal(nodeRHS,i2)+=timeSample*timeSample*d_model[d_rhsElement[i]]*d_model[d_rhsElement[i]]*d_rhsTerm(i,timeStep);
@@ -70,7 +70,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
 
 
   // loop over mesh elements
-  RAJA::forall< exec_policy >( RAJA::RangeSegment( 0, numberOfElements ), [=] LVARRAY_HOST_DEVICE ( int e )
+  RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfElements ), [=] LVARRAY_HOST_DEVICE ( int e )
   {
     int nPointsPerElement=(order+1)*(order+1);
     // start parallel section
@@ -141,20 +141,20 @@ void solverRaja::computeOneStep(  const int & timeStep,
       int gIndex=localToGlobal[i];
       //massMatrixGlobal[gIndex]+=massMatrixLocal(threadId,i)
       //yGlobal[gIndex]+=Y(threadId,i);
-      RAJA::atomicAdd< atomic_policy >(&d_massMatrixGlobal[gIndex],massMatrixLocal[i]);
-      RAJA::atomicAdd< atomic_policy>(&d_yGlobal[gIndex],Y[i]);
+      RAJA::atomicAdd< deviceAtomicPolicy >(&d_massMatrixGlobal[gIndex],massMatrixLocal[i]);
+      RAJA::atomicAdd< deviceAtomicPolicy>(&d_yGlobal[gIndex],Y[i]);
     } 
   } );
   // update pressure
-  RAJA::forall< exec_policy>( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
+  RAJA::forall< deviceExecPolicy>( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
     int I=d_listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
     d_pnGlobal[I][i1]=2*d_pnGlobal[I][i2]-d_pnGlobal[I][i1]-tmp*d_yGlobal[I]/d_massMatrixGlobal[I];
   } );
-  RAJA::forall< exec_policy>( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
+  RAJA::forall< deviceExecPolicy>( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
     d_ShGlobal[i]=0;
   } );
-  RAJA::forall< exec_policy >( RAJA::RangeSegment( 0, numberOfBoundaryFaces ), [=] LVARRAY_HOST_DEVICE ( int iFace ){
+  RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfBoundaryFaces ), [=] LVARRAY_HOST_DEVICE ( int iFace ){
     //get ds
     float ds[6];
     float Sh[6];
@@ -171,12 +171,12 @@ void solverRaja::computeOneStep(  const int & timeStep,
     {
       int gIndexFaceNode=d_localFaceNodeToGlobalFaceNode(iFace,i);
       Sh[i]=d_weights[i]*ds[i]/(d_model[d_faceInfos(iFace,0)]);
-      RAJA::atomicAdd< atomic_policy >(&d_ShGlobal[gIndexFaceNode],Sh[i]);
+      RAJA::atomicAdd< deviceAtomicPolicy >(&d_ShGlobal[gIndexFaceNode],Sh[i]);
     }
   } );
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
-  RAJA::forall< exec_policy >( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
+  RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
     int I=d_listOfBoundaryNodes[i];
     float invMpSh=1/(d_massMatrixGlobal[I]+timeSample*d_ShGlobal[i]*0.5);
     float MmSh=d_massMatrixGlobal[I]-timeSample*d_ShGlobal[i]*0.5;

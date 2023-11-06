@@ -53,19 +53,12 @@
   using vectorInt=std::vector< int >;
   using vectorReal=std::vector< float >;
   using vectorDouble=std::vector< double >;
-  //using vectorInt=Vector< int >;
-  //using vectorReal=Vector< float >;
-  //using vectorDouble=Vector< double >;
   using arrayInt=Array2D< int >;
   using arrayReal=Array2D< float >;
   using arrayDouble=Array2D< double >;
   using array3DInt=Array3D< int >;
   using array3DReal=Array3D< float >;
   using array3DDouble=Array3D< double >;
-
-  #ifdef SEM_USE_RAJA
-    #include "RAJA/RAJA.hpp"
-  #endif
 
   template<class T>
   T allocateVector(int n1)
@@ -96,10 +89,10 @@
   #include "RAJA/RAJA.hpp"
   #include "Array.hpp"
   #include "ChaiBuffer.hpp"
-  //using exec_policy=RAJA::omp_parallel_for_exec;
-  //using atomic_policy=RAJA::omp_atomic;
-  using atomic_policy=RAJA::cuda_atomic;
-  using exec_policy=RAJA::cuda_exec<32>;
+  using hostExecPolicy=RAJA::omp_parallel_for_exec;
+  using hostAtomicPolicy=RAJA::omp_atomic;
+  using deviceAtomicPolicy=RAJA::cuda_atomic;
+  using deviceExecPolicy=RAJA::cuda_exec<32>;
   // define vectors and  arrays.
   using vectorInt=LvArray::Array< int,
                                   1,

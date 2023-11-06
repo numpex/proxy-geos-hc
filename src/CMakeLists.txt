@@ -10,8 +10,6 @@
 #
 #  And the users can chose data containers as following:
 #
-#  (a) If SEM_USE_LVARRAY is ON, LVARRAY is used.
-#  (b) If SEM_USE_VECTOR is ON, std::vector is used.
 #
 #  env variables to be defined before build
 #  the variables above are defined for Pangea3
@@ -67,31 +65,14 @@ set( ENABLE_DOCS OFF )
 set( ENABLE_BENCHMARKS OFF )
 set( DISABLE_UNIT_TESTS ON)
 
-if (SEM_USE_VECTOR)
-    set (DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
-endif()
+# force ENABLE_OPENMP to ON
+set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 
-if(SEM_USE_OMP)
-    set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
-    set (SOLVER "OMP" CACHE PATH "" FORCE)
-    message(STATUS "BUILDING SOLVER including OMP ")
-    set (SEM_USE_KOKKOS OFF CACHE BOOL "")
-    set (SEM_USE_RAJA OFF CACHE BOOL "")
-    set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
-    if(SEM_USE_LVARRAY)
-      set( DATA_CONTAINER "LVARRAY" CACHE STRING "" FORCE)
-      message(FATAL_ERROR "SEM_USE_OMP can  be used with SEM_USE_VECTOR=ON only")
-    endif()
-    set (DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
-endif()
-
-# at this point User have to know if SEM_TPL is built with CUDA support.
-if(SEM_USE_CUDA)
-  set( ENABLE_CUDA ON CACHE STRING "" FORCE)
-  if(P9)
+# choose platform   
+if(P9)
     set(X86 OFF CACHE STRING "" FORCE)
-  endif()
 endif()
+
 # Cuda options 
 if(X86)
   if (ENABLE_CUDA)
@@ -108,8 +89,6 @@ if(X86)
     set(CMAKE_CUDA_FLAGS "-O3 -restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17" CACHE STRING "")
     message(STATUS "CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS}")
     set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
-    else()
-    message(FATAL_ERROR "You must have CUDA_ROOT environment variable set, we advise loading module cuda/11.0.3")
   endif()
 else()
   # Cuda options for pangea3
@@ -125,12 +104,22 @@ else()
      set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
      # --expt-extended-lambda --expt-relaxed-constexpr: important for compilation  are not set by default
      set(CMAKE_CUDA_FLAGS "-O3 -restrict -arch ${CUDA_ARCH}  --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le  " CACHE STRING "")
-  else()
-    message(FATAL_ERROR "You must have CUDA_ROOT environment variable set, we advise loading module cuda/11.0.3")
   endif()
 endif()
 
 include( ../blt/SetupBLT.cmake )
+
+################################
+# SEM USE OMP
+################################
+if(SEM_USE_OMP)
+    set (SOLVER "OMP" CACHE PATH "" FORCE)
+    message(STATUS "BUILDING SOLVER including OMP ")
+    set (SEM_USE_KOKKOS OFF CACHE BOOL "")
+    set (SEM_USE_RAJA OFF CACHE BOOL "")
+    set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
+    set (DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
+endif()
 
 
 ################################
@@ -154,7 +143,7 @@ if ( SEM_USE_RAJA)
                     PATHS ${RAJA_DIR}
                     NO_DEFAULT_PATH)
 
-	    message(STATUS "SEM USE RAJA:  RAJA VERSION=${RAJA_VERSION}")
+       message(STATUS "SEM USE RAJA:  RAJA VERSION=${RAJA_VERSION}")
 
        get_target_property(RAJA_INCLUDE_DIRS RAJA INTERFACE_INCLUDE_DIRECTORIES)
        set_target_properties(RAJA PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${RAJA_INCLUDE_DIRS}")
@@ -242,12 +231,8 @@ elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
   set (Kokkos_INCLUDE_DIRS "${Kokkos_ROOT}/../../../include")
   include_directories(${Kokkos_INCLUDE_DIRS})
 
-  if (SEM_USE_KOKKOSVECTOR)
-     set (DATA_CONTAINER "KOKKOSVECTOR" CACHE PATH "" FORCE)
-  endif()
   set (kokkosList "-L${Kokkos_ROOT}/../.. -lkokkoscontainers -lkokkoscore -lkokkossimd")
   set (ENABLE_KOKKOS ON CACHE BOOL "")
-
 
 elseif (NOT DEFINED $ENV{KOKKOS_DIR})
   set (SEM_USE_KOKKOS OFF CACHE BOOL "")
@@ -258,5 +243,4 @@ else ()
 endif()
 
 add_subdirectory( sem )
-
-#add_subdirectory( tests )
+add_subdirectory( tests )
