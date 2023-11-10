@@ -4,22 +4,22 @@
 #  Users can choose from "OMP", "RAJA", and "KOKKOS" as following:
 #
 #  (0) The default is using sequential mode
-#  (1) If SEM_USE_OMP is ON, it is using OMP to parallelise loops.
-#  (2) If SEM_USE_RAJA is ON, it is using RAJA.
-#  (3) If SEM_USE_KOKKOS is ON, it is using KOKKOS.
+#  (1) If _USE_OMP is ON, it is using OMP to parallelise loops.
+#  (2) If _USE_RAJA is ON, it is using RAJA.
+#  (3) If _USE_KOKKOS is ON, it is using KOKKOS.
 #
 #  And the users can chose data containers as following:
 #
 #
 #  env variables to be defined before build
 #  the variables above are defined for Pangea3
-#  SEM_TPL must be first compiled and installed 
+#  _TPL must be first compiled and installed 
 #
 #  example:
 #  export MODULEPATH=/data_local/appli_local/MTS/GEOSX/modulefiles/:$MODULEPATH
 #  module load cmake/3.21.4 gcc/8.4.1 cuda/11.0.3 ompi/4.1.2 openblas/0.3.18 python4geosx/3.8.5-gcc-8.4.1-ompi-4.1.2
-#  export SEM_TPL_ROOT_DIR=/users/j0024947/appli_src/geosx/codes/proxyApp/tpl4ProxyApp/installTPLNOCUDA
-#  export SEM_TPL_ROOT_DIR=/users/j0024947/appli_src/geosx/codes/proxyApp/tpl4ProxyApp/installTPL
+#  export _TPL_ROOT_DIR=/users/j0024947/appli_src/geosx/codes/proxyApp/tpl4ProxyApp/installTPLNOCUDA
+#  export _TPL_ROOT_DIR=/users/j0024947/appli_src/geosx/codes/proxyApp/tpl4ProxyApp/installTPL
 #  export RAJA_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/raja
 #  export CAMP_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/camp
 #  export CHAI_DIR=${SEM_TPL_ROOT_DIR}/chai/share/chai/cmake/
@@ -112,11 +112,11 @@ include( ../blt/SetupBLT.cmake )
 ################################
 # SEM USE OMP
 ################################
-if(SEM_USE_OMP)
+if(_USE_OMP)
     set (SOLVER "OMP" CACHE PATH "" FORCE)
     message(STATUS "BUILDING SOLVER including OMP ")
-    set (SEM_USE_KOKKOS OFF CACHE BOOL "")
-    set (SEM_USE_RAJA OFF CACHE BOOL "")
+    set (_USE_KOKKOS OFF CACHE BOOL "")
+    set (_USE_RAJA OFF CACHE BOOL "")
     set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
     set (DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
 endif()
@@ -125,10 +125,10 @@ endif()
 ################################
 # RAJA
 ################################
-if ( SEM_USE_RAJA)
+if ( _USE_RAJA)
    # disable OMP and KOKKOS 
-   set (SEM_USE_OMP OFF CACHE BOOL "")
-   set (SEM_USE_KOKKOS OFF CACHE BOOL "")
+   set (_USE_OMP OFF CACHE BOOL "")
+   set (_USE_KOKKOS OFF CACHE BOOL "")
    # set solver
    message( " " )
    message( STATUS "-------------------RAJA SETTINGS---------------------------------------" )
@@ -138,12 +138,12 @@ if ( SEM_USE_RAJA)
 
    set (RAJA_DIR "$ENV{RAJA_DIR}")
    if(DEFINED RAJA_DIR)
-       message(STATUS "SEM USE RAJA in RAJA_DIR = ${RAJA_DIR}")
+       message(STATUS " USE RAJA in RAJA_DIR = ${RAJA_DIR}")
        find_package(RAJA REQUIRED
                     PATHS ${RAJA_DIR}
                     NO_DEFAULT_PATH)
 
-       message(STATUS "SEM USE RAJA:  RAJA VERSION=${RAJA_VERSION}")
+       message(STATUS " USE RAJA:  RAJA VERSION=${RAJA_VERSION}")
 
        get_target_property(RAJA_INCLUDE_DIRS RAJA INTERFACE_INCLUDE_DIRECTORIES)
        set_target_properties(RAJA PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${RAJA_INCLUDE_DIRS}")
@@ -158,13 +158,13 @@ if ( SEM_USE_RAJA)
    ################################
    set (UMPIRE_DIR "$ENV{UMPIRE_DIR}")
    if(DEFINED UMPIRE_DIR)
-       message(STATUS "SEM USE RAJA: RAJA must be compiled with UMPIRE in UMPIRE_DIR = ${UMPIRE_DIR}")
+       message(STATUS " USE RAJA: RAJA must be compiled with UMPIRE in UMPIRE_DIR = ${UMPIRE_DIR}")
 
        find_package(umpire REQUIRED
                     PATHS ${UMPIRE_DIR}
                     NO_DEFAULT_PATH)
 
-	    message(STATUS "SEM USE RAJA: RAJA is compiled with UMPIRE VERSION=${umpire_VERSION}")
+	    message(STATUS " USE RAJA: RAJA is compiled with UMPIRE VERSION=${umpire_VERSION}")
 
        set(ENABLE_UMPIRE ON CACHE BOOL "")
        set(thirdPartyLibs ${thirdPartyLibs} umpire)
@@ -177,13 +177,13 @@ if ( SEM_USE_RAJA)
    ################################
    set (CHAI_DIR "$ENV{CHAI_DIR}")
    if(DEFINED CHAI_DIR)
-       message(STATUS "SEM USE RAJA in CHAI_DIR = ${CHAI_DIR}")
+       message(STATUS " USE RAJA in CHAI_DIR = ${CHAI_DIR}")
 
        find_package(chai REQUIRED
                     PATHS ${CHAI_DIR}
                     NO_DEFAULT_PATH)
 
-	    message(STATUS "SEM USE RAJA: RAJA is compiled with chai_VERSION=${chai_VERSION}")
+	    message(STATUS " USE RAJA: RAJA is compiled with chai_VERSION=${chai_VERSION}")
 
        get_target_property(CHAI_INCLUDE_DIRS chai INTERFACE_INCLUDE_DIRECTORIES)
        set_target_properties(chai PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CHAI_INCLUDE_DIRS}")
@@ -194,12 +194,12 @@ if ( SEM_USE_RAJA)
      message(FATAL_ERROR "GEOSX requires CHAI, set CHAI_DIR to the CHAI installation directory.")
    endif()
 
-   if (SEM_USE_LVARRAY)
+   if (_USE_LVARRAY)
       set( DATA_CONTAINER "LVARRAY" CACHE STRING "" FORCE)
       set(ENABLE_LVARRAY ON CACHE BOOL "" FORCE)
       add_subdirectory( LvArray )
    endif()
-   if (SEM_USE_VECTOR)
+   if (_USE_VECTOR)
       set( DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
    endif()
    message( " " )
@@ -211,11 +211,11 @@ endif()
 ################################
 # KOKKOS
 ################################
-# the solver is using KOKKOS if SEM_USE_KOKKOS is ON
-if (NOT SEM_USE_KOKKOS)
-  message ("-- SEM_USE_KOKKOS flag is set to be false and KOKKOS is not enabled")
+# the solver is using KOKKOS if _USE_KOKKOS is ON
+if (NOT _USE_KOKKOS)
+  message ("-- _USE_KOKKOS flag is set to be false and KOKKOS is not enabled")
 elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
-  message ("-- SEM_USE_KOKKOS flag is set to be true and KOKOS is now enabled")
+  message ("-- _USE_KOKKOS flag is set to be true and KOKOS is now enabled")
   message("-- Found the KOKKOS library in $ENV{KOKKOS_DIR}")
   set (SOLVER "Kokkos" CACHE PATH "" FORCE)
 
@@ -235,12 +235,13 @@ elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
   set (ENABLE_KOKKOS ON CACHE BOOL "")
 
 elseif (NOT DEFINED $ENV{KOKKOS_DIR})
-  set (SEM_USE_KOKKOS OFF CACHE BOOL "")
+  set (_USE_KOKKOS OFF CACHE BOOL "")
   message("-- KOKKOS_DIR is not defined  not enabled")
 else ()
-  set (SEM_USE_KOKKOS OFF CACHE BOOL "")
+  set (_USE_KOKKOS OFF CACHE BOOL "")
   message("-- KOKKOS_DIR is not the correct path and is not enabled")
 endif()
 
 add_subdirectory( sem )
 add_subdirectory( tests )
+add_subdirectory( fd )

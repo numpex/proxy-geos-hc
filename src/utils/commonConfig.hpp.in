@@ -2,25 +2,23 @@
 #define COMMON_CONFIG_HPP
 
 // Enables use of Caliper (CMake option)
-#cmakedefine SEM_USE_CALIPER
+#cmakedefine _USE_CALIPER
 
 // Enable use of Vector (CMake option)
-#cmakedefine SEM_USE_VECTOR
+#cmakedefine _USE_VECTOR
 
 // Enable use of LvArray (CMake option)
-#cmakedefine SEM_USE_LVARRAY
+#cmakedefine _USE_LVARRAY
 
 // Enable use of RAJA (CMake option)
-#cmakedefine SEM_USE_RAJA
+#cmakedefine _USE_RAJA
 
 // Enables use of OMP (CMake option)
-#cmakedefine SEM_USE_OMP
+#cmakedefine _USE_OMP
 
 // Enables use of KOKOS (CMake option)
-#cmakedefine SEM_USE_KOKKOS
+#cmakedefine _USE_KOKKOS
 
-// Enables use of KOKOS (CMake option)
-#cmakedefine SEM_USE_KOKKOSVECTOR
 
 #endif
 

@@ -1,7 +1,7 @@
 //************************************************************************
-//  SEM proxy application v.0.0.1
+//   proxy application v.0.0.1
 //
-//  semproxy.cpp: the main interface of SEM proxy application
+//  semproxy.cpp: the main interface of  proxy application
 //
 //************************************************************************
 
@@ -9,7 +9,7 @@
 // Initialize the simulation.
 void SEMProxy::init()
 {
-  SEM_CALIPER_MARK_BEGIN( "InitTime" );
+  _CALIPER_MARK_BEGIN( "InitTime" );
 
   // get information from mesh
   numberOfNodes=myMesh.getNumberOfNodes();
@@ -56,14 +56,14 @@ void SEMProxy::init()
     rhsElement[i]=rhsE;
   }
 
-  SEM_CALIPER_MARK_END( "InitTime" );
+  _CALIPER_MARK_END( "InitTime" );
 }
 
 
 // Run the simulation.
 void SEMProxy::run()
 {
-  SEM_CALIPER_MARK_BEGIN( "RunTime" );
+  _CALIPER_MARK_BEGIN( "RunTime" );
 
 
   mySolver.computeFEInit( myOrderNumber,myMesh, myQk);
@@ -86,7 +86,7 @@ void SEMProxy::run()
     swap( i1, i2 );
   }
 
-  SEM_CALIPER_MARK_END( "RunTime" );
+  _CALIPER_MARK_END( "RunTime" );
 
 
 }

@@ -1,5 +1,5 @@
 //************************************************************************
-//  SEM proxy application v.0.0.1
+//   proxy application v.0.0.1
 //
 //  solverBase.hpp: simple 2D acoustive wave equation solver
 //
@@ -23,9 +23,9 @@ class solverBase
 public:
 
   solverBase(){};
-#ifdef SEM_USE_RAJA
+#ifdef _USE_RAJA
   LVARRAY_HOST_DEVICE ~solverBase(){};
-#elif defined SEM_USE_KOKKOS
+#elif defined _USE_KOKKOS
   KOKKOS_FUNCTION ~solverBase(){};
 #else
   ~solverBase(){};

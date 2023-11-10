@@ -1,5 +1,5 @@
 //************************************************************************
-//  SEM proxy application v.0.0.1
+//   proxy application v.0.0.1
 //
 //  semproxy.hpp: the main interface of SEM proxy application
 //
@@ -77,11 +77,11 @@ protected:
   solverUtils myUtils;
 
   vectorInt rhsElement;
-#if defined(SEM_USE_RAJA)
+#if defined(_USE_RAJA)
   solverRaja mySolver;
-#elif defined(SEM_USE_OMP)
+#elif defined(_USE_OMP)
   solverOMP mySolver;
-#elif defined(SEM_USE_KOKKOS)
+#elif defined(_USE_KOKKOS)
   solverKokkos mySolver;
 #else
   solverSEQUENTIAL mySolver;

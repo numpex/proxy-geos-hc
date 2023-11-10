@@ -11,15 +11,15 @@ if( ENABLE_CUDA )
   set( extraComponentsLinkList ${extraComponentsLinkList} cuda )
 endif()
 
-if(SEM_USE_LVARRAY)
+if(_USE_LVARRAY)
 set( dependencyList lvarray  )
 endif()
 
-if(SEM_USE_RAJA )
-   if (NOT SEM_USE_LVARRAY)
+if(_USE_RAJA )
+   if (NOT _USE_LVARRAY)
      set( dependencyList RAJA chai )
    endif()
-   if(SEM_USE_LVARRAY)
+   if(_USE_LVARRAY)
       set( dependencyList lvarray RAJA chai )
    endif()
 endif()
@@ -36,7 +36,7 @@ if( ENABLE_CALIPER )
   endif()
 endif()
 
-if(SEM_USE_KOKKOS)
+if(_USE_KOKKOS)
 	set( dependencyList ${dependencyList} ${kokkosList} )
     message ("-------------------- KOKKOS DEPENDENCY LIST= ${dependencyList}")
 endif()
@@ -49,9 +49,9 @@ message( STATUS "-------------------SEM ${SOLVER}_${DATA_CONTAINER} Solver setti
 message( STATUS "-----------------------------------------------------------------------" )
 
 set (sem_headers
-     utils/commonMacro.hpp
-     utils/dataType.hpp
-     utils/utils.hpp
+     ../utils/commonMacro.hpp
+     ../utils/dataType.hpp
+     ../utils/utils.hpp
      finiteElements/QkGL.hpp
      mesh/simpleMesh.hpp
      solver/solverBase.hpp
@@ -68,10 +68,10 @@ set (sem_sources
 
 
 
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/utils/commonConfig.hpp.in
-                ${CMAKE_BINARY_DIR}/src/sem/commonConfig.hpp)
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/../utils/commonConfig.hpp.in
+                ${CMAKE_BINARY_DIR}/src/commonConfig.hpp)
 # Install the generated header.
-install( FILES ${CMAKE_BINARY_DIR}/src/sem/CommonConfig.hpp
+install( FILES ${CMAKE_BINARY_DIR}/src/CommonConfig.hpp
          DESTINATION src/sem )
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
@@ -84,8 +84,8 @@ if (SEM_USE_LVARRAY)
 	target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../LvArray/src)
 	target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_BINARY_DIR}/include)
 endif()
-target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_BINARY_DIR}/src/sem)
-target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/utils)
+target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_BINARY_DIR}/src)
+target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../utils)
 target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/finiteElements)
 target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mesh)
 target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/solver)

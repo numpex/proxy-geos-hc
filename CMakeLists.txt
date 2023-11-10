@@ -18,31 +18,31 @@ option (P9 "Power9 architecture  " OFF)
 #-----------------------------------------------------
 
 # use OMP to parallelise loops
-option (SEM_USE_OMP "Use OpenMP to parallelise loops" OFF)
+option (_USE_OMP "Use OpenMP to parallelise loops" OFF)
 
 # use RAJA to expose parallelism loop
-option (SEM_USE_RAJA "Use RAJA to parallelise loops" OFF)
+option (_USE_RAJA "Use RAJA to parallelise loops" OFF)
 
 # use KOKOS to expose parallelism loop
-option (SEM_USE_KOKKOS "Use KOKKOS to parallelise loops" OFF)
+option (_USE_KOKKOS "Use KOKKOS to parallelise loops" OFF)
 
 #-----------------------------------------------------
 # Setup the flags for users to select data containers
 #-----------------------------------------------------
 
 # use std::vector for vectores and arrays
-option (SEM_USE_VECTOR "Use standard vectors as data containers" OFF)
+option (_USE_VECTOR "Use standard vectors as data containers" OFF)
 
 # use LvArray for vectors and arrays
-option (SEM_USE_LVARRAY "Use LVARRAY as data containers" OFF)
+option (_USE_LVARRAY "Use LVARRAY as data containers" OFF)
 
 #-----------------------------------------------------
 # Setup the flags for profiling using caliper
 #-----------------------------------------------------
-option (SEM_USE_CALIPER "Use CALIPER for profiling" OFF)
+option (_USE_CALIPER "Use CALIPER for profiling" OFF)
 
 # setup the flags for python interface (not working yet)
-#option (SEM_USE_PYTHON "bind python" OFF)
+#option (_USE_PYTHON "bind python" OFF)
 
 
 add_subdirectory(src)

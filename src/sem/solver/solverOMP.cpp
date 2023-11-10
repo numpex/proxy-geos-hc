@@ -1,5 +1,5 @@
 //************************************************************************
-//  SEM proxy application v.0.0.1
+//   proxy application v.0.0.1
 //
 //  solverOMP.cpp: simple 2D acoustive wave equation solver
 //
