@@ -17,8 +17,6 @@
 #include "utils.hpp"
 #include "dataType.hpp"
 
-#define MemSpace Kokkos::SharedSpace
-
 
 int main( int argc, char *argv[] )
 {

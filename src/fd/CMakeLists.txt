@@ -48,16 +48,19 @@ if (ENABLE_CUDA)
 		        SOURCES FDTDRAJA.cpp
 		        HEADERS ../utils/dataType.hpp ../utils/utils.hpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
-		target_include_directories(FDTDRAJA.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
+    target_include_directories(FDTDRAJA.exe PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../LvArray/src)
     target_include_directories(FDTDRAJA.exe PUBLIC ${CMAKE_BINARY_DIR}/src)
     target_include_directories(FDTDRAJA.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../utils)
   endif()
 elseif(ENABLE_KOKKOS AND ENABLE_OPENMP)
     message( STATUS "kokkosinclude=${Kokkos_ROOT}/../../../include")
     blt_add_executable( NAME FDTDKOKKOS.exe 
-                        SOURCES test_FDTDKokkos.cpp
+                        SOURCES FDTDKokkos.cpp
+		        HEADERS ../utils/dataType.hpp ../utils/utils.hpp
                         DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
     target_include_directories(FDTDKOKKOS.exe PUBLIC "${Kokkos_ROOT}/../../../include")
+    target_include_directories(FDTDKOKKOS.exe PUBLIC ${CMAKE_BINARY_DIR}/src)
+    target_include_directories(FDTDKOKKOS.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../utils)
 elseif(ENABLE_OPENMP)
      blt_add_executable( NAME FDTDOMP.exe 
                          SOURCES FDTDOMP.cpp

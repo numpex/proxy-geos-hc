@@ -30,7 +30,7 @@ option (_USE_KOKKOS "Use KOKKOS to parallelise loops" OFF)
 # Setup the flags for users to select data containers
 #-----------------------------------------------------
 
-# use std::vector for vectores and arrays
+# use std::vector for vectors and arrays
 option (_USE_VECTOR "Use standard vectors as data containers" OFF)
 
 # use LvArray for vectors and arrays

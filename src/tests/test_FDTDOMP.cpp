@@ -240,11 +240,8 @@ int main( int argc, char *argv[] )
 		                      +coef[3]*(pn(i,j,k+3)+pn(i,j,k-3))
 		                      +coef[4]*(pn(i,j,k+4)+pn(i,j,k-4));
                 pnp1(i,j,k)=2.*pn(i,j,k)-pnm1(i,j,k)+timeStep2*vp(i,j,k)*(coef0*pn(i,j,k)+lapx+lapy+lapz);
-              	//if(i==xs && j==ys && k==zs)printf("%lf %lf %lf\n",coef0*pn(i,j,k),lapx+lapy+lapz,pn(i,j,k));
-              	//if(i==xs && j==ys && k==zs)printf("exact %lf %lf\n",coef0,6.*(coef[1]+coef[2]+coef[3]+coef[4]));
-              	//if(i==xs && j==ys && k==zs)printf("exact %lf\n",coef0+6*(coef[1]+coef[2]+coef[3]+coef[4]));
              }
-	  }
+	        }
       }
       if(itSample%50==0){
       printf("result 1 %f\n",pnp1(xs,ys,zs));}
