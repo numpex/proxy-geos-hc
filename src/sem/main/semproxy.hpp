@@ -77,11 +77,11 @@ protected:
   solverUtils myUtils;
 
   vectorInt rhsElement;
-#if defined(_USE_RAJA)
+#if defined(USE_RAJA)
   solverRaja mySolver;
-#elif defined(_USE_OMP)
+#elif defined(USE_OMP)
   solverOMP mySolver;
-#elif defined(_USE_KOKKOS)
+#elif defined(USE_KOKKOS)
   solverKokkos mySolver;
 #else
   solverSEQUENTIAL mySolver;

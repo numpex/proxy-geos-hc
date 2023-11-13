@@ -4,7 +4,7 @@
 #include "commonConfig.hpp"
 #include <iostream>
 
-#ifdef _USE_VECTOR
+#ifdef USE_VECTOR
   #include <vector>
   template<class T> class Vector 
   {
@@ -82,9 +82,9 @@
     return array;
   }
 
-#endif //_USE_VECTOR
+#endif //USE_VECTOR
 
-#ifdef _USE_LVARRAY
+#ifdef USE_LVARRAY
 
   #include "RAJA/RAJA.hpp"
   #include "Array.hpp"
@@ -208,9 +208,9 @@
     T array(n1, n2, n3);
     return array;
   }
-#endif //_USE_LVARRAY
+#endif //USE_LVARRAY
 
-#ifdef _USE_KOKKOS
+#ifdef USE_KOKKOS
   #include <Kokkos_Core.hpp>
   #define MemSpace Kokkos::SharedSpace
   using ExecSpace = MemSpace::execution_space;
@@ -253,6 +253,6 @@
     T array("a",n1, n2, n3);
     return array;
   }
-#endif //_USE_KOKKOS
+#endif //USE_KOKKOS
 
 #endif //DATATYPE_HPP_

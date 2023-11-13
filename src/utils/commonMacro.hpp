@@ -1,14 +1,14 @@
 #include "commonConfig.hpp"
 
-#ifdef _USE_RAJA
+#ifdef USE_RAJA
 
 #include "solverRaja.hpp"
 
-#elif defined _USE_OMP
+#elif defined USE_OMP
 
 #include "solverOMP.hpp"
 
-#elif defined _USE_KOKKOS
+#elif defined USE_KOKKOS
 
 #include "solverKokkos.hpp"
 
@@ -18,7 +18,7 @@
 
 #endif
 
-#ifdef _USE_CALIPER
+#ifdef USE_CALIPER
 
 #include <caliper/cali.h>
 #include <sys/time.h>
@@ -43,7 +43,7 @@
 /// Mark the end of function, only useful when you don't want to or can't mark the whole function.
 #define _CALIPER_MARK_FUNCTION_END CALI_MARK_FUNCTION_END
 
-#else // _USE_CALIPER
+#else // USE_CALIPER
 
 /// @cond DO_NOT_DOCUMENT
 #define _CALIPER_MARK_SCOPE( name )
@@ -56,4 +56,4 @@
 #define _CALIPER_MARK_FUNCTION_END
 /// @endcond
 
-#endif // _USE_CALIPER
+#endif // USE_CALIPER

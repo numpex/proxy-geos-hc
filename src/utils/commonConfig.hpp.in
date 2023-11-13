@@ -2,22 +2,22 @@
 #define COMMON_CONFIG_HPP
 
 // Enables use of Caliper (CMake option)
-#cmakedefine _USE_CALIPER
+#cmakedefine USE_CALIPER
 
 // Enable use of Vector (CMake option)
-#cmakedefine _USE_VECTOR
+#cmakedefine USE_VECTOR
 
 // Enable use of LvArray (CMake option)
-#cmakedefine _USE_LVARRAY
+#cmakedefine USE_LVARRAY
 
 // Enable use of RAJA (CMake option)
-#cmakedefine _USE_RAJA
+#cmakedefine USE_RAJA
 
 // Enables use of OMP (CMake option)
-#cmakedefine _USE_OMP
+#cmakedefine USE_OMP
 
 // Enables use of KOKOS (CMake option)
-#cmakedefine _USE_KOKKOS
+#cmakedefine USE_KOKKOS
 
 
 #endif

@@ -4,9 +4,9 @@
 #  Users can choose from "OMP", "RAJA", and "KOKKOS" as following:
 #
 #  (0) The default is using sequential mode
-#  (1) If _USE_OMP is ON, it is using OMP to parallelise loops.
-#  (2) If _USE_RAJA is ON, it is using RAJA.
-#  (3) If _USE_KOKKOS is ON, it is using KOKKOS.
+#  (1) If USE_OMP is ON, it is using OMP to parallelise loops.
+#  (2) If USE_RAJA is ON, it is using RAJA.
+#  (3) If USE_KOKKOS is ON, it is using KOKKOS.
 #
 #  And the users can chose data containers as following:
 #
@@ -112,11 +112,11 @@ include( ../blt/SetupBLT.cmake )
 ################################
 # SEM USE OMP
 ################################
-if(_USE_OMP)
+if(USE_OMP)
     set (SOLVER "OMP" CACHE PATH "" FORCE)
     message(STATUS "BUILDING SOLVER including OMP ")
-    set (_USE_KOKKOS OFF CACHE BOOL "")
-    set (_USE_RAJA OFF CACHE BOOL "")
+    set (USE_KOKKOS OFF CACHE BOOL "")
+    set (USE_RAJA OFF CACHE BOOL "")
     set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
     set (DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
 endif()
@@ -125,10 +125,10 @@ endif()
 ################################
 # RAJA
 ################################
-if ( _USE_RAJA)
+if ( USE_RAJA)
    # disable OMP and KOKKOS 
-   set (_USE_OMP OFF CACHE BOOL "")
-   set (_USE_KOKKOS OFF CACHE BOOL "")
+   set (USE_OMP OFF CACHE BOOL "")
+   set (USE_KOKKOS OFF CACHE BOOL "")
    # set solver
    message( " " )
    message( STATUS "-------------------RAJA SETTINGS---------------------------------------" )
@@ -194,12 +194,12 @@ if ( _USE_RAJA)
      message(FATAL_ERROR "GEOSX requires CHAI, set CHAI_DIR to the CHAI installation directory.")
    endif()
 
-   if (_USE_LVARRAY)
+   if (USE_LVARRAY)
       set( DATA_CONTAINER "LVARRAY" CACHE STRING "" FORCE)
       set(ENABLE_LVARRAY ON CACHE BOOL "" FORCE)
       add_subdirectory( LvArray )
    endif()
-   if (_USE_VECTOR)
+   if (USE_VECTOR)
       set( DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
    endif()
    message( " " )
@@ -211,11 +211,11 @@ endif()
 ################################
 # KOKKOS
 ################################
-# the solver is using KOKKOS if _USE_KOKKOS is ON
-if (NOT _USE_KOKKOS)
-  message ("-- _USE_KOKKOS flag is set to be false and KOKKOS is not enabled")
+# the solver is using KOKKOS if USE_KOKKOS is ON
+if (NOT USE_KOKKOS)
+  message ("-- USE_KOKKOS flag is set to be false and KOKKOS is not enabled")
 elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
-  message ("-- _USE_KOKKOS flag is set to be true and KOKOS is now enabled")
+  message ("-- USE_KOKKOS flag is set to be true and KOKOS is now enabled")
   message("-- Found the KOKKOS library in $ENV{KOKKOS_DIR}")
   set (SOLVER "Kokkos" CACHE PATH "" FORCE)
 
@@ -235,10 +235,10 @@ elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
   set (ENABLE_KOKKOS ON CACHE BOOL "")
 
 elseif (NOT DEFINED $ENV{KOKKOS_DIR})
-  set (_USE_KOKKOS OFF CACHE BOOL "")
+  set (USE_KOKKOS OFF CACHE BOOL "")
   message("-- KOKKOS_DIR is not defined  not enabled")
 else ()
-  set (_USE_KOKKOS OFF CACHE BOOL "")
+  set (USE_KOKKOS OFF CACHE BOOL "")
   message("-- KOKKOS_DIR is not the correct path and is not enabled")
 endif()
 

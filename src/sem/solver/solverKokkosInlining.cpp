@@ -31,7 +31,6 @@ void solverKokkos::computeOneStep(  const int & timeStep,
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
   } );
-/*
   // update pnGLobal with right hade side
   Kokkos::parallel_for(numberOfRHS,KOKKOS_LAMBDA (const int i)
   {
@@ -346,6 +345,5 @@ void solverKokkos::computeOneStep(  const int & timeStep,
     float MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
     pnGlobal(I,i1)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,i2)-MmSh*pnGlobal(I,i1)-tmp*yGlobal[I]);
   } );
-*/
   Kokkos::fence();
 }
