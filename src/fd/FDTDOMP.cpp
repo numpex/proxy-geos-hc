@@ -14,6 +14,46 @@
 #include "utils.hpp"
 #include "dataType.hpp"
 
+//inner points
+void inner3D(const int n1, const int n2, const int n3,
+             const int x3, const int x4,
+             const int y3, const int y4,
+             const int z3, const int z4,
+	     const float timeStep2,
+	     const float coef0,
+             const vectorReal & coefx,
+             const vectorReal & coefy,
+             const vectorReal & coefz,
+             array3DReal & vp,
+             array3DReal & pnp1,
+             array3DReal & pn,
+             array3DReal & pnm1)
+{
+  #pragma omp parallel for collapse(3)
+  for( int i=x3; i<x4;i++)
+  {
+     for( int j=y3; j<y4;j++)
+     {
+        for( int k=z3; k<z4;k++)
+        {
+          float lapx=(coefx[1]*(pn(i+1,j,k)+pn(i-1,j,k))
+                    +coefx[2]*(pn(i+2,j,k)+pn(i-2,j,k))
+                    +coefx[3]*(pn(i+3,j,k)+pn(i-3,j,k))
+                    +coefx[4]*(pn(i+4,j,k)+pn(i-4,j,k)));
+          float lapy=(coefy[1]*(pn(i,j+1,k)+pn(i,j-1,k))
+                    +coefy[2]*(pn(i,j+2,k)+pn(i,j-2,k))
+                    +coefy[3]*(pn(i,j+3,k)+pn(i,j-3,k))
+                    +coefy[4]*(pn(i,j+4,k)+pn(i,j-4,k)));
+          float lapz=(coefz[1]*(pn(i,j,k+1)+pn(i,j,k-1))
+                    +coefz[2]*(pn(i,j,k+2)+pn(i,j,k-2))
+                    +coefz[3]*(pn(i,j,k+3)+pn(i,j,k-3))
+                    +coefz[4]*(pn(i,j,k+4)+pn(i,j,k-4)));
+          pnp1(i,j,k)=2.*pn(i,j,k)-pnm1(i,j,k)+timeStep2*vp(i,j,k)*(coef0*pn(i,j,k)+lapx+lapy+lapz);
+          //if(i==xs && j==ys && k==zs)printf("%f %f %f\n",coef0*pn(i,j,k),lapx+lapy+lapz,pn(i,j,k));
+        }
+     }
+  }
+}
 
 int main( int argc, char *argv[] )
 {
@@ -79,7 +119,7 @@ int main( int argc, char *argv[] )
     printf("memory used for vectra and arrays %d bytes\n",(4*n1*n2*n3+nSamples+ncoefs)*4);
 
     // initialize vp and pressure field
-#pragma omp parallel for collapse(3)
+    #pragma omp parallel for collapse(3)
     for( int i=0; i<n1;i++)
     {
        for( int j=0; j<n2;j++)
@@ -93,38 +133,24 @@ int main( int argc, char *argv[] )
           }
        }
     }
+
+    int x3=4;
+    int x4=n1-4;
+    int y3=4;
+    int y4=n2-4;
+    int z3=4;
+    int z4=n2-4;
+
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     for (int itSample=0; itSample<nSamples;itSample++)
     {
       pn(xs,ys,zs)+=vp(xs,ys,zs)*timeStep*timeStep*RHSTerm[itSample];
-#pragma omp parallel for collapse(3)
-      for( int i=4; i<n1-4;i++)
-      {
-         for( int j=4; j<n2-4;j++)
-         {
-            for( int k=4; k<n3-4;k++)
-            {
-              float lapx=(coefx[1]*(pn(i+1,j,k)+pn(i-1,j,k))
-                        +coefx[2]*(pn(i+2,j,k)+pn(i-2,j,k))
-                        +coefx[3]*(pn(i+3,j,k)+pn(i-3,j,k))
-                        +coefx[4]*(pn(i+4,j,k)+pn(i-4,j,k)));
-              float lapy=(coefy[1]*(pn(i,j+1,k)+pn(i,j-1,k))
-                        +coefy[2]*(pn(i,j+2,k)+pn(i,j-2,k))
-                        +coefy[3]*(pn(i,j+3,k)+pn(i,j-3,k)) 
-                        +coefy[4]*(pn(i,j+4,k)+pn(i,j-4,k)));
-              float lapz=(coefz[1]*(pn(i,j,k+1)+pn(i,j,k-1))
-                        +coefz[2]*(pn(i,j,k+2)+pn(i,j,k-2))
-                        +coefz[3]*(pn(i,j,k+3)+pn(i,j,k-3))
-                        +coefz[4]*(pn(i,j,k+4)+pn(i,j,k-4)));
-              pnp1(i,j,k)=2.*pn(i,j,k)-pnm1(i,j,k)+timeStep2*vp(i,j,k)*(coef0*pn(i,j,k)+lapx+lapy+lapz);
-              //if(i==xs && j==ys && k==zs)printf("%f %f %f\n",coef0*pn(i,j,k),lapx+lapy+lapz,pn(i,j,k));
-            }
-         }
-      }
+      //inner points
+      inner3D(n1, n2, n3, x3, x4, y3, y4,z3, z4, timeStep2, coef0, coefx, coefy,coefz, vp, pnp1, pn, pnm1);
       if(itSample%50==0){
       printf("result 1 %f\n",pnp1(xs,ys,zs));}
-#pragma omp parallel for collapse(3)
+      #pragma omp parallel for collapse(3)
       for( int i=0; i<n1;i++)
       {
          for( int j=0; j<n2;j++)
