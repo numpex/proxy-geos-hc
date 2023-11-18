@@ -14,6 +14,7 @@
 #include    "simpleMesh.hpp"
 #include    "dataType.hpp"
 #include    "omp.h"
+#include    "vector"
 
 using namespace grid;
 using namespace FE;
@@ -60,8 +61,11 @@ public:
   int numberOfInteriorNodes;
   int numberOfBoundaryNodes;
   int numberOfBoundaryFaces;
+  const int numberOfColors=4;
 
   //shared arrays
+  int numberOfElementsByColor[4];
+  arrayInt listOfElementsByColor;
   arrayInt globalNodesList;
   arrayReal globalNodesCoords;
   vectorInt listOfInteriorNodes;

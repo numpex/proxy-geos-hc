@@ -69,6 +69,60 @@ int simpleMesh::getNumberOfBoundaryFaces() const
 // get number of Boundary nodes
 int simpleMesh::getNumberOfBoundaryNodes() const
 {return 2*(nx+ny)-4;}
+// sort element by color
+// red=0, green=1, blue=2, yellow=3
+// get
+int simpleMesh::getNumberOfElementsByColor() const
+{return ((ex/2+ex%2)*(ey/2+ey%2));}
+//sort
+void simpleMesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const
+{
+  // red
+  int k=0;
+  for ( int j=0;j<ey; j=j+2)
+  {
+      for ( int i=0;i<ex; i=i+2)
+      {
+          listOfElementsByColor(0,k)=i+j*ex;
+          k=k+1;
+      }
+  }
+  numberOfElementsByColor[0]=k;
+  // green
+  k=0;
+  for ( int j=0;j<ey; j=j+2)
+  {
+      for ( int i=1;i<ex; i=i+2)
+      {
+          listOfElementsByColor(1,k)=i+j*ex;
+          k=k+1;
+      }
+  }
+  numberOfElementsByColor[1]=k;
+  // blue
+  k=0;
+  for ( int j=1;j<ey; j=j+2)
+  {
+      for ( int i=0;i<ex; i=i+2)
+      {
+          listOfElementsByColor(2,k)=i+j*ex;
+          k=k+1;
+      }
+  }
+  numberOfElementsByColor[2]=k;
+  // yellow
+  k=0;
+  for ( int j=1;j<ey; j=j+2)
+  {
+      for ( int i=1;i<ex; i=i+2)
+      {
+          listOfElementsByColor(3,k)=i+j*ex;
+          k=k+1;
+      }
+  }
+  numberOfElementsByColor[3]=k;
+}
+
 // Initialize nodal coordinates.
 #ifdef USE_RAJA
 void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayReal const & nodeCoords ) const
