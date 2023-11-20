@@ -116,9 +116,6 @@ void pml3d(const int n1, const int n2, const int n3,
         }
     }
 }
-void initEta(int n1, int n2, int n3, float timeStep, vectorReal eta)
-{
-}	
 
 int main( int argc, char *argv[] )
 {
