@@ -4,12 +4,11 @@
 #  Users can choose from "OMP", "RAJA", and "KOKKOS" as following:
 #
 #  (0) The default is using sequential mode
-#  (1) If USE_OMP is ON, it is using OMP to parallelise loops.
-#  (2) If USE_RAJA is ON, it is using RAJA.
-#  (3) If USE_KOKKOS is ON, it is using KOKKOS.
+#  (1) If USE_OMP is ON, it is using OpenMP+Vector on CPU.
+#  (2) If USE_RAJA is ON, it is using RAJA+LVARRAY+CUDA.
+#  (3) If USE_KOKKOS is ON, it is using KOKKOS+CUDA.
 #
 #  And the users can chose data containers as following:
-#
 #
 #  env variables to be defined before build
 #  the variables above are defined for Pangea3
@@ -24,7 +23,7 @@
 #  export CAMP_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/camp
 #  export CHAI_DIR=${SEM_TPL_ROOT_DIR}/chai/share/chai/cmake/
 #  export UMPIRE_DIR=${SEM_TPL_ROOT_DIR}/chai/lib/cmake/umpire/
-
+#
 #-------------------------------------------------------------------
 
 # the solver is using sequential mode by default
@@ -57,6 +56,7 @@ if (NOT BLT_CXX_STD)
     set(BLT_CXX_STD "c++17" CACHE STRING "")
 endif()
 
+# the following options are setup for BLT
 set( ENABLE_GTEST OFF CACHE STRING "" FORCE)
 set( ENABLE_ALL_WARNINGS OFF CACHE STRING "" FORCE)
 set( ENABLE_TESTS OFF CACHE STRING "" FORCE)
@@ -64,93 +64,106 @@ set( ENABLE_EXAMPLES OFF )
 set( ENABLE_DOCS OFF )
 set( ENABLE_BENCHMARKS OFF )
 set( DISABLE_UNIT_TESTS ON)
-
 # force ENABLE_OPENMP to ON
 set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 
 # choose platform   
 if(P9)
-    set(X86 OFF CACHE STRING "" FORCE)
+    set(X86_laptop OFF CACHE STRING "" FORCE)
+    set(X86_cypress OFF CACHE STRING "" FORCE)
 endif()
 
 # Cuda options 
-if(X86)
+if(X86_laptop)
   if (ENABLE_CUDA)
     set(CUDA_ROOT "/usr" CACHE PATH "")
-    set(ENABLE_CUDA_NVTOOLSEXT ON CACHE BOOL "")
-    set(CUDA_TOOLKIT_ROOT_DIR $ENV{CUDA_ROOT} CACHE PATH "")
-    set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "")
-    set(CMAKE_CUDA_COMPILER ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc CACHE STRING "")
     set(CMAKE_CUDA_ARCHITECTURES 50 CACHE STRING "")
     set(CUDA_ARCH sm_50 CACHE STRING "")
-    set(CMAKE_CUDA_STANDARD 17 CACHE STRING "")
-    set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
-    # --expt-extended-lambda --expt-relaxed-constexpr: important for compilation  are not set by default
     set(CMAKE_CUDA_FLAGS "-O3 -restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17" CACHE STRING "")
-    message(STATUS "CMAKE_CUDA_FLAGS ${CMAKE_CUDA_FLAGS}")
     set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
   endif()
-else()
+endif()
+
+if(X86_cypress)
+  if (ENABLE_CUDA)
+    set(CUDA_ROOT $ENV{CUDA_ROOT} CACHE PATH "" FORCE) 
+    set(CMAKE_CUDA_ARCHITECTURES 80 CACHE STRING "" FORCE) 
+    set(CUDA_ARCH sm_80 CACHE STRING "" FORCE) 
+    set(CMAKE_CUDA_FLAGS "-O3 -restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17" CACHE STRING "" FORCE)
+    set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
+  endif()
+endif()
+
+if(P9)
   # Cuda options for pangea3
   if (ENABLE_CUDA)
      set(CUDA_ROOT "/data_local/sw/cuda/11.0.3-rhel8" CACHE PATH "")
-     set(ENABLE_CUDA_NVTOOLSEXT ON CACHE BOOL "")
-     set(CUDA_TOOLKIT_ROOT_DIR $ENV{CUDA_ROOT} CACHE PATH "")
-     set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "")
-     set(CMAKE_CUDA_COMPILER ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc CACHE STRING "")
      set(CMAKE_CUDA_ARCHITECTURES 70 CACHE STRING "")
      set(CUDA_ARCH sm_70 CACHE STRING "")
-     set(CMAKE_CUDA_STANDARD 17 CACHE STRING "")
-     set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
-     # --expt-extended-lambda --expt-relaxed-constexpr: important for compilation  are not set by default
      set(CMAKE_CUDA_FLAGS "-O3 -restrict -arch ${CUDA_ARCH}  --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le  " CACHE STRING "")
   endif()
 endif()
 
+if( ENABLE_CUDA )
+  set(ENABLE_CUDA_NVTOOLSEXT ON CACHE BOOL "")
+  set(CUDA_TOOLKIT_ROOT_DIR $ENV{CUDA_ROOT} CACHE PATH "")
+  set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "")
+  set(CMAKE_CUDA_COMPILER ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc CACHE STRING "")
+  set(extraComponentsLinkList ${extraComponentsLinkList} cuda )
+  set(CMAKE_CUDA_STANDARD 17 CACHE STRING "")
+  set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+endif()
+
 include( ../blt/SetupBLT.cmake )
+
+set (USE_VECTOR ON CACHE BOOL "" FORCE)
 
 ################################
 # SEM USE OMP
 ################################
+# the solver is using OpenMP+Vector on CPU
 if(USE_OMP)
-    set (SOLVER "OMP" CACHE PATH "" FORCE)
-    message(STATUS "BUILDING SOLVER including OMP ")
-    set (USE_KOKKOS OFF CACHE BOOL "")
-    set (USE_RAJA OFF CACHE BOOL "")
-    set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
-    set (DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
+  set (SOLVER "OMP" CACHE PATH "" FORCE)
+  message(STATUS "BUILDING SOLVER including OpenMP+Vector on CPU")
+  set (USE_KOKKOS OFF CACHE BOOL "")
+  set (USE_RAJA OFF CACHE BOOL "")
+  set (USE_LVARRAY OFF CACHE BOOL "" FORCE)
+  set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
+  set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+else()
+    message ("-- USE_OMP flag is set to be false and OMP is not enabled")
 endif()
 
 
 ################################
 # RAJA
 ################################
+# the solver is using RAJA+LVARRAY+CUDA on GPU
 if ( USE_RAJA)
    # disable OMP and KOKKOS 
+   set (USE_LVARRAY ON CACHE BOOL "" FORCE)
+   set (USE_VECTOR OFF CACHE BOOL "" FORCE)
    set (USE_OMP OFF CACHE BOOL "")
    set (USE_KOKKOS OFF CACHE BOOL "")
    # set solver
    message( " " )
    message( STATUS "-------------------RAJA SETTINGS---------------------------------------" )
-   message( STATUS "-----------------------------------------------------------------------" )
    set (SOLVER "Raja" CACHE PATH "" FORCE)
    message(STATUS "BUILDING SOLVER including RAJA ")
 
    set (RAJA_DIR "$ENV{RAJA_DIR}")
    if(DEFINED RAJA_DIR)
-       message(STATUS " USE RAJA in RAJA_DIR = ${RAJA_DIR}")
+       message(STATUS "USE RAJA in RAJA_DIR = ${RAJA_DIR}")
        find_package(RAJA REQUIRED
                     PATHS ${RAJA_DIR}
                     NO_DEFAULT_PATH)
-
-       message(STATUS " USE RAJA:  RAJA VERSION=${RAJA_VERSION}")
-
        get_target_property(RAJA_INCLUDE_DIRS RAJA INTERFACE_INCLUDE_DIRECTORIES)
        set_target_properties(RAJA PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${RAJA_INCLUDE_DIRS}")
+       message(STATUS "RAJA_INCLUDE_DIRS: ${RAJA_INCLUDE_DIRS}")
        set(ENABLE_RAJA ON CACHE BOOL "")
        set(thirdPartyLibs ${thirdPartyLibs} RAJA )
    else()
-       message(FATAL_ERROR "GEOSX requires RAJA, set RAJA_DIR to the RAJA installation directory.")
+       message(FATAL_ERROR "ProxyApp requires RAJA, set RAJA_DIR to the RAJA installation directory.")
    endif()
 
    ################################
@@ -159,17 +172,13 @@ if ( USE_RAJA)
    set (UMPIRE_DIR "$ENV{UMPIRE_DIR}")
    if(DEFINED UMPIRE_DIR)
        message(STATUS " USE RAJA: RAJA must be compiled with UMPIRE in UMPIRE_DIR = ${UMPIRE_DIR}")
-
        find_package(umpire REQUIRED
                     PATHS ${UMPIRE_DIR}
                     NO_DEFAULT_PATH)
-
-	    message(STATUS " USE RAJA: RAJA is compiled with UMPIRE VERSION=${umpire_VERSION}")
-
        set(ENABLE_UMPIRE ON CACHE BOOL "")
        set(thirdPartyLibs ${thirdPartyLibs} umpire)
    else()
-       message(FATAL_ERROR "GEOSX requires Umpire, set UMPIRE_DIR to the Umpire installation directory.")
+       message(FATAL_ERROR "ProxyApp requires Umpire, set UMPIRE_DIR to the Umpire installation directory.")
    endif()
 
    ################################
@@ -178,43 +187,38 @@ if ( USE_RAJA)
    set (CHAI_DIR "$ENV{CHAI_DIR}")
    if(DEFINED CHAI_DIR)
        message(STATUS " USE RAJA in CHAI_DIR = ${CHAI_DIR}")
-
        find_package(chai REQUIRED
                     PATHS ${CHAI_DIR}
                     NO_DEFAULT_PATH)
-
-	    message(STATUS " USE RAJA: RAJA is compiled with chai_VERSION=${chai_VERSION}")
-
        get_target_property(CHAI_INCLUDE_DIRS chai INTERFACE_INCLUDE_DIRECTORIES)
        set_target_properties(chai PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CHAI_INCLUDE_DIRS}")
-
        set(ENABLE_CHAI ON CACHE BOOL "")
        set(thirdPartyLibs ${thirdPartyLibs} chai)
    else()
-     message(FATAL_ERROR "GEOSX requires CHAI, set CHAI_DIR to the CHAI installation directory.")
+     message(FATAL_ERROR "ProxyApp requires CHAI, set CHAI_DIR to the CHAI installation directory.")
    endif()
 
-   if (USE_LVARRAY)
-      set( DATA_CONTAINER "LVARRAY" CACHE STRING "" FORCE)
-      set(ENABLE_LVARRAY ON CACHE BOOL "" FORCE)
-      add_subdirectory( LvArray )
-   endif()
-   if (USE_VECTOR)
-      set( DATA_CONTAINER "VECTOR" CACHE STRING "" FORCE)
-   endif()
-   message( " " )
+   set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+   set (dependencyList lvarray RAJA chai)
+   add_subdirectory( LvArray )
+   include_directories(${CMAKE_CURRENT_SOURCE_DIR}/LvArray/src)
+
    message( STATUS "-------------------END RAJA SETTINGS-----------------------------------" )
-   message( STATUS "-----------------------------------------------------------------------" )
+   message( " " )
+else()
+    message ("-- USE_RAJA flag is set to be false and RAJA is not enabled")
 endif()
 
 
 ################################
 # KOKKOS
 ################################
-# the solver is using KOKKOS if USE_KOKKOS is ON
+# the solver is using KOKKOS+CUDA if USE_KOKKOS is ON
 if (NOT USE_KOKKOS)
   message ("-- USE_KOKKOS flag is set to be false and KOKKOS is not enabled")
 elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
+  set (USE_LVARRAY OFF CACHE BOOL "" FORCE)
+  set (USE_VECTOR OFF CACHE BOOL "" FORCE)
   message ("-- USE_KOKKOS flag is set to be true and KOKOS is now enabled")
   message("-- Found the KOKKOS library in $ENV{KOKKOS_DIR}")
   set (SOLVER "Kokkos" CACHE PATH "" FORCE)
@@ -232,7 +236,9 @@ elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
   include_directories(${Kokkos_INCLUDE_DIRS})
 
   set (kokkosList "-L${Kokkos_ROOT}/../.. -lkokkoscontainers -lkokkoscore -lkokkossimd")
-  set (ENABLE_KOKKOS ON CACHE BOOL "")
+  set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+  set (dependencyList ${dependencyList} ${kokkosList} )
+  message (STATUS "KOKKOS DEPENDENCY LIST= ${dependencyList}")
 
 elseif (NOT DEFINED $ENV{KOKKOS_DIR})
   set (USE_KOKKOS OFF CACHE BOOL "")
@@ -242,6 +248,9 @@ else ()
   message("-- KOKKOS_DIR is not the correct path and is not enabled")
 endif()
 
-add_subdirectory( sem )
+configure_file( utils/commonConfig.hpp.in
+                ${CMAKE_BINARY_DIR}/src/commonConfig.hpp)
+
+#add_subdirectory( sem )
+#add_subdirectory( fd )
 add_subdirectory( tests )
-add_subdirectory( fd )

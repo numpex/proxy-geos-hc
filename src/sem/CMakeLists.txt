@@ -1,62 +1,19 @@
 ################################
-# Add all the tests
+# Setup for SEM_EXECUTABLE
 ################################
-set( extraComponentsLinkList "" )
 
-if( ENABLE_OPENMP )
-  set( extraComponentsLinkList ${extraComponentsLinkList} openmp )
-endif()
+set (SEM_EXECUTABLE "sem_${SOLVER}.exe" CACHE PATH "" FORCE)
 
-if( ENABLE_CUDA )
-  set( extraComponentsLinkList ${extraComponentsLinkList} cuda )
-endif()
-
-if(USE_LVARRAY)
-set( dependencyList lvarray  )
-endif()
-
-if(USE_RAJA )
-   if (NOT USE_LVARRAY)
-     set( dependencyList RAJA chai )
-   endif()
-   if(USE_LVARRAY)
-      set( dependencyList lvarray RAJA chai )
-   endif()
-endif()
-
-if( ENABLE_CALIPER )
-  set( dependencyList ${dependencyList} caliper )
-
-  if (TARGET adiak::adiak)
-    set( dependencyList ${dependencyList} adiak::adiak )
-  endif()
-
-  if (TARGET adiak)
-    set( dependencyList ${dependencyList} adiak )
-  endif()
-endif()
-
-if(USE_KOKKOS)
-	set( dependencyList ${dependencyList} ${kokkosList} )
-    message ("-------------------- KOKKOS DEPENDENCY LIST= ${dependencyList}")
-endif()
+message ( "\n---------------------------------------------------------------------------------" )
+message ( "-- The Current Program Model Used is: ${SOLVER}")
+message ( "-- The Current executable to be built is: ${SEM_EXECUTABLE}")
+message ( "-- CMAKE_SOURCE_DIR : ${CMAKE_SOURCE_DIR}")
+message ( "-- PROJECT_BINARY_DIR :  ${PROJECT_BINARY_DIR}")
+message ( "---------------------------------------------------------------------------------\n" )
 
 #-------------------------------------------------------
 # SEM proxy application setup
 #-------------------------------------------------------
-message("         ")
-message( STATUS "-------------------SEM ${SOLVER}_${DATA_CONTAINER} Solver settings-----------------------" )
-message( STATUS "-----------------------------------------------------------------------" )
-
-set (sem_headers
-     ../utils/commonMacro.hpp
-     ../utils/dataType.hpp
-     ../utils/utils.hpp
-     finiteElements/QkGL.hpp
-     mesh/simpleMesh.hpp
-     solver/solverBase.hpp
-     solver/solver${SOLVER}.hpp
-     main/semproxy.hpp)
 
 set (sem_sources
      finiteElements/QkGL.cpp
@@ -66,31 +23,18 @@ set (sem_sources
      main/semproxy.cpp
      main/main.cpp)
 
-
-
-configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/../utils/commonConfig.hpp.in
-                ${CMAKE_BINARY_DIR}/src/commonConfig.hpp)
-# Install the generated header.
-install( FILES ${CMAKE_BINARY_DIR}/src/CommonConfig.hpp
-         DESTINATION src/sem )
-message(STATUS "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
-message(STATUS "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
-
-blt_add_executable( NAME sem${SOLVER}_${DATA_CONTAINER}.exe 
+blt_add_executable( NAME ${SEM_EXECUTABLE}
                     SOURCES ${sem_sources}
-                    HEADERS ${sem_headers}
                     DEPENDS_ON ${extraComponentsLinkList} ${dependencyList} )
-if (USE_LVARRAY)
-	target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../LvArray/src)
-	target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_BINARY_DIR}/include)
-endif()
-target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_BINARY_DIR}/src)
-target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../utils)
-target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/finiteElements)
-target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/mesh)
-target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/solver)
-target_include_directories(sem${SOLVER}_${DATA_CONTAINER}.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/main)
 
-message("         ")
-message( STATUS "-------------------END SEM ${SOLVER}_${DATA_CONTAINER} Solver settings-------------------" )
-message( STATUS "-----------------------------------------------------------------------" )
+target_include_directories( ${SEM_EXECUTABLE} PUBLIC
+        ${CMAKE_BINARY_DIR}/src
+        ${CMAKE_CURRENT_SOURCE_DIR}/../utils
+        ${CMAKE_CURRENT_SOURCE_DIR}/finiteElements
+        ${CMAKE_CURRENT_SOURCE_DIR}/mesh
+        ${CMAKE_CURRENT_SOURCE_DIR}/solver
+        ${CMAKE_CURRENT_SOURCE_DIR}/main)
+
+install(TARGETS ${SEM_EXECUTABLE}
+        RUNTIME DESTINATION bin)
+

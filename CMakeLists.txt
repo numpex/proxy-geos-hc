@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.22.1 )
 
-project( sem )
+project( proxyapp)
 
 #-----------------------------------------------------
 # Setup Flags for Building and Installation
@@ -9,10 +9,12 @@ project( sem )
 set (CMAKE_VERBOSE_MAKEFILE ON )
 
 #-----------------------------------------------------
-# architecture 
+# Setup the computing resources for running proxyapp
 #-----------------------------------------------------
-option (X86 "X86 architecture  default" ON)
+option (X86_laptop "X86 architecture  default" OFF)
+option (X86_cypress "Compilation on Cypress Cluster" ON)
 option (P9 "Power9 architecture  " OFF)
+
 #-----------------------------------------------------
 # Setup the flags for users to select programming models
 #-----------------------------------------------------
@@ -27,22 +29,9 @@ option (USE_RAJA "Use RAJA to parallelise loops" OFF)
 option (USE_KOKKOS "Use KOKKOS to parallelise loops" OFF)
 
 #-----------------------------------------------------
-# Setup the flags for users to select data containers
-#-----------------------------------------------------
-
-# use std::vector for vectors and arrays
-option (USE_VECTOR "Use standard vectors as data containers" OFF)
-
-# use LvArray for vectors and arrays
-option (USE_LVARRAY "Use LVARRAY as data containers" OFF)
-
-#-----------------------------------------------------
 # Setup the flags for profiling using caliper
 #-----------------------------------------------------
 option (USE_CALIPER "Use CALIPER for profiling" OFF)
-
-# setup the flags for python interface (not working yet)
-#option (_USE_PYTHON "bind python" OFF)
 
 
 add_subdirectory(src)
