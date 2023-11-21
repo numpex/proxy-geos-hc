@@ -38,7 +38,7 @@ if (ENABLE_CUDA)
     message( STATUS "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
     blt_add_executable( NAME FDTDKOKKOS.exe 
                 SOURCES FDTDKokkos.cpp
-		HEADERS ../utils/dataType.hpp ../utils/utils.hpp
+		HEADERS ../utils/dataType.hpp ../utils/utils.hpp ./utilFDTD/FDTDutils.hpp
                 DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
     target_include_directories(FDTDKOKKOS.exe PUBLIC ${CMAKE_BINARY_DIR}/src)
     target_include_directories(FDTDKOKKOS.exe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../utils)

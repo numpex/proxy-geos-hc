@@ -13,15 +13,11 @@
 #include <vector>
 #include "utils.hpp"
 #include "dataType.hpp"
+#include "FDTDutils.hpp"
 
-#define POW2(x) ((x)*(x))
-#define IDX3(i,j,k) (n3*n2*(i) + n3*(j) + (k))
-#define IDX3_l(i,j,k) ((n3+2*lz)*(n2+2*ly)*((i)+lx) + (n3+2*lz)*((j)+ly) + ((k)+lz))
-#define IDX3_eta1(i,j,k) ((n3+2)*(n2+2)*((i)+1) + (n3+2)*((j)+1) + ((k)+1))
-#define IDX3_eta0(i,j,k) ((n3+2)*(n2+2)*(i) + (n3+2)*(j) + (k))
 
 //inner points
-void inner3D(const int n1, const int n2, const int n3,
+void inner3D(const int nx, const int ny, const int nz,
              const int x3, const int x4,
              const int y3, const int y4,
              const int z3, const int z4,
@@ -63,7 +59,7 @@ void inner3D(const int n1, const int n2, const int n3,
   }
 }
 
-void pml3d(const int n1, const int n2, const int n3,
+void pml3d(const int nx, const int ny, const int nz,
            const int x3, const int x4, 
 	   const int y3, const int y4, 
 	   const int z3, const int z4,
@@ -119,37 +115,20 @@ void pml3d(const int n1, const int n2, const int n3,
 
 int main( int argc, char *argv[] )
 {
-    constexpr int n1=20;
-    constexpr int n2=20;
-    constexpr int n3=20;
+    constexpr int nx=20;
+    constexpr int ny=20;
+    constexpr int nz=20;
     constexpr int lx=4;
     constexpr int ly=4;
     constexpr int ly=4;
 
-    constexpr int x1=0;
-    constexpr int x2=lx-1;
-    constexpr int x3=lx;
-    constexpr int x4=n1-lx;
-    constexpr int x5=n1=lx+1;
-    constexpr int x6=n1;
-    constexpr int y1=0;
-    constexpr int y2=ly-1;
-    constexpr int y3=ly;
-    constexpr int y4=n2-ly;
-    constexpr int y5=n2=ly+1;
-    constexpr int y6=n2;
-    constexpr int z1=0;
-    constexpr int z2=lz-1;
-    constexpr int z3=lz;
-    constexpr int z4=n3-lz;
-    constexpr int z5=n3=lz+1;
-    constexpr int z6=n3;
     
     constexpr int   sourceOrder=1;
-    constexpr int   xs=n1/2;
-    constexpr int   ys=n2/2;
-    constexpr int   zs=n3/2;
+    constexpr int   xs=nx/2;
+    constexpr int   ys=ny/2;
+    constexpr int   zs=nz/2;
     constexpr float f0=10.;
+    constexpr float fmax=2.5*f0;
     constexpr float timeMax=2.0;
 
     constexpr int ncoefs=5;
@@ -163,7 +142,7 @@ int main( int argc, char *argv[] )
     constexpr float dx=10;
     constexpr float dy=10;
     constexpr float dz=10;
-    solverUtils myUtils;
+    FDTDUtils myUtils;
     myUtils.init_coef(dx, coefx);
     myUtils.init_coef(dy, coefy);
     myUtils.init_coef(dz, coefz);
@@ -172,7 +151,7 @@ int main( int argc, char *argv[] )
     coef0+=-2.*(coefy[1]+coefy[2]+coefy[3]+coefy[4]);
     coef0+=-2.*(coefz[1]+coefz[2]+coefz[3]+coefz[4]);
 
-    float vmax=1500;
+    constexpr float vmax=1500;
 
     float timeStep=myUtils.compute_dt_sch(vmax,coefx,coefy,coefz);
 
@@ -188,36 +167,67 @@ int main( int argc, char *argv[] )
       RHSTerm[i]=sourceTerm[i];
     }
     
+    // init pml limits
+    constexpr int ntaperx=3;
+    constexpr int ntapery=3;
+    constexpr int ntaperz=3;
+    constexpr float hdx_2=1./(4.*dx*dx);
+    constexpr float hdy_2=1./(4.*dy*dy);
+    constexpr float hdz_2=1./(4.*dz*dz);
+    constexpr float lambdamax=vmax/fmax;
+    constexpr float ndampx=ntaperx*lambdamax/dx;
+    constexpr float ndampy=ntaperx*lambdamax/dx;
+    constexpr float ndampz=ntaperx*lambdamax/dx;
+    constexpr int x1=0;
+    constexpr int x2=ndampx;
+    constexpr int x3=ndampx;
+    constexpr int x4=nx-ndampx;
+    constexpr int x5=nx-ndampx;
+    constexpr int x6=nx;
+    constexpr int y1=0;
+    constexpr int y2=ndampy;
+    constexpr int y3=ndampy;
+    constexpr int y4=ny-ndampy;
+    constexpr int y5=ny-ndampy;
+    constexpr int y6=ny;
+    constexpr int z1=0;
+    constexpr int z2=ndampz;
+    constexpr int z3=ndampz;
+    constexpr int z4=nz-ndampz;
+    constexpr int z5=nz-ndampz;
+    constexpr int z6=nz;
+
     // allocate vector and arrays 
-    vectorReal vp=allocateVector<VectorReal>(n1*n2*n3);
-    VectorReal pnp1=allocateVector<VectorReal>((n1+2*lx)*(n2+2*ly)*(n3+2*lz));
-    VectorReal pn=allocateVector<VectorReal>((n1+2*lx)*(n2+2*ly)*(n3+2*lz));
-    VectorReal pnm1=allocateVector<VectorReal>((n1+2*lx)*(n2+2*ly)*(n3+2*lz));
+    vectorReal vp=allocateVector<VectorReal>(nx*ny*nz);
+    VectorReal pnp1=allocateVector<VectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
+    VectorReal pn=allocateVector<VectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
+    VectorReal pnm1=allocateVector<VectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
     // PML arrays
-    vectorReal phi=allocateVector<vectorReal>(n1*n2*n3);
-    vectorReal eta=allocateVector<vectorReal>((n1+2)*(n2+2)*(n3+2));
+    vectorReal phi=allocateVector<vectorReal>(nx*ny*nz);
+    vectorReal eta=allocateVector<vectorReal>((nx+2)*(ny+2)*(nz+2));
 
     printf("memory used for vectra and arrays %d bytes\n",
-           (n1*n2*n3+3*(n1+2*lx)*(n2+2*ly)*(n3+2*lz)+nSamples+ncoefs)*4);
+           (nx*ny*nz+3*(nx+2*lx)*(ny+2*ly)*(nz+2*lz)+nSamples+ncoefs)*4);
 
     // initialize vp and pressure field
     #pragma omp parallel for collapse(3)
-    for( int i=0; i<n1;i++)
+    for( int i=0; i<nx;i++)
     {
-       for( int j=0; j<n2;j++)
+       for( int j=0; j<ny;j++)
        {
-          for( int k=0; k<n3;k++)
+          for( int k=0; k<nz;k++)
           {
             vp[IDX3(i,j,k)]=1500.*1500.;
+            phi[IDX3(i,j,k)]=0.;
           }
        }
     }
     #pragma omp parallel for collapse(3)
-    for( int i=-lx; i<n1+lx;i++)
+    for( int i=-lx; i<nx+lx;i++)
     {
-       for( int j=-ly; j<n2+ly;j++)
+       for( int j=-ly; j<ny+ly;j++)
        {
-          for( int k=-lz; k<n3+lz;k++)
+          for( int k=-lz; k<nz+lz;k++)
           {
             pnp1[IDX3_l(i,j,k)]=0.;
             pn[IDX3_l(i,j,k)]=0.;
@@ -226,10 +236,14 @@ int main( int argc, char *argv[] )
        }
     }
 
-    // init pml
-    constexpr float hdx_2=1./(4.*dx*dx);
-    constexpr float hdy_2=1./(4.*dy*dy);
-    constexpr float hdz_2=1./(4.*dz*dz);
+    //init pml eta array
+    myUtils.init_eta(int nx, int ny, int nz,
+		     int ndampx, int ndampy,int ndampz,
+                     int x1, int x2, int x3, int x4, int x5, int x6,
+                     int y1, int y2, int y3, int y4, int y5, int y6,
+                     int z1, int z2, int z3, int z4, int z5, int z6
+                     float dx, float dy, float dz, float dt_sch,
+                     float vmax, vectorReal eta)
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
@@ -238,28 +252,28 @@ int main( int argc, char *argv[] )
       pn(xs,ys,zs)+=vp(xs,ys,zs)*timeStep*timeStep*RHSTerm[itSample];
 
       //up
-      pml3D(n1,n2,n3,0,n1,0,n2,z1,z2,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+      pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
       //front
-      pml3D(n1,n2,n3,0,n1,y1,y2,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+      pml3D(nx,ny,nz,0,nx,y1,y2,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
       //left
-      pml3D(n1,n2,n3,x1,x2,y3,y4,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+      pml3D(nx,ny,nz,x1,x2,y3,y4,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
       //inner points
-      inner3D(n1,n2,n3,x3,x4,y3,y4,z3,z4,timeStep2,coef0,coefx,coefy,coefz,vp,pnp1,pn,pnm1);
+      inner3D(nx,ny,nz,x3,x4,y3,y4,z3,z4,timeStep2,coef0,coefx,coefy,coefz,vp,pnp1,pn,pnm1);
       //right
-      pml3D(n1,n2,n3,x5,x6,y3,y4,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+      pml3D(nx,ny,nz,x5,x6,y3,y4,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
       //back
-      pml3D(n1,n2,n3,0,n1,y5,y6,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+      pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
       // bottom
-      pml3D(n1,n2,n3,0,n1,0,n2,z5,z6,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+      pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
 
       if(itSample%50==0){
       printf("result 1 %f\n",pnp1[IDX3_l(xs,ys,zs)]);}
       #pragma omp parallel for collapse(3)
-      for( int i=0; i<n1;i++)
+      for( int i=0; i<nx;i++)
       {
-         for( int j=0; j<n2;j++)
+         for( int j=0; j<ny;j++)
          {
-            for( int k=0; k<n3;k++)
+            for( int k=0; k<nz;k++)
             {
                pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
                pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];

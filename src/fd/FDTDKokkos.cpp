@@ -16,6 +16,7 @@
 #include <vector>
 #include "utils.hpp"
 #include "dataType.hpp"
+#include "FDTDutils.hpp"
 
 
 int main( int argc, char *argv[] )
@@ -44,7 +45,7 @@ int main( int argc, char *argv[] )
     coefy=allocateVector<vectorReal>(ncoefs);
     coefz=allocateVector<vectorReal>(ncoefs);
 
-    solverUtils myUtils;
+    FDTDUtils myUtils;
     myUtils.init_coef(dx, coefx);
     myUtils.init_coef(dy, coefy);
     myUtils.init_coef(dz, coefz);
