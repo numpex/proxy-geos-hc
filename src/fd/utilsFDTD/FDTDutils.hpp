@@ -124,7 +124,7 @@ struct FDTDUtils
                 int ndampx, int ndampy,int ndampz,
                 int x1, int x2, int x3, int x4, int x5, int x6,
                 int y1, int y2, int y3, int y4, int y5, int y6,
-                int z1, int z2, int z3, int z4, int z5, int z6
+                int z1, int z2, int z3, int z4, int z5, int z6,
                 float dx, float dy, float dz, float dt_sch,
                 float vmax, vectorReal eta)
   {
