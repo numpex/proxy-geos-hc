@@ -22,7 +22,6 @@ void inner3D(const int nx, const int ny, const int nz,
              const int y3, const int y4,
              const int z3, const int z4,
              const int lx, const int ly, const int lz,
-	     const float timeStep2,
 	     const float coef0,
              const vectorReal & coefx,
              const vectorReal & coefy,
@@ -40,21 +39,22 @@ void inner3D(const int nx, const int ny, const int nz,
         for( int k=z3; k<z4;k++)
         {
           float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
-                    +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
-                    +coefx[3]*(pn[IDX3_l(i+3,j,k)]+pn[IDX3_l(i-3,j,k)])
-                    +coefx[4]*(pn[IDX3_l(i+4,j,k)]+pn[IDX3_l(i-4,j,k)]));
+                     +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
+                     +coefx[3]*(pn[IDX3_l(i+3,j,k)]+pn[IDX3_l(i-3,j,k)])
+                     +coefx[4]*(pn[IDX3_l(i+4,j,k)]+pn[IDX3_l(i-4,j,k)]));
           float lapy=(coefy[1]*(pn[IDX3_l(i,j+1,k)]+pn[IDX3_l(i,j-1,k)])
-                    +coefy[2]*(pn[IDX3_l(i,j+2,k)]+pn[IDX3_l(i,j-2,k)])
-                    +coefy[3]*(pn[IDX3_l(i,j+3,k)]+pn[IDX3_l(i,j-3,k)])
-                    +coefy[4]*(pn[IDX3_l(i,j+4,k)]+pn[IDX3_l(i,j-4,k)]));
+                     +coefy[2]*(pn[IDX3_l(i,j+2,k)]+pn[IDX3_l(i,j-2,k)])
+                     +coefy[3]*(pn[IDX3_l(i,j+3,k)]+pn[IDX3_l(i,j-3,k)])
+                     +coefy[4]*(pn[IDX3_l(i,j+4,k)]+pn[IDX3_l(i,j-4,k)]));
           float lapz=(coefz[1]*(pn[IDX3_l(i,j,k+1)]+pn[IDX3_l(i,j,k-1)])
-                    +coefz[2]*(pn[IDX3_l(i,j,k+2)]+pn[IDX3_l(i,j,k-2)])
-                    +coefz[3]*(pn[IDX3_l(i,j,k+3)]+pn[IDX3_l(i,j,k-3)])
-                    +coefz[4]*(pn[IDX3_l(i,j,k+4)]+pn[IDX3_l(i,j,k-4)]));
+                     +coefz[2]*(pn[IDX3_l(i,j,k+2)]+pn[IDX3_l(i,j,k-2)])
+                     +coefz[3]*(pn[IDX3_l(i,j,k+3)]+pn[IDX3_l(i,j,k-3)])
+                     +coefz[4]*(pn[IDX3_l(i,j,k+4)]+pn[IDX3_l(i,j,k-4)]));
 
           pnp1[IDX3_l(i,j,k)]=2.*pn[IDX3_l(i,j,k)]-pnm1[IDX3_l(i,j,k)]
-		             +timeStep2*vp[IDX3(i,j,k)]*(coef0*pn[IDX3_l(i,j,k)]+lapx+lapy+lapz);
-          //if(i==xs && j==ys && k==zs)printf("%f %f %f\n",coef0*pn(i,j,k),lapx+lapy+lapz,pn(i,j,k));
+		             +vp[IDX3(i,j,k)]*(coef0*pn[IDX3_l(i,j,k)]+lapx+lapy+lapz);
+          //if(i==nx/2 && j==ny/2 && k==nz/2)printf("%f %f %f\n",coef0*pn[IDX3_l(i,j,k)],
+          //			                          lapx+lapy+lapz,pn[IDX3_l(i,j,k)]);
         }
      }
   }
@@ -78,6 +78,7 @@ void pml3D(const int nx, const int ny, const int nz,
 {
     float coef0 = coefx[0] + coefy[0] + coefz[0];
     float lap;
+    #pragma omp parallel for collapse(3)
     for (int i = x3; i < x4; ++i) 
     {
         for (int j = y3; j < y4; ++j) 
@@ -86,17 +87,17 @@ void pml3D(const int nx, const int ny, const int nz,
 	    {
 
 		float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
-                          +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
-                          +coefx[3]*(pn[IDX3_l(i+3,j,k)]+pn[IDX3_l(i-3,j,k)])
-                          +coefx[4]*(pn[IDX3_l(i+4,j,k)]+pn[IDX3_l(i-4,j,k)]));
+                           +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
+                           +coefx[3]*(pn[IDX3_l(i+3,j,k)]+pn[IDX3_l(i-3,j,k)])
+                           +coefx[4]*(pn[IDX3_l(i+4,j,k)]+pn[IDX3_l(i-4,j,k)]));
                 float lapy=(coefy[1]*(pn[IDX3_l(i,j+1,k)]+pn[IDX3_l(i,j-1,k)])
-                          +coefy[2]*(pn[IDX3_l(i,j+2,k)]+pn[IDX3_l(i,j-2,k)])
-                          +coefy[3]*(pn[IDX3_l(i,j+3,k)]+pn[IDX3_l(i,j-3,k)])
-                          +coefy[4]*(pn[IDX3_l(i,j+4,k)]+pn[IDX3_l(i,j-4,k)]));
+                           +coefy[2]*(pn[IDX3_l(i,j+2,k)]+pn[IDX3_l(i,j-2,k)])
+                           +coefy[3]*(pn[IDX3_l(i,j+3,k)]+pn[IDX3_l(i,j-3,k)])
+                           +coefy[4]*(pn[IDX3_l(i,j+4,k)]+pn[IDX3_l(i,j-4,k)]));
                 float lapz=(coefz[1]*(pn[IDX3_l(i,j,k+1)]+pn[IDX3_l(i,j,k-1)])
-                          +coefz[2]*(pn[IDX3_l(i,j,k+2)]+pn[IDX3_l(i,j,k-2)])
-                          +coefz[3]*(pn[IDX3_l(i,j,k+3)]+pn[IDX3_l(i,j,k-3)])
-                          +coefz[4]*(pn[IDX3_l(i,j,k+4)]+pn[IDX3_l(i,j,k-4)]));
+                           +coefz[2]*(pn[IDX3_l(i,j,k+2)]+pn[IDX3_l(i,j,k-2)])
+                           +coefz[3]*(pn[IDX3_l(i,j,k+3)]+pn[IDX3_l(i,j,k-3)])
+                           +coefz[4]*(pn[IDX3_l(i,j,k+4)]+pn[IDX3_l(i,j,k-4)]));
 
 		lap=coef0*pn[IDX3_l(i,j,k)]+lapx+lapy+lapz;
 
@@ -119,60 +120,31 @@ void pml3D(const int nx, const int ny, const int nz,
 
 int main( int argc, char *argv[] )
 {
-    constexpr int nx=20;
-    constexpr int ny=20;
-    constexpr int nz=20;
+    constexpr int nx=150;
+    constexpr int ny=150;
+    constexpr int nz=150;
     constexpr int lx=4;
     constexpr int ly=4;
     constexpr int lz=4;
+    constexpr float dx=10;
+    constexpr float dy=10;
+    constexpr float dz=10;
 
-    
     constexpr int   sourceOrder=1;
     constexpr int   xs=nx/2;
     constexpr int   ys=ny/2;
     constexpr int   zs=nz/2;
-    constexpr float f0=10.;
+    constexpr float f0=5.;
     constexpr float fmax=2.5*f0;
-    constexpr float timeMax=2.0;
+    constexpr float timeMax=0.8;
 
     constexpr int ncoefs=5;
-    vectorReal coefx;
-    vectorReal coefy;
-    vectorReal coefz;
-    coefx=allocateVector<vectorReal>(ncoefs);
-    coefy=allocateVector<vectorReal>(ncoefs);
-    coefz=allocateVector<vectorReal>(ncoefs);
-
-    constexpr float dx=10;
-    constexpr float dy=10;
-    constexpr float dz=10;
+    constexpr float vmax=1500;
+    
+    // imports utils
     solverUtils myUtils;
     FDTDUtils myFDTDUtils;
 
-    myFDTDUtils.init_coef(dx, coefx);
-    myFDTDUtils.init_coef(dy, coefy);
-    myFDTDUtils.init_coef(dz, coefz);
-
-    double coef0=-2.*(coefx[1]+coefx[2]+coefx[3]+coefx[4]);
-    coef0+=-2.*(coefy[1]+coefy[2]+coefy[3]+coefy[4]);
-    coef0+=-2.*(coefz[1]+coefz[2]+coefz[3]+coefz[4]);
-
-    constexpr float vmax=1500;
-
-    float timeStep=myFDTDUtils.compute_dt_sch(vmax,coefx,coefy,coefz);
-
-    float timeStep2=timeStep*timeStep;
-    const int nSamples=timeMax/timeStep;
-    printf("timeStep=%f\n",timeStep);
-
-    vectorReal RHSTerm=allocateVector<vectorReal>(nSamples);
-    // compute source term
-    std::vector<float>sourceTerm=myUtils.computeSourceTerm(nSamples,timeStep,f0,sourceOrder);
-    for(int i=0;i<nSamples;i++)
-    {
-      RHSTerm[i]=sourceTerm[i];
-    }
-    
     // init pml limits
     constexpr int ntaperx=3;
     constexpr int ntapery=3;
@@ -181,9 +153,10 @@ int main( int argc, char *argv[] )
     constexpr float hdy_2=1./(4.*dy*dy);
     constexpr float hdz_2=1./(4.*dz*dz);
     constexpr float lambdamax=vmax/fmax;
-    constexpr float ndampx=ntaperx*lambdamax/dx;
-    constexpr float ndampy=ntaperx*lambdamax/dx;
-    constexpr float ndampz=ntaperx*lambdamax/dx;
+    constexpr int ndampx=ntaperx*lambdamax/dx;
+    constexpr int ndampy=ntaperx*lambdamax/dx;
+    constexpr int ndampz=ntaperx*lambdamax/dx;
+    printf("ndampx=%d ndampy=%d ndampz=%d\n",ndampx, ndampy,ndampz);
     constexpr int x1=0;
     constexpr int x2=ndampx;
     constexpr int x3=ndampx;
@@ -204,13 +177,43 @@ int main( int argc, char *argv[] )
     constexpr int z6=nz;
 
     // allocate vector and arrays 
+    // FD coefs
+    vectorReal coefx=allocateVector<vectorReal>(ncoefs);
+    vectorReal coefy=allocateVector<vectorReal>(ncoefs);
+    vectorReal coefz=allocateVector<vectorReal>(ncoefs);
+    // model
     vectorReal vp=allocateVector<vectorReal>(nx*ny*nz);
+    // pressure fields
     vectorReal pnp1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
     vectorReal pn=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
     vectorReal pnm1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
     // PML arrays
     vectorReal phi=allocateVector<vectorReal>(nx*ny*nz);
     vectorReal eta=allocateVector<vectorReal>((nx+2)*(ny+2)*(nz+2));
+
+    // extract FD coefs
+    myFDTDUtils.init_coef(dx, coefx);
+    myFDTDUtils.init_coef(dy, coefy);
+    myFDTDUtils.init_coef(dz, coefz);
+
+    double coef0=-2.*(coefx[1]+coefx[2]+coefx[3]+coefx[4]);
+    coef0+=-2.*(coefy[1]+coefy[2]+coefy[3]+coefy[4]);
+    coef0+=-2.*(coefz[1]+coefz[2]+coefz[3]+coefz[4]);
+
+    // compute time step
+    float timeStep=myFDTDUtils.compute_dt_sch(vmax,coefx,coefy,coefz);
+    float timeStep2=timeStep*timeStep;
+    const int nSamples=timeMax/timeStep;
+    printf("timeStep=%f\n",timeStep);
+
+    // compute source term
+    // source term
+    vectorReal RHSTerm=allocateVector<vectorReal>(nSamples);
+    std::vector<float>sourceTerm=myUtils.computeSourceTerm(nSamples,timeStep,f0,sourceOrder);
+    for(int i=0;i<nSamples;i++)
+    {
+      RHSTerm[i]=sourceTerm[i];
+    }
 
     printf("memory used for vectra and arrays %d bytes\n",
            (nx*ny*nz+3*(nx+2*lx)*(ny+2*ly)*(nz+2*lz)+nSamples+ncoefs)*4);
@@ -223,7 +226,7 @@ int main( int argc, char *argv[] )
        {
           for( int k=0; k<nz;k++)
           {
-            vp[IDX3(i,j,k)]=1500.*1500.;
+            vp[IDX3(i,j,k)]=1500.*1500.*timeStep2;
             phi[IDX3(i,j,k)]=0.;
           }
        }
@@ -235,9 +238,9 @@ int main( int argc, char *argv[] )
        {
           for( int k=-lz; k<nz+lz;k++)
           {
-            pnp1[IDX3_l(i,j,k)]=0.;
-            pn[IDX3_l(i,j,k)]=0.;
-            pnm1[IDX3_l(i,j,k)]=0.;
+            pnp1[IDX3_l(i,j,k)]=0.000001;
+            pn[IDX3_l(i,j,k)]  =0.000001;
+            pnm1[IDX3_l(i,j,k)]=0.000001;
           }
        }
     }
@@ -255,7 +258,7 @@ int main( int argc, char *argv[] )
     start = std::chrono::system_clock::now();
     for (int itSample=0; itSample<nSamples;itSample++)
     {
-      pn[IDX3_l(xs,ys,zs)]+=vp[IDX3_l(xs,ys,zs)]*timeStep*timeStep*RHSTerm[itSample];
+      pn[IDX3_l(xs,ys,zs)]+=vp[IDX3(xs,ys,zs)]*RHSTerm[itSample];
 
       //up
       pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
@@ -264,7 +267,7 @@ int main( int argc, char *argv[] )
       //left
       pml3D(nx,ny,nz,x1,x2,y3,y4,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
       //inner points
-      inner3D(nx,ny,nz,x3,x4,y3,y4,z3,z4,lx,ly,lz,timeStep2,coef0,coefx,coefy,coefz,vp,pnp1,pn,pnm1);
+      inner3D(nx,ny,nz,x3,x4,y3,y4,z3,z4,lx,ly,lz,coef0,coefx,coefy,coefz,vp,pnp1,pn,pnm1);
       //right
       pml3D(nx,ny,nz,x5,x6,y3,y4,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
       //back
@@ -272,8 +275,7 @@ int main( int argc, char *argv[] )
       // bottom
       pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
 
-      if(itSample%50==0){
-      printf("result 1 %f\n",pnp1[IDX3_l(xs,ys,zs)]);}
+      if(itSample%50==0){printf("result 1 %f\n",pnp1[IDX3_l(xs,ys,zs)]);}
       #pragma omp parallel for collapse(3)
       for( int i=0; i<nx;i++)
       {
