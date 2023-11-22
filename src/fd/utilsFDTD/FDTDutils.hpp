@@ -158,6 +158,7 @@ struct FDTDUtils
                 y1+1, y2, y3+1, y4, y5+1, y6,
                 z1+1, z2, z3+1, z4, z5+1, z6);
 
+    /*
     #ifndef USE_VECTOR
     #ifndef USE_LVARRAY
     free(etax);
@@ -165,6 +166,7 @@ struct FDTDUtils
     free(etaz);
     #endif
     #endif
+    */
 
   }
 };

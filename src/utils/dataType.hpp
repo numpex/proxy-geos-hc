@@ -215,11 +215,12 @@
   #define MemSpace Kokkos::SharedSpace
   using ExecSpace = MemSpace::execution_space;
   using range_policy = Kokkos::RangePolicy<>;
-  #ifdef ENABLE_CUDA
-    using Layout=Kokkos::LayoutLeft;
-  #else
-    using Layout=Kokkos::LayoutRight;
-  #endif
+  using Layout=Kokkos::LayoutLeft;
+  //#ifdef ENABLE_CUDA
+  //  using Layout=Kokkos::LayoutLeft;
+  //#else
+  //  using Layout=Kokkos::LayoutRight;
+  //#endif
   typedef Kokkos::View<int*,     Layout, MemSpace> vectorInt;
   typedef Kokkos::View<float*,   Layout,  MemSpace> vectorReal;
   typedef Kokkos::View<double*,  Layout, MemSpace> vectorDouble;
