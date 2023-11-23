@@ -75,7 +75,13 @@ int simpleMesh::getNumberOfBoundaryNodes() const
 int simpleMesh::getNumberOfElementsByColor() const
 {return ((ex/2+ex%2)*(ey/2+ey%2));}
 //sort
+#ifdef USE_RAJA
 void simpleMesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const
+#elif defined USE_KOKKOS
+void simpleMesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const
+#else
+void simpleMesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt  & listOfElementsByColor) const
+#endif
 {
   // red
   int k=0;

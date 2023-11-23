@@ -33,7 +33,7 @@
     Array2D(): data( 0, std::vector< T >( 0 )) {}
 
     std::vector< T > & operator[]( int index ){return data[index];}
-    T& operator()(size_t row, size_t col) {return data[row][col];}
+    T& operator()(int row, int col) {return data[row][col];}
 
   private:
     std::vector< std::vector< T > > data;

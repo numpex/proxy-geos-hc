@@ -58,7 +58,13 @@ public:
   // sort element by color
   // red=0, green=1, blue=2, yellow=3
   int getNumberOfElementsByColor() const;
+  #ifdef USE_RAJA
   void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const;
+  #elif defined USE_KOKKOS
+  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const;
+  #else
+  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt  & listOfElementsByColor) const;
+  #endif
   // Initialize nodal coordinates.
   #ifdef USE_RAJA
   void nodesCoordinates( const int & numberOfNodes, arrayReal const & nodeCoords ) const;
