@@ -3,7 +3,7 @@
 ################################
 
 # the followings need "-DUSE_KOKKOS=ON -DENABLE_CUDA=ON"
-set (testcase  Kokkos)
+#set (testcase  Kokkos)
 #set (testcase  Kokkos1)
 #set (testcase  FDTDKokkos)
 
@@ -22,7 +22,7 @@ set (testcase  Kokkos)
 
 # the followings need "-DOMP=ON"
 #set (testcase  omp)
-#set (testcase  FDTDOMP)
+set (testcase  FDTDOMP)
 
 set (TEST_EXECUTABLE "test_${testcase}.exe" CACHE PATH "" FORCE)
 
