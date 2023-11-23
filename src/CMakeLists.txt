@@ -75,6 +75,7 @@ endif()
 
 # Cuda options 
 if(X86_laptop)
+  set(X86_cypress OFF CACHE STRING "" FORCE)
   if (ENABLE_CUDA)
     set(CUDA_ROOT "/usr" CACHE PATH "")
     set(CMAKE_CUDA_ARCHITECTURES 50 CACHE STRING "")
@@ -251,6 +252,6 @@ endif()
 configure_file( utils/commonConfig.hpp.in
                 ${CMAKE_BINARY_DIR}/src/commonConfig.hpp)
 
-#add_subdirectory( sem )
-#add_subdirectory( fd )
+add_subdirectory( sem )
+add_subdirectory( fd )
 add_subdirectory( tests )

@@ -57,12 +57,12 @@ protected:
 
   const int myNumberOfRHS=1;
   int   sourceOrder=1;
-  float f0=15.;
+  float f0=10.;
   float myTimeMax=1.0;
   float myTimeStep=0.001;
 
   const int myNumSamples=myTimeMax/myTimeStep;
-  const int myOrderNumber=3;
+  const int myOrderNumber=2;
   
    // arrays
   arrayReal myRHSLocation;
@@ -71,7 +71,7 @@ protected:
   arrayReal pnGlobal;
 
   // initialize mesh
-  simpleMesh  myMesh {166, 166, 5000, 5000, myOrderNumber};
+  simpleMesh  myMesh {250, 250, 5000, 5000, myOrderNumber};
 
   QkGL myQk;
   solverUtils myUtils;
