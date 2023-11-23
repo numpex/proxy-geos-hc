@@ -55,6 +55,10 @@ public:
   int getNumberOfBoundaryFaces() const;
   // get number of Boundary nodes
   int getNumberOfBoundaryNodes() const;
+  // sort element by color
+  // red=0, green=1, blue=2, yellow=3
+  int getNumberOfElementsByColor() const;
+  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const;
   // Initialize nodal coordinates.
   #ifdef USE_RAJA
   void nodesCoordinates( const int & numberOfNodes, arrayReal const & nodeCoords ) const;

@@ -179,6 +179,10 @@ namespace FE
                                  double const transpInvJacobianMatrix[][4],
                                  double const detJ[],
                                  double B[][4] ) const;
+  //KOKKOS_FUNCTION int  computeB( const int & nPointsPerElement,
+  //                               double const jacobianMatrix[][4],
+  //                               double const detJ[],
+  //                               double B[][4] ) const;
   #else
   int  computeB( const int & nPointsPerElement,
                  double const invJacobianMatrix[][4],

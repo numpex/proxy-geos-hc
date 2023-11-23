@@ -13,12 +13,21 @@ void solverBase::computeFEInit( const int & order, simpleMesh mesh, QkGL Qk)
 {
 
   // get infos from mesh
-  
   //interior elements
   numberOfNodes=mesh.getNumberOfNodes();
   numberOfElements=mesh.getNumberOfElements();
   numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
   printf("numberOfNodes %d numberOfElements %d \n",numberOfNodes,numberOfElements);
+
+  // number Of elements by color
+  // sort element by color 
+  int numberMaxOfElementsByColor=mesh.getNumberOfElementsByColor();
+  listOfElementsByColor=allocateArray2D<arrayInt>(numberOfColors,numberMaxOfElementsByColor);
+  mesh.sortElementsByColor(numberOfElementsByColor,listOfElementsByColor); 
+  printf("number of elements color red %d\n",numberOfElementsByColor[0]);
+  printf("number of elements color green %d\n",numberOfElementsByColor[1]);
+  printf("number of elements color blue %d\n",numberOfElementsByColor[2]);
+  printf("number of elements color yellow %d\n",numberOfElementsByColor[3]);
   
   globalNodesList=allocateArray2D<arrayInt>(numberOfElements,(order+1)*(order+1));
   mesh.globalNodesList( numberOfElements, globalNodesList );

@@ -475,6 +475,7 @@ int QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
   for( int i=0; i<nPointsPerElement; i++ )
   {
     detJ[i]=(jacobianMatrix[i][0]*jacobianMatrix[i][3]-jacobianMatrix[i][2]*jacobianMatrix[i][1]);
+    //detJ[i]=1./detJ[i];
   }
   return 0;
 }
@@ -499,10 +500,10 @@ int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
 {
   for( int i=0; i<nPointsPerElement; i++ )
   {
-    invJacobianMatrix[i][0]=(jacobianMatrix[i][3]/detJ[i]);
-    invJacobianMatrix[i][1]=(-jacobianMatrix[i][1]/detJ[i]);
-    invJacobianMatrix[i][2]=(-jacobianMatrix[i][2]/detJ[i]);
-    invJacobianMatrix[i][3]=(jacobianMatrix[i][0]/detJ[i]);
+    invJacobianMatrix[i][0]=jacobianMatrix[i][3];///detJ[i]);
+    invJacobianMatrix[i][1]=-jacobianMatrix[i][1];///detJ[i]);
+    invJacobianMatrix[i][2]=-jacobianMatrix[i][2];///detJ[i]);
+    invJacobianMatrix[i][3]=jacobianMatrix[i][0];///detJ[i]);
   }
   return 0;
 }
@@ -527,10 +528,10 @@ int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
 {
   for( int i=0; i<nPointsPerElement; i++ )
   {
-    transpInvJacobianMatrix[i][0]=(jacobianMatrix[i][3]/detJ[i]);
-    transpInvJacobianMatrix[i][1]=(-jacobianMatrix[i][2]/detJ[i]);
-    transpInvJacobianMatrix[i][2]=(-jacobianMatrix[i][1]/detJ[i]);
-    transpInvJacobianMatrix[i][3]=(jacobianMatrix[i][0]/detJ[i]);
+    transpInvJacobianMatrix[i][0]=jacobianMatrix[i][3];///detJ[i]);
+    transpInvJacobianMatrix[i][1]=-jacobianMatrix[i][2];///detJ[i]);
+    transpInvJacobianMatrix[i][2]=-jacobianMatrix[i][1];///detJ[i]);
+    transpInvJacobianMatrix[i][3]=jacobianMatrix[i][0];///detJ[i]);
   }
   return 0;
 }
@@ -558,6 +559,7 @@ int QkGL::computeB( const int & nPointsPerElement,
 {
   for( int i=0; i<nPointsPerElement; i++ )
   {
+    /*
     B[i][0]=(abs( detJ[i] )*(invJacobianMatrix[i][0]*transpInvJacobianMatrix[i][0]+
                              invJacobianMatrix[i][1]*transpInvJacobianMatrix[i][2]));
     B[i][1]=(abs( detJ[i] )*(invJacobianMatrix[i][0]*transpInvJacobianMatrix[i][1]+
@@ -566,6 +568,16 @@ int QkGL::computeB( const int & nPointsPerElement,
                              invJacobianMatrix[i][3]*transpInvJacobianMatrix[i][2]));
     B[i][3]=(abs( detJ[i] )*(invJacobianMatrix[i][2]*transpInvJacobianMatrix[i][1]+
                              invJacobianMatrix[i][3]*transpInvJacobianMatrix[i][3]));
+    */
+    double detJM1=abs(1./detJ[i]);
+    B[i][0]=(invJacobianMatrix[i][0]*transpInvJacobianMatrix[i][0]+
+            invJacobianMatrix[i][1]*transpInvJacobianMatrix[i][2])*detJM1;
+    B[i][1]=(invJacobianMatrix[i][0]*transpInvJacobianMatrix[i][1]+
+            invJacobianMatrix[i][1]*transpInvJacobianMatrix[i][3])*detJM1;
+    B[i][2]=(invJacobianMatrix[i][2]*transpInvJacobianMatrix[i][0]+
+            invJacobianMatrix[i][3]*transpInvJacobianMatrix[i][2])*detJM1;
+    B[i][3]=(invJacobianMatrix[i][2]*transpInvJacobianMatrix[i][1]+
+            invJacobianMatrix[i][3]*transpInvJacobianMatrix[i][3])*detJM1;
   }
   return 0;
 }
@@ -595,9 +607,9 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                           double   R[][36] ) const
 #endif
 {
-  for (int i=0;i<nPointsPerElement;i++)
+  for (int j=0;j<nPointsPerElement;j++)
   {
-      for (int j=0; j<nPointsPerElement;j++)
+      for (int i=0; i<nPointsPerElement;i++)
       {
         R[j][i]=0;
       }

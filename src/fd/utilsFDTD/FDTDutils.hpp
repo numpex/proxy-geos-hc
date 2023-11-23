@@ -1,0 +1,174 @@
+#ifndef FDTDUTILS_HPP
+#define FDTDUTILS_HPP
+
+#include <stdlib.h>
+#include <stdio.h>
+#include  <cmath>
+#include <vector>
+#include "dataType.hpp"
+
+#define POW2(x) ((x)*(x))
+#define IDX3(i,j,k) (nz*ny*(i) + nz*(j) + (k))
+#define IDX3_l(i,j,k) ((nz+2*lz)*(ny+2*ly)*((i)+lx) + (nz+2*lz)*((j)+ly) + ((k)+lz))
+#define IDX3_eta1(i,j,k) ((nz+2)*(ny+2)*((i)+1) + (nz+2)*((j)+1) + ((k)+1))
+#define IDX3_eta0(i,j,k) ((nz+2)*(ny+2)*(i) + (nz+2)*(j) + (k))
+
+
+struct FDTDUtils
+{
+  void init_coef(float dx, vectorReal &coef)
+  {
+      float dx2 = dx*dx;
+      coef[0] = -205.f/72.f/dx2;
+      coef[1] = 8.f/5.f/dx2;
+      coef[2] = -1.f/5.f/dx2;
+      coef[3] = 8.f/315.f/dx2;
+      coef[4] = -1.f/560.f/dx2;
+  }
+  float compute_dt_sch(const float vmax,const vectorReal &coefx,const vectorReal &coefy,const vectorReal &coefz)
+  {
+
+      float ftmp = 0.;
+      float cfl=0.8;
+      ftmp += fabsf(coefx[0]) + fabsf(coefy[0]) + fabsf(coefz[0]);
+      for (int i = 1; i < 5; i++) {
+          ftmp += 2.f*fabsf(coefx[i]);
+          ftmp += 2.f*fabsf(coefy[i]);
+          ftmp += 2.f*fabsf(coefz[i]);
+      }
+      return 2*cfl/(sqrtf(ftmp)*vmax);
+  }
+  void write_io(int nx, int ny, int nz,
+                int lx, int ly, int lz,
+                array3DReal &u, int istep)
+  {
+      char filename_buf[32];
+      snprintf(filename_buf, sizeof(filename_buf), "snapshot.it%d.%d.raw", istep, nz);
+      FILE *snapshot_file = fopen(filename_buf, "wb");
+      for (int k = lz; k < nz+lz; ++k) {
+          for (int j = ly; j < ny+ly; ++j) {
+              for (int i = lx; i < nx+lx; ++i) {
+                  fwrite(&u(i,j,k), sizeof(float),1, snapshot_file);
+              }
+          }
+      }
+      /* Clean up */
+      fclose(snapshot_file);
+  }
+  void pml_profile_init(vectorReal profile, int i_min, int i_max, int n_first, int n_last, float scale)
+  {
+    int n = i_max-i_min+1;
+    int shift = i_min-1;
+
+    int first_beg = 1 + shift;
+    int first_end = n_first + shift;
+    int last_beg  = n - n_last+1 + shift;
+    int last_end  = n + shift;
+
+    for (int i = i_min; i <= i_max; ++i) {
+        profile[i] = 0.f;
+    }
+
+    float tmp = scale / POW2(first_end-first_beg+1);
+    for (int i = 1; i <= first_end-first_beg+1; ++i) {
+        profile[first_end-i+1] = POW2(i)*tmp;
+    }
+
+    for (int i = 1; i <= last_end-last_beg+1; ++i) {
+        profile[last_beg+i-1] = POW2(i)*tmp;
+    }
+  }
+
+  void pml_profile_extend(int nx, int ny, int nz,
+                          vectorReal eta, vectorReal etax, vectorReal etay, vectorReal etaz,
+                          int xbeg, int xend, int ybeg, int yend, int zbeg, int zend)
+  {
+    const int n_ghost = 1;
+    for (int ix = xbeg-n_ghost; ix <= xend+n_ghost; ++ix) {
+        for (int iy = ybeg-n_ghost; iy <= yend+n_ghost; ++iy) {
+            for (int iz = zbeg-n_ghost; iz <= zend+n_ghost; ++iz) {
+                eta[IDX3_eta0(ix,iy,iz)] = etax[ix] + etay[iy] + etaz[iz];
+            }
+        }
+    }
+  }
+
+  void pml_profile_extend_all(int nx, int ny, int nz,
+                              vectorReal eta, vectorReal etax, vectorReal etay, vectorReal etaz,
+                              int xmin, int xmax, int ymin, int ymax,
+                              int x1, int x2, int x5, int x6,
+                              int y1, int y2, int y3, int y4, int y5, int y6,
+                              int z1, int z2, int z3, int z4, int z5, int z6)
+  {
+    // Top.
+    if (z1 != -1)
+    pml_profile_extend(nx,ny,nz,eta,etax,etay,etaz,xmin,xmax,ymin,ymax,z1,z2);
+    // Bottom.
+    if (z5 != -5)
+    pml_profile_extend(nx,ny,nz,eta,etax,etay,etaz,xmin,xmax,ymin,ymax,z5,z6);
+    // Front.
+    if ((y1!=-1) && (z3!=-3))
+    pml_profile_extend(nx,ny,nz,eta,etax,etay,etaz,xmin,xmax,y1,y2,z3,z4);
+    // Back.
+    if ((y6!=-6) && (z3!=-3))
+    pml_profile_extend(nx,ny,nz,eta,etax,etay,etaz,xmin,xmax,y5,y6,z3,z4);
+    // Left.
+    if ((x1!=-1) && (y3!=-3) && (z3!=-3))
+    pml_profile_extend(nx,ny,nz,eta,etax,etay,etaz,x1,x2,y3,y4,z3,z4);
+    // Right.
+    if ((x6!=-6) && (y3!=-3) && (z3!=-3))
+    pml_profile_extend(nx,ny,nz,eta,etax,etay,etaz,x5,x6,y3,y4,z3,z4);
+  }
+
+  void init_eta(int nx, int ny, int nz,
+                int ndampx, int ndampy,int ndampz,
+                int x1, int x2, int x3, int x4, int x5, int x6,
+                int y1, int y2, int y3, int y4, int y5, int y6,
+                int z1, int z2, int z3, int z4, int z5, int z6,
+                float dx, float dy, float dz, float dt_sch,
+                float vmax, vectorReal eta)
+  {
+    for (int i = -1; i < nx+1; ++i) {
+        for (int j = -1; j < ny+1; ++j) {
+            for (int k = -1; k < nz+1; ++k) {
+                eta[IDX3_eta1(i,j,k)] = 0.f;
+            }
+        }
+    }
+
+    /* etax */
+    float param = dt_sch * 3.f * vmax * logf(1000.f)/(2.f*ndampx*dx);
+    vectorReal etax=allocateVector<vectorReal>(nx+2);
+    pml_profile_init(etax, 0, nx+1, ndampx, ndampx, param);
+
+    /* etay */
+    param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampy*dy);
+    vectorReal etay=allocateVector<vectorReal>(ny+2);
+    pml_profile_init(etay, 0, ny+1, ndampy, ndampy, param);
+
+    /* etaz */
+    param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampz*dz);
+    vectorReal etaz=allocateVector<vectorReal>(nz+2);
+    pml_profile_init(etaz, 0, nz+1, ndampz, ndampz, param);
+
+    (void)pml_profile_extend_all(nx, ny, nz,
+                eta, etax, etay, etaz,
+                1, nx, 1, ny,
+                x1+1, x2, x5+1, x6,
+                y1+1, y2, y3+1, y4, y5+1, y6,
+                z1+1, z2, z3+1, z4, z5+1, z6);
+
+    /*
+    #ifndef USE_VECTOR
+    #ifndef USE_LVARRAY
+    free(etax);
+    free(etay);
+    free(etaz);
+    #endif
+    #endif
+    */
+
+  }
+};
+
+#endif  //FDTDUTILS_HPP
