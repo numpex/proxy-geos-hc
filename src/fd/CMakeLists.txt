@@ -23,6 +23,7 @@ blt_add_executable( NAME ${FD_EXECUTABLE}
 
 target_include_directories( ${FD_EXECUTABLE} PUBLIC
         ${CMAKE_BINARY_DIR}/src
+	${CMAKE_CURRENT_SOURCE_DIR}/utilsFDTD 
         ${CMAKE_CURRENT_SOURCE_DIR}/../utils )
 
 install(TARGETS ${FD_EXECUTABLE}
