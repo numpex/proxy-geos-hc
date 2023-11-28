@@ -1,202 +1,359 @@
 //************************************************************************
-//  SEM proxy application v.0.0.1
+// SEM proxy application v.0.0.1
 //
-//  main.cpp: this main file is simply a driver
+// main.cpp: this main file is simply a driver
 //************************************************************************
 
-#include <iostream>
-#include <cstdio>
-#include <fstream>
-#include <cmath>
-#include <chrono>
-#include <omp.h>
-#include <vector>
-#include "Array.hpp"
-#include "RAJA/RAJA.hpp"
-#include "Macros.hpp"
-#include "ChaiBuffer.hpp"
-#include "utils.hpp"
-#include "dataType.hpp"
+#include<iostream>
+#include<cstdio>
+#include<fstream>
+#include<cmath>
+#include<chrono>
+#include"Array.hpp"
+#include"RAJA/RAJA.hpp"
+#include"Macros.hpp"
+#include"ChaiBuffer.hpp"
+#include<omp.h>
+#include<vector>
+#include"utils.hpp"
+#include"dataType.hpp"
+#include"FDTDutils.hpp"
 
-#define MemSpace Kokkos::SharedSpace
 
+//innerpoints
+int inner3D(const int nx, const int ny, const int nz,
+       const int x3, const int x4,
+       const int y3, const int y4,
+       const int z3, const int z4,
+       const int lx, const int ly, const int lz,
+       const float coef0,
+       vectorRealView const & coefx,
+       vectorRealView const & coefy,
+       vectorRealView const & coefz,
+       vectorRealView const & vp,
+       vectorRealView const & pnp1,
+       vectorRealView const & pn,
+       vectorRealView const & pnm1)
+{
+   RAJA::TypedRangeSegment<int> KRange(z3, z4);
+   RAJA::TypedRangeSegment<int> JRange(y3, y4);
+   RAJA::TypedRangeSegment<int> IRange(x3, x4);
+
+   using EXEC_POL =
+   RAJA::KernelPolicy<
+     RAJA::statement::CudaKernel<
+       RAJA::statement::For<2, RAJA::cuda_thread_x_loop,      // k
+         RAJA::statement::For<1, RAJA::cuda_thread_y_loop,    // j
+           RAJA::statement::For<0, RAJA::cuda_thread_z_loop,  // i
+             RAJA::statement::Lambda<0>
+           >
+         >
+       >
+     >
+   >;
+
+   RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) {
+    float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
+               +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
+               +coefx[3]*(pn[IDX3_l(i+3,j,k)]+pn[IDX3_l(i-3,j,k)])
+               +coefx[4]*(pn[IDX3_l(i+4,j,k)]+pn[IDX3_l(i-4,j,k)]));
+    float lapy=(coefy[1]*(pn[IDX3_l(i,j+1,k)]+pn[IDX3_l(i,j-1,k)])
+               +coefy[2]*(pn[IDX3_l(i,j+2,k)]+pn[IDX3_l(i,j-2,k)])
+               +coefy[3]*(pn[IDX3_l(i,j+3,k)]+pn[IDX3_l(i,j-3,k)])
+               +coefy[4]*(pn[IDX3_l(i,j+4,k)]+pn[IDX3_l(i,j-4,k)]));
+    float lapz=(coefz[1]*(pn[IDX3_l(i,j,k+1)]+pn[IDX3_l(i,j,k-1)])
+               +coefz[2]*(pn[IDX3_l(i,j,k+2)]+pn[IDX3_l(i,j,k-2)])
+               +coefz[3]*(pn[IDX3_l(i,j,k+3)]+pn[IDX3_l(i,j,k-3)])
+               +coefz[4]*(pn[IDX3_l(i,j,k+4)]+pn[IDX3_l(i,j,k-4)]));
+    pnp1[IDX3_l(i,j,k)]=2.*pn[IDX3_l(i,j,k)]-pnm1[IDX3_l(i,j,k)]
+                       +vp[IDX3(i,j,k)]*(coef0*pn[IDX3_l(i,j,k)]+lapx+lapy+lapz);
+   });
+   return (0);
+}
+
+int pml3D(const int nx, const int ny, const int nz,
+           const int x3, const int x4, 
+           const int y3, const int y4, 
+           const int z3, const int z4,
+           const int lx, const int ly, const int lz,
+           const float hdx_2, const float hdy_2, const float hdz_2,
+           vectorRealView const & coefx,
+           vectorRealView const & coefy,
+           vectorRealView const & coefz,
+           vectorRealView const & vp,
+           vectorRealView const & phi,
+           vectorRealView const & eta,
+           vectorRealView const & pnp1,
+           vectorRealView const & pn,
+           vectorRealView const & pnm1)
+{
+   RAJA::TypedRangeSegment<int> KRange(z3, z4);
+   RAJA::TypedRangeSegment<int> JRange(y3, y4);
+   RAJA::TypedRangeSegment<int> IRange(x3, x4);
+
+   using EXEC_POL =
+   RAJA::KernelPolicy<
+     RAJA::statement::CudaKernel<
+       RAJA::statement::For<2, RAJA::cuda_thread_x_loop,      // k
+         RAJA::statement::For<1, RAJA::cuda_thread_y_loop,    // j
+           RAJA::statement::For<0, RAJA::cuda_thread_z_loop,  // i
+             RAJA::statement::Lambda<0>
+           >
+         >
+       >
+     >
+   >;
+
+   RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
+   {
+     float coef0 = coefx[0] + coefy[0] + coefz[0];
+     float lap;
+     float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
+                +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
+                +coefx[3]*(pn[IDX3_l(i+3,j,k)]+pn[IDX3_l(i-3,j,k)])
+                +coefx[4]*(pn[IDX3_l(i+4,j,k)]+pn[IDX3_l(i-4,j,k)]));
+     float lapy=(coefy[1]*(pn[IDX3_l(i,j+1,k)]+pn[IDX3_l(i,j-1,k)])
+                +coefy[2]*(pn[IDX3_l(i,j+2,k)]+pn[IDX3_l(i,j-2,k)])
+                +coefy[3]*(pn[IDX3_l(i,j+3,k)]+pn[IDX3_l(i,j-3,k)])
+                +coefy[4]*(pn[IDX3_l(i,j+4,k)]+pn[IDX3_l(i,j-4,k)]));
+     float lapz=(coefz[1]*(pn[IDX3_l(i,j,k+1)]+pn[IDX3_l(i,j,k-1)])
+                +coefz[2]*(pn[IDX3_l(i,j,k+2)]+pn[IDX3_l(i,j,k-2)])
+                +coefz[3]*(pn[IDX3_l(i,j,k+3)]+pn[IDX3_l(i,j,k-3)])
+                +coefz[4]*(pn[IDX3_l(i,j,k+4)]+pn[IDX3_l(i,j,k-4)]));
+
+     lap=coef0*pn[IDX3_l(i,j,k)]+lapx+lapy+lapz;
+
+     pnp1[IDX3_l(i,j,k)]=((2.-eta[IDX3_eta1(i,j,k)]*eta[IDX3_eta1(i,j,k)]
+                +2.*eta[IDX3_eta1(i,j,k)])*pn[IDX3_l(i,j,k)]
+                +vp[IDX3(i,j,k)]*(lap+phi[IDX3(i,j,k)]))/(1.+2.*eta[IDX3_eta1(i,j,k)])
+                -pnm1[IDX3_l(i,j,k)];
+
+     phi[IDX3(i,j,k)]=(phi[IDX3(i,j,k)]-((eta[IDX3_eta1(i+1,j,k)]-eta[IDX3_eta1(i-1,j,k)])
+                *(pn[IDX3_l(i+1,j,k)]-pn[IDX3_l(i-1,j,k)])*hdx_2
+                +(eta[IDX3_eta1(i,j+1,k)]-eta[IDX3_eta1(i,j-1,k)])
+                *(pn[IDX3_l(i,j+1,k)]-pn[IDX3_l(i,j-1,k)])*hdy_2
+                +(eta[IDX3_eta1(i,j,k+1)]-eta[IDX3_eta1(i,j,k-1)])
+                *(pn[IDX3_l(i,j,k+1)]-pn[IDX3_l(i,j,k-1)])*hdz_2))
+                /(1.+eta[IDX3_eta1(i,j,k)]);
+   });
+   return(0);
+}
 
 int main( int argc, char *argv[] )
 {
-    constexpr int n1=208;
-    constexpr int n2=208;
-    constexpr int n3=208;
-    constexpr float dx=10;
-    constexpr float dy=10;
-    constexpr float dz=10;
+   constexpr int nx=150;
+   constexpr int ny=150;
+   constexpr int nz=150;
+   constexpr int lx=4;
+   constexpr int ly=4;
+   constexpr int lz=4;
+   constexpr float dx=10;
+   constexpr float dy=10;
+   constexpr float dz=10;
 
-    constexpr int   sourceOrder=1;
-    constexpr int   xs=n1/2;
-    constexpr int   ys=n2/2;
-    constexpr int   zs=n3/2;
-    float f0=10.;
-    float timeMax=2.0;
+   constexpr int   sourceOrder=1;
+   constexpr int   xs=nx/2;
+   constexpr int   ys=ny/2;
+   constexpr int   zs=nz/2;
+   constexpr float f0=5.;
+   constexpr float fmax=2.5*f0;
+   constexpr float timeMax=0.8;
 
-    const int ncoefs=5;
-    vectorReal h_coefx;
-    vectorReal h_coefy;
-    vectorReal h_coefz;
-    h_coefx=allocateVector<vectorReal>(ncoefs);
-    h_coefy=allocateVector<vectorReal>(ncoefs);
-    h_coefz=allocateVector<vectorReal>(ncoefs);
+   constexpr int ncoefs=5;
+   constexpr float vmax=1500;
+   
+   // imports utils
+   solverUtils myUtils;
+   FDTDUtils myFDTDUtils;
 
-    solverUtils myUtils;
-    myUtils.init_coef(dx, h_coefx);
-    myUtils.init_coef(dy, h_coefy);
-    myUtils.init_coef(dz, h_coefz);
+   // init pml limits
+   constexpr int ntaperx=3;
+   constexpr int ntapery=3;
+   constexpr int ntaperz=3;
+   constexpr float hdx_2=1./(4.*dx*dx);
+   constexpr float hdy_2=1./(4.*dy*dy);
+   constexpr float hdz_2=1./(4.*dz*dz);
+   constexpr float lambdamax=vmax/fmax;
+   constexpr int ndampx=ntaperx*lambdamax/dx;
+   constexpr int ndampy=ntapery*lambdamax/dy;
+   constexpr int ndampz=ntaperz*lambdamax/dz;
+   printf("ndampx=%d ndampy=%d ndampz=%d\n",ndampx, ndampy,ndampz);
+   constexpr int x1=0;
+   constexpr int x2=ndampx;
+   constexpr int x3=ndampx;
+   constexpr int x4=nx-ndampx;
+   constexpr int x5=nx-ndampx;
+   constexpr int x6=nx;
+   constexpr int y1=0;
+   constexpr int y2=ndampy;
+   constexpr int y3=ndampy;
+   constexpr int y4=ny-ndampy;
+   constexpr int y5=ny-ndampy;
+   constexpr int y6=ny;
+   constexpr int z1=0;
+   constexpr int z2=ndampz;
+   constexpr int z3=ndampz;
+   constexpr int z4=nz-ndampz;
+   constexpr int z5=nz-ndampz;
+   constexpr int z6=nz;
 
-    double coef0=-2.*(h_coefx[1]+h_coefx[2]+h_coefx[3]+h_coefx[4]);
-    coef0+=-2.*(h_coefy[1]+h_coefy[2]+h_coefy[3]+h_coefy[4]);
-    coef0+=-2.*(h_coefz[1]+h_coefz[2]+h_coefz[3]+h_coefz[4]);
+   // allocate vector and arrays 
+   // FD coefs
+   vectorReal h_coefx=allocateVector<vectorReal>(ncoefs);
+   vectorReal h_coefy=allocateVector<vectorReal>(ncoefs);
+   vectorReal h_coefz=allocateVector<vectorReal>(ncoefs);
+   // model
+   vectorReal h_vp=allocateVector<vectorReal>(nx*ny*nz);
+   // pressure fields
+   vectorReal h_pnp1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
+   vectorReal h_pn=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
+   vectorReal h_pnm1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
+   // PML arrays
+   vectorReal h_phi=allocateVector<vectorReal>(nx*ny*nz);
+   vectorReal h_eta=allocateVector<vectorReal>((nx+2)*(ny+2)*(nz+2));
 
-    float vmax=1500;
+   // extract FD coefs
+   myFDTDUtils.init_coef(dx, h_coefx);
+   myFDTDUtils.init_coef(dy, h_coefy);
+   myFDTDUtils.init_coef(dz, h_coefz);
 
-    float timeStep=myUtils.compute_dt_sch(vmax,h_coefx,h_coefy,h_coefz);
+   double coef0=-2.*(h_coefx[1]+h_coefx[2]+h_coefx[3]+h_coefx[4]);
+   coef0+=-2.*(h_coefy[1]+h_coefy[2]+h_coefy[3]+h_coefy[4]);
+   coef0+=-2.*(h_coefz[1]+h_coefz[2]+h_coefz[3]+h_coefz[4]);
 
-    float timeStep2=timeStep*timeStep;
-    const int nSamples=timeMax/timeStep;
-    printf("timeStep=%f\n",timeStep);
+   // compute time step
+   float timeStep=myFDTDUtils.compute_dt_sch(vmax,h_coefx,h_coefy,h_coefz);
+   float timeStep2=timeStep*timeStep;
+   const int nSamples=timeMax/timeStep;
+   printf("timeStep=%f\n",timeStep);
 
-    vectorReal h_RHSTerm;
-    h_RHSTerm=allocateVector<vectorReal>(nSamples);
-    // compute source term
-    std::vector<float>sourceTerm=myUtils.computeSourceTerm(nSamples,timeStep,f0,sourceOrder);
-    for(int i=0;i<nSamples;i++)
-    {
-      h_RHSTerm[i]=sourceTerm[i];
-    }
-    
-    // allocate vector and arrays 
-    array3DReal h_vp;
-    h_vp=allocateArray3D<array3DReal>(n1,n1,n3);
-    array3DReal h_pnp1;
-    h_pnp1=allocateArray3D<array3DReal>(n1,n2,n3);
-    array3DReal h_pn;
-    h_pn=allocateArray3D<array3DReal>(n1,n2,n3);
-    array3DReal h_pnm1;
-    h_pnm1=allocateArray3D<array3DReal>(n1,n2,n3);
+   // compute source term
+   // source term
+   vectorReal h_RHSTerm=allocateVector<vectorReal>(nSamples);
+   std::vector<float>sourceTerm=myUtils.computeSourceTerm(nSamples,timeStep,f0,sourceOrder);
+   for(int i=0;i<nSamples;i++)
+   {
+     h_RHSTerm[i]=sourceTerm[i];
+   }
 
-    printf("memory used for vectra and arrays %d bytes\n",(4*n1*n2*n3+nSamples+ncoefs)*4);
+   printf("memory used for vectra and arrays %d bytes\n",
+          (nx*ny*nz+3*(nx+2*lx)*(ny+2*ly)*(nz+2*lz)+nSamples+ncoefs)*4);
 
-#pragma omp parallel for collapse(3)
-    for(int i=0;i<n1;i++)
-    {
-       for(int j=0;j<n2;j++)
-       {
-          for(int k=0;k<n3;k++)
-          {
-            h_vp(i,j,k)=1500.*1500.;
-            h_pnp1(i,j,k)=0.;
-            h_pn(i,j,k)=0.;
-            h_pnm1(i,j,k)=0.;
-          }
-       }
-    }
-
-    vectorRealView   const coefx=h_coefx.toView();
-    vectorRealView   const coefy=h_coefy.toView();
-    vectorRealView   const coefz=h_coefz.toView();
-    vectorRealView   const RHSTerm=h_RHSTerm.toView();
-    array3DRealView  const vp=h_vp.toView();
-    array3DRealView  const pnp1=h_pnp1.toView();
-    array3DRealView  const pn=h_pn.toView();
-    array3DRealView  const pnm1=h_pnm1.toView();
-
-    //RAJA_INDEX_VALUE_T(KIDX, int, "KIDX");
-    //RAJA_INDEX_VALUE_T(JIDX, int, "JIDX");
-    //RAJA_INDEX_VALUE_T(IIDX, int, "IIDX");
-    constexpr int imins = xs;
-    constexpr int imaxs = xs+1;
-    constexpr int jmins = ys;
-    constexpr int jmaxs = ys+1;
-    constexpr int kmins = zs;
-    constexpr int kmaxs = zs+1;
-    RAJA::TypedRangeSegment<int> KRanges(kmins, kmaxs);
-    RAJA::TypedRangeSegment<int> JRanges(jmins, jmaxs);
-    RAJA::TypedRangeSegment<int> IRanges(imins, imaxs);
-    constexpr int imini = 4;
-    constexpr int imaxi = n1-4;
-    constexpr int jmini = 4;
-    constexpr int jmaxi = n2-4;
-    constexpr int kmini = 4;
-    constexpr int kmaxi = n3-4;
-    RAJA::TypedRangeSegment<int> KRangei(kmini, kmaxi);
-    RAJA::TypedRangeSegment<int> JRangei(jmini, jmaxi);
-    RAJA::TypedRangeSegment<int> IRangei(imini, imaxi);
-    constexpr int imin = 0;
-    constexpr int imax = n1;
-    constexpr int jmin = 0;
-    constexpr int jmax = n2;
-    constexpr int kmin = 0;
-    constexpr int kmax = n3;
-    RAJA::TypedRangeSegment<int> KRange(kmin, kmax);
-    RAJA::TypedRangeSegment<int> JRange(jmin, jmax);
-    RAJA::TypedRangeSegment<int> IRange(imin, imax);
-
-    using EXEC_POL5 =
-    RAJA::KernelPolicy<
-      RAJA::statement::CudaKernel<
-        RAJA::statement::For<2, RAJA::cuda_thread_x_loop,      // k
-          RAJA::statement::For<1, RAJA::cuda_thread_y_loop,    // j
-            RAJA::statement::For<0, RAJA::cuda_thread_z_loop,  // i
-              RAJA::statement::Lambda<0>
-            >
-          >
-        >
-      >
-    >;
-
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
-    for (int itSample=0; itSample<nSamples;itSample++)
-    {
-      RAJA::kernel<EXEC_POL5>( RAJA::make_tuple(IRanges, JRanges, KRanges), [=] __device__ (int i, int j, int k)
+   // initialize vp and pressure field
+   #pragma omp parallel for collapse(3)
+   for( int i=0; i<nx;i++)
+   {
+      for( int j=0; j<ny;j++)
       {
-        pn(i,j,k)+=vp(i,j,k)*timeStep*timeStep*RHSTerm[itSample];
-      });
-
-      RAJA::kernel<EXEC_POL5>( RAJA::make_tuple(IRangei, JRangei, KRangei), [=] __device__ (int i, int j, int k)
+         for( int k=0; k<nz;k++)
+         {
+           h_vp[IDX3(i,j,k)]=1500.*1500.*timeStep2;
+           h_phi[IDX3(i,j,k)]=0.;
+         }
+      }
+   }
+   #pragma omp parallel for collapse(3)
+   for( int i=-lx; i<nx+lx;i++)
+   {
+      for( int j=-ly; j<ny+ly;j++)
       {
-         float lapx=(coefx[1]*(pn(i+1,j,k)+pn(i-1,j,k))
-                   +coefx[2]*(pn(i+2,j,k)+pn(i-2,j,k))
-                   +coefx[3]*(pn(i+3,j,k)+pn(i-3,j,k))
-                   +coefx[4]*(pn(i+4,j,k)+pn(i-4,j,k)));
-         float lapy=(coefy[1]*(pn(i,j+1,k)+pn(i,j-1,k))
-                   +coefy[2]*(pn(i,j+2,k)+pn(i,j-2,k))
-                   +coefy[3]*(pn(i,j+3,k)+pn(i,j-3,k))
-                   +coefy[4]*(pn(i,j+4,k)+pn(i,j-4,k)));
-         float lapz=(coefz[1]*(pn(i,j,k+1)+pn(i,j,k-1))
-                   +coefz[2]*(pn(i,j,k+2)+pn(i,j,k-2))
-                   +coefz[3]*(pn(i,j,k+3)+pn(i,j,k-3))
-                   +coefz[4]*(pn(i,j,k+4)+pn(i,j,k-4)));
-         pnp1(i,j,k)=2.*pn(i,j,k)-pnm1(i,j,k)+timeStep2*vp(i,j,k)*(coef0*pn(i,j,k)+lapx+lapy+lapz);
-         //if(i==xs && j==ys && k==zs)printf("%f %f %f\n",coef0*pn(i,j,k),lapx+lapy+lapz,pn(i,j,k));
-      });
-      if(itSample%50==0){
-        RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,n1), [pnp1] ( int i)
+         for( int k=-lz; k<nz+lz;k++)
+         {
+           h_pnp1[IDX3_l(i,j,k)]=0.000001;
+           h_pn[IDX3_l(i,j,k)]  =0.000001;
+           h_pnm1[IDX3_l(i,j,k)]=0.000001;
+         }
+      }
+   }
+
+   //init pml eta array
+   myFDTDUtils.init_eta( nx,  ny,  nz,
+		         ndampx,  ndampy, ndampz,
+                         x1,  x2,  x3,  x4,  x5,  x6,
+                         y1,  y2,  y3,  y4,  y5,  y6,
+                         z1,  z2,  z3,  z4,  z5,  z6,
+                         dx,  dy,  dz,  timeStep,
+                         vmax, h_eta);
+
+   // define policy for source term
+   RAJA::TypedRangeSegment<int> KRanges(xs, xs+1);
+   RAJA::TypedRangeSegment<int> JRanges(ys, ys+1);
+   RAJA::TypedRangeSegment<int> IRanges(zs, zs+1);
+   
+   // define policy for swapping 
+   RAJA::TypedRangeSegment<int> KRange(0, nx);
+   RAJA::TypedRangeSegment<int> JRange(0, ny);
+   RAJA::TypedRangeSegment<int> IRange(0, ny);
+
+   using EXEC_POL =
+   RAJA::KernelPolicy<
+     RAJA::statement::CudaKernel<
+       RAJA::statement::For<2, RAJA::cuda_thread_x_loop,      // i
+         RAJA::statement::For<1, RAJA::cuda_thread_y_loop,    // j
+           RAJA::statement::For<0, RAJA::cuda_thread_z_loop,  // k
+             RAJA::statement::Lambda<0>
+           >
+         >
+       >
+     >
+   >;
+
+   vectorRealView const RHSTerm=h_RHSTerm.toView();
+   vectorRealView const coefx=h_coefx.toView();
+   vectorRealView const coefy=h_coefy.toView();
+   vectorRealView const coefz=h_coefz.toView();
+   vectorRealView const vp=h_vp.toView();
+   vectorRealView const phi=h_phi.toView();
+   vectorRealView const eta=h_eta.toView();
+   vectorRealView  pnp1=h_pnp1.toView();
+   vectorRealView  pn=h_pn.toView();
+   vectorRealView  pnm1=h_pnm1.toView();
+   std::chrono::time_point<std::chrono::system_clock> start, end;
+   start = std::chrono::system_clock::now();
+   for (int itSample=0; itSample<nSamples;itSample++)
+   {
+
+     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRanges, JRanges, KRanges), [=] __device__ (int i, int j, int k)
+     {
+       pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
+     });
+     //
+     //up
+     pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     //front
+     pml3D(nx,ny,nz,0,nx,y1,y2,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     //left
+     pml3D(nx,ny,nz,x1,x2,y3,y4,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     //inner points
+     inner3D(nx,ny,nz,x3,x4,y3,y4,z3,z4,lx,ly,lz,coef0,coefx,coefy,coefz,vp,pnp1,pn,pnm1);
+     //right
+     pml3D(nx,ny,nz,x5,x6,y3,y4,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     //back
+     pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     // bottom
+     pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+
+     if(itSample%50==0)
+     {
+	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pnp1] ( int i)
                          {});
-      printf("result 1 %f\n",pnp1(xs,ys,zs));}
+	printf("result1 %f\n",pnp1[IDX3_l(xs,ys,zs)]);
+     }
+     // swap
+     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
+     {
+        pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
+        pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
+     });
+   }
+   end = std::chrono::system_clock::now();
+   std::chrono::duration<double> elapsed_seconds = end - start;
+   std::time_t start_time = std::chrono::system_clock::to_time_t(start);
+   std::time_t end_time = std::chrono::system_clock::to_time_t(end);
 
-      RAJA::kernel<EXEC_POL5>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
-      {
-        pnm1(i,j,k)=pn(i,j,k);
-        pn(i,j,k)=pnp1(i,j,k);
-      });
-    }
-    end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end - start;
-    std::time_t start_time = std::chrono::system_clock::to_time_t(start);
-    std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+   std::cout << "started computation at " << std::ctime(&start_time)<<std::endl
+             << "finished computation at " << std::ctime(&end_time)<<std::endl
+             << "elapsed time: " << elapsed_seconds.count() << "s\n";
 
-    std::cout << "started computation at " << std::ctime(&start_time)<<std::endl
-              << "finished computation at " << std::ctime(&end_time)<<std::endl
-              << "elapsed time: " << elapsed_seconds.count() << "s\n";
-
-
-  return (0);
+   return (0);
 }

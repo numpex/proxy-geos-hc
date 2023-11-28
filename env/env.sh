@@ -1,5 +1,3 @@
-#export MODULEPATH=/data_local/appli_local/MTS/GEOSX/modulefiles/:$MODULEPATH
-#module load cmake/3.21.4 gcc/8.4.1 cuda/11.0.3 ompi/4.1.2 openblas/0.3.18 python4geosx/3.8.5-gcc-8.4.1-ompi-4.1.2
 
 export _TPL_ROOT_DIR=~/algorithms/proxyApp/buildInstall/install
 export RAJA_DIR=${_TPL_ROOT_DIR}/raja/lib/cmake/raja
