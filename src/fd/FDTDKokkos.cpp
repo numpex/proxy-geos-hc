@@ -109,6 +109,7 @@ int main( int argc, char *argv[] )
 {
   Kokkos::initialize(argc,argv);
   {
+    int debug=0;
     constexpr int nx=150;
     constexpr int ny=150;
     constexpr int nz=150;
@@ -243,21 +244,23 @@ int main( int argc, char *argv[] )
                           z1,  z2,  z3,  z4,  z5,  z6,
                           dx,  dy,  dz,  timeStep,
                           vmax, eta);
-   char filename_buf[32];
-   snprintf(filename_buf, sizeof(filename_buf), "debug_eta.H@");
-   printf("\n");
-   printf("eta file n1=%d n2=%d\n",nx+2,nz+2);
-   printf("\n");
-   FILE *dbg = fopen(filename_buf, "wb");
-   for (int k = 0; k < nz; ++k) {
-       for (int j = ny/2; j < ny/2+1; ++j) {
-           for (int i = 0; i < nx; ++i) {
-               fwrite(&eta[IDX3_eta1(i,j,k)], sizeof(float),1, dbg);
-           }
-        }
+   if(debug==1){
+     char filename_buf[32];
+     snprintf(filename_buf, sizeof(filename_buf), "debug_eta.H@");
+     printf("\n");
+     printf("eta file n1=%d n2=%d\n",nx+2,nz+2);
+     printf("\n");
+     FILE *dbg = fopen(filename_buf, "wb");
+     for (int k = 0; k < nz; ++k) {
+         for (int j = ny/2; j < ny/2+1; ++j) {
+             for (int i = 0; i < nx; ++i) {
+                 fwrite(&eta[IDX3_eta1(i,j,k)], sizeof(float),1, dbg);
+             }
+          }
+     }
+     /* Clean up */
+     fclose(dbg);
    }
-   /* Clean up */
-   fclose(dbg);
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
@@ -286,37 +289,40 @@ int main( int argc, char *argv[] )
       {
         Kokkos::fence();
 	printf("result 1 %f\n",pnp1[IDX3_l(xs,ys,zs)]);
-//	write_io(nx, ny, nz, lx, ly, lz, pn, itSample);
-        char filename_buf[32];
-        snprintf(filename_buf, sizeof(filename_buf), "snapshot.it%d.H@", itSample);
-        printf("snapshot file size n1=%d n2=%d\n",nx,nz);
-        FILE *snapshot_file = fopen(filename_buf, "wb");
-        for (int k = 0; k < nz; ++k) {
-            for (int j = ny/2; j < ny/2+1; ++j) {
-                for (int i = 0; i < nx; ++i) {
-                    fwrite(&pnp1[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
-                }
-            }
-        }
-        /* Clean up */
-        fclose(snapshot_file);
+	if(debug==1)
+	{
+//   	write_io(nx, ny, nz, lx, ly, lz, pn, itSample);
+          char filename_buf[32];
+          snprintf(filename_buf, sizeof(filename_buf), "snapshot.it%d.H@", itSample);
+          printf("snapshot file size n1=%d n2=%d\n",nx,nz);
+          FILE *snapshot_file = fopen(filename_buf, "wb");
+          for (int k = 0; k < nz; ++k) {
+              for (int j = ny/2; j < ny/2+1; ++j) {
+                  for (int i = 0; i < nx; ++i) {
+                      fwrite(&pnp1[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
+                  }
+              }
+          }
+          /* Clean up */
+          fclose(snapshot_file);
 
-        snprintf(filename_buf, sizeof(filename_buf), "snapshotPhi.it%d.H@", itSample);
-        printf("snapshotPhi file size n1=%d n2=%d\n",nx,nz);
-        FILE *snapshotPhi_file = fopen(filename_buf, "wb");
-        for (int k = 0; k < nz; ++k) {
-            for (int j = ny/2; j < ny/2+1; ++j) {
-                for (int i = 0; i < nx; ++i) {
-                    fwrite(&phi[IDX3(i,j,k)], sizeof(float),1, snapshotPhi_file);
-                }
-            }
-        }
-        /* Clean up */
-       fclose(snapshot_file);
+          snprintf(filename_buf, sizeof(filename_buf), "snapshotPhi.it%d.H@", itSample);
+          printf("snapshotPhi file size n1=%d n2=%d\n",nx,nz);
+          FILE *snapshotPhi_file = fopen(filename_buf, "wb");
+          for (int k = 0; k < nz; ++k) {
+              for (int j = ny/2; j < ny/2+1; ++j) {
+                  for (int i = 0; i < nx; ++i) {
+                      fwrite(&phi[IDX3(i,j,k)], sizeof(float),1, snapshotPhi_file);
+                  }
+              }
+          }
+          /* Clean up */
+          fclose(snapshot_file);
+	}
 
       }
       //Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({-lx,-ly,-lz},{nx+lx,ny+ly,nz+lz}),KOKKOS_LAMBDA(int i,int j,int k)
-      Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({0,0,0},{nx+2*lx,ny+2*ly,nz+2*lz}),KOKKOS_LAMBDA(int I,int J,int K)
+      Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({0,0,0},{nz+2*lz,nx+2*lx,ny+2*ly}),KOKKOS_LAMBDA(int K,int I,int J)
       {
          int i=I-lx;
          int j=J-ly;

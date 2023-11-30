@@ -349,7 +349,7 @@ int main( int argc, char *argv[] )
      // bottom
      pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
 
-     if(itSample%10==0)
+     if(itSample%50==0)
      {
 	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pnp1,phi] ( int i)
                          {});
