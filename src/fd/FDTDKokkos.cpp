@@ -34,7 +34,8 @@ void inner3D(const int nx, const int ny, const int nz,
         vectorReal const & pn,
         vectorReal const & pnm1)
 {
-    Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({x3,y3,z3},{x4,y4,z4}),KOKKOS_LAMBDA(int i,int j,int k)
+    //Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({x3,y3,z3},{x4,y4,z4}),KOKKOS_LAMBDA(int i,int j,int k)
+    Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({z3,x3,y3},{z4,x4,y4}),KOKKOS_LAMBDA(int k,int i,int j)
     {
      float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                 +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
@@ -69,7 +70,8 @@ void pml3D(const int nx, const int ny, const int nz,
             vectorReal const & pn,
             vectorReal const & pnm1)
 {
-    Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({x3,y3,z3},{x4,y4,z4}),KOKKOS_LAMBDA(int i,int j,int k)
+    //Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({x3,y3,z3},{x4,y4,z4}),KOKKOS_LAMBDA(int i,int j,int k)
+    Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({z3,x3,y3},{z4,x4,y4}),KOKKOS_LAMBDA(int k,int i,int j)
     {
       float coef0 = coefx[0] + coefy[0] + coefz[0];
       float lap;
