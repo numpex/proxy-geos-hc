@@ -101,8 +101,8 @@ void pml3D(const int nx, const int ny, const int nz,
 
 		pnp1[IDX3_l(i,j,k)]=((2.-eta[IDX3_eta1(i,j,k)]*eta[IDX3_eta1(i,j,k)]
                                     +2.*eta[IDX3_eta1(i,j,k)])*pn[IDX3_l(i,j,k)]
-                                    +vp[IDX3(i,j,k)]*(lap+phi[IDX3(i,j,k)]))/(1.+2.*eta[IDX3_eta1(i,j,k)])
-			            -pnm1[IDX3_l(i,j,k)];
+			            -pnm1[IDX3_l(i,j,k)]
+                                    +vp[IDX3(i,j,k)]*(lap+phi[IDX3(i,j,k)]))/(1.+2.*eta[IDX3_eta1(i,j,k)]);
 
                 phi[IDX3(i,j,k)]=(phi[IDX3(i,j,k)]-((eta[IDX3_eta1(i+1,j,k)]-eta[IDX3_eta1(i-1,j,k)])
                                 *(pn[IDX3_l(i+1,j,k)]-pn[IDX3_l(i-1,j,k)])*hdx_2
@@ -132,7 +132,7 @@ int main( int argc, char *argv[] )
     constexpr int   xs=nx/2;
     constexpr int   ys=ny/2;
     constexpr int   zs=nz/2;
-    constexpr float f0=5.;
+    constexpr float f0=15.;
     constexpr float fmax=2.5*f0;
     constexpr float timeMax=0.8;
 
@@ -249,6 +249,21 @@ int main( int argc, char *argv[] )
                           z1,  z2,  z3,  z4,  z5,  z6,
                           dx,  dy,  dz,  timeStep,
                           vmax, eta);
+    char filename_buf[32];
+    snprintf(filename_buf, sizeof(filename_buf), "debug_eta.H@");
+    printf("\n");
+    printf("eta file n1=%d n2=%d\n",nx+2,nz+2);
+    printf("\n");
+    FILE *dbg = fopen(filename_buf, "wb");
+    for (int k = 0; k < nz; ++k) {
+        for (int j = ny/2; j < ny/2+1; ++j) {
+            for (int i = 0; i < nx; ++i) {
+                fwrite(&eta[IDX3_eta1(i,j,k)], sizeof(float),1, dbg);
+            }
+        }
+    }
+    /* Clean up */
+    fclose(dbg);
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
@@ -271,7 +286,39 @@ int main( int argc, char *argv[] )
       // bottom
       pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
 
-      if(itSample%50==0){printf("result 1 %f\n",pnp1[IDX3_l(xs,ys,zs)]);}
+      if(itSample%50==0)
+      {
+
+	printf("result 1 %f\n",pnp1[IDX3_l(xs,ys,zs)]);
+        char filename_buf[32];
+        snprintf(filename_buf, sizeof(filename_buf), "snapshot.it%d.H@", itSample);
+        printf("snapshot file size n1=%d n2=%d\n",nx,nz);
+        FILE *snapshot_file = fopen(filename_buf, "wb");
+        for (int k = 0; k < nz; ++k) {
+            for (int j = ny/2; j < ny/2+1; ++j) {
+                for (int i = 0; i < nx; ++i) {
+                    fwrite(&pnp1[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
+                }
+            }
+        }
+
+        /* Clean up */
+        fclose(snapshot_file);
+
+        snprintf(filename_buf, sizeof(filename_buf), "snapshotPhi.it%d.H@", itSample);
+        printf("snapshotPhi file size n1=%d n2=%d\n",nx,nz);
+        FILE *snapshotPhi_file = fopen(filename_buf, "wb");
+        for (int k = 0; k < nz; ++k) {
+            for (int j = ny/2; j < ny/2+1; ++j) {
+                for (int i = 0; i < nx; ++i) {
+                    fwrite(&phi[IDX3(i,j,k)], sizeof(float),1, snapshotPhi_file);
+                }
+            }
+        }
+        /* Clean up */
+       fclose(snapshot_file);
+      }
+
       for( int i=0; i<nx;i++)
       {
          for( int j=0; j<ny;j++)

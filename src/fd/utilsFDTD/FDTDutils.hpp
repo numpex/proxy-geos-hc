@@ -38,24 +38,27 @@ struct FDTDUtils
       }
       return 2*cfl/(sqrtf(ftmp)*vmax);
   }
-  void write_io(int nx, int ny, int nz,
+
+  int write_io(int nx, int ny, int nz,
                 int lx, int ly, int lz,
-                array3DReal &u, int istep)
+                vectorReal &u, int istep)
   {
       char filename_buf[32];
       snprintf(filename_buf, sizeof(filename_buf), "snapshot.it%d.%d.raw", istep, nz);
       FILE *snapshot_file = fopen(filename_buf, "wb");
-      for (int k = lz; k < nz+lz; ++k) {
-          for (int j = ly; j < ny+ly; ++j) {
-              for (int i = lx; i < nx+lx; ++i) {
-                  fwrite(&u(i,j,k), sizeof(float),1, snapshot_file);
+      for (int k = -lz; k < nz+lz; ++k) {
+          for (int j = ny/2; j < ny/2+1; ++j) {
+              for (int i = -lx; i < nx+lx; ++i) {
+                  fwrite(&u[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
               }
           }
       }
       /* Clean up */
       fclose(snapshot_file);
+      return(0);
   }
-  void pml_profile_init(vectorReal profile, int i_min, int i_max, int n_first, int n_last, float scale)
+
+  void pml_profile_init(vectorReal  & profile, int i_min, int i_max, int n_first, int n_last, float scale)
   {
     int n = i_max-i_min+1;
     int shift = i_min-1;
@@ -80,7 +83,7 @@ struct FDTDUtils
   }
 
   void pml_profile_extend(int nx, int ny, int nz,
-                          vectorReal eta, vectorReal etax, vectorReal etay, vectorReal etaz,
+                          vectorReal &  eta, vectorReal & etax, vectorReal & etay, vectorReal & etaz,
                           int xbeg, int xend, int ybeg, int yend, int zbeg, int zend)
   {
     const int n_ghost = 1;
@@ -94,7 +97,7 @@ struct FDTDUtils
   }
 
   void pml_profile_extend_all(int nx, int ny, int nz,
-                              vectorReal eta, vectorReal etax, vectorReal etay, vectorReal etaz,
+                              vectorReal & eta, vectorReal & etax, vectorReal & etay, vectorReal & etaz,
                               int xmin, int xmax, int ymin, int ymax,
                               int x1, int x2, int x5, int x6,
                               int y1, int y2, int y3, int y4, int y5, int y6,
@@ -126,7 +129,7 @@ struct FDTDUtils
                 int y1, int y2, int y3, int y4, int y5, int y6,
                 int z1, int z2, int z3, int z4, int z5, int z6,
                 float dx, float dy, float dz, float dt_sch,
-                float vmax, vectorReal eta)
+                float vmax, vectorReal & eta)
   {
     for (int i = -1; i < nx+1; ++i) {
         for (int j = -1; j < ny+1; ++j) {
@@ -138,16 +141,19 @@ struct FDTDUtils
 
     /* etax */
     float param = dt_sch * 3.f * vmax * logf(1000.f)/(2.f*ndampx*dx);
+    printf("param=%f\n",param);
     vectorReal etax=allocateVector<vectorReal>(nx+2);
     pml_profile_init(etax, 0, nx+1, ndampx, ndampx, param);
 
     /* etay */
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampy*dy);
+    printf("param=%f\n",param);
     vectorReal etay=allocateVector<vectorReal>(ny+2);
     pml_profile_init(etay, 0, ny+1, ndampy, ndampy, param);
 
     /* etaz */
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampz*dz);
+    printf("param=%f\n",param);
     vectorReal etaz=allocateVector<vectorReal>(nz+2);
     pml_profile_init(etaz, 0, nz+1, ndampz, ndampz, param);
 

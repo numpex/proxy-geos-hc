@@ -76,6 +76,7 @@ int pml3D(const int nx, const int ny, const int nz,
            const int y3, const int y4, 
            const int z3, const int z4,
            const int lx, const int ly, const int lz,
+           const float coef0,
            const float hdx_2, const float hdy_2, const float hdz_2,
            vectorRealView const & coefx,
            vectorRealView const & coefy,
@@ -106,8 +107,6 @@ int pml3D(const int nx, const int ny, const int nz,
 
    RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
    {
-     float coef0 = coefx[0] + coefy[0] + coefz[0];
-     float lap;
      float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                 +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
                 +coefx[3]*(pn[IDX3_l(i+3,j,k)]+pn[IDX3_l(i-3,j,k)])
@@ -121,12 +120,12 @@ int pml3D(const int nx, const int ny, const int nz,
                 +coefz[3]*(pn[IDX3_l(i,j,k+3)]+pn[IDX3_l(i,j,k-3)])
                 +coefz[4]*(pn[IDX3_l(i,j,k+4)]+pn[IDX3_l(i,j,k-4)]));
 
-     lap=coef0*pn[IDX3_l(i,j,k)]+lapx+lapy+lapz;
+     float lap=coef0*pn[IDX3_l(i,j,k)]+lapx+lapy+lapz;
 
      pnp1[IDX3_l(i,j,k)]=((2.-eta[IDX3_eta1(i,j,k)]*eta[IDX3_eta1(i,j,k)]
                 +2.*eta[IDX3_eta1(i,j,k)])*pn[IDX3_l(i,j,k)]
-                +vp[IDX3(i,j,k)]*(lap+phi[IDX3(i,j,k)]))/(1.+2.*eta[IDX3_eta1(i,j,k)])
-                -pnm1[IDX3_l(i,j,k)];
+                -pnm1[IDX3_l(i,j,k)]
+                +vp[IDX3(i,j,k)]*(lap+phi[IDX3(i,j,k)]))/(1.+2.*eta[IDX3_eta1(i,j,k)]);
 
      phi[IDX3(i,j,k)]=(phi[IDX3(i,j,k)]-((eta[IDX3_eta1(i+1,j,k)]-eta[IDX3_eta1(i-1,j,k)])
                 *(pn[IDX3_l(i+1,j,k)]-pn[IDX3_l(i-1,j,k)])*hdx_2
@@ -155,7 +154,7 @@ int main( int argc, char *argv[] )
    constexpr int   xs=nx/2;
    constexpr int   ys=ny/2;
    constexpr int   zs=nz/2;
-   constexpr float f0=5.;
+   constexpr float f0=15.;
    constexpr float fmax=2.5*f0;
    constexpr float timeMax=0.8;
 
@@ -275,6 +274,23 @@ int main( int argc, char *argv[] )
                          dx,  dy,  dz,  timeStep,
                          vmax, h_eta);
 
+   char filename_buf[32];
+   snprintf(filename_buf, sizeof(filename_buf), "debug_eta.H@");
+   printf("\n");
+   printf("eta file n1=%d n2=%d\n",nx,nz);
+   printf("\n");
+   FILE *dbg = fopen(filename_buf, "wb");
+   for (int k = 0; k < nz; ++k) {
+       for (int j = ny/2; j < ny/2+1; ++j) {
+           for (int i = 0; i < nx; ++i) {
+               fwrite(&h_eta[IDX3_eta1(i,j,k)], sizeof(float),1, dbg);
+           }
+        }
+   }
+   /* Clean up */
+   fclose(dbg);
+
+
    // define policy for source term
    RAJA::TypedRangeSegment<int> KRanges(xs, xs+1);
    RAJA::TypedRangeSegment<int> JRanges(ys, ys+1);
@@ -319,25 +335,51 @@ int main( int argc, char *argv[] )
      });
      //
      //up
-     pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
      //front
-     pml3D(nx,ny,nz,0,nx,y1,y2,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     pml3D(nx,ny,nz,0,nx,y1,y2,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
      //left
-     pml3D(nx,ny,nz,x1,x2,y3,y4,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     pml3D(nx,ny,nz,x1,x2,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
      //inner points
      inner3D(nx,ny,nz,x3,x4,y3,y4,z3,z4,lx,ly,lz,coef0,coefx,coefy,coefz,vp,pnp1,pn,pnm1);
      //right
-     pml3D(nx,ny,nz,x5,x6,y3,y4,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     pml3D(nx,ny,nz,x5,x6,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
      //back
-     pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
      // bottom
-     pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
 
-     if(itSample%50==0)
+     if(itSample%10==0)
      {
-	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pnp1] ( int i)
+	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pnp1,phi] ( int i)
                          {});
 	printf("result1 %f\n",pnp1[IDX3_l(xs,ys,zs)]);
+	char filename_buf[32];
+        snprintf(filename_buf, sizeof(filename_buf), "snapshot.it%d.H@", itSample);
+        printf("snapshot file nx=%d nz=%d\n",nx,nz);
+        FILE *snapshot_file = fopen(filename_buf, "wb");
+        for (int k = 0; k < nz; ++k) {
+            for (int j = ny/2; j < ny/2+1; ++j) {
+                for (int i = 0; i < nx; ++i) {
+                    fwrite(&pnp1[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
+                }
+            }
+        }
+        /* Clean up */
+        fclose(snapshot_file);
+
+	snprintf(filename_buf, sizeof(filename_buf), "snapshotPhi.it%d.H@", itSample);
+        printf("snapshotPhi file size n1=%d n2=%d\n",nx,nz);
+        FILE *snapshotPhi_file = fopen(filename_buf, "wb");
+        for (int k = 0; k < nz; ++k) {
+            for (int j = ny/2; j < ny/2+1; ++j) {
+                for (int i = 0; i < nx; ++i) {
+                    fwrite(&phi[IDX3(i,j,k)], sizeof(float),1, snapshotPhi_file);
+                }
+            }
+        }
+        /* Clean up */
+        fclose(snapshot_file);
      }
      // swap
      RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
