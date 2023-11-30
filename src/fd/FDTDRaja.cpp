@@ -140,6 +140,7 @@ int pml3D(const int nx, const int ny, const int nz,
 
 int main( int argc, char *argv[] )
 {
+   int debug=0;
    constexpr int nx=150;
    constexpr int ny=150;
    constexpr int nz=150;
@@ -274,21 +275,24 @@ int main( int argc, char *argv[] )
                          dx,  dy,  dz,  timeStep,
                          vmax, h_eta);
 
-   char filename_buf[32];
-   snprintf(filename_buf, sizeof(filename_buf), "debug_eta.H@");
-   printf("\n");
-   printf("eta file n1=%d n2=%d\n",nx,nz);
-   printf("\n");
-   FILE *dbg = fopen(filename_buf, "wb");
-   for (int k = 0; k < nz; ++k) {
-       for (int j = ny/2; j < ny/2+1; ++j) {
-           for (int i = 0; i < nx; ++i) {
-               fwrite(&h_eta[IDX3_eta1(i,j,k)], sizeof(float),1, dbg);
-           }
-        }
+   if(debug==1)
+   {
+     char filename_buf[32];
+     snprintf(filename_buf, sizeof(filename_buf), "debug_eta.H@");
+     printf("\n");
+     printf("eta file n1=%d n2=%d\n",nx,nz);
+     printf("\n");
+     FILE *dbg = fopen(filename_buf, "wb");
+     for (int k = 0; k < nz; ++k) {
+         for (int j = ny/2; j < ny/2+1; ++j) {
+             for (int i = 0; i < nx; ++i) {
+                 fwrite(&h_eta[IDX3_eta1(i,j,k)], sizeof(float),1, dbg);
+             }
+          }
+     }
+     /* Clean up */
+     fclose(dbg);
    }
-   /* Clean up */
-   fclose(dbg);
 
 
    // define policy for source term
@@ -354,32 +358,35 @@ int main( int argc, char *argv[] )
 	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pnp1,phi] ( int i)
                          {});
 	printf("result1 %f\n",pnp1[IDX3_l(xs,ys,zs)]);
-	char filename_buf[32];
-        snprintf(filename_buf, sizeof(filename_buf), "snapshot.it%d.H@", itSample);
-        printf("snapshot file nx=%d nz=%d\n",nx,nz);
-        FILE *snapshot_file = fopen(filename_buf, "wb");
-        for (int k = 0; k < nz; ++k) {
-            for (int j = ny/2; j < ny/2+1; ++j) {
-                for (int i = 0; i < nx; ++i) {
-                    fwrite(&pnp1[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
-                }
-            }
-        }
-        /* Clean up */
-        fclose(snapshot_file);
-
-	snprintf(filename_buf, sizeof(filename_buf), "snapshotPhi.it%d.H@", itSample);
-        printf("snapshotPhi file size n1=%d n2=%d\n",nx,nz);
-        FILE *snapshotPhi_file = fopen(filename_buf, "wb");
-        for (int k = 0; k < nz; ++k) {
-            for (int j = ny/2; j < ny/2+1; ++j) {
-                for (int i = 0; i < nx; ++i) {
-                    fwrite(&phi[IDX3(i,j,k)], sizeof(float),1, snapshotPhi_file);
-                }
-            }
-        }
-        /* Clean up */
-        fclose(snapshot_file);
+	if(debug==1)
+        {
+	  char filename_buf[32];
+          snprintf(filename_buf, sizeof(filename_buf), "snapshot.it%d.H@", itSample);
+          printf("snapshot file nx=%d nz=%d\n",nx,nz);
+          FILE *snapshot_file = fopen(filename_buf, "wb");
+          for (int k = 0; k < nz; ++k) {
+              for (int j = ny/2; j < ny/2+1; ++j) {
+                  for (int i = 0; i < nx; ++i) {
+                      fwrite(&pnp1[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
+                  }
+              }
+          }
+          /* Clean up */
+          fclose(snapshot_file);
+  
+          snprintf(filename_buf, sizeof(filename_buf), "snapshotPhi.it%d.H@", itSample);
+          printf("snapshotPhi file size n1=%d n2=%d\n",nx,nz);
+          FILE *snapshotPhi_file = fopen(filename_buf, "wb");
+          for (int k = 0; k < nz; ++k) {
+              for (int j = ny/2; j < ny/2+1; ++j) {
+                  for (int i = 0; i < nx; ++i) {
+                      fwrite(&phi[IDX3(i,j,k)], sizeof(float),1, snapshotPhi_file);
+                  }
+              }
+          }
+          /* Clean up */
+          fclose(snapshot_file);
+	}
      }
      // swap
      RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
