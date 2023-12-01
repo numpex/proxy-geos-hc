@@ -161,11 +161,9 @@ int main( int argc, char *argv[] )
     start = std::chrono::system_clock::now();
     for (int itSample=0; itSample<nSamples;itSample++)
     {
-      Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({xs,xs,zs},{xs+1,ys+1,zs+1}),KOKKOS_LAMBDA(int i,int j,int k)
-      {
-        pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
-      });
-           //compute one step
+      // add RHS term
+      myKernel.addRHS(nx,ny,nz,lx,ly,lz,xs,ys,zs,itSample,RHSTerm,vp,pn);
+      //compute one step
       myKernel.computeOneStep(nx,ny,nz,
                               lx,ly,lz,
                               x1,  x2,  x3,
@@ -179,15 +177,9 @@ int main( int argc, char *argv[] )
                               coefx,coefy,coefz,
                               vp,phi,eta,
                               pnp1,pn,pnm1);
-      // swap
-      Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({0,0,0},{nz+2*lz,nx+2*lx,ny+2*ly}),KOKKOS_LAMBDA(int K,int I,int J)
-      {
-         int i=I-lx;
-         int j=J-ly;
-         int k=K-lz;
-         pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
-         pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
-      });
+      // swap wavefields
+      myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,pnp1,pn,pnm1);
+      // print infos and save wavefields
       if(itSample%50==0)
       {
         Kokkos::fence();

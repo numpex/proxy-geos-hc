@@ -105,7 +105,6 @@ int main( int argc, char *argv[] )
     float timeStep2=timeStep*timeStep;
     const int nSamples=timeMax/timeStep;
     printf("timeStep=%f\n",timeStep);
-
     // compute source term
     // source term
     vectorReal RHSTerm=allocateVector<vectorReal>(nSamples);
@@ -114,10 +113,8 @@ int main( int argc, char *argv[] )
     {
       RHSTerm[i]=sourceTerm[i];
     }
-
     printf("memory used for vectra and arrays %d bytes\n",
            (nx*ny*nz+3*(nx+2*lx)*(ny+2*ly)*(nz+2*lz)+nSamples+ncoefs)*4);
-
     // initialize vp and pressure field
     for( int i=0; i<nx;i++)
     {
@@ -142,7 +139,6 @@ int main( int argc, char *argv[] )
           }
        }
     }
-
     //init pml eta array
     myFDTDUtils.init_eta( nx,  ny,  nz,
 		          ndampx,  ndampy, ndampz,
@@ -155,7 +151,8 @@ int main( int argc, char *argv[] )
     start = std::chrono::system_clock::now();
     for (int itSample=0; itSample<nSamples;itSample++)
     {
-      pn[IDX3_l(xs,ys,zs)]+=vp[IDX3(xs,ys,zs)]*RHSTerm[itSample];
+      // add RHS term
+      myKernel.addRHS(nx,ny,nz,lx,ly,lz,xs,ys,zs,itSample,RHSTerm,vp,pn);
       //compute one step
       myKernel.computeOneStep(nx,ny,nz,
                               lx,ly,lz,
@@ -170,24 +167,15 @@ int main( int argc, char *argv[] )
                               coefx,coefy,coefz,
                               vp,phi,eta,
                               pnp1,pn,pnm1);
-
-      //swap
-      for( int i=0; i<nx;i++)
-      {
-         for( int j=0; j<ny;j++)
-         {
-            for( int k=0; k<nz;k++)
-            {
-               pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
-               pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
-            }
-         }
-      }
+      // swap wavefields
+      myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,pnp1,pn,pnm1);
+      // print infos and save wavefields
       if(itSample%50==0)
       {
         printf("result1 %f\n",pn[IDX3_l(xs,ys,zs)]);
         myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
       }
+
     }
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;

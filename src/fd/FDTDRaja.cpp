@@ -153,29 +153,6 @@ int main( int argc, char *argv[] )
                          dx,  dy,  dz,  timeStep,
                          vmax, h_eta);
 
-   // define policy for source term
-   RAJA::TypedRangeSegment<int> KRanges(xs, xs+1);
-   RAJA::TypedRangeSegment<int> JRanges(ys, ys+1);
-   RAJA::TypedRangeSegment<int> IRanges(zs, zs+1);
-   
-   // define policy for swapping 
-   RAJA::TypedRangeSegment<int> KRange(0, nx);
-   RAJA::TypedRangeSegment<int> JRange(0, ny);
-   RAJA::TypedRangeSegment<int> IRange(0, ny);
-
-   using EXEC_POL =
-   RAJA::KernelPolicy<
-     RAJA::statement::CudaKernel<
-       RAJA::statement::For<2, RAJA::cuda_thread_x_loop,      // i
-         RAJA::statement::For<1, RAJA::cuda_thread_y_loop,    // j
-           RAJA::statement::For<0, RAJA::cuda_thread_z_loop,  // k
-             RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-           >
-         >
-       >
-     >
-   >;
-
    vectorRealView const RHSTerm=h_RHSTerm.toView();
    vectorRealView const coefx=h_coefx.toView();
    vectorRealView const coefy=h_coefy.toView();
@@ -190,12 +167,9 @@ int main( int argc, char *argv[] )
    start = std::chrono::system_clock::now();
    for (int itSample=0; itSample<nSamples;itSample++)
    {
-
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRanges, JRanges, KRanges), [=] __device__ (int i, int j, int k)
-     {
-       pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
-     });
-     //compute one step
+      // add RHS term
+      myKernel.addRHS(nx,ny,nz,lx,ly,lz,xs,ys,zs,itSample,RHSTerm,vp,pn);
+      //compute one step
       myKernel.computeOneStep(nx,ny,nz,
                               lx,ly,lz,
                               x1,  x2,  x3,
@@ -209,12 +183,9 @@ int main( int argc, char *argv[] )
                               coefx,coefy,coefz,
                               vp,phi,eta,
                               pnp1,pn,pnm1);
-     // swap
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
-     {
-        pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
-        pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
-     });
+      // swap wavefields
+      myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,pnp1,pn,pnm1);
+      // print infos and save wavefields
      if(itSample%50==0)
      {
 	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i)

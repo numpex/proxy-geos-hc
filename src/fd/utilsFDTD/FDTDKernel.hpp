@@ -219,6 +219,127 @@ struct FDTDKernel
 #endif
      return(0);
   }
+
+  // add RHS term
+  int addRHS(const int nx,const int ny,const int nz,
+	     const int lx,const int ly,const int lz,
+	     const int xs,const int ys,const int zs,const int itSample,
+#ifdef USE_RAJA
+	     vectorRealView const & RHSTerm,
+	     vectorRealView const & vp,
+	     vectorRealView const & pn) const
+#elif defined USE_KOKKOS
+	     vectorReal const & RHSTerm,
+	     vectorReal const & vp,
+	     vectorReal const & pn) const
+#else
+	     vectorReal & RHSTerm,
+	     vectorReal & vp,
+	     vectorReal & pn)
+#endif
+  {
+#ifdef USE_RAJA
+     // define policy for source term
+     RAJA::TypedRangeSegment<int> KRanges(xs, xs+1);
+     RAJA::TypedRangeSegment<int> JRanges(ys, ys+1);
+     RAJA::TypedRangeSegment<int> IRanges(zs, zs+1);
+
+     using EXEC_POL =
+     RAJA::KernelPolicy<
+       RAJA::statement::CudaKernel<
+         RAJA::statement::For<2, RAJA::cuda_thread_x_loop,      // i
+           RAJA::statement::For<1, RAJA::cuda_thread_y_loop,    // j
+             RAJA::statement::For<0, RAJA::cuda_thread_z_loop,  // k
+               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
+             >
+           >
+         >
+       >
+     >;
+     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRanges, JRanges, KRanges), [=] __device__ (int i, int j, int k)
+     {
+       pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
+     });
+#elif defined USE_KOKKOS
+    Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({xs,xs,zs},{xs+1,ys+1,zs+1}),KOKKOS_LAMBDA(int i,int j,int k)
+    {
+    pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
+    });
+#else
+    pn[IDX3_l(xs,ys,zs)]+=vp[IDX3(xs,ys,zs)]*RHSTerm[itSample];
+#endif
+    return(0);
+  }
+
+  // swap wavefields
+  int swapWavefields(const int nx,const int ny,const int nz,
+		     const int lx,const int ly,const int lz,
+#ifdef USE_RAJA
+		     vectorRealView const & pnp1,
+		     vectorRealView const & pn,
+		     vectorRealView const & pnm1) const
+#elif defined USE_KOKKOS
+		     vectorReal const & pnp1,
+		     vectorReal const & pn,
+		     vectorReal const & pnm1) const
+#else
+		     vectorReal & pnp1,
+		     vectorReal & pn,
+		     vectorReal & pnm1)
+#endif
+  {
+#ifdef USE_RAJA
+      // define policy for swapping
+      RAJA::TypedRangeSegment<int> KRange(0, nx);
+      RAJA::TypedRangeSegment<int> JRange(0, ny);
+      RAJA::TypedRangeSegment<int> IRange(0, ny);
+ 
+      using EXEC_POL =
+      RAJA::KernelPolicy<
+        RAJA::statement::CudaKernel<
+          RAJA::statement::For<2, RAJA::cuda_thread_x_loop,      // i
+            RAJA::statement::For<1, RAJA::cuda_thread_y_loop,    // j
+              RAJA::statement::For<0, RAJA::cuda_thread_z_loop,  // k
+                RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
+              >
+            >
+          >
+        >
+      >;
+
+      RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
+      {
+         pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
+         pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
+      });
+#elif defined USE_KOKKOS
+      Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({0,0,0},{nz+2*lz,nx+2*lx,ny+2*ly}),KOKKOS_LAMBDA(int K,int I,int J)
+      {
+         int i=I-lx;
+         int j=J-ly;
+         int k=K-lz;
+         pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
+         pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
+      });
+#else
+#ifdef USE_OMP
+      #pragma omp parallel for collapse(3)
+#endif
+      for( int i=0; i<nx;i++)
+      {
+         for( int j=0; j<ny;j++)
+         {
+            for( int k=0; k<nz;k++)
+            {
+               pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
+               pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
+            }
+         }
+      }
+#endif
+      return(0);
+  }
+
   // compute one step
   int computeOneStep(const int nx, const int ny, const int nz,
                      const int lx, const int ly, const int lz,
@@ -278,5 +399,6 @@ struct FDTDKernel
     pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
     return(0);
   }
+
 };
 #endif //FDTDKERNE_HPP
