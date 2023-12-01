@@ -219,5 +219,64 @@ struct FDTDKernel
 #endif
      return(0);
   }
+  // compute one step
+  int computeOneStep(const int nx, const int ny, const int nz,
+                     const int lx, const int ly, const int lz,
+	             const int x1, const int x2, const int x3, 
+	             const int x4, const int x5, const int x6,
+	             const int y1, const int y2, const int y3, 
+	             const int y4, const int y5, const int y6,
+	             const int z1, const int z2, const int z3, 
+	             const int z4, const int z5, const int z6,
+                     const float coef0,
+                     const float hdx_2, const float hdy_2, const float hdz_2,
+#ifdef USE_RAJA
+                     vectorRealView const & coefx,
+                     vectorRealView const & coefy,
+                     vectorRealView const & coefz,
+                     vectorRealView const & vp,
+                     vectorRealView const & phi,
+                     vectorRealView const & eta,
+                     vectorRealView const & pnp1,
+                     vectorRealView const & pn,
+                     vectorRealView const & pnm1)const
+#elif defined USE_KOKKOS
+                     vectorReal const & coefx,
+                     vectorReal const & coefy,
+                     vectorReal const & coefz,
+                     vectorReal const & vp,
+                     vectorReal const & phi,
+                     vectorReal const & eta,
+                     vectorReal const & pnp1,
+                     vectorReal const & pn,
+                     vectorReal const & pnm1)const
+#else
+                     vectorReal  & coefx,
+                     vectorReal  & coefy,
+                     vectorReal  & coefz,
+                     vectorReal  & vp,
+                     vectorReal  & phi,
+                     vectorReal  & eta,
+                     vectorReal  & pnp1,
+                     vectorReal  & pn,
+                     vectorReal  & pnm1)
+#endif
+  {
+    //up
+    pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+    //front
+    pml3D(nx,ny,nz,0,nx,y1,y2,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+    //left
+    pml3D(nx,ny,nz,x1,x2,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+    //inner points
+    inner3D(nx,ny,nz,x3,x4,y3,y4,z3,z4,lx,ly,lz,coef0,coefx,coefy,coefz,vp,pnp1,pn,pnm1);
+    //right
+    pml3D(nx,ny,nz,x5,x6,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+    //back
+    pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+    // bottom
+    pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+    return(0);
+  }
 };
 #endif //FDTDKERNE_HPP

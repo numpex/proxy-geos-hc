@@ -195,21 +195,20 @@ int main( int argc, char *argv[] )
      {
        pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
      });
-     //
-     //up
-     myKernel.pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
-     //front
-     myKernel.pml3D(nx,ny,nz,0,nx,y1,y2,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
-     //left
-     myKernel.pml3D(nx,ny,nz,x1,x2,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
-     //inner points
-     myKernel.inner3D(nx,ny,nz,x3,x4,y3,y4,z3,z4,lx,ly,lz,coef0,coefx,coefy,coefz,vp,pnp1,pn,pnm1);
-     //right
-     myKernel.pml3D(nx,ny,nz,x5,x6,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
-     //back
-     myKernel.pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
-     // bottom
-     myKernel.pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+     //compute one step
+      myKernel.computeOneStep(nx,ny,nz,
+                              lx,ly,lz,
+                              x1,  x2,  x3,
+                              x4,  x5,  x6,
+                              y1,  y2,  y3,
+                              y4,  y5,  y6,
+                              z1,  z2,  z3,
+                              z4,  z5,  z6,
+                              coef0,
+                              hdx_2,hdy_2,hdz_2,
+                              coefx,coefy,coefz,
+                              vp,phi,eta,
+                              pnp1,pn,pnm1);
      // swap
      RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
      {
