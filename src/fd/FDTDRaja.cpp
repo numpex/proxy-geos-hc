@@ -140,7 +140,6 @@ int pml3D(const int nx, const int ny, const int nz,
 
 int main( int argc, char *argv[] )
 {
-   int debug=0;
    constexpr int nx=150;
    constexpr int ny=150;
    constexpr int nz=150;
@@ -275,26 +274,6 @@ int main( int argc, char *argv[] )
                          dx,  dy,  dz,  timeStep,
                          vmax, h_eta);
 
-   if(debug==1)
-   {
-     char filename_buf[32];
-     snprintf(filename_buf, sizeof(filename_buf), "debug_eta.H@");
-     printf("\n");
-     printf("eta file n1=%d n2=%d\n",nx,nz);
-     printf("\n");
-     FILE *dbg = fopen(filename_buf, "wb");
-     for (int k = 0; k < nz; ++k) {
-         for (int j = ny/2; j < ny/2+1; ++j) {
-             for (int i = 0; i < nx; ++i) {
-                 fwrite(&h_eta[IDX3_eta1(i,j,k)], sizeof(float),1, dbg);
-             }
-          }
-     }
-     /* Clean up */
-     fclose(dbg);
-   }
-
-
    // define policy for source term
    RAJA::TypedRangeSegment<int> KRanges(xs, xs+1);
    RAJA::TypedRangeSegment<int> JRanges(ys, ys+1);
@@ -352,48 +331,19 @@ int main( int argc, char *argv[] )
      pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
      // bottom
      pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
-
-     if(itSample%50==0)
-     {
-	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pnp1,phi] ( int i)
-                         {});
-	printf("result1 %f\n",pnp1[IDX3_l(xs,ys,zs)]);
-	if(debug==1)
-        {
-	  char filename_buf[32];
-          snprintf(filename_buf, sizeof(filename_buf), "snapshot.it%d.H@", itSample);
-          printf("snapshot file nx=%d nz=%d\n",nx,nz);
-          FILE *snapshot_file = fopen(filename_buf, "wb");
-          for (int k = 0; k < nz; ++k) {
-              for (int j = ny/2; j < ny/2+1; ++j) {
-                  for (int i = 0; i < nx; ++i) {
-                      fwrite(&pnp1[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
-                  }
-              }
-          }
-          /* Clean up */
-          fclose(snapshot_file);
-  
-          snprintf(filename_buf, sizeof(filename_buf), "snapshotPhi.it%d.H@", itSample);
-          printf("snapshotPhi file size n1=%d n2=%d\n",nx,nz);
-          FILE *snapshotPhi_file = fopen(filename_buf, "wb");
-          for (int k = 0; k < nz; ++k) {
-              for (int j = ny/2; j < ny/2+1; ++j) {
-                  for (int i = 0; i < nx; ++i) {
-                      fwrite(&phi[IDX3(i,j,k)], sizeof(float),1, snapshotPhi_file);
-                  }
-              }
-          }
-          /* Clean up */
-          fclose(snapshot_file);
-	}
-     }
      // swap
      RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
      {
         pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
         pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
      });
+     if(itSample%50==0)
+     {
+	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i)
+                         {});
+	printf("result1 %f\n",h_pn[IDX3_l(xs,ys,zs)]);
+	myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,h_pn,itSample);
+     }
    }
    end = std::chrono::system_clock::now();
    std::chrono::duration<double> elapsed_seconds = end - start;

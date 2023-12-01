@@ -39,23 +39,26 @@ struct FDTDUtils
       return 2*cfl/(sqrtf(ftmp)*vmax);
   }
 
-  int write_io(int nx, int ny, int nz,
-                int lx, int ly, int lz,
-                vectorReal &u, int istep)
+  void write_io(int nx, int ny, int nz,
+		int lx, int ly, int lz,
+		int x0, int x1, 
+		int y0, int y1, 
+		int z0, int z1, 
+                vectorReal const &u, int istep)
   {
       char filename_buf[32];
-      snprintf(filename_buf, sizeof(filename_buf), "snapshot.it%d.%d.raw", istep, nz);
+      snprintf(filename_buf, sizeof(filename_buf), "snapshot_it_%d.H@", istep);
       FILE *snapshot_file = fopen(filename_buf, "wb");
-      for (int k = -lz; k < nz+lz; ++k) {
-          for (int j = ny/2; j < ny/2+1; ++j) {
-              for (int i = -lx; i < nx+lx; ++i) {
-                  fwrite(&u[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
+      printf(" %d %d %d %d %d %d\n",x0,x1,y0,y1,z0,z1);
+      for (int k = z0; k < z1; ++k) {
+          for (int j = y0; j < y1+1; ++j) {
+              for (int i = x0; i < x1; ++i) {
+		  fwrite(&u[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
               }
           }
       }
       /* Clean up */
       fclose(snapshot_file);
-      return(0);
   }
 
   void pml_profile_init(vectorReal  & profile, int i_min, int i_max, int n_first, int n_last, float scale)

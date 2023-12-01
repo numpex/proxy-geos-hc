@@ -249,28 +249,11 @@ int main( int argc, char *argv[] )
                           z1,  z2,  z3,  z4,  z5,  z6,
                           dx,  dy,  dz,  timeStep,
                           vmax, eta);
-    char filename_buf[32];
-    snprintf(filename_buf, sizeof(filename_buf), "debug_eta.H@");
-    printf("\n");
-    printf("eta file n1=%d n2=%d\n",nx+2,nz+2);
-    printf("\n");
-    FILE *dbg = fopen(filename_buf, "wb");
-    for (int k = 0; k < nz; ++k) {
-        for (int j = ny/2; j < ny/2+1; ++j) {
-            for (int i = 0; i < nx; ++i) {
-                fwrite(&eta[IDX3_eta1(i,j,k)], sizeof(float),1, dbg);
-            }
-        }
-    }
-    /* Clean up */
-    fclose(dbg);
-
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     for (int itSample=0; itSample<nSamples;itSample++)
     {
       pn[IDX3_l(xs,ys,zs)]+=vp[IDX3(xs,ys,zs)]*RHSTerm[itSample];
-
       //up
       pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
       //front
@@ -285,40 +268,7 @@ int main( int argc, char *argv[] )
       pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
       // bottom
       pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
-
-      if(itSample%50==0)
-      {
-
-	printf("result 1 %f\n",pnp1[IDX3_l(xs,ys,zs)]);
-        char filename_buf[32];
-        snprintf(filename_buf, sizeof(filename_buf), "snapshot.it%d.H@", itSample);
-        printf("snapshot file size n1=%d n2=%d\n",nx,nz);
-        FILE *snapshot_file = fopen(filename_buf, "wb");
-        for (int k = 0; k < nz; ++k) {
-            for (int j = ny/2; j < ny/2+1; ++j) {
-                for (int i = 0; i < nx; ++i) {
-                    fwrite(&pnp1[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
-                }
-            }
-        }
-
-        /* Clean up */
-        fclose(snapshot_file);
-
-        snprintf(filename_buf, sizeof(filename_buf), "snapshotPhi.it%d.H@", itSample);
-        printf("snapshotPhi file size n1=%d n2=%d\n",nx,nz);
-        FILE *snapshotPhi_file = fopen(filename_buf, "wb");
-        for (int k = 0; k < nz; ++k) {
-            for (int j = ny/2; j < ny/2+1; ++j) {
-                for (int i = 0; i < nx; ++i) {
-                    fwrite(&phi[IDX3(i,j,k)], sizeof(float),1, snapshotPhi_file);
-                }
-            }
-        }
-        /* Clean up */
-       fclose(snapshot_file);
-      }
-
+      //swap
       for( int i=0; i<nx;i++)
       {
          for( int j=0; j<ny;j++)
@@ -329,6 +279,11 @@ int main( int argc, char *argv[] )
                pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
             }
          }
+      }
+      if(itSample%50==0)
+      {
+        printf("result1 %f\n",pn[IDX3_l(xs,ys,zs)]);
+        myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
       }
     }
     end = std::chrono::system_clock::now();
