@@ -147,7 +147,6 @@ int main( int argc, char *argv[] )
        }
     }
 
-
     //init pml eta array
     myFDTDUtils.init_eta( nx,  ny,  nz,
 		          ndampx,  ndampy, ndampz,
@@ -161,8 +160,10 @@ int main( int argc, char *argv[] )
     start = std::chrono::system_clock::now();
     for (int itSample=0; itSample<nSamples;itSample++)
     {
+
       // add RHS term
       myKernel.addRHS(nx,ny,nz,lx,ly,lz,xs,ys,zs,itSample,RHSTerm,vp,pn);
+
       //compute one step
       myKernel.computeOneStep(nx,ny,nz,
                               lx,ly,lz,
@@ -177,8 +178,10 @@ int main( int argc, char *argv[] )
                               coefx,coefy,coefz,
                               vp,phi,eta,
                               pnp1,pn,pnm1);
+
       // swap wavefields
       myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,pnp1,pn,pnm1);
+
       // print infos and save wavefields
       if(itSample%50==0)
       {
@@ -186,7 +189,9 @@ int main( int argc, char *argv[] )
 	printf("result1 %f\n",pn[IDX3_l(xs,ys,zs)]);
         myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
       }
+
     }
+
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end - start;
     std::time_t start_time = std::chrono::system_clock::to_time_t(start);

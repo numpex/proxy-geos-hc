@@ -80,15 +80,9 @@ int main( int argc, char *argv[] )
    vectorReal h_coefx=allocateVector<vectorReal>(ncoefs);
    vectorReal h_coefy=allocateVector<vectorReal>(ncoefs);
    vectorReal h_coefz=allocateVector<vectorReal>(ncoefs);
+
    // model
    vectorReal h_vp=allocateVector<vectorReal>(nx*ny*nz);
-   // pressure fields
-   vectorReal h_pnp1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
-   vectorReal h_pn=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
-   vectorReal h_pnm1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
-   // PML arrays
-   vectorReal h_phi=allocateVector<vectorReal>(nx*ny*nz);
-   vectorReal h_eta=allocateVector<vectorReal>((nx+2)*(ny+2)*(nz+2));
 
    // extract FD coefs
    myFDTDUtils.init_coef(dx, h_coefx);
@@ -106,13 +100,33 @@ int main( int argc, char *argv[] )
    printf("timeStep=%f\n",timeStep);
 
    // compute source term
-   // source term
    vectorReal h_RHSTerm=allocateVector<vectorReal>(nSamples);
    std::vector<float>sourceTerm=myUtils.computeSourceTerm(nSamples,timeStep,f0,sourceOrder);
    for(int i=0;i<nSamples;i++)
    {
      h_RHSTerm[i]=sourceTerm[i];
    }
+
+   // pressure fields
+   vectorReal h_pnp1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
+   vectorReal h_pn=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
+   vectorReal h_pnm1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
+
+   // PML arrays
+   vectorReal h_phi=allocateVector<vectorReal>(nx*ny*nz);
+   vectorReal h_eta=allocateVector<vectorReal>((nx+2)*(ny+2)*(nz+2));
+
+   // mirror arrays 
+   vectorRealView const RHSTerm=h_RHSTerm.toView();
+   vectorRealView const coefx=h_coefx.toView();
+   vectorRealView const coefy=h_coefy.toView();
+   vectorRealView const coefz=h_coefz.toView();
+   vectorRealView const vp=h_vp.toView();
+   vectorRealView const phi=h_phi.toView();
+   vectorRealView const eta=h_eta.toView();
+   vectorRealView  pnp1=h_pnp1.toView();
+   vectorRealView  pn=h_pn.toView();
+   vectorRealView  pnm1=h_pnm1.toView();
 
    printf("memory used for vectra and arrays %d bytes\n",
           (nx*ny*nz+3*(nx+2*lx)*(ny+2*ly)*(nz+2*lz)+nSamples+ncoefs)*4);
@@ -153,22 +167,15 @@ int main( int argc, char *argv[] )
                          dx,  dy,  dz,  timeStep,
                          vmax, h_eta);
 
-   vectorRealView const RHSTerm=h_RHSTerm.toView();
-   vectorRealView const coefx=h_coefx.toView();
-   vectorRealView const coefy=h_coefy.toView();
-   vectorRealView const coefz=h_coefz.toView();
-   vectorRealView const vp=h_vp.toView();
-   vectorRealView const phi=h_phi.toView();
-   vectorRealView const eta=h_eta.toView();
-   vectorRealView  pnp1=h_pnp1.toView();
-   vectorRealView  pn=h_pn.toView();
-   vectorRealView  pnm1=h_pnm1.toView();
+
    std::chrono::time_point<std::chrono::system_clock> start, end;
    start = std::chrono::system_clock::now();
    for (int itSample=0; itSample<nSamples;itSample++)
    {
+	   
       // add RHS term
       myKernel.addRHS(nx,ny,nz,lx,ly,lz,xs,ys,zs,itSample,RHSTerm,vp,pn);
+
       //compute one step
       myKernel.computeOneStep(nx,ny,nz,
                               lx,ly,lz,
@@ -183,8 +190,10 @@ int main( int argc, char *argv[] )
                               coefx,coefy,coefz,
                               vp,phi,eta,
                               pnp1,pn,pnm1);
+
       // swap wavefields
       myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,pnp1,pn,pnm1);
+
       // print infos and save wavefields
      if(itSample%50==0)
      {
@@ -193,6 +202,7 @@ int main( int argc, char *argv[] )
 	printf("result1 %f\n",h_pn[IDX3_l(xs,ys,zs)]);
 	myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,h_pn,itSample);
      }
+
    }
    end = std::chrono::system_clock::now();
    std::chrono::duration<double> elapsed_seconds = end - start;
