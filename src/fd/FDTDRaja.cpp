@@ -45,7 +45,7 @@ int inner3D(const int nx, const int ny, const int nz,
        RAJA::statement::For<2, RAJA::cuda_thread_x_loop,      // k
          RAJA::statement::For<1, RAJA::cuda_thread_y_loop,    // j
            RAJA::statement::For<0, RAJA::cuda_thread_z_loop,  // i
-             RAJA::statement::Lambda<0>
+             RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
            >
          >
        >
@@ -98,7 +98,7 @@ int pml3D(const int nx, const int ny, const int nz,
        RAJA::statement::For<2, RAJA::cuda_thread_x_loop,      // k
          RAJA::statement::For<1, RAJA::cuda_thread_y_loop,    // j
            RAJA::statement::For<0, RAJA::cuda_thread_z_loop,  // i
-             RAJA::statement::Lambda<0>
+             RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
            >
          >
        >
@@ -290,7 +290,7 @@ int main( int argc, char *argv[] )
        RAJA::statement::For<2, RAJA::cuda_thread_x_loop,      // i
          RAJA::statement::For<1, RAJA::cuda_thread_y_loop,    // j
            RAJA::statement::For<0, RAJA::cuda_thread_z_loop,  // k
-             RAJA::statement::Lambda<0>
+             RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
            >
          >
        >
