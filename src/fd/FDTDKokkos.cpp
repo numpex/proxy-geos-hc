@@ -27,20 +27,21 @@ int main( int argc, char *argv[] )
     constexpr int lx=4;
     constexpr int ly=4;
     constexpr int lz=4;
-    constexpr float dx=10;
-    constexpr float dy=10;
-    constexpr float dz=10;
+    constexpr float dx=20;
+    constexpr float dy=20;
+    constexpr float dz=20;
 
     constexpr int   sourceOrder=1;
     constexpr int   xs=nx/2;
     constexpr int   ys=ny/2;
     constexpr int   zs=nz/2;
-    constexpr float f0=15.;
+    constexpr float f0=10.;
     constexpr float fmax=2.5*f0;
-    constexpr float timeMax=0.8;
+    constexpr float timeMax=1.0;
 
     constexpr int ncoefs=5;
-    constexpr float vmax=1500;
+    constexpr float vmin=1500;
+    constexpr float vmax=4500;
     
     // imports utils
     solverUtils myUtils;
