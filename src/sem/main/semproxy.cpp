@@ -77,7 +77,7 @@ void SEMProxy::run()
     {
       cout<<"TimeStep="<<indexTimeStep<<endl;
     }
-    if( indexTimeStep%900==0 )
+    if( indexTimeStep%100==0 )
     {
       cout<<" pnGlobal @ elementSource location "<<myElementSource
           <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),i1)<<endl;

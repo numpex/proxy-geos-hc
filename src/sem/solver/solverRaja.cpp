@@ -182,7 +182,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     float MmSh=d_massMatrixGlobal[I]-timeSample*d_ShGlobal[i]*0.5;
     d_pnGlobal[I][i1]=invMpSh*(2*d_massMatrixGlobal[I]*d_pnGlobal[I][i2]-MmSh*d_pnGlobal[I][i1]-tmp*d_yGlobal[I]);
   } );
-  if(timeStep%900==0)
+  if(timeStep%100==0)
   {
      int nodeRHS=d_globalNodesList(d_rhsElement[0],0);
      RAJA::forall< RAJA::seq_exec>( RAJA::RangeSegment( 0, numberOfNodes ), [=] LVARRAY_HOST_DEVICE ( int i )

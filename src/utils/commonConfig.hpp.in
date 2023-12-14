@@ -19,6 +19,8 @@
 // Enables use of KOKOS (CMake option)
 #cmakedefine USE_KOKKOS
 
+// add Tests directory (CMake option)
+#cmakedefine addTests 
 
 #endif
 

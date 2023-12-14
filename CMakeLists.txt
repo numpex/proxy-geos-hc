@@ -33,6 +33,12 @@ option (USE_KOKKOS "Use KOKKOS to parallelise loops" OFF)
 #-----------------------------------------------------
 option (USE_CALIPER "Use CALIPER for profiling" OFF)
 
+#---------------------------------------------------
+# Tests directory to perform differen tests before 
+# integration into proxy apps
+#---------------------------------------------------
+option (addTests " add Tests directory" OFF)
+
 
 add_subdirectory(src)
 
