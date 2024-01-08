@@ -37,7 +37,8 @@ int main( int argc, char *argv[] )
    constexpr float timeMax=0.8;
 
    constexpr int ncoefs=5;
-   constexpr float vmax=1500;
+   constexpr float vmin=1500;
+   constexpr float vmax=4500;
    
    // imports utils
    solverUtils myUtils;
@@ -51,7 +52,7 @@ int main( int argc, char *argv[] )
    constexpr float hdx_2=1./(4.*dx*dx);
    constexpr float hdy_2=1./(4.*dy*dy);
    constexpr float hdz_2=1./(4.*dz*dz);
-   constexpr float lambdamax=vmax/fmax;
+   constexpr float lambdamax=vmin/fmax;
    constexpr int ndampx=ntaperx*lambdamax/dx;
    constexpr int ndampy=ntapery*lambdamax/dy;
    constexpr int ndampz=ntaperz*lambdamax/dz;
@@ -139,7 +140,7 @@ int main( int argc, char *argv[] )
       {
          for( int k=0; k<nz;k++)
          {
-           h_vp[IDX3(i,j,k)]=1500.*1500.*timeStep2;
+           h_vp[IDX3(i,j,k)]=vmin*vmin*timeStep2;
            h_phi[IDX3(i,j,k)]=0.;
          }
       }

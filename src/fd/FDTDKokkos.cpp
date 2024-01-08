@@ -27,15 +27,15 @@ int main( int argc, char *argv[] )
     constexpr int lx=4;
     constexpr int ly=4;
     constexpr int lz=4;
-    constexpr float dx=20;
-    constexpr float dy=20;
-    constexpr float dz=20;
+    constexpr float dx=10;
+    constexpr float dy=10;
+    constexpr float dz=10;
 
     constexpr int   sourceOrder=1;
     constexpr int   xs=nx/2;
     constexpr int   ys=ny/2;
     constexpr int   zs=nz/2;
-    constexpr float f0=10.;
+    constexpr float f0=15.;
     constexpr float fmax=2.5*f0;
     constexpr float timeMax=1.0;
 
@@ -129,7 +129,7 @@ int main( int argc, char *argv[] )
        {
           for( int k=0; k<nz;k++)
           {
-            vp[IDX3(i,j,k)]=1500.*1500.*timeStep2;
+            vp[IDX3(i,j,k)]=vmin*vmin*timeStep2;
             phi[IDX3(i,j,k)]=0.;
           }
        }
