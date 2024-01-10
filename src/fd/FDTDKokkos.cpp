@@ -21,9 +21,12 @@ int main( int argc, char *argv[] )
 {
   Kokkos::initialize(argc,argv);
   {
-    constexpr int nx=150;
-    constexpr int ny=150;
-    constexpr int nz=150;
+    int nx=std::stoi(argv[1]);
+    int ny=nx;
+    int nz=nx;
+    int   xs=nx/2;
+    int   ys=ny/2;
+    int   zs=nz/2;
     constexpr int lx=4;
     constexpr int ly=4;
     constexpr int lz=4;
@@ -143,7 +146,7 @@ int main( int argc, char *argv[] )
           {
             pnp1[IDX3_l(i,j,k)]=0.000001;
             pn[IDX3_l(i,j,k)]  =0.000001;
-            pnm1[IDX3_l(i,j,k)]=0.000001;
+            pnm1[IDX3_l(i,j,k)]  =0.000001;
           }
        }
     }

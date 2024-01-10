@@ -18,9 +18,13 @@
 
 int main( int argc, char *argv[] )
 {
-   constexpr int nx=150;
-   constexpr int ny=150;
-   constexpr int nz=150;
+   int nx=std::stoi(argv[1]);
+   int ny=nx;
+   int nz=nx;
+   int xs=nx/2;
+   int ys=ny/2;
+   int zs=nz/2;
+
    constexpr int lx=4;
    constexpr int ly=4;
    constexpr int lz=4;
@@ -126,7 +130,7 @@ int main( int argc, char *argv[] )
    vectorRealView const phi=h_phi.toView();
    vectorRealView const eta=h_eta.toView();
    vectorRealView  pnp1=h_pnp1.toView();
-   vectorRealView  pn=h_pn.toView();
+   vectorRealView  pn  =h_pn.toView();
    vectorRealView  pnm1=h_pnm1.toView();
 
    printf("memory used for vectra and arrays %d bytes\n",
