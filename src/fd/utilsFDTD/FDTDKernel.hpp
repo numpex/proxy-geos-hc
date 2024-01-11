@@ -54,13 +54,27 @@ constexpr size_t greater_of_squarest_factor_pair(size_t n)
       : n / lesser_of_squarest_factor_pair_helper(n, sqrt(n));
 }
 
-#define block_size (256)
-#define x_block_sz (32)
-#define y_block_sz (greater_of_squarest_factor_pair(block_size/x_block_sz))
-#define z_block_sz (lesser_of_squarest_factor_pair(block_size/x_block_sz))
-//const int x_block_sz=32;
-//const int y_block_sz=4;
-//const int z_block_sz=2;
+#define block_size (512)
+#define z_block_sz (32)
+#define y_block_sz (greater_of_squarest_factor_pair(block_size/z_block_sz))
+#define x_block_sz (lesser_of_squarest_factor_pair(block_size/z_block_sz))
+#define RAJANestedLoop(x3,y3,z3,x4,y4,z4)\
+     RAJA::TypedRangeSegment<int> KRange(z3, z4);\
+     RAJA::TypedRangeSegment<int> JRange(y3, y4);\
+     RAJA::TypedRangeSegment<int> IRange(x3, x4);\
+     using EXEC_POL =\
+     RAJA::KernelPolicy<\
+        RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,\
+          RAJA::statement::For<0, RAJA::cuda_global_size_z_direct<x_block_sz>, \
+            RAJA::statement::For<1, RAJA::cuda_global_size_y_direct<y_block_sz>,\
+              RAJA::statement::For<2, RAJA::cuda_global_size_x_direct<z_block_sz>,\
+               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>\
+             >\
+           >\
+         >\
+       >\
+     >;\
+     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) 
 #endif
 
 struct FDTDKernel
@@ -99,24 +113,7 @@ struct FDTDKernel
 #endif
   {
 #ifdef USE_RAJA
-     RAJA::TypedRangeSegment<int> KRange(z3, z4);
-     RAJA::TypedRangeSegment<int> JRange(y3, y4);
-     RAJA::TypedRangeSegment<int> IRange(x3, x4);
-
-
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::cuda_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::cuda_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::cuda_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) 
+     RAJANestedLoop(x3,y3,z3,x4,y4,z4)
      {
 #elif defined USE_KOKKOS
      Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({z3,x3,y3},{z4,x4,y4}),KOKKOS_LAMBDA(int k,int i,int j)
@@ -199,23 +196,7 @@ struct FDTDKernel
 #endif
   {
 #ifdef USE_RAJA
-     RAJA::TypedRangeSegment<int> KRange(z3, z4);
-     RAJA::TypedRangeSegment<int> JRange(y3, y4);
-     RAJA::TypedRangeSegment<int> IRange(x3, x4);
-
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::cuda_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::cuda_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::cuda_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) 
+     RAJANestedLoop(x3,y3,z3,x4,y4,z4)
      {
 #elif defined USE_KOKKOS
      Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({z3,x3,y3},{z4,x4,y4}),KOKKOS_LAMBDA(int k,int i,int j)
@@ -289,25 +270,7 @@ struct FDTDKernel
 #endif
   {
 #ifdef USE_RAJA
-     // define policy for source term
-     RAJA::TypedRangeSegment<int> KRanges(xs, xs+1);
-     RAJA::TypedRangeSegment<int> JRanges(ys, ys+1);
-     RAJA::TypedRangeSegment<int> IRanges(zs, zs+1);
-
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::cuda_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::cuda_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::cuda_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRanges, JRanges, KRanges), [=] __device__ (int i, int j, int k)
+     RAJANestedLoop(xs,ys,zs,xs+1,ys+1,zs+1)
      {
        pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
      });
@@ -340,25 +303,7 @@ struct FDTDKernel
 #endif
   {
 #ifdef USE_RAJA
-     // define policy for swapping
-     RAJA::TypedRangeSegment<int> KRange(0, nx);
-     RAJA::TypedRangeSegment<int> JRange(0, ny);
-     RAJA::TypedRangeSegment<int> IRange(0, ny);
- 
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::cuda_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::cuda_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::cuda_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
+     RAJANestedLoop(0,0,0,nx,ny,nz)
      {
         pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
         pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
