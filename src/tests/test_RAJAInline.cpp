@@ -13,6 +13,117 @@
 
 #include "test_RAJAInline.hpp"
 
+void gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints )
+{
+  if( order == 1 )
+  {
+    quadraturePoints[0]=-1.0;
+    quadraturePoints[1]=1.0;
+  }
+  if( order == 2 )
+  {
+    quadraturePoints[0]=-1.0;
+    quadraturePoints[1]=0.0;
+    quadraturePoints[2]=1.0;
+  }
+  if( order == 3 )
+  {
+    quadraturePoints[0]=-1.0;
+    quadraturePoints[1]=-0.4472136;
+    quadraturePoints[2]=0.4472136;
+    quadraturePoints[3]=1.0;
+  }
+}
+
+void gaussLobattoQuadratureWeights( int order, vectorDouble const & weights )
+{
+  if( order == 1 )
+  {
+    weights[0]=1.0;
+    weights[1]=1.0;
+  }
+  if( order == 2 )
+  {
+    weights[0]=0.33333333;
+    weights[1]=1.33333333;
+    weights[2]= 0.33333333;
+  }
+  if( order == 3 )
+  {
+    weights[0]=0.16666667;
+    weights[1]=0.83333333;
+    weights[2]=0.83333333;
+    weights[3]=0.16666667;
+  }
+}
+
+std::vector<double> shapeFunction1D( int order, double xi ) 
+{
+  std::vector<double> shapeFunction( order+1 );
+  if( order==1 )
+  {
+    shapeFunction[0]=0.5*(1.0-xi);
+
+    shapeFunction[1]=0.5*(1.0+xi);
+  }
+  if( order==2 )
+  {
+    shapeFunction[0]= -1.0*xi*(0.5 - 0.5*xi);
+
+    shapeFunction[1]=(1.0 - 1.0*xi)*(1.0*xi + 1.0);
+
+    shapeFunction[2]= 1.0*xi*(0.5*xi + 0.5);
+  }
+  if( order==3 )
+  {
+    shapeFunction[0]=(0.309016994374947 - 0.690983005625053*xi)*(0.5 - 0.5*xi)
+                      *(-1.80901699437495*xi - 0.809016994374947);
+
+    shapeFunction[1]=(0.5 - 1.11803398874989*xi)*(0.690983005625053 - 0.690983005625053*xi)
+                      *(1.80901699437495*xi + 1.80901699437495);
+
+    shapeFunction[2]=(1.80901699437495 - 1.80901699437495*xi)
+                      *(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5);
+
+    shapeFunction[3]=(0.5*xi + 0.5)*(0.690983005625053*xi + 0.309016994374947)
+                      *(1.80901699437495*xi - 0.809016994374947);
+  }
+}
+
+std::vector<double> derivativeShapeFunction1D( int order, double xi ) const
+{
+  std::vector<double> derivativeShapeFunction( order+1 );
+
+  if( order == 1 )
+  {
+    derivativeShapeFunction[0]=-0.5;
+    derivativeShapeFunction[1]=0.5;
+  }
+  if( order == 2 )
+  {
+    derivativeShapeFunction[0]=1.0*xi - 0.5;
+    derivativeShapeFunction[1]=-2.0*xi;
+    derivativeShapeFunction[2]=1.0*xi + 0.5;
+  }
+  if( order == 3 )
+  {
+    derivativeShapeFunction[0]=-1.80901699437495*(0.309016994374947 - 0.690983005625053*xi)*(0.5 - 0.5*xi)
+                                + (-1.80901699437495*xi - 0.809016994374947)*(0.345491502812526*xi - 0.345491502812526)
+                                + (-1.80901699437495*xi - 0.809016994374947)*(0.345491502812526*xi - 0.154508497187474);
+
+    derivativeShapeFunction[1]=1.80901699437495*(0.5 - 1.11803398874989*xi)*(0.690983005625053 - 0.690983005625053*xi)
+                                + (0.772542485937369*xi - 0.772542485937369)*(1.80901699437495*xi + 1.80901699437495)
+                                + (0.772542485937369*xi - 0.345491502812526)*(1.80901699437495*xi + 1.80901699437495);
+
+    derivativeShapeFunction[2]=(1.80901699437495 - 1.80901699437495*xi)*(0.772542485937369*xi + 0.345491502812526) +
+                                (1.80901699437495 - 1.80901699437495*xi)*(0.772542485937369*xi + 0.772542485937369) -
+                                1.80901699437495*(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5);
+
+    derivativeShapeFunction[3]=(0.345491502812526*xi + 0.154508497187474)*(1.80901699437495*xi - 0.809016994374947) +
+                                (0.345491502812526*xi + 0.345491502812526)*(1.80901699437495*xi - 0.809016994374947) +
+                                1.80901699437495*(0.5*xi + 0.5)*(0.690983005625053*xi + 0.309016994374947);
+  }
+}
 
 void globalNodesList( const int & order, const int & ex, const int & ey, const int & nx, arrayInt const & nodesList )
 {
@@ -63,6 +174,13 @@ void nodesCoordinates( const int & nx, const int & ny, const int & order, const 
       xi[2]=1.;
       break;
     default:
+      break;
+    case 3:
+      static constexpr double sqrt5 = 2.2360679774997897;
+      xi[0] = -1.0;
+      xi[1] = -1./sqrt5;
+      xi[2] = 1./sqrt5;
+      xi[3] = 1.;
       break;
   }
   for( int i=0; i<ex; i++ )

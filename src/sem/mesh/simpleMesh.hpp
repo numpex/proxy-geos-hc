@@ -118,16 +118,31 @@ public:
   #endif
   // get global coordinates of element e
   #ifdef USE_RAJA
+  LVARRAY_HOST_DEVICE int  getXi( const int & elementNumber,
+		                  const int & numberOfPointsPerElement,
+				  arrayIntView  const & nodesList,
+                                  arrayRealView const & globalNodesCoords,
+                                  double  Xi[][2]) const;
   LVARRAY_HOST_DEVICE int  getXi( const int & numberOfPointsPerElement,
                                   arrayRealView const & globalNodesCoords,
                                   int const  localToGlobal[] , 
                                   double  Xi[][2]) const;
   #elif defined USE_KOKKOS
+  KOKKOS_FUNCTION int  getXi( const int & elementNumber,
+		              const int & numberOfPointsPerElement,
+			      arrayInt const  & nodesList,
+                              arrayReal const & globalNodesCoords,
+                              double  Xi[][2]) const;
   KOKKOS_FUNCTION int  getXi( const int & numberOfPointsPerElement,
                               arrayReal const & globalNodesCoords,
                               int const  localToGlobal[] , 
                               double  Xi[][2]) const;
   #else
+  int  getXi( const int & elementNumber,
+	      const int & numberOfPointsPerElement,
+	      arrayInt  & nodesList,
+              arrayReal & globalNodesCoords,
+              double  Xi[][2]) const;
   int  getXi( const int & numberOfPointsPerElement,
               arrayReal  & globalNodesCoords,
               int const  localToGlobal[] , 

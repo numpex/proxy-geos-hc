@@ -68,63 +68,31 @@ void solverRaja::computeOneStep(  const int & timeStep,
  
   int numberOfPointsPerElement=(order+1)*(order+1);
 
-
-  // loop over mesh elements
   RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfElements ), [=] LVARRAY_HOST_DEVICE ( int e )
   {
     int nPointsPerElement=(order+1)*(order+1);
     // start parallel section
-    int  localToGlobal[36];
     double Xi[36][2];
-
-    double jacobianMatrix[36][4];
-    double detJ[36];
-    double invJacobianMatrix[36][4];
-    double transpInvJacobianMatrix[36][4];
-
     double B[36][4];
     double R[36][36];
-
     double massMatrixLocal[36];
-
     double pnLocal[36];
     double Y[36];
 
-    // extract global coordinates of element e
-    // get local to global indexes of nodes of element e
-    int i=mesh.localToGlobalNodes( e, numberOfPointsPerElement, d_globalNodesList, localToGlobal );
     //get global coordinates Xi of element e
-    int j=mesh.getXi( nPointsPerElement, d_globalNodesCoords, localToGlobal, Xi );
-    // compute jacobian Matrix
-    int k=Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
-                              d_derivativeBasisFunction2DX,
-                              d_derivativeBasisFunction2DY,
-                              jacobianMatrix );
-    // compute determinant of jacobian Matrix
-    int l=Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
-                                           jacobianMatrix,
-                                           detJ );
-    // compute inverse of Jacobian Matrix
-    int m=Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
-                                 jacobianMatrix,
-                                 detJ,
-                                 invJacobianMatrix );
-    // compute transposed inverse of Jacobian Matrix
-    int n=Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
-                                       jacobianMatrix,
-                                       detJ,
-                                       transpInvJacobianMatrix );
-    // compute  geometrical transformation matrix
-    int o=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
+    int j=mesh.getXi( e, nPointsPerElement, d_globalNodesList, d_globalNodesCoords,Xi );
+    // compute Jacobian, massMatrix and B
+    //int o=Qk.computeB( e,numberOfPointsPerElement,d_globalNodesList,d_globalNodesCoords,d_weights2D,
+    int o=Qk.computeB( numberOfPointsPerElement,Xi,d_weights2D,
+                       d_derivativeBasisFunction2DX,d_derivativeBasisFunction2DY,massMatrixLocal,B );
     // compute stifness and mass matrix ( durufle's optimization)
     int p=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, d_weights2D, B, d_derivativeBasisFunction1D, R );
-    // compute local mass matrix ( used optimez version)
-    int q=Qk.phiIphiJ( numberOfPointsPerElement, d_weights2D, detJ, massMatrixLocal );
     // get pnGlobal to pnLocal
     for( int i=0; i<nPointsPerElement; i++ )
     {
+      int localToGlobal=d_globalNodesList(e,i);
       massMatrixLocal[i]/=(d_model[e]*d_model[e]);
-      pnLocal[i]=d_pnGlobal(localToGlobal[i],i2);
+      pnLocal[i]=d_pnGlobal(localToGlobal,i2);
     }
     // compute Y=R*pnLocal
     for( int i=0; i<nPointsPerElement; i++ )
@@ -138,13 +106,14 @@ void solverRaja::computeOneStep(  const int & timeStep,
     //compute gloval mass Matrix and global stiffness vector
     for( int i=0; i<nPointsPerElement; i++ )
     {
-      int gIndex=localToGlobal[i];
+      int gIndex=d_globalNodesList(e,i);
       //massMatrixGlobal[gIndex]+=massMatrixLocal(threadId,i)
       //yGlobal[gIndex]+=Y(threadId,i);
       RAJA::atomicAdd< deviceAtomicPolicy >(&d_massMatrixGlobal[gIndex],massMatrixLocal[i]);
       RAJA::atomicAdd< deviceAtomicPolicy>(&d_yGlobal[gIndex],Y[i]);
     } 
-  } );
+  });
+
   // update pressure
   RAJA::forall< deviceExecPolicy>( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
     int I=d_listOfInteriorNodes[i];

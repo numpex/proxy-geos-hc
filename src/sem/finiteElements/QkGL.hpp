@@ -30,6 +30,7 @@ namespace FE
   #else
   ~QkGL();
   #endif
+
   // get Gauss Lobatto quadrature points
   #ifdef USE_RAJA
   void gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const;
@@ -38,6 +39,7 @@ namespace FE
   #else
   void gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoints ) const;
   #endif
+
   // get Gauss Lobatto quadrature weights
   #ifdef USE_RAJA
   void  gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const;
@@ -46,9 +48,11 @@ namespace FE
   #else
   void  gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) const;
   #endif
+
   // compute  1d shape Functions and derivatives
   std::vector<double>  shapeFunction1D( int order, double xi ) const;
   std::vector<double>  derivativeShapeFunction1D( int order, double xi ) const;
+
   // get  1d shape Functions and derivatives for all quadrature points
   #ifdef USE_RAJA
   void  getBasisFunction1D( int order, vectorDouble const & quadraturePoints ,arrayDouble const & basisFunction1D) const;
@@ -67,6 +71,7 @@ namespace FE
   void getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints, 
                                                 arrayDouble & derivativeBasisFunction1D ) const;
   #endif
+
   // compute 2D gauss-lobatto weights
   #ifdef USE_RAJA
   void getGaussLobattoWeights( vectorDouble const & quadraturePoints,
@@ -81,6 +86,7 @@ namespace FE
                                            vectorDouble & weights,
                                            vectorDouble & W )const;
   #endif
+
   // get  2d shape Functions  for all quadrature points
   #ifdef USE_RAJA
   void getBasisFunction2D( vectorDouble const & quadraturePoints,
@@ -98,6 +104,7 @@ namespace FE
                            arrayDouble & b,
                            arrayDouble & c) const;
   #endif
+
   // compute Jacobian Matrix
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE int  computeJacobianMatrix( const int & nPointsPerElement,
@@ -118,6 +125,7 @@ namespace FE
                               arrayDouble  & dyPhi,
                               double jacobianMatrix[][4] ) const;
   #endif
+
   // compute determinant of Jacobian Matrix
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE int  computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
@@ -132,6 +140,7 @@ namespace FE
                                            double const  jacobianMatrix[][4],
                                            double detJ[] ) const;
   #endif
+
   // compute inverse of Jacobian Matrix
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE int  computeInvJacobianMatrix( const int & nPointsPerElement,
@@ -149,6 +158,7 @@ namespace FE
                                  double const  detJ[],
                                  double  invJacobianMatrix[][4] ) const;
   #endif
+
   // compute tranposed inverse of Jacobian Matrix
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE int  computeTranspInvJacobianMatrix( const int & nPointsPerElement,
@@ -166,6 +176,67 @@ namespace FE
                                        double const  detJ[],
                                        double  invJacobianMatrix[][4] ) const;
   #endif
+
+  // compute B and M
+  #ifdef USE_RAJA
+  LVARRAY_HOST_DEVICE int computeB( const int & elementNumber,
+                                    const int & nPointsPerElement,
+                                    arrayIntView     const & nodesList,
+                                    arrayRealView    const & nodesCoords,
+                                    vectorDoubleView const & weights2D,
+                                    arrayDoubleView  const & dxPhi,
+                                    arrayDoubleView  const & dyPhi,
+                                    double massMatrixLocal[],
+                                    double   B[][4] ) const;
+  #elif defined USE_KOKKOS
+  KOKKOS_FUNCTION int computeB( const int & elementNumber,
+                                const int & nPointsPerElement,
+                                arrayInt     const & nodesList,
+                                arrayReal    const & nodesCoords,
+                                vectorDouble const & weights2D,
+                                arrayDouble  const & dxPhi,
+                                arrayDouble  const & dyPhi,
+                                double massMatrixLocal[],
+                                double   B[][4]) const;
+  #else
+  int computeB( const int & elementNumber,
+                const int & nPointsPerElement,
+                arrayInt  & nodesList,
+                arrayReal & nodesCoords,
+                vectorDouble & weights2D,
+                arrayDouble  & dxPhi,
+                arrayDouble  & dyPhi,
+                double massMatrixLocal[],
+                double   B[][4]) const;
+  #endif
+
+  // compute B and M
+  #ifdef USE_RAJA
+  LVARRAY_HOST_DEVICE int computeB( const int & nPointsPerElement,
+                                    double const  Xi[][2],
+                                    vectorDoubleView const & weights2D,
+                                    arrayDoubleView  const & dxPhi,
+                                    arrayDoubleView  const & dyPhi,
+                                    double massMatrixLocal[],
+                                    double   B[][4] ) const;
+  #elif defined USE_KOKKOS
+  KOKKOS_FUNCTION int computeB( const int & nPointsPerElement,
+                                double const  Xi[][2],
+                                vectorDouble const & weights2D,
+                                arrayDouble & dxPhi,
+                                arrayDouble & dyPhi,
+                                double massMatrixLocal[],
+                                double   B[][4]) const;
+  #else
+  int computeB( const int & nPointsPerElement,
+                double const  Xi[][2],
+                vectorDouble & weights2D,
+                arrayDouble  & dxPhi,
+                arrayDouble  & dyPhi,
+                double massMatrixLocal[],
+                double   B[][4]) const;
+  #endif
+
   // compute 𝐵 the matrix containing the geometrical informations
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE int  computeB( const int & nPointsPerElement,
@@ -179,10 +250,6 @@ namespace FE
                                  double const transpInvJacobianMatrix[][4],
                                  double const detJ[],
                                  double B[][4] ) const;
-  //KOKKOS_FUNCTION int  computeB( const int & nPointsPerElement,
-  //                               double const jacobianMatrix[][4],
-  //                               double const detJ[],
-  //                               double B[][4] ) const;
   #else
   int  computeB( const int & nPointsPerElement,
                  double const invJacobianMatrix[][4],
@@ -190,6 +257,7 @@ namespace FE
                  double const detJ[],
                  double B[][4] ) const;
   #endif
+
   // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
   // Marc Durufle Formulae
   #ifdef USE_RAJA
@@ -214,6 +282,7 @@ namespace FE
                        arrayDouble  & dPhi,
                        double  R[][36]) const;
   #endif
+
   // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE int  gradPhiGradPhi( const int & nPointsPerElement,
@@ -237,6 +306,7 @@ namespace FE
                        arrayDouble  & dyPhi,
                        double  R[][36] ) const;
   #endif
+
   // compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ (optimized formulation)
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE int  phiIphiJ( const int & nPointsPerElement,
@@ -254,6 +324,7 @@ namespace FE
                  double const  detJ[],
                  double  massMatrixLocal[] ) const;
   #endif
+
   // compute dx
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE int  computeDs( const int & iFace,

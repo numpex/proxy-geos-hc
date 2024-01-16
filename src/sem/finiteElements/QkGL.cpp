@@ -536,6 +536,149 @@ int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
   return 0;
 }
 
+// compute B and M  
+#ifdef USE_RAJA
+LVARRAY_HOST_DEVICE int QkGL::computeB( const int & elementNumber,
+		                        const int & nPointsPerElement,
+					arrayIntView     const & nodesList,
+					arrayRealView    const & nodesCoords,
+                                        vectorDoubleView const & weights2D,
+                                        arrayDoubleView  const & dxPhi,
+                                        arrayDoubleView  const & dyPhi,
+					double massMatrixLocal[],
+                                        double   B[][4] ) const
+#elif defined USE_KOKKOS
+KOKKOS_FUNCTION int QkGL::computeB( const int & elementNumber,
+		                    const int & nPointsPerElement,
+			            arrayInt     const & nodesList,
+			            arrayReal    const & nodesCoords,
+                                    vectorDouble const & weights2D,
+                                    arrayDouble  const & dxPhi,
+                                    arrayDouble  const & dyPhi,
+				    double massMatrixLocal[],
+                                    double   B[][4]) const
+#else
+int QkGL::computeB( const int & elementNumber,
+	            const int & nPointsPerElement,
+                    arrayInt  & nodesList,
+                    arrayReal & nodesCoords,
+                    vectorDouble & weights2D,
+                    arrayDouble  & dxPhi,
+                    arrayDouble  & dyPhi,
+		    double massMatrixLocal[],
+                    double   B[][4]) const
+#endif
+{
+  for( int i=0; i<nPointsPerElement; i++ )
+  {               
+    // compute jacobian matrix
+    double jac0=0;
+    double jac1=0;
+    double jac2=0;
+    double jac3=0;
+    for( int j=0; j<nPointsPerElement; j++ )
+    {
+      int localToGlobal=nodesList(elementNumber,j);
+      double X=nodesCoords(localToGlobal,0);
+      double Y=nodesCoords(localToGlobal,1);
+      jac0+=X*dxPhi(j,i);
+      jac1+=X*dyPhi(j,i);
+      jac2+=Y*dxPhi(j,i);
+      jac3+=Y*dyPhi(j,i);
+    }
+
+    // detJ
+    double detJ=abs(jac0*jac3-jac2*jac1);
+
+    double invJac0=jac3;
+    double invJac1=-jac1;
+    double invJac2=-jac2;
+    double invJac3=jac0;
+    double transpInvJac0=jac3;
+    double transpInvJac1=-jac2;
+    double transpInvJac2=-jac1;
+    double transpInvJac3=jac0;
+
+    double detJM1=1./detJ;
+    // B
+    B[i][0]=(invJac0*transpInvJac0+invJac1*transpInvJac2)*detJM1;
+    B[i][1]=(invJac0*transpInvJac1+invJac1*transpInvJac3)*detJM1;
+    B[i][2]=(invJac2*transpInvJac0+invJac3*transpInvJac2)*detJM1;
+    B[i][3]=(invJac2*transpInvJac1+invJac3*transpInvJac3)*detJM1;
+
+    //M
+    massMatrixLocal[i]=weights2D[i]*detJ;
+  }
+  return 0;
+}
+
+// compute B and M  
+#ifdef USE_RAJA
+LVARRAY_HOST_DEVICE int QkGL::computeB( const int & nPointsPerElement,
+                                        double const  Xi[][2],
+                                        vectorDoubleView const & weights2D,
+                                        arrayDoubleView  const & dxPhi,
+                                        arrayDoubleView  const & dyPhi,
+					double massMatrixLocal[],
+                                        double   B[][4] ) const
+#elif defined USE_KOKKOS
+KOKKOS_FUNCTION int QkGL::computeB( const int & nPointsPerElement,
+                                    double const  Xi[][2],
+                                    vectorDouble const & weights2D,
+                                    arrayDouble  const & dxPhi,
+                                    arrayDouble  const & dyPhi,
+				    double massMatrixLocal[],
+                                    double   B[][4]) const
+#else
+int QkGL::computeB( const int & nPointsPerElement,
+                    double const  Xi[][2],
+                    vectorDouble & weights2D,
+                    arrayDouble  & dxPhi,
+                    arrayDouble  & dyPhi,
+		    double massMatrixLocal[],
+                    double   B[][4]) const
+#endif
+{
+  for( int i=0; i<nPointsPerElement; i++ )
+  {               
+    // compute jacobian matrix
+    double jac0=0;
+    double jac1=0;
+    double jac2=0;
+    double jac3=0;
+    for( int j=0; j<nPointsPerElement; j++ )
+    {
+      jac0+=Xi[j][0]*dxPhi(j,i);
+      jac1+=Xi[j][0]*dyPhi(j,i);
+      jac2+=Xi[j][1]*dxPhi(j,i);
+      jac3+=Xi[j][1]*dyPhi(j,i);
+    }
+
+    // detJ
+    double detJ=abs(jac0*jac3-jac2*jac1);
+
+    double invJac0=jac3;
+    double invJac1=-jac1;
+    double invJac2=-jac2;
+    double invJac3=jac0;
+    double transpInvJac0=jac3;
+    double transpInvJac1=-jac2;
+    double transpInvJac2=-jac1;
+    double transpInvJac3=jac0;
+
+    double detJM1=1./detJ;
+    // B
+    B[i][0]=(invJac0*transpInvJac0+invJac1*transpInvJac2)*detJM1;
+    B[i][1]=(invJac0*transpInvJac1+invJac1*transpInvJac3)*detJM1;
+    B[i][2]=(invJac2*transpInvJac0+invJac3*transpInvJac2)*detJM1;
+    B[i][3]=(invJac2*transpInvJac1+invJac3*transpInvJac3)*detJM1;
+
+    //M
+    massMatrixLocal[i]=weights2D[i]*detJ;
+  }
+  return 0;
+}
+
 // compute B the matrix containing the geometrical informations
 #ifdef USE_RAJA
 LVARRAY_HOST_DEVICE int QkGL::computeB( const int & nPointsPerElement,
@@ -559,16 +702,6 @@ int QkGL::computeB( const int & nPointsPerElement,
 {
   for( int i=0; i<nPointsPerElement; i++ )
   {
-    /*
-    B[i][0]=(abs( detJ[i] )*(invJacobianMatrix[i][0]*transpInvJacobianMatrix[i][0]+
-                             invJacobianMatrix[i][1]*transpInvJacobianMatrix[i][2]));
-    B[i][1]=(abs( detJ[i] )*(invJacobianMatrix[i][0]*transpInvJacobianMatrix[i][1]+
-                             invJacobianMatrix[i][1]*transpInvJacobianMatrix[i][3]));
-    B[i][2]=(abs( detJ[i] )*(invJacobianMatrix[i][2]*transpInvJacobianMatrix[i][0]+
-                             invJacobianMatrix[i][3]*transpInvJacobianMatrix[i][2]));
-    B[i][3]=(abs( detJ[i] )*(invJacobianMatrix[i][2]*transpInvJacobianMatrix[i][1]+
-                             invJacobianMatrix[i][3]*transpInvJacobianMatrix[i][3]));
-    */
     double detJM1=abs(1./detJ[i]);
     B[i][0]=(invJacobianMatrix[i][0]*transpInvJacobianMatrix[i][0]+
             invJacobianMatrix[i][1]*transpInvJacobianMatrix[i][2])*detJM1;
@@ -625,7 +758,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         int j=j1+i2*(order+1);
         for( int m=0; m<order+1; m++ )
         {
-          R[j][i]+=weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*dPhi(i1,m)*dPhi(j1,m));
+          R[i][j]+=weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*dPhi(i1,m)*dPhi(j1,m));
         }
       }
     }
@@ -641,7 +774,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-          R[j][i]+=weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*dPhi(i2,j2)*dPhi(j1,i1));
+          R[i][j]+=weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*dPhi(i2,j2)*dPhi(j1,i1));
         }
       }
     }
@@ -657,7 +790,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-          R[j][i]+=weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*dPhi(i1,j1)*dPhi(j2,i2));
+          R[i][j]+=weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*dPhi(i1,j1)*dPhi(j2,i2));
         }
       }
     }
@@ -673,7 +806,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
         int j=i1+j2*(order+1);
         for( int n=0; n<order+1; n++ )
         {
-          R[j][i]+=weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*dPhi(i2,n)*dPhi(j2,n));
+          R[i][j]+=weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*dPhi(i2,n)*dPhi(j2,n));
         }
       }
     }

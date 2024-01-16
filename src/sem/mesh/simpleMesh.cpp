@@ -360,6 +360,36 @@ void simpleMesh::neighbors( const int & e , vectorInt  & neigh) const
 
 // get global coordinates of element e
 #ifdef USE_RAJA
+LVARRAY_HOST_DEVICE int simpleMesh::getXi( const int & elementNumber,
+                                           const int & numberOfPointsPerElement,
+                                           arrayIntView  const & nodesList,
+                                           arrayRealView const & globalNodesCoords,
+                                           double Xi[][2]) const
+#elif defined USE_KOKKOS
+KOKKOS_FUNCTION int simpleMesh::getXi( const int & elementNumber,
+		                       const int & numberOfPointsPerElement,
+				       arrayInt  const & nodesList,
+				       arrayReal const & globalNodesCoords,
+                                       double Xi[][2]) const
+#else
+int simpleMesh::getXi( const int & elementNumber,
+		       const int & numberOfPointsPerElement,
+		       arrayInt  & nodesList,
+                       arrayReal & globalNodesCoords,
+                       double Xi[][2]) const
+#endif
+{
+  for( int i=0; i<numberOfPointsPerElement; i++ )
+  {
+    int localToGlobal=nodesList(elementNumber,i);
+    Xi[i][0]=globalNodesCoords(localToGlobal,0);
+    Xi[i][1]=globalNodesCoords(localToGlobal,1);
+  }
+  return 0;
+}
+
+// get global coordinates of element e
+#ifdef USE_RAJA
 LVARRAY_HOST_DEVICE int simpleMesh::getXi( const int & numberOfPointsPerElement, 
                                            arrayRealView const & globalNodesCoords,
                                            int const  localToGlobal[] ,
