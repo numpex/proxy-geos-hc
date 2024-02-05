@@ -196,8 +196,10 @@ void solverKokkos::computeOneStep(  const int & timeStep,
       for( int i=0; i<numberOfPointsPerElement; i++ )
       {
         int gIndex=globalNodesList(e,i);
-        //massMatrixGlobal[gIndex]+=massMatrixLocal(threadId,i)
-        //yGlobal[gIndex]+=Y(threadId,i);
+	/*
+        massMatrixGlobal[gIndex]+=massMatrixLocal[i];
+        yGlobal[gIndex]+=Y[i];
+	*/
 	Kokkos::atomic_add(&massMatrixGlobal[gIndex],massMatrixLocal[i]);
         Kokkos::atomic_add(&yGlobal[gIndex],Y[i]);
 

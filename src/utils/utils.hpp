@@ -56,7 +56,7 @@ struct solverUtils
     return sourceTerm;
   }
 
-/*
+///*
   void saveSnapShot( const int indexTimeStep, const int i1, arrayReal pnGlobal, simpleMesh mesh )
   {
 
@@ -84,7 +84,7 @@ struct solverUtils
     }
     snapFile.close();
   }
-*/
+//*/
 
 };
 #endif //UTILS_HPP_

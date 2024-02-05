@@ -21,9 +21,18 @@ void solverKokkos::computeOneStep(  const int & timeStep,
                                    arrayReal & rhsTerm,
                                    arrayReal & pnGlobal)
 {
-
-
-  Kokkos::parallel_for( numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
+  using team_policy = Kokkos::TeamPolicy<>;
+  using team_member = typename team_policy::member_type;
+  const Kokkos::TeamPolicy<> policy(numberOfTeams, Kokkos::AUTO);
+  // Set up a policy that launches NumberOfNodes teams, with the maximum number
+  // of threads per team.
+  const team_policy policy(numberOfNodes, Kokkos::AUTO);
+  Kokkos::parallel_for( policy, KOKKOS_CLASS_LAMBDA ( const team_member & thread )
+  {
+  printf("Hello World: %i %i // %i %i\n", thread.league_rank(),
+               thread.team_rank(), thread.league_size(), thread.team_size());
+  });
+  //Kokkos::parallel_for( numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
   {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
