@@ -40,7 +40,8 @@ int main( int argc, char *argv[] )
     constexpr float timeMax=1.0;
 
     constexpr int ncoefs=5;
-    constexpr float vmax=1500;
+    constexpr float vmin=1500;
+    constexpr float vmax=4500;
     
     // imports utils
     solverUtils myUtils;
@@ -56,8 +57,8 @@ int main( int argc, char *argv[] )
     constexpr float hdz_2=1./(4.*dz*dz);
     constexpr float lambdamax=vmax/fmax;
     constexpr int ndampx=ntaperx*lambdamax/dx;
-    constexpr int ndampy=ntaperx*lambdamax/dx;
-    constexpr int ndampz=ntaperx*lambdamax/dx;
+    constexpr int ndampy=ntapery*lambdamax/dy;
+    constexpr int ndampz=ntaperz*lambdamax/dz;
     printf("nx=%d ny=%d nz=%d\n",nx, ny,nz);
     printf("ndampx=%d ndampy=%d ndampz=%d\n",ndampx, ndampy,ndampz);
     constexpr int x1=0;
@@ -125,7 +126,7 @@ int main( int argc, char *argv[] )
        {
           for( int k=0; k<nz;k++)
           {
-            vp[IDX3(i,j,k)]=1500.*1500.*timeStep2;
+            vp[IDX3(i,j,k)]=vmin*vmin*timeStep2;
             phi[IDX3(i,j,k)]=0.;
           }
        }
@@ -176,7 +177,7 @@ int main( int argc, char *argv[] )
       if(itSample%50==0)
       {
         printf("result1 %f\n",pn[IDX3_l(xs,ys,zs)]);
-        myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
+        //myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
       }
 
     }
