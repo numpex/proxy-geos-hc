@@ -12,8 +12,9 @@ set (CMAKE_VERBOSE_MAKEFILE ON )
 # Setup the computing resources for running proxyapp
 #-----------------------------------------------------
 option (X86_laptop "X86 architecture  default" OFF)
-option (X86_cypress "Compilation on Cypress Cluster" ON)
+option (X86_cypress "Compilation on Cypress Cluster" OFF)
 option (P9 "Power9 architecture  " OFF)
+option (ARM "ARM aarch64 architecture: e.g. grace CPU" ON)
 
 #-----------------------------------------------------
 # Setup the flags for users to select programming models
@@ -38,6 +39,7 @@ option (USE_CALIPER "Use CALIPER for profiling" OFF)
 # integration into proxy apps
 #---------------------------------------------------
 option (addTests " add Tests directory" OFF)
+#option (addFD " add finite difference proxy directory" OFF)
 
 
 add_subdirectory(src)

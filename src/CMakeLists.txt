@@ -30,7 +30,7 @@
 set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
 
 # CC options
-set(CMAKE_C_COMPILER gcc-11 CACHE PATH "")
+set(CMAKE_C_COMPILER gcc CACHE PATH "")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "")
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "")
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
@@ -67,13 +67,7 @@ set( DISABLE_UNIT_TESTS ON)
 # force ENABLE_OPENMP to ON
 set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 
-# choose platform   
-if(P9)
-    set(X86_laptop OFF CACHE STRING "" FORCE)
-    set(X86_cypress OFF CACHE STRING "" FORCE)
-endif()
-
-# Cuda options 
+# choose platform for Cuda options 
 if(X86_laptop)
   set(X86_cypress OFF CACHE STRING "" FORCE)
   if (ENABLE_CUDA)
@@ -102,6 +96,19 @@ if(P9)
      set(CMAKE_CUDA_ARCHITECTURES 70 CACHE STRING "")
      set(CUDA_ARCH sm_70 CACHE STRING "")
      set(CMAKE_CUDA_FLAGS "-O3 -restrict -arch ${CUDA_ARCH}  --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le  " CACHE STRING "")
+  endif()
+endif()
+
+if(ARM)
+  if (ENABLE_CUDA)
+    message(STATUS $ENV{CUDA_ROOT})
+    set(CUDA_ROOT $ENV{CUDA_ROOT} CACHE PATH "" FORCE) 
+    set(CMAKE_CUDA_ARCHITECTURES 90 CACHE STRING "") 
+    set(CUDA_ARCH sm_90 CACHE STRING "") 
+    set(CMAKE_CUDA_FLAGS "-restrict --expt-relaxed-constexpr --expt-extended-lambda -Werror cross-execution-space-call,reorder,deprecated-declarations -std=c++17" CACHE STRING "") 
+    set(CMAKE_CUDA_FLAGS_RELEASE "-Xcompiler -DNDEBUG -Xcompiler -O3" CACHE STRING "") 
+    set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "-g -lineinfo ${CMAKE_CUDA_FLAGS_RELEASE}" CACHE STRING "") 
+    set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "") 
   endif()
 endif()
 

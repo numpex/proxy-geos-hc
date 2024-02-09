@@ -21,10 +21,17 @@ namespace FE
     int order;
   public:
 
+  #ifdef USE_RAJA
+  LVARRAY_HOST_DEVICE QkGL();
+  #elif defined USE_KOKKOS
+  KOKKOS_FUNCTION QkGL();
+  #else
   QkGL();
+  #endif
+
 
   #ifdef USE_RAJA
-  ~QkGL();
+  LVARRAY_HOST_DEVICE ~QkGL();
   #elif defined USE_KOKKOS
   KOKKOS_FUNCTION ~QkGL();
   #else
