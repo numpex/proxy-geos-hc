@@ -12,9 +12,9 @@ set (CMAKE_VERBOSE_MAKEFILE ON )
 # Setup the computing resources for running proxyapp
 #-----------------------------------------------------
 option (X86_laptop "X86 architecture  default" OFF)
-option (X86_cypress "Compilation on Cypress Cluster" OFF)
+option (X86_cypress "Compilation on Cypress Cluster" ON)
 option (P9 "Power9 architecture  " OFF)
-option (ARM "ARM aarch64 architecture: e.g. grace CPU" ON)
+option (ARM "ARM aarch64 architecture: e.g. grace CPU" OFF)
 
 #-----------------------------------------------------
 # Setup the flags for users to select programming models

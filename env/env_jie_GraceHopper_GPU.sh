@@ -10,3 +10,10 @@ export KOKKOS_DIR=${SEM_TPL_ROOT_DIR}/kokkos/lib64/cmake/Kokkos
 export KOKKOS_INCLUDE_DIR=${SEM_TPL_ROOT_DIR}/kokkos/include
 export CUDA_ROOT=/hrtc/apps/cuda/12.3.107/aarch64/rocky9/
 
+
+# don't forget to change CMakeLists.txt 
+# option (X86_cypress "Compilation on Cypress Cluster" OFF)
+# ption (ARM "ARM aarch64 architecture: e.g. grace CPU" ON)
+
+# for kokkos: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON .. ; make 
+# for raja: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON .. ; make 
