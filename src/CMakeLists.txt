@@ -29,20 +29,23 @@
 # the solver is using sequential mode by default
 set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
 
-# CC options
-set(CMAKE_C_COMPILER gcc CACHE PATH "")
-set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "")
-set(CMAKE_C_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
-
-# C++ options
-set(CMAKE_CXX_COMPILER g++ CACHE PATH "")
-set (CMAKE_CXX_FLAGS "-O3 -std=c++17  " CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG " CACHE STRING "")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
-set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
-
+if( ENABLE_HIP )
+  set(CMAKE_CXX_COMPILER /opt/rocm-6.0.0/bin/amdclang++ CACHE PATH "" FORCE)
+else()
+  # CC options
+  set(CMAKE_C_COMPILER gcc CACHE PATH "")
+  set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "")
+  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "")
+  set(CMAKE_C_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
+  
+  # C++ options
+  set(CMAKE_CXX_COMPILER g++ CACHE PATH "")
+  set (CMAKE_CXX_FLAGS "-O3 -std=c++17  " CACHE STRING "" FORCE)
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG " CACHE STRING "")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "")
+  set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
+  set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
+endif()
 
 # allow to install only one target
 set (CMAKE_SKIP_INSTALL_ALL_DEPENDENCY "True" CACHE STRING "" FORCE)
@@ -248,6 +251,11 @@ elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
   set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
   set (dependencyList ${dependencyList} ${kokkosList} )
   message (STATUS "KOKKOS DEPENDENCY LIST= ${dependencyList}")
+  if( ENABLE_HIP )
+    set(Kokkos_ENABLE_HIP ON CACHE BOOL "" FORCE) 
+    set(Kokkos_ENABLE_CUDA OFF CACHE BOOL "" FORCE) 
+    include_directories("/opt/rocm-6.0.0/include")
+  endif()
 
 elseif (NOT DEFINED $ENV{KOKKOS_DIR})
   set (USE_KOKKOS OFF CACHE BOOL "")

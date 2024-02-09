@@ -211,6 +211,10 @@
 #endif //USE_LVARRAY
 
 #ifdef USE_KOKKOS
+  #ifdef ENABLE_HIP
+  #define __HIP_PLATFORM_AMD__ 1
+  #endif
+
   #include <Kokkos_Core.hpp>
   #define MemSpace Kokkos::SharedSpace
   using ExecSpace = MemSpace::execution_space;
