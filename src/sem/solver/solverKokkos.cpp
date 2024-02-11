@@ -21,36 +21,13 @@ void solverKokkos::computeOneStep(  const int & timeStep,
                                    arrayReal & rhsTerm,
                                    arrayReal & pnGlobal)
 {
-  // Set up a policy that launches NumberOfNodes teams, with the maximum number
-  // of threads per team.
-  using team_policy=Kokkos::TeamPolicy<>;
-  using Kokkos::TeamThreadRange;
-  int nthreads=128;
-  int blockteamSize=(numberOfNodes+nthreads-1)/nthreads;
-  const team_policy policyNodes(blockteamSize, Kokkos::AUTO);
-  Kokkos::parallel_for( policyNodes, KOKKOS_CLASS_LAMBDA ( const Kokkos::TeamPolicy<>::member_type & team )
-  {
-  int teamSize=team.league_size();
-  int teamId=team.league_rank();
-  int threadId=team.team_rank();
-  int blockThreadSize=team.team_size();
 
-  Kokkos::parallel_for(TeamThreadRange(team,blockThreadSize), [=] (const int j)
-  {
-    int i=teamId*blockThreadSize+j;
-    //if(teamId==1)printf("Hello World: %d %d // %d %d %d\n", teamId, threadId,teamSize , blockThreadSize, teamId*blockThreadSize+j );
-    massMatrixGlobal[i]=0;
-    yGlobal[i]=0;
-  });
-  }); 
 
- /* 
   Kokkos::parallel_for( numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
   {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
   } );
-*/
 
   // update pnGLobal with right hade side
   Kokkos::parallel_for(numberOfRHS,KOKKOS_CLASS_LAMBDA (const int i)
@@ -60,21 +37,8 @@ void solverKokkos::computeOneStep(  const int & timeStep,
   });
  
   int numberOfPointsPerElement=(order+1)*(order+1);
-  blockteamSize=(numberOfElements+nthreads-1)/nthreads;
-  const team_policy policyElements(blockteamSize, Kokkos::AUTO);
-  //Kokkos::parallel_for( numberOfElements, KOKKOS_CLASS_LAMBDA ( const int e )
-  //{
-  Kokkos::parallel_for( policyElements, KOKKOS_CLASS_LAMBDA ( const Kokkos::TeamPolicy<>::member_type & team )
+  Kokkos::parallel_for( numberOfElements, KOKKOS_CLASS_LAMBDA ( const int e )
   {
-     int teamSize=team.league_size();
-     int teamId=team.league_rank();
-     int threadId=team.team_rank();
-     int blockThreadSize=team.team_size();
-     //if(teamId<=2)printf("Hello World: %d %d // %d %d \n", teamId, threadId,teamSize , blockThreadSize);
-
-     Kokkos::parallel_for(TeamThreadRange(team,blockThreadSize), [=] (const int index)
-     {
-        int e=teamId*blockThreadSize+index;
         // start parallel section
         double Xi[36][2];
 	double B[36][4];
@@ -93,6 +57,7 @@ void solverKokkos::computeOneStep(  const int & timeStep,
              Xi[i][1]=globalNodesCoords(localToGlobal,1);
 	   }//);
         }//);
+	
 	for (int i=0;i<numberOfPointsPerElement;i++)
 	{
 	   // compute jacobian matrix
@@ -226,21 +191,22 @@ void solverKokkos::computeOneStep(  const int & timeStep,
           Y[i]+=R[i][j]*pnLocal[j];
         }
       }
+
       //compute global mass Matrix and global stiffness vector
       for( int i=0; i<numberOfPointsPerElement; i++ )
       {
         int gIndex=globalNodesList(e,i);
-/*	
+	/*
         massMatrixGlobal[gIndex]+=massMatrixLocal[i];
         yGlobal[gIndex]+=Y[i];
-*/
+	*/
 	Kokkos::atomic_add(&massMatrixGlobal[gIndex],massMatrixLocal[i]);
         Kokkos::atomic_add(&yGlobal[gIndex],Y[i]);
 
       }
+
     });
-    team.team_barrier();
-  });
+  //});
   // update pressure
   Kokkos::parallel_for( range_policy(0,numberOfInteriorNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {

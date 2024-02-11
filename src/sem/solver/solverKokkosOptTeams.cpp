@@ -21,18 +21,8 @@ void solverKokkos::computeOneStep(  const int & timeStep,
                                    arrayReal & rhsTerm,
                                    arrayReal & pnGlobal)
 {
-  using team_policy = Kokkos::TeamPolicy<>;
-  using team_member = typename team_policy::member_type;
-  const Kokkos::TeamPolicy<> policy(numberOfTeams, Kokkos::AUTO);
-  // Set up a policy that launches NumberOfNodes teams, with the maximum number
-  // of threads per team.
-  const team_policy policy(numberOfNodes, Kokkos::AUTO);
-  Kokkos::parallel_for( policy, KOKKOS_CLASS_LAMBDA ( const team_member & thread )
-  {
-  printf("Hello World: %i %i // %i %i\n", thread.league_rank(),
-               thread.team_rank(), thread.league_size(), thread.team_size());
-  });
-  //Kokkos::parallel_for( numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
+
+  Kokkos::parallel_for( numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
   {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
@@ -44,45 +34,63 @@ void solverKokkos::computeOneStep(  const int & timeStep,
     int nodeRHS=globalNodesList(rhsElement[i],0);
     pnGlobal(nodeRHS,i2)+=timeSample*timeSample*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   });
- 
+  Kokkos::fence();
+  
+  // Set up a policy that launches NumberOfNodes teams, with the maximum number
+  // of threads per team.
+  using team_policy=Kokkos::TeamPolicy<>;
+  using Kokkos::TeamThreadRange;
+  int nthreads=128;
   int numberOfPointsPerElement=(order+1)*(order+1);
-  Kokkos::parallel_for( numberOfElements, KOKKOS_CLASS_LAMBDA ( const int e )
+  int leagueSize=(numberOfElements+nthreads-1)/nthreads;
+  const team_policy policyElements(leagueSize,nthreads);// Kokkos::AUTO);
+  Kokkos::parallel_for( policyElements, KOKKOS_CLASS_LAMBDA ( const Kokkos::TeamPolicy<>::member_type & team )
   {
+     int teamSize=team.league_size();
+     int teamId=team.league_rank();
+     int threadId=team.team_rank();
+     int blockThreadSize=team.team_size();
+     //if(teamId<=2)printf("Hello World: %d %d // %d %d \n", teamId, threadId,teamSize , blockThreadSize);
+     //printf("Hello World: %d %d // %d %d \n", teamId, threadId,teamSize , blockThreadSize);
+
+     Kokkos::parallel_for(TeamThreadRange(team,blockThreadSize), [=] (const int index)
+     {
+        int e=teamId*blockThreadSize+index;
+      if(e<numberOfElements-1){
         // start parallel section
         double Xi[36][2];
-	double B[36][4];
+        double   B[36][4];
         double R[36][36];
         double massMatrixLocal[36];
-	double pnLocal[36];
-	double Y[36];
-	
-	for( int x=0; x<order+1;x++)
-	{
-	   for( int y=0; y<order+1;y++)
-	   {
-	     int i=x+y*(order+1);
-	     int localToGlobal=globalNodesList(e,i);
-             Xi[i][0]=globalNodesCoords(localToGlobal,0);
-             Xi[i][1]=globalNodesCoords(localToGlobal,1);
-	   }//);
-        }//);
-	
-	for (int i=0;i<numberOfPointsPerElement;i++)
-	{
-	   // compute jacobian matrix
-           double jac0=0;
-           double jac1=0;
-           double jac2=0;
-           double jac3=0;
-
-	   for (int j=0;j<numberOfPointsPerElement;j++)
-	   {
-	     jac0+=Xi[j][0]*derivativeBasisFunction2DX(j,i);
-             jac1+=Xi[j][0]*derivativeBasisFunction2DY(j,i);
-             jac2+=Xi[j][1]*derivativeBasisFunction2DX(j,i);
-             jac3+=Xi[j][1]*derivativeBasisFunction2DY(j,i);
+        double   pnLocal[36];
+        double   Y[36];
+      
+        for(   int x=0; x<order+1;x++)
+        {
+           for( int y=0; y<order+1;y++)
+           {
+             int i=x+y*(order+1);
+             int localToGlobal=globalNodesList(e,i);
+               Xi[i][0]=globalNodesCoords(localToGlobal,0);
+               Xi[i][1]=globalNodesCoords(localToGlobal,1);
            }//);
-	   // detJ
+        }//);
+        for   (int i=0;i<numberOfPointsPerElement;i++)
+        {
+           // compute jacobian matrix
+             double jac0=0;
+             double jac1=0;
+             double jac2=0;
+             double jac3=0;
+
+           for (int j=0;j<numberOfPointsPerElement;j++)
+           {
+             jac0+=Xi[j][0]*derivativeBasisFunction2DX(j,i);
+               jac1+=Xi[j][0]*derivativeBasisFunction2DY(j,i);
+               jac2+=Xi[j][1]*derivativeBasisFunction2DX(j,i);
+               jac3+=Xi[j][1]*derivativeBasisFunction2DY(j,i);
+           }//);
+           // detJ
            double detJ=abs(jac0*jac3-jac2*jac1);
 
            double invJac0=jac3;
@@ -100,120 +108,117 @@ void solverKokkos::computeOneStep(  const int & timeStep,
            B[i][1]=(invJac0*transpInvJac1+invJac1*transpInvJac3)*detJM1;
            B[i][2]=(invJac2*transpInvJac0+invJac3*transpInvJac2)*detJM1;
            B[i][3]=(invJac2*transpInvJac1+invJac3*transpInvJac3)*detJM1;
-	     
-	   //M
+             
+           //M
            massMatrixLocal[i]=weights2D[i]*detJ;
 
         }//);
-        
-	// compute stiffness
-	for (int i=0;i<numberOfPointsPerElement;i++)
-	{
-	   for (int j=0;j<numberOfPointsPerElement;j++)
-	   {
-	     R[i][j]=0;
-	   }//);
-	}//);
-	
-	for (int i1=0;i1<order+1;i1++)
-	{
-	   for (int i2=0;i2<order+1;i2++)
-	   {
-	        int i=i1+i2*(order+1);
-                for( int j1=0; j1<order+1; j1++ )
-                {
-                  int j=j1+i2*(order+1);
-                  for( int m=0; m<order+1; m++ )
-                  {
-                    R[i][j]+=weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*
-		             derivativeBasisFunction1D(i1,m)*derivativeBasisFunction1D(j1,m));
-                  }
-                }
+          
+        //   compute stiffness
+        for   (int i=0;i<numberOfPointsPerElement;i++)
+        {
+           for (int j=0;j<numberOfPointsPerElement;j++)
+           {
+             R[i][j]=0;
            }//);
         }//);
-        // B21
-	for (int i1=0;i1<order+1;i1++)
+      
+        for   (int i1=0;i1<order+1;i1++)
         {
-	  for (int i2=0;i2<order+1;i2++)
-          {
-           int i=i1+i2*(order+1);
-           for( int j1=0; j1<order+1; j1++ )
+           for (int i2=0;i2<order+1;i2++)
            {
-             for( int j2=0; j2<order+1; j2++ )
+                int i=i1+i2*(order+1);
+                  for( int j1=0; j1<order+1; j1++ )
+                  {
+                    int j=j1+i2*(order+1);
+                    for( int m=0; m<order+1; m++ )
+                    {
+                      R[i][j]+=weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*
+                           derivativeBasisFunction1D(i1,m)*derivativeBasisFunction1D(j1,m));
+                    }
+                  }
+             }//);
+        }//);
+        // B21
+        for   (int i1=0;i1<order+1;i1++)
+        {
+          for (int i2=0;i2<order+1;i2++)
+            {
+             int i=i1+i2*(order+1);
+             for( int j1=0; j1<order+1; j1++ )
              {
-               int j=j1+j2*(order+1);
-               R[i][j]+=weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*
-			derivativeBasisFunction1D(i2,j2)*derivativeBasisFunction1D(j1,i1));
+               for( int j2=0; j2<order+1; j2++ )
+               {
+                 int j=j1+j2*(order+1);
+                 R[i][j]+=weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*
+                  derivativeBasisFunction1D(i2,j2)*derivativeBasisFunction1D(j1,i1));
+               }
              }
-          }
-         }//);
+            }//);
         }//);
         // B12
-	for (int i1=0;i1<order+1;i1++)
+        for   (int i1=0;i1<order+1;i1++)
         {
-	  for (int i2=0;i2<order+1;i2++)
+          for (int i2=0;i2<order+1;i2++)
           {
-           int i=i1+i2*(order+1);
-           for( int j1=0; j1<order+1; j1++ )
-           {
-             for( int j2=0; j2<order+1; j2++ )
+             int i=i1+i2*(order+1);
+             for( int j1=0; j1<order+1; j1++ )
              {
-               int j=j1+j2*(order+1);
-               R[i][j]+=weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*
-                        derivativeBasisFunction1D(i1,j1)*derivativeBasisFunction1D(j2,i2));
+               for( int j2=0; j2<order+1; j2++ )
+               {
+                 int j=j1+j2*(order+1);
+                 R[i][j]+=weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*
+                          derivativeBasisFunction1D(i1,j1)*derivativeBasisFunction1D(j2,i2));
+               }
              }
-           }
-         }//);
-        }//);
-        // B22
-	for (int i1=0;i1<order+1;i1++)
-        {
-	  for (int i2=0;i2<order+1;i2++)
-          {
-           int i=i1+i2*(order+1);
-           for( int j2=0; j2<order+1; j2++ )
-           {
-              int j=i1+j2*(order+1);
-              for( int n=0; n<order+1; n++ )
-              {
-              R[i][j]+=weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*
-	               derivativeBasisFunction1D(i2,n)*derivativeBasisFunction1D(j2,n));
-              }
-           }
           }//);
         }//);
-
-       // get pnGlobal to pnLocal
-      for( int i=0; i<numberOfPointsPerElement; i++ )
-      {
-	int localToGlobal=globalNodesList(e,i);
-        massMatrixLocal[i]/=(model[e]*model[e]);
-        pnLocal[i]=pnGlobal(localToGlobal,i2);
-      }
-
-      // compute Y=R*pnLocal
-      for( int i=0; i<numberOfPointsPerElement; i++ )
-      {
-        Y[i]=0;
-        for( int j=0; j<numberOfPointsPerElement; j++ )
+        // B22
+        for   (int i1=0;i1<order+1;i1++)
         {
-          Y[i]+=R[i][j]*pnLocal[j];
+          for (int i2=0;i2<order+1;i2++)
+          {
+             int i=i1+i2*(order+1);
+             for( int j2=0; j2<order+1; j2++ )
+             {
+                int j=i1+j2*(order+1);
+                for( int n=0; n<order+1; n++ )
+                {
+                R[i][j]+=weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*
+                       derivativeBasisFunction1D(i2,n)*derivativeBasisFunction1D(j2,n));
+                }
+             }
+          }//);
+         }//);
+         // get pnGlobal to pnLocal
+        for( int i=0; i<numberOfPointsPerElement; i++ )
+        {
+          int   localToGlobal=globalNodesList(e,i);
+          massMatrixLocal[i]/=(model[e]*model[e]);
+          pnLocal[i]=pnGlobal(localToGlobal,i2);
         }
-      }
 
-      //compute global mass Matrix and global stiffness vector
-      for( int i=0; i<numberOfPointsPerElement; i++ )
-      {
-        int gIndex=globalNodesList(e,i);
-        //massMatrixGlobal[gIndex]+=massMatrixLocal(threadId,i)
-        //yGlobal[gIndex]+=Y(threadId,i);
-	Kokkos::atomic_add(&massMatrixGlobal[gIndex],massMatrixLocal[i]);
-        Kokkos::atomic_add(&yGlobal[gIndex],Y[i]);
-
-      }
-
+        // compute Y=R*pnLocal
+        for( int i=0; i<numberOfPointsPerElement; i++ )
+        {
+          Y[i]=0;
+          for( int j=0; j<numberOfPointsPerElement; j++ )
+          {
+            Y[i]+=R[i][j]*pnLocal[j];
+          }
+        }
+        //compute global mass Matrix and global stiffness vector
+        for( int i=0; i<numberOfPointsPerElement; i++ )
+        {
+          int gIndex=globalNodesList(e,i);
+          Kokkos::atomic_add(&massMatrixGlobal[gIndex],massMatrixLocal[i]);
+          Kokkos::atomic_add(&yGlobal[gIndex],Y[i]);
+        }
+      } // end if ( e <numberOfElements - 1 )
     });
-  //});
+    team.team_barrier();
+  });
+  Kokkos::fence();
   // update pressure
   Kokkos::parallel_for( range_policy(0,numberOfInteriorNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {
@@ -221,6 +226,7 @@ void solverKokkos::computeOneStep(  const int & timeStep,
     float tmp=timeSample*timeSample;
     pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-tmp*yGlobal[I]/massMatrixGlobal[I];
   } );
+  Kokkos::fence();
 
   Kokkos::parallel_for( range_policy(0,numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {
@@ -248,6 +254,8 @@ void solverKokkos::computeOneStep(  const int & timeStep,
       Kokkos::atomic_add(&ShGlobal[gIndexFaceNode],Sh[i]);
     }
   } );
+
+  Kokkos::fence();
 
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
