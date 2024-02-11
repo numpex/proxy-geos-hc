@@ -29,8 +29,8 @@
 # the solver is using sequential mode by default
 set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
 
-if( ENABLE_HIP )
-  set(CMAKE_CXX_COMPILER /opt/rocm-6.0.0/bin/amdclang++ CACHE PATH "" FORCE)
+if(ENABLE_HIP)
+  set(CMAKE_CXX_COMPILER "/opt/rocm-6.0.0/bin/amdclang++")
 else()
   # CC options
   set(CMAKE_C_COMPILER gcc CACHE PATH "")
@@ -249,7 +249,7 @@ elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
 
   set (kokkosList "-L${Kokkos_ROOT}/../.. -lkokkoscontainers -lkokkoscore -lkokkossimd")
   set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
-  set (dependencyList ${dependencyList} ${kokkosList} )
+  set (dependencyList ${dependencyList} ${kokkosList} Kokkos::kokkos)
   message (STATUS "KOKKOS DEPENDENCY LIST= ${dependencyList}")
   if( ENABLE_HIP )
     set(Kokkos_ENABLE_HIP ON CACHE BOOL "" FORCE) 
@@ -265,11 +265,13 @@ else ()
   message("-- KOKKOS_DIR is not the correct path and is not enabled")
 endif()
 
+message(STATUS "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+
 configure_file( utils/commonConfig.hpp.in
                 ${CMAKE_BINARY_DIR}/src/commonConfig.hpp)
 
-add_subdirectory( sem )
+#add_subdirectory( sem )
 add_subdirectory( fd )
 if ( addTests)
-add_subdirectory( tests )
+  add_subdirectory( tests )
 endif()

@@ -39,7 +39,7 @@ option (USE_CALIPER "Use CALIPER for profiling" OFF)
 # integration into proxy apps
 #---------------------------------------------------
 option (addTests " add Tests directory" OFF)
-#option (addFD " add finite difference proxy directory" OFF)
+option (addFD " add finite difference proxy directory" OFF)
 
 
 add_subdirectory(src)
