@@ -37,6 +37,7 @@ namespace FE
   #else
   ~QkGL();
   #endif
+
   // get Gauss Lobatto quadrature points
   #ifdef USE_RAJA
   void gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const;

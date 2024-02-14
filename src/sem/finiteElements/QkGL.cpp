@@ -9,14 +9,20 @@
 namespace FE
 {
 
+#ifdef USE_RAJA
+LVARRAY_HOST_DEVICE QkGL::QkGL(){};
+#elif defined USE_KOKKOS
+KOKKOS_FUNCTION QkGL::QkGL(){};
+#else
 QkGL::QkGL(){};
+#endif
 
 #ifdef USE_RAJA
- QkGL::~QkGL(){};
+LVARRAY_HOST_DEVICE QkGL::~QkGL(){};
 #elif defined USE_KOKKOS
 KOKKOS_FUNCTION QkGL::~QkGL(){};
 #else
-  QkGL::~QkGL(){};
+QkGL::~QkGL(){};
 #endif
 
 #ifdef USE_RAJA

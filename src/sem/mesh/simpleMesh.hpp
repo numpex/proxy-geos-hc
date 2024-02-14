@@ -26,7 +26,7 @@ private:
 public:
   simpleMesh( const int & ex_in, const int & ey_in, const float & lx_in, const float & ly_in, const int & order_in );
 
-   #ifdef USE_RAJA
+  #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE simpleMesh();
   #elif defined USE_KOKKOS
   KOKKOS_FUNCTION simpleMesh();

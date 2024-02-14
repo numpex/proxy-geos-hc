@@ -40,7 +40,7 @@ void solverKokkos::computeOneStep(  const int & timeStep,
   // of threads per team.
   using team_policy=Kokkos::TeamPolicy<>;
   using Kokkos::TeamThreadRange;
-  int nthreads=32;
+  int nthreads=128;
   int numberOfPointsPerElement=(order+1)*(order+1);
   int leagueSize=(numberOfElements+nthreads-1)/nthreads;
   const team_policy policyElements(leagueSize,nthreads);// Kokkos::AUTO);
@@ -232,7 +232,7 @@ void solverKokkos::computeOneStep(  const int & timeStep,
   {
     ShGlobal[i]=0;
   } );
-  /* 
+  
   Kokkos::parallel_for (numberOfBoundaryFaces, KOKKOS_CLASS_LAMBDA (const int iFace)
   {
     //get ds
@@ -268,5 +268,4 @@ void solverKokkos::computeOneStep(  const int & timeStep,
   } );
 
   Kokkos::fence();
-  */
 }

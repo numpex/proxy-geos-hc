@@ -22,9 +22,17 @@ simpleMesh::simpleMesh( const int & ex_in, const int & ey_in, const float & lx_i
   cout <<"simpleMesh initiliazed\n";
   cout<<"nx, ny="<<nx<<", "<<ny<<endl;
 }
-simpleMesh::simpleMesh(){};
+
 #ifdef USE_RAJA
-simpleMesh::~simpleMesh(){};
+LVARRAY_HOST_DEVICE simpleMesh::simpleMesh(){};
+#elif defined USE_KOKKOS
+KOKKOS_FUNCTION simpleMesh::simpleMesh(){};
+#else
+simpleMesh::simpleMesh(){};
+#endif
+
+#ifdef USE_RAJA
+LVARRAY_HOST_DEVICE simpleMesh::~simpleMesh(){};
 #elif defined USE_KOKKOS
 KOKKOS_FUNCTION simpleMesh::~simpleMesh(){};
 #else
