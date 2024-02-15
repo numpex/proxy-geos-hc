@@ -73,13 +73,21 @@ void solverRaja::computeOneStep(  const int & timeStep,
   RAJA::TypedRangeSegment<int> e_Range(0, numberOfElements);
   RAJA::TypedRangeSegment<int> qx_Range(0, order+1);
   RAJA::TypedRangeSegment<int> qy_Range(0, order+1);
-
-  using cuda_thread_e = RAJA::LoopPolicy<RAJA::cuda_thread_x_loop>;
-  using cuda_thread_y = RAJA::LoopPolicy<RAJA::cuda_thread_y_loop>;
-  using cuda_thread_z = RAJA::LoopPolicy<RAJA::cuda_thread_z_loop>;
+  /*
+  #ifdef ENABLE_CUDA
+    using cuda_thread_e = RAJA::LoopPolicy<RAJA::cuda_thread_x_loop>;
+    using cuda_thread_y = RAJA::LoopPolicy<RAJA::cuda_thread_y_loop>;
+    using cuda_thread_z = RAJA::LoopPolicy<RAJA::cuda_thread_z_loop>;
+    using launch_policy_cuda = RAJA::LaunchPolicy<RAJA::cuda_launch_t<async>>;
+  #elif defined ENABLE_HIP
+    using cuda_thread_e = RAJA::LoopPolicy<RAJA::hip_thread_x_loop>;
+    using cuda_thread_y = RAJA::LoopPolicy<RAJA::hip_thread_y_loop>;
+    using cuda_thread_z = RAJA::LoopPolicy<RAJA::hip_thread_z_loop>;
+    using launch_policy_cuda = RAJA::LaunchPolicy<RAJA::hip_launch_t<async>>;
+  #endif
+  */
 
   const bool async = false; //execute asynchronously
-  using launch_policy_cuda = RAJA::LaunchPolicy<RAJA::cuda_launch_t<async>>;
 
   //RAJA::launch<launch_policy_cuda>
   //  (RAJA::LaunchParams(RAJA::Teams(2), RAJA::Threads(32,8)),
@@ -277,6 +285,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     d_ShGlobal[i]=0;
   } );
   
+  /*
   RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfBoundaryFaces ), [=] LVARRAY_HOST_DEVICE ( int iFace ){
     //get ds
     float ds[6];
@@ -315,4 +324,5 @@ void solverRaja::computeOneStep(  const int & timeStep,
           pnGlobal(nodeRHS,i1)=d_pnGlobal(nodeRHS,i1);
      });
   }
+  */
 }
