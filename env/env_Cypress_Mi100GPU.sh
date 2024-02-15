@@ -16,6 +16,6 @@ export KOKKOS_INCLUDE_DIR=/shared/data1/Users/j0535952/work2024/ProgrammingModel
 # don't forget to change CMakeLists.txt 
 # option (X86_cypress "Compilation on Cypress Cluster" ON)
 
-# for kokkos: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON .. ; make install
-# for raja: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON .. ; make install
+# for kokkos: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_HIP=ON .. ; make install
+# for raja: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_HIP=ON .. ; make install
 
