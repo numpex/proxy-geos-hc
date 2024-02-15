@@ -91,9 +91,15 @@
   #include "ChaiBuffer.hpp"
   using hostExecPolicy=RAJA::omp_parallel_for_exec;
   using hostAtomicPolicy=RAJA::omp_atomic;
+  #ifdef ENABLE_CUDA
   using deviceAtomicPolicy=RAJA::cuda_atomic;
   using deviceExecPolicy=RAJA::cuda_exec<32>;
-  // define vectors and  arrays.
+  #endif
+  #ifdef ENABLE_HIP
+  using deviceAtomicPolicy=RAJA::hip_atomic;
+  using deviceExecPolicy=RAJA::hip_exec<32>;
+  #endif
+ // define vectors and  arrays.
   using vectorInt=LvArray::Array< int,
                                   1,
                                   camp::idx_seq< 0 >,

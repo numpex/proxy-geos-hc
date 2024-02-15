@@ -93,14 +93,15 @@ struct FDTDKernel
          vectorReal  & vp,
          vectorReal  & pnp1,
          vectorReal  & pn)
-#endif
+  #endif
   {
-#ifdef USE_RAJA
+  #ifdef USE_RAJA
      RAJA::TypedRangeSegment<int> KRange(z3, z4);
      RAJA::TypedRangeSegment<int> JRange(y3, y4);
      RAJA::TypedRangeSegment<int> IRange(x3, x4);
 
 
+     #ifdef ENABLE_CUDA
      using EXEC_POL =
      RAJA::KernelPolicy<
         RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
@@ -113,6 +114,21 @@ struct FDTDKernel
          >
        >
      >;
+     #elif defined ENABLE_HIP
+     using EXEC_POL =
+     RAJA::KernelPolicy<
+        RAJA::statement::HipKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
+          RAJA::statement::For<0, RAJA::hip_global_size_z_direct<x_block_sz>,     //z
+            RAJA::statement::For<1, RAJA::hip_global_size_y_direct<y_block_sz>,   //g
+              RAJA::statement::For<2, RAJA::hip_global_size_x_direct<z_block_sz>,
+               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
+             >
+           >
+         >
+       >
+     >;
+     #endif
+     
      RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) 
      {
 #elif defined USE_KOKKOS
@@ -197,6 +213,7 @@ struct FDTDKernel
      RAJA::TypedRangeSegment<int> JRange(y3, y4);
      RAJA::TypedRangeSegment<int> IRange(x3, x4);
 
+     #ifdef ENABLE_CUDA
      using EXEC_POL =
      RAJA::KernelPolicy<
         RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
@@ -209,6 +226,21 @@ struct FDTDKernel
          >
        >
      >;
+     #elif defined ENABLE_HIP
+     using EXEC_POL =
+     RAJA::KernelPolicy<
+        RAJA::statement::HipKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
+          RAJA::statement::For<0, RAJA::hip_global_size_z_direct<x_block_sz>,     //z
+            RAJA::statement::For<1, RAJA::hip_global_size_y_direct<y_block_sz>,   //g
+              RAJA::statement::For<2, RAJA::hip_global_size_x_direct<z_block_sz>,
+               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
+             >
+           >
+         >
+       >
+     >;
+     #endif
+ 
      RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) 
      {
 #elif defined USE_KOKKOS
@@ -288,6 +320,7 @@ struct FDTDKernel
      RAJA::TypedRangeSegment<int> JRanges(ys, ys+1);
      RAJA::TypedRangeSegment<int> IRanges(zs, zs+1);
 
+     #ifdef ENABLE_CUDA
      using EXEC_POL =
      RAJA::KernelPolicy<
         RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
@@ -300,7 +333,21 @@ struct FDTDKernel
          >
        >
      >;
-
+     #elif defined ENABLE_HIP
+     using EXEC_POL =
+     RAJA::KernelPolicy<
+        RAJA::statement::HipKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
+          RAJA::statement::For<0, RAJA::hip_global_size_z_direct<x_block_sz>,     //z
+            RAJA::statement::For<1, RAJA::hip_global_size_y_direct<y_block_sz>,   //g
+              RAJA::statement::For<2, RAJA::hip_global_size_x_direct<z_block_sz>,
+               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
+             >
+           >
+         >
+       >
+     >;
+     #endif
+ 
      RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRanges, JRanges, KRanges), [=] __device__ (int i, int j, int k)
      {
        pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
@@ -336,6 +383,7 @@ struct FDTDKernel
      RAJA::TypedRangeSegment<int> JRange(0, ny);
      RAJA::TypedRangeSegment<int> IRange(0, ny);
  
+     #ifdef ENABLE_CUDA
      using EXEC_POL =
      RAJA::KernelPolicy<
         RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
@@ -348,7 +396,21 @@ struct FDTDKernel
          >
        >
      >;
-
+     #elif defined ENABLE_HIP
+     using EXEC_POL =
+     RAJA::KernelPolicy<
+        RAJA::statement::HipKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
+          RAJA::statement::For<0, RAJA::hip_global_size_z_direct<x_block_sz>,     //z
+            RAJA::statement::For<1, RAJA::hip_global_size_y_direct<y_block_sz>,   //g
+              RAJA::statement::For<2, RAJA::hip_global_size_x_direct<z_block_sz>,
+               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
+             >
+           >
+         >
+       >
+     >;
+     #endif
+ 
      RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
      {
          pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];

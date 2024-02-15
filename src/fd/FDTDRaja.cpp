@@ -198,8 +198,11 @@ int main( int argc, char *argv[] )
       // print infos and save wavefields
      if(itSample%50==0)
      {
-	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i)
-                         {});
+        #ifdef ENABLE_HIP
+	//RAJA::forall<RAJA::hip_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i){});
+        #else
+	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i){});
+        #endif
 	printf("Result %f\n",h_pn[IDX3_l(xs,ys,zs)]);
 	//myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,h_pn,itSample);
      }
