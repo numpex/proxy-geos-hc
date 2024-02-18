@@ -1,4 +1,4 @@
-module use /shared/data1/Projects/CSE_HPC/apps/modules/amd
+module use /shared/data1/Users/j0535952/modules/amd
 module load cmake llvm rocm/6.0.0
 
 export SEM_TPL_ROOT_DIR=/shared/data1/Users/j0535952/work2024/proxys_2024/TPL/tpl4ProxyApp/installTPL_Cypress_mi100GPU
@@ -12,6 +12,8 @@ export UMPIRE_DIR=${SEM_TPL_ROOT_DIR}/chai/lib/cmake/umpire/
 export KOKKOS_DIR=/shared/data1/Users/j0535952/work2024/ProgrammingModels/kokkos/install_mi100_hipcc-6.0.0-gfx908/lib64/cmake/Kokkos
 export KOKKOS_INCLUDE_DIR=/shared/data1/Users/j0535952/work2024/ProgrammingModels/kokkos/install_mi100_hipcc-6.0.0-gfx908/include
 
+#export RAJA_DIR=/shared/data1/Users/j0535952/work2024/ProgrammingModels/raja/install_mi100_hipcc-6.0.0-gfx908/lib/cmake/raja
+#export CAMP_DIR=/shared/data1/Users/j0535952/work2024/ProgrammingModels/raja/install_mi100_hipcc-6.0.0-gfx908/lib/cmake/camp
 
 # don't forget to change CMakeLists.txt 
 # option (X86_cypress "Compilation on Cypress Cluster" ON)
