@@ -3,12 +3,15 @@
 ################################
 
 # the followings need "-DUSE_KOKKOS=ON -DENABLE_HIP=ON"
-set (testcase  kokkos_hip)
+#set (testcase  kokkos_hip)
 
 # the followings need "-DUSE_KOKKOS=ON -DENABLE_CUDA=ON"
 #set (testcase  Kokkos)
 #set (testcase  Kokkos1)
 #set (testcase  FDTDKokkos)
+
+# the followings need "-DUSE_RAJA=ON -DENABLE_HIP=ON"
+set (testcase  raja_hip_daxpy)
 
 # the followings need "-DUSE_RAJA=ON -DENABLE_CUDA=ON"
 #set (testcase  LvArray)
@@ -18,6 +21,7 @@ set (testcase  kokkos_hip)
 #set (testcase  RAJAInline)
 #set (testcase  Raja_cuda)
 #set (testcase  FDTDRAJA)
+#set (testcase  raja_cuda_daxpy)
 
 # the followings need "-DENABLE_CUDA=ON"
 #set (testcase  cuda)
@@ -39,7 +43,7 @@ message ( "---------------------------------------------------------------------
 
 blt_add_executable( NAME ${TEST_EXECUTABLE}
                     SOURCES test_${testcase}.cpp
-                    DEPENDS_ON ${extraComponentsLinkList} ${dependencyList} Kokkos::kokkos)
+                    DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
 
 install(TARGETS ${TEST_EXECUTABLE}
         RUNTIME DESTINATION bin)

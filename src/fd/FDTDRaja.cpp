@@ -199,7 +199,8 @@ int main( int argc, char *argv[] )
      if(itSample%50==0)
      {
         #ifdef ENABLE_HIP
-	//RAJA::forall<RAJA::hip_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i){});
+	RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i){});
+        //RAJA::forall<RAJA::hip_exec<256>>(RAJA::RangeSegment(0, nx), [pn] RAJA_DEVICE (int i) {});
         #else
 	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i){});
         #endif

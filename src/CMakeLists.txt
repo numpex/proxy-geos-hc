@@ -30,7 +30,15 @@
 set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
 
 if(ENABLE_HIP)
+  set(COMP_VER "6.0.0")
+  set(COMP_ARCH "gfx908")
   set(CMAKE_CXX_COMPILER "/opt/rocm-6.0.0/bin/amdclang++")
+  set(ROCM_ROOT_DIR "/opt/rocm-${COMP_VER}")
+  set(ROCM_PATH "/opt/rocm-${COMP_VER}")
+  set(HIP_ROOT_DIR "/opt/rocm-${COMP_VER}/hip")
+  set(HIP_PATH "/opt/rocm-${COMP_VER}/bin")
+  set(GPU_TARGETS "${COMP_ARCH}")
+  message(STATUS "======== ROCM_ROOT_DIR=${ROCM_ROOT_DIR}")
 else()
   # CC options
   set(CMAKE_C_COMPILER gcc CACHE PATH "")
@@ -178,6 +186,12 @@ if ( USE_RAJA)
        message(FATAL_ERROR "ProxyApp requires RAJA, set RAJA_DIR to the RAJA installation directory.")
    endif()
 
+   if( ENABLE_HIP )
+     set(RAJA_ENABLE_HIP ON CACHE BOOL "" FORCE) 
+     set(RAJA_ENABLE_CUDA OFF CACHE BOOL "" FORCE) 
+     include_directories("/opt/rocm-6.0.0/include")
+   endif()
+
    ################################
    # Umpire
    ################################
@@ -214,6 +228,10 @@ if ( USE_RAJA)
    set (dependencyList lvarray RAJA chai)
    add_subdirectory( LvArray )
    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/LvArray/src)
+
+   if( ENABLE_HIP )
+     set (dependencyList ${dependencyList} blt::hip blt::hip_runtime)
+   endif()
 
    message( STATUS "-------------------END RAJA SETTINGS-----------------------------------" )
    message( " " )
@@ -273,5 +291,5 @@ configure_file( utils/commonConfig.hpp.in
 add_subdirectory( sem )
 add_subdirectory( fd )
 if ( addTests)
-  add_subdirectory( tests )
+#  add_subdirectory( tests )
 endif()
