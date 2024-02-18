@@ -22,8 +22,8 @@ void SEMProxy::init()
   pnGlobal=allocateArray2D<arrayReal>( numberOfNodes, 2 );
 
   // set number of rhs and location
-  myRHSLocation(0,0)=501;
-  myRHSLocation(0,1)=501;
+  myRHSLocation(0,0)=1001;
+  myRHSLocation(0,1)=1001;
   cout << "Source location: "<<myRHSLocation(0,0)<<", "<<myRHSLocation(0,1)<<endl;
 
   // get element number of source term

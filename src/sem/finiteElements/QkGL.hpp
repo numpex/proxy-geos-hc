@@ -223,8 +223,8 @@ namespace FE
   KOKKOS_FUNCTION int computeB( const int & nPointsPerElement,
                                 double const  Xi[][2],
                                 vectorDouble const & weights2D,
-                                arrayDouble & dxPhi,
-                                arrayDouble & dyPhi,
+                                arrayDouble  const & dxPhi,
+                                arrayDouble  const & dyPhi,
                                 double massMatrixLocal[],
                                 double   B[][4]) const;
   #else
