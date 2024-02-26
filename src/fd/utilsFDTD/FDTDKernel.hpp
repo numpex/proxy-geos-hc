@@ -72,20 +72,13 @@ struct FDTDKernel
          const int z3, const int z4,
          const int lx, const int ly, const int lz,
          const float coef0,
-  #ifdef USE_RAJA
+  #if defined(USE_RAJA) || defined(USE_KOKKOS)
          vectorRealView const & coefx,
          vectorRealView const & coefy,
          vectorRealView const & coefz,
          vectorRealView const & vp,
          vectorRealView const & pnp1,
          vectorRealView const & pn)const
-  #elif defined USE_KOKKOS
-         vectorReal const & coefx,
-         vectorReal const & coefy,
-         vectorReal const & coefz,
-         vectorReal const & vp,
-         vectorReal const & pnp1,
-         vectorReal const & pn)const
   #else
          vectorReal  & coefx,
          vectorReal  & coefy,
@@ -179,7 +172,7 @@ struct FDTDKernel
              const int lx, const int ly, const int lz,
              const float coef0,
              const float hdx_2, const float hdy_2, const float hdz_2,
-#ifdef USE_RAJA
+#if defined(USE_RAJA) || defined(USE_KOKKOS)
              vectorRealView const & coefx,
              vectorRealView const & coefy,
              vectorRealView const & coefz,
@@ -188,15 +181,6 @@ struct FDTDKernel
              vectorRealView const & eta,
              vectorRealView const & pnp1,
              vectorRealView const & pn)const
-#elif defined USE_KOKKOS
-             vectorReal const & coefx,
-             vectorReal const & coefy,
-             vectorReal const & coefz,
-             vectorReal const & vp,
-             vectorReal const & phi,
-             vectorReal const & eta,
-             vectorReal const & pnp1,
-             vectorReal const & pn)const
 #else
              vectorReal  & coefx,
              vectorReal  & coefy,
@@ -300,14 +284,10 @@ struct FDTDKernel
   int addRHS(const int nx,const int ny,const int nz,
 	     const int lx,const int ly,const int lz,
 	     const int xs,const int ys,const int zs,const int itSample,
-#ifdef USE_RAJA
+#if defined(USE_RAJA) || defined(USE_KOKKOS)
 	     vectorRealView const & RHSTerm,
 	     vectorRealView const & vp,
 	     vectorRealView const & pn) const
-#elif defined USE_KOKKOS
-	     vectorReal const & RHSTerm,
-	     vectorReal const & vp,
-	     vectorReal const & pn) const
 #else
 	     vectorReal & RHSTerm,
 	     vectorReal & vp,
@@ -366,12 +346,9 @@ struct FDTDKernel
   // swap wavefields
   int swapWavefields(const int nx,const int ny,const int nz,
 		     const int lx,const int ly,const int lz,
-#ifdef USE_RAJA
+#if defined(USE_RAJA) || defined(USE_KOKKOS)
 		     vectorRealView const & pnp1,
 		     vectorRealView const & pn) const
-#elif defined USE_KOKKOS
-		     vectorReal const & pnp1,
-		     vectorReal const & pn) const
 #else
 		     vectorReal & pnp1,
 		     vectorReal & pn)
@@ -452,7 +429,7 @@ struct FDTDKernel
 	             const int z4, const int z5, const int z6,
                      const float coef0,
                      const float hdx_2, const float hdy_2, const float hdz_2,
-#ifdef USE_RAJA
+#if defined(USE_RAJA) || defined(USE_KOKKOS)
                      vectorRealView const & coefx,
                      vectorRealView const & coefy,
                      vectorRealView const & coefz,
@@ -461,15 +438,6 @@ struct FDTDKernel
                      vectorRealView const & eta,
                      vectorRealView const & pnp1,
                      vectorRealView const & pn)const
-#elif defined USE_KOKKOS
-                     vectorReal const & coefx,
-                     vectorReal const & coefy,
-                     vectorReal const & coefz,
-                     vectorReal const & vp,
-                     vectorReal const & phi,
-                     vectorReal const & eta,
-                     vectorReal const & pnp1,
-                     vectorReal const & pn)const
 #else
                      vectorReal  & coefx,
                      vectorReal  & coefy,

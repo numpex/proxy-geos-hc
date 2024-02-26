@@ -45,6 +45,11 @@ int main( int argc, char *argv[] )
     constexpr float vmin=1500;
     constexpr float vmax=4500;
     
+    // imports utils
+    solverUtils myUtils;
+    FDTDUtils myFDTDUtils;
+    FDTDKernel myKernel;
+
     // init pml limits
     constexpr int ntaperx=3;
     constexpr int ntapery=3;
@@ -58,7 +63,6 @@ int main( int argc, char *argv[] )
     constexpr int ndampz=ntaperz*lambdamax/dz;
     printf("nx=%d ny=%d nz=%d\n",nx, ny,nz);
     printf("ndampx=%d ndampy=%d ndampz=%d\n",ndampx, ndampy,ndampz);
-
     constexpr int x1=0;
     constexpr int x2=ndampx;
     constexpr int x3=ndampx;
@@ -83,44 +87,26 @@ int main( int argc, char *argv[] )
     vectorReal coefx=allocateVector<vectorReal>(ncoefs);
     vectorReal coefy=allocateVector<vectorReal>(ncoefs);
     vectorReal coefz=allocateVector<vectorReal>(ncoefs);
-
-    vectorReal::HostMirror h_coefx = Kokkos::create_mirror_view( coefx );
-    vectorReal::HostMirror h_coefy = Kokkos::create_mirror_view( coefy );
-    vectorReal::HostMirror h_coefz = Kokkos::create_mirror_view( coefz );
-
-    // imports utils
-    solverUtils myUtils;
-    FDTDUtils myFDTDUtils;
-    FDTDKernel myKernel;
-
-    // extract FD coefs
-    myFDTDUtils.init_coef(dx, h_coefx);
-    myFDTDUtils.init_coef(dy, h_coefy);
-    myFDTDUtils.init_coef(dz, h_coefz);
-
-    float h_coef0=-2.*(h_coefx[1]+h_coefx[2]+h_coefx[3]+h_coefx[4]);
-    h_coef0+=-2.*(h_coefy[1]+h_coefy[2]+h_coefy[3]+h_coefy[4]);
-    h_coef0+=-2.*(h_coefz[1]+h_coefz[2]+h_coefz[3]+h_coefz[4]);
-    printf("h_coef0=%f\n",h_coef0);
-
     // model
     vectorReal vp=allocateVector<vectorReal>(nx*ny*nz);
-    vectorReal::HostMirror h_vp = Kokkos::create_mirror_view( vp );
-
     // pressure fields
     vectorReal pnp1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
     vectorReal pn=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
-    vectorReal::HostMirror h_pnp1 = Kokkos::create_mirror_view( pnp1 );
-    vectorReal::HostMirror h_pn = Kokkos::create_mirror_view( pn );
-
     // PML arrays
     vectorReal phi=allocateVector<vectorReal>(nx*ny*nz);
     vectorReal eta=allocateVector<vectorReal>((nx+2)*(ny+2)*(nz+2));
-    vectorReal::HostMirror h_phi = Kokkos::create_mirror_view( phi );
-    vectorReal::HostMirror h_eta = Kokkos::create_mirror_view( eta );
+
+    // extract FD coefs
+    myFDTDUtils.init_coef(dx, coefx);
+    myFDTDUtils.init_coef(dy, coefy);
+    myFDTDUtils.init_coef(dz, coefz);
+
+    double coef0=-2.*(coefx[1]+coefx[2]+coefx[3]+coefx[4]);
+    coef0+=-2.*(coefy[1]+coefy[2]+coefy[3]+coefy[4]);
+    coef0+=-2.*(coefz[1]+coefz[2]+coefz[3]+coefz[4]);
 
     // compute time step
-    float timeStep=myFDTDUtils.compute_dt_sch(vmax,h_coefx,h_coefy,h_coefz);
+    float timeStep=myFDTDUtils.compute_dt_sch(vmax,coefx,coefy,coefz);
     float timeStep2=timeStep*timeStep;
     const int nSamples=timeMax/timeStep;
     printf("timeStep=%f\n",timeStep);
@@ -128,12 +114,10 @@ int main( int argc, char *argv[] )
     // compute source term
     // source term
     vectorReal RHSTerm=allocateVector<vectorReal>(nSamples);
-    vectorReal::HostMirror h_RHSTerm = Kokkos::create_mirror_view( RHSTerm );
-    std::vector<float> sourceTerm=myUtils.computeSourceTerm(nSamples,timeStep,f0,sourceOrder);
-
+    std::vector<float>sourceTerm=myUtils.computeSourceTerm(nSamples,timeStep,f0,sourceOrder);
     for(int i=0;i<nSamples;i++)
     {
-      h_RHSTerm[i]=sourceTerm[i];
+      RHSTerm[i]=sourceTerm[i];
     }
 
     printf("memory used for vectra and arrays %d bytes\n",
@@ -147,8 +131,8 @@ int main( int argc, char *argv[] )
        {
           for( int k=0; k<nz;k++)
           {
-            h_vp[IDX3(i,j,k)]=vmin*vmin*timeStep2;
-            h_phi[IDX3(i,j,k)]=0.;
+            vp[IDX3(i,j,k)]=vmin*vmin*timeStep2;
+            phi[IDX3(i,j,k)]=0.;
           }
        }
     }
@@ -159,8 +143,8 @@ int main( int argc, char *argv[] )
        {
           for( int k=-lz; k<nz+lz;k++)
           {
-            h_pnp1[IDX3_l(i,j,k)]=0.000001;
-            h_pn[IDX3_l(i,j,k)]  =0.000001;
+            pnp1[IDX3_l(i,j,k)]=0.000001;
+            pn[IDX3_l(i,j,k)]  =0.000001;
           }
        }
     }
@@ -172,17 +156,19 @@ int main( int argc, char *argv[] )
                           y1,  y2,  y3,  y4,  y5,  y6,
                           z1,  z2,  z3,  z4,  z5,  z6,
                           dx,  dy,  dz,  timeStep,
-                          vmax, h_eta);
+                          vmax, eta);
 
-    Kokkos::deep_copy( vp, h_vp);
-    Kokkos::deep_copy( pn, h_pn);
-    Kokkos::deep_copy( pnp1, h_pnp1);
-    Kokkos::deep_copy( RHSTerm, h_RHSTerm);
+    auto d_RHSTerm = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, RHSTerm);
+    auto d_vp = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, vp);
+    auto d_pn = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, pn);
+    auto d_pnp1 = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, pnp1);
 
-    Kokkos::deep_copy( coefx, h_coefx);
-    Kokkos::deep_copy( coefy, h_coefy);
-    Kokkos::deep_copy( coefz, h_coefz);
-    Kokkos::deep_copy( eta, h_eta);
+
+    auto d_coefx = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, coefx);
+    auto d_coefy = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, coefy);
+    auto d_coefz = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, coefz);
+    auto d_eta = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, eta);
+    auto d_phi = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, phi);
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
@@ -190,7 +176,7 @@ int main( int argc, char *argv[] )
     {
 
       // add RHS term
-      myKernel.addRHS(nx,ny,nz,lx,ly,lz,xs,ys,zs,itSample,RHSTerm,vp,pn);
+      myKernel.addRHS(nx,ny,nz,lx,ly,lz,xs,ys,zs,itSample,d_RHSTerm,d_vp,d_pn);
 
       //compute one step
       myKernel.computeOneStep(nx,ny,nz,
@@ -201,21 +187,21 @@ int main( int argc, char *argv[] )
                               y4,  y5,  y6,
                               z1,  z2,  z3,
                               z4,  z5,  z6,
-                              h_coef0,
+                              coef0,
                               hdx_2,hdy_2,hdz_2,
-                              coefx,coefy,coefz,
-                              vp,phi,eta,
-                              pnp1,pn);
+                              d_coefx,d_coefy,d_coefz,
+                              d_vp,d_phi,d_eta,
+                              d_pnp1,d_pn);
 
       // swap wavefields
-      myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,pnp1,pn);
+      myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,d_pnp1,d_pn);
 
       // print infos and save wavefields
       if(itSample%50==0)
       {
         Kokkos::fence();
-        Kokkos::deep_copy( h_pn, pn);
-	printf("result1 %f\n",h_pn[IDX3_l(xs,ys,zs)]);
+        Kokkos::deep_copy( pn, d_pn);
+	printf("result1 %f\n",pn[IDX3_l(xs,ys,zs)]);
         //myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
       }
 
@@ -229,7 +215,6 @@ int main( int argc, char *argv[] )
     std::cout << "started computation at " << std::ctime(&start_time)<<std::endl
               << "finished computation at " << std::ctime(&end_time)<<std::endl
               << "elapsed time: " << elapsed_seconds.count() << "s\n";
-
   } 
   Kokkos::finalize();
   return (0);

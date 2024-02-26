@@ -217,23 +217,27 @@
 #endif //USE_LVARRAY
 
 #ifdef USE_KOKKOS
+
   #ifdef ENABLE_HIP
-  #define __HIP_PLATFORM_AMD__ 1
+    #define __HIP_PLATFORM_AMD__ 1
   #endif
 
   #include <Kokkos_Core.hpp>
-  #define MemSpace Kokkos::SharedSpace
+  //#define MemSpace Kokkos::SharedSpace
+  #define MemSpace Kokkos::HostSpace
+  using DeviceMemorySpace = typename Kokkos::DefaultExecutionSpace::memory_space;
   using ExecSpace = MemSpace::execution_space;
   using range_policy = Kokkos::RangePolicy<>;
   using Layout=Kokkos::LayoutLeft;
+
   //#ifdef ENABLE_CUDA
   //  using Layout=Kokkos::LayoutLeft;
   //#else
   //  using Layout=Kokkos::LayoutRight;
   //#endif
+
   typedef Kokkos::View<int*,     Layout, MemSpace> vectorInt;
-  //typedef Kokkos::View<float*,   Layout,  MemSpace> vectorReal;
-  typedef Kokkos::View<float*> vectorReal;
+  typedef Kokkos::View<float*,   Layout,  MemSpace> vectorReal;
   typedef Kokkos::View<double*,  Layout, MemSpace> vectorDouble;
 
   typedef Kokkos::View<int**,    Layout, MemSpace> arrayInt;
@@ -243,6 +247,8 @@
   typedef Kokkos::View<int***,    Layout, MemSpace> array3DInt;
   typedef Kokkos::View<float***,  Layout, MemSpace> array3DReal;
   typedef Kokkos::View<double***, Layout, MemSpace> array3DDouble;
+
+  typedef Kokkos::View<float*, Layout, DeviceMemorySpace> vectorRealView; 
 
   template<class T>
   T allocateVector(int n1)
