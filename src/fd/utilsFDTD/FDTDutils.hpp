@@ -16,7 +16,7 @@
 
 struct FDTDUtils
 {
-  void init_coef(float dx, vectorReal &coef)
+  void init_coef(float dx, vectorReal::HostMirror &coef)
   {
       float dx2 = dx*dx;
       coef[0] = -205.f/72.f/dx2;
@@ -25,7 +25,7 @@ struct FDTDUtils
       coef[3] = 8.f/315.f/dx2;
       coef[4] = -1.f/560.f/dx2;
   }
-  float compute_dt_sch(const float vmax,const vectorReal &coefx,const vectorReal &coefy,const vectorReal &coefz)
+  float compute_dt_sch(const float vmax,const vectorReal::HostMirror &coefx,const vectorReal::HostMirror &coefy,const vectorReal::HostMirror &coefz)
   {
 
       float ftmp = 0.;
@@ -61,7 +61,7 @@ struct FDTDUtils
       fclose(snapshot_file);
   }
 
-  void pml_profile_init(vectorReal  & profile, int i_min, int i_max, int n_first, int n_last, float scale)
+  void pml_profile_init(std::vector< float > &profile, int i_min, int i_max, int n_first, int n_last, float scale)
   {
     int n = i_max-i_min+1;
     int shift = i_min-1;
@@ -86,7 +86,7 @@ struct FDTDUtils
   }
 
   void pml_profile_extend(int nx, int ny, int nz,
-                          vectorReal &  eta, vectorReal & etax, vectorReal & etay, vectorReal & etaz,
+                          vectorReal::HostMirror &eta, std::vector< float > &etax, std::vector< float > &etay, std::vector< float > &etaz,
                           int xbeg, int xend, int ybeg, int yend, int zbeg, int zend)
   {
     const int n_ghost = 1;
@@ -100,7 +100,8 @@ struct FDTDUtils
   }
 
   void pml_profile_extend_all(int nx, int ny, int nz,
-                              vectorReal & eta, vectorReal & etax, vectorReal & etay, vectorReal & etaz,
+                              vectorReal::HostMirror &eta, 
+                              std::vector< float > &etax, std::vector< float > &etay, std::vector< float > &etaz,
                               int xmin, int xmax, int ymin, int ymax,
                               int x1, int x2, int x5, int x6,
                               int y1, int y2, int y3, int y4, int y5, int y6,
@@ -132,7 +133,7 @@ struct FDTDUtils
                 int y1, int y2, int y3, int y4, int y5, int y6,
                 int z1, int z2, int z3, int z4, int z5, int z6,
                 float dx, float dy, float dz, float dt_sch,
-                float vmax, vectorReal & eta)
+                float vmax, vectorReal::HostMirror &eta)
   {
     for (int i = -1; i < nx+1; ++i) {
         for (int j = -1; j < ny+1; ++j) {
@@ -145,19 +146,19 @@ struct FDTDUtils
     /* etax */
     float param = dt_sch * 3.f * vmax * logf(1000.f)/(2.f*ndampx*dx);
     printf("param=%f\n",param);
-    vectorReal etax=allocateVector<vectorReal>(nx+2);
+    std::vector< float > etax ( nx+2 );
     pml_profile_init(etax, 0, nx+1, ndampx, ndampx, param);
 
     /* etay */
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampy*dy);
     printf("param=%f\n",param);
-    vectorReal etay=allocateVector<vectorReal>(ny+2);
+    std::vector< float > etay ( ny+2 );
     pml_profile_init(etay, 0, ny+1, ndampy, ndampy, param);
 
     /* etaz */
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampz*dz);
     printf("param=%f\n",param);
-    vectorReal etaz=allocateVector<vectorReal>(nz+2);
+    std::vector< float > etaz ( nz+2 );
     pml_profile_init(etaz, 0, nz+1, ndampz, ndampz, param);
 
     (void)pml_profile_extend_all(nx, ny, nz,

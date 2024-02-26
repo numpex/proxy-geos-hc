@@ -232,7 +232,8 @@
   //  using Layout=Kokkos::LayoutRight;
   //#endif
   typedef Kokkos::View<int*,     Layout, MemSpace> vectorInt;
-  typedef Kokkos::View<float*,   Layout,  MemSpace> vectorReal;
+  //typedef Kokkos::View<float*,   Layout,  MemSpace> vectorReal;
+  typedef Kokkos::View<float*> vectorReal;
   typedef Kokkos::View<double*,  Layout, MemSpace> vectorDouble;
 
   typedef Kokkos::View<int**,    Layout, MemSpace> arrayInt;
