@@ -316,6 +316,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     d_pnGlobal[I][i1]=invMpSh*(2*d_massMatrixGlobal[I]*d_pnGlobal[I][i2]-MmSh*d_pnGlobal[I][i1]-tmp*d_yGlobal[I]);
   } );
 
+  */
   if(timeStep%100==0)
   {
      int nodeRHS=d_globalNodesList(d_rhsElement[0],0);
@@ -324,5 +325,4 @@ void solverRaja::computeOneStep(  const int & timeStep,
           pnGlobal(nodeRHS,i1)=d_pnGlobal(nodeRHS,i1);
      });
   }
-  */
 }
