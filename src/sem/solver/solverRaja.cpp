@@ -89,60 +89,44 @@ void solverRaja::computeOneStep(  const int & timeStep,
   RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfElements ), [=] LVARRAY_HOST_DEVICE ( int e )
   {
         // start parallel section
-        double Xi[125][3];
-	double B[125][9];
-        double R[125][125];
-        double massMatrixLocal[125];
-	double pnLocal[125];
-	double Y[125];
-	//RAJA::loop<cuda_thread_z>(ctx, RAJA::RangeSegment(0, order+1), [&](int z) 
-	for( int z=0; z<order+1;z++)
+        double Xi[36][2];
+	double B[36][4];
+        double R[36][36];
+        double massMatrixLocal[36];
+	double pnLocal[36];
+	double Y[36];
+	//RAJA::loop<cuda_thread_y>(ctx, RAJA::RangeSegment(0, order+1), [&](int x) 
+	for( int x=0; x<order+1;x++)
 	{
-	  //RAJA::loop<cuda_thread_y>(ctx, RAJA::RangeSegment(0, order+1), [&](int x) 
-	  for( int y=0; y<order+1;y++)
-          {
-            //RAJA::loop<cuda_thread_z>(ctx, RAJA::RangeSegment(0, order+1), [&](int y) 
-	    for( int x=0; x<order+1;x++)
-	    {
-	      int i=x+y*(order+1)+z*(order+1)*(order+1);
-	      int localToGlobal=d_globalNodesList(e,i);
-              Xi[i][0]=d_globalNodesCoords(localToGlobal,0);
-              Xi[i][1]=d_globalNodesCoords(localToGlobal,1);
-              Xi[i][2]=d_globalNodesCoords(localToGlobal,2);
-	    }//);
-	 }//);
+           //RAJA::loop<cuda_thread_z>(ctx, RAJA::RangeSegment(0, order+1), [&](int y) 
+	   for( int y=0; y<order+1;y++)
+	   {
+	     int i=x+y*(order+1);
+	     int localToGlobal=d_globalNodesList(e,i);
+             Xi[i][0]=d_globalNodesCoords(localToGlobal,0);
+             Xi[i][1]=d_globalNodesCoords(localToGlobal,1);
+	   }//);
         }//);
 	
 	//RAJA::loop<cuda_thread_y>(ctx, RAJA::RangeSegment(0, numberOfPointsPerElement), [&](int i) 
 	for (int i=0;i<numberOfPointsPerElement;i++)
 	{
 	   // compute jacobian matrix
-           double jac00=0;
-           double jac01=0;
-           double jac02=0;
-           double jac10=0;
-           double jac11=0;
-           double jac12=0;
-           double jac20=0;
-           double jac21=0;
-           double jac22=0;
+           double jac0=0;
+           double jac1=0;
+           double jac2=0;
+           double jac3=0;
 
            //RAJA::loop<cuda_thread_z>(ctx, RAJA::RangeSegment(0, numberOfPointsPerElement), [&](int j) 
 	   for (int j=0;j<numberOfPointsPerElement;j++)
 	   {
-	     jac00+=Xi[j][0]*d_derivativeBasisFunction3DX(j,i);
-             jac01+=Xi[j][0]*d_derivativeBasisFunction3DY(j,i);
-             jac02+=Xi[j][0]*d_derivativeBasisFunction3DZ(j,i);
-	     jac10+=Xi[j][1]*d_derivativeBasisFunction3DX(j,i);
-             jac11+=Xi[j][1]*d_derivativeBasisFunction3DY(j,i);
-             jac12+=Xi[j][1]*d_derivativeBasisFunction3DZ(j,i);
-	     jac20+=Xi[j][2]*d_derivativeBasisFunction3DX(j,i);
-             jac21+=Xi[j][2]*d_derivativeBasisFunction3DY(j,i);
-             jac22+=Xi[j][2]*d_derivativeBasisFunction3DZ(j,i);
+	     jac0+=Xi[j][0]*d_derivativeBasisFunction2DX(j,i);
+             jac1+=Xi[j][0]*d_derivativeBasisFunction2DY(j,i);
+             jac2+=Xi[j][1]*d_derivativeBasisFunction2DX(j,i);
+             jac3+=Xi[j][1]*d_derivativeBasisFunction2DY(j,i);
            }//);
 	   // detJ
-           double detJ=abs(jac00*(jac11*jac22-jac21*jac12)-jac01*(j10*jac22-jac20*jac12)
-			  +jac02*(jac10*jac21-jac20*jac11));
+           double detJ=abs(jac0*jac3-jac2*jac1);
 
            double invJac0=jac3;
            double invJac1=-jac1;
