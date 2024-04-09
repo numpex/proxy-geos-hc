@@ -60,15 +60,19 @@ struct solverUtils
   void saveSnapShot( const int indexTimeStep, const int i1, arrayReal pnGlobal, simpleMesh mesh )
   {
 
-    int numberOfNodes=mesh.getNumberOfNodes();
-    std::vector<float> inputVector( numberOfNodes );
     int nx=mesh.getNx();
     int ny=mesh.getNy();
+    int nz=mesh.getNz();
     float dx=mesh.getDx();
     float dy=mesh.getDy();
-    for( int i = 0; i< numberOfNodes; i++ )
+    float dz=mesh.getDz();
+    int numberOfNodes=nx*nz;
+    std::vector<float> inputVector( numberOfNodes );
+    int offset=(ny==1?offset=0:offset=nx*nz*(ny/2-1));
+    printf(" nx, ny/2-1, nz %d %d %d offset=%d\n",nx,ny/2-1,nz, offset);
+    for( int i = offset; i< offset+numberOfNodes; i++ )
     {
-      inputVector[i]=pnGlobal(i,i1);
+      inputVector[i-offset]=pnGlobal(i,i1);
     }
     std::vector<std::vector<float>> grid=mesh.projectToGrid( numberOfNodes, inputVector );
     fstream snapFile;
@@ -77,13 +81,14 @@ struct solverUtils
     std::cout<<"nx="<<nx<<" ny="<<ny<<std::endl;
     for( int i=0; i<nx; i++ )
     {
-      for( int j=0; j<ny; j++ )
+      for( int j=0; j<nz; j++ )
       {
-        snapFile<<i*dx<<" "<<j*dy<<" " <<grid[i][j]<<endl;
+        snapFile<<i*dx<<" "<<j*dz<<" " <<grid[i][j]<<endl;
       }
     }
     snapFile.close();
   }
 */
+
 };
 #endif //UTILS_HPP_

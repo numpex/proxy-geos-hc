@@ -74,7 +74,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     int nPointsPerElement=(order+1)*(order+1)*(order+1);
     // start parallel section
     double B[125][6];
-    double R[125][8];
+    double R[125][125];
     double massMatrixLocal[125];
     double pnLocal[125];
     double Y[125];

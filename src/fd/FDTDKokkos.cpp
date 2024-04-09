@@ -1,3 +1,4 @@
+
 //************************************************************************
 //  SEM proxy application v.0.0.1
 //
@@ -24,11 +25,9 @@ int main( int argc, char *argv[] )
     int nx= (argc > 1)? std::stoi(argv[1]) : 150;
     int ny=nx;
     int nz=nx;
-
-    int xs=nx/2;
-    int ys=ny/2;
-    int zs=nz/2;
-
+    int   xs=nx/2;
+    int   ys=ny/2;
+    int   zs=nz/2;
     constexpr int lx=4;
     constexpr int ly=4;
     constexpr int lz=4;
@@ -57,27 +56,26 @@ int main( int argc, char *argv[] )
     constexpr float hdx_2=1./(4.*dx*dx);
     constexpr float hdy_2=1./(4.*dy*dy);
     constexpr float hdz_2=1./(4.*dz*dz);
-    constexpr float lambdamax=vmax/fmax;
+    constexpr float lambdamax=vmin/fmax;
     constexpr int ndampx=ntaperx*lambdamax/dx;
     constexpr int ndampy=ntapery*lambdamax/dy;
     constexpr int ndampz=ntaperz*lambdamax/dz;
-    printf("nx=%d ny=%d nz=%d\n",nx, ny,nz);
     printf("ndampx=%d ndampy=%d ndampz=%d\n",ndampx, ndampy,ndampz);
-    constexpr int x1=0;
-    constexpr int x2=ndampx;
-    constexpr int x3=ndampx;
+    int x1=0;
+    int x2=ndampx;
+    int x3=ndampx;
     int x4=nx-ndampx;
     int x5=nx-ndampx;
     int x6=nx;
-    constexpr int y1=0;
-    constexpr int y2=ndampy;
-    constexpr int y3=ndampy;
+    int y1=0;
+    int y2=ndampy;
+    int y3=ndampy;
     int y4=ny-ndampy;
     int y5=ny-ndampy;
     int y6=ny;
-    constexpr int z1=0;
-    constexpr int z2=ndampz;
-    constexpr int z3=ndampz;
+    int z1=0;
+    int z2=ndampz;
+    int z3=ndampz;
     int z4=nz-ndampz;
     int z5=nz-ndampz;
     int z6=nz;
@@ -92,6 +90,7 @@ int main( int argc, char *argv[] )
     // pressure fields
     vectorReal pnp1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
     vectorReal pn=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
+    vectorReal pnm1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
     // PML arrays
     vectorReal phi=allocateVector<vectorReal>(nx*ny*nz);
     vectorReal eta=allocateVector<vectorReal>((nx+2)*(ny+2)*(nz+2));
@@ -145,6 +144,7 @@ int main( int argc, char *argv[] )
           {
             pnp1[IDX3_l(i,j,k)]=0.000001;
             pn[IDX3_l(i,j,k)]  =0.000001;
+            pnm1[IDX3_l(i,j,k)]  =0.000001;
           }
        }
     }
@@ -158,25 +158,13 @@ int main( int argc, char *argv[] )
                           dx,  dy,  dz,  timeStep,
                           vmax, eta);
 
-    auto d_RHSTerm = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, RHSTerm);
-    auto d_vp = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, vp);
-    auto d_pn = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, pn);
-    auto d_pnp1 = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, pnp1);
-
-
-    auto d_coefx = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, coefx);
-    auto d_coefy = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, coefy);
-    auto d_coefz = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, coefz);
-    auto d_eta = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, eta);
-    auto d_phi = Kokkos::create_mirror_view_and_copy(DeviceMemorySpace{}, phi);
-
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     for (int itSample=0; itSample<nSamples;itSample++)
     {
 
       // add RHS term
-      myKernel.addRHS(nx,ny,nz,lx,ly,lz,xs,ys,zs,itSample,d_RHSTerm,d_vp,d_pn);
+      myKernel.addRHS(nx,ny,nz,lx,ly,lz,xs,ys,zs,itSample,RHSTerm,vp,pn);
 
       //compute one step
       myKernel.computeOneStep(nx,ny,nz,
@@ -189,20 +177,19 @@ int main( int argc, char *argv[] )
                               z4,  z5,  z6,
                               coef0,
                               hdx_2,hdy_2,hdz_2,
-                              d_coefx,d_coefy,d_coefz,
-                              d_vp,d_phi,d_eta,
-                              d_pnp1,d_pn);
+                              coefx,coefy,coefz,
+                              vp,phi,eta,
+                              pnp1,pn,pnm1);
 
       // swap wavefields
-      myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,d_pnp1,d_pn);
+      myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,pnp1,pn,pnm1);
 
       // print infos and save wavefields
       if(itSample%50==0)
       {
         Kokkos::fence();
-        Kokkos::deep_copy( pn, d_pn);
 	printf("result1 %f\n",pn[IDX3_l(xs,ys,zs)]);
-        //myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
+        myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
       }
 
     }
@@ -215,7 +202,9 @@ int main( int argc, char *argv[] )
     std::cout << "started computation at " << std::ctime(&start_time)<<std::endl
               << "finished computation at " << std::ctime(&end_time)<<std::endl
               << "elapsed time: " << elapsed_seconds.count() << "s\n";
+
   } 
   Kokkos::finalize();
   return (0);
 }
+

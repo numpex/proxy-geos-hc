@@ -223,9 +223,9 @@
   #endif
 
   #include <Kokkos_Core.hpp>
-  //#define MemSpace Kokkos::SharedSpace
-  #define MemSpace Kokkos::HostSpace
-  using DeviceMemorySpace = typename Kokkos::DefaultExecutionSpace::memory_space;
+  #define MemSpace Kokkos::SharedSpace
+  //#define MemSpace Kokkos::HostSpace
+  //using DeviceMemorySpace = typename Kokkos::DefaultExecutionSpace::memory_space;
   using ExecSpace = MemSpace::execution_space;
   using range_policy = Kokkos::RangePolicy<>;
   using Layout=Kokkos::LayoutLeft;
@@ -248,6 +248,7 @@
   typedef Kokkos::View<float***,  Layout, MemSpace> array3DReal;
   typedef Kokkos::View<double***, Layout, MemSpace> array3DDouble;
 
+  /*
   typedef Kokkos::View<int*,     Layout, DeviceMemorySpace> vectorIntView;
   typedef Kokkos::View<float*,   Layout,  DeviceMemorySpace> vectorRealView;
   typedef Kokkos::View<double*,  Layout, DeviceMemorySpace> vectorDoubleView;
@@ -259,7 +260,7 @@
   typedef Kokkos::View<int***,    Layout, DeviceMemorySpace> array3DIntView;
   typedef Kokkos::View<float***,  Layout, DeviceMemorySpace> array3DRealView;
   typedef Kokkos::View<double***, Layout, DeviceMemorySpace> array3DDoubleView;
-
+ */
 
   template<class T>
   T allocateVector(int n1)

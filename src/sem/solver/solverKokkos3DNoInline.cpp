@@ -36,18 +36,18 @@ void solverKokkos::computeOneStep(  const int & timeStep,
     pnGlobal(nodeRHS,i2)+=timeSample*timeSample*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   });
  
-  int numberOfPointsPerElement=(order+1)*(order+1)*(order+1);
+  int numberOfPointsPerElement=(order+1)*(order+1);
   Kokkos::parallel_for( numberOfElements, KOKKOS_CLASS_LAMBDA ( const int e ) 
   {
     // start parallel section
-    double B[8][6];
-    double R[8][8];
-    double massMatrixLocal[8];
-    double pnLocal[8];
-    double Y[8];
+    double B[125][6];
+    double R[125][125];
+    double massMatrixLocal[125];
+    double pnLocal[125];
+    double Y[125];
 
     // compute Jacobian, massMatrix and B
-    int o=Qk.computeB( e,order,globalNodesList,globalNodesCoords,weights3D,
+    int o=Qk.computeB( e,order,globalNodesList,globalNodesCoords,weights2D,
                        derivativeBasisFunction1D,massMatrixLocal,B );
     // compute stifness  matrix ( durufle's optimization)
     int p=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights3D, B, derivativeBasisFunction1D, R );

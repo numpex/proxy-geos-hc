@@ -54,13 +54,52 @@ constexpr size_t greater_of_squarest_factor_pair(size_t n)
       : n / lesser_of_squarest_factor_pair_helper(n, sqrt(n));
 }
 
-#define block_size (256)
-#define x_block_sz (32)
-#define y_block_sz (greater_of_squarest_factor_pair(block_size/x_block_sz))
-#define z_block_sz (lesser_of_squarest_factor_pair(block_size/x_block_sz))
-//const int x_block_sz=32;
-//const int y_block_sz=4;
-//const int z_block_sz=2;
+//#define block_size (512)
+#define block_size (128)
+#define z_block_sz (32)
+#define y_block_sz (greater_of_squarest_factor_pair(block_size/z_block_sz))
+#define x_block_sz (lesser_of_squarest_factor_pair(block_size/z_block_sz))
+
+#ifdef ENABLE_CUDA
+#define RAJANestedLoop(x3,y3,z3,x4,y4,z4)\
+     RAJA::TypedRangeSegment<int> KRange(z3, z4);\
+     RAJA::TypedRangeSegment<int> JRange(y3, y4);\
+     RAJA::TypedRangeSegment<int> IRange(x3, x4);\
+     using EXEC_POL =\
+     RAJA::KernelPolicy<\
+        RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,\
+          RAJA::statement::For<0, RAJA::cuda_global_size_z_direct<x_block_sz>, \
+            RAJA::statement::For<1, RAJA::cuda_global_size_y_direct<y_block_sz>,\
+              RAJA::statement::For<2, RAJA::cuda_global_size_x_direct<z_block_sz>,\
+               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>\
+             >\
+           >\
+         >\
+       >\
+     >;\
+     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) 
+#endif
+
+
+#ifdef ENABLE_HIP
+#define RAJANestedLoop(x3,y3,z3,x4,y4,z4)\
+     RAJA::TypedRangeSegment<int> KRange(z3, z4);\
+     RAJA::TypedRangeSegment<int> JRange(y3, y4);\
+     RAJA::TypedRangeSegment<int> IRange(x3, x4);\
+     using EXEC_POL =\
+     RAJA::KernelPolicy<\
+        RAJA::statement::HipKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,\
+          RAJA::statement::For<0, RAJA::hip_global_size_z_direct<x_block_sz>, \
+            RAJA::statement::For<1, RAJA::hip_global_size_y_direct<y_block_sz>,\
+              RAJA::statement::For<2, RAJA::hip_global_size_x_direct<z_block_sz>,\
+               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>\
+             >\
+           >\
+         >\
+       >\
+     >;\
+     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) 
+#endif
 #endif
 
 struct FDTDKernel
@@ -72,57 +111,34 @@ struct FDTDKernel
          const int z3, const int z4,
          const int lx, const int ly, const int lz,
          const float coef0,
-  #if defined(USE_RAJA) || defined(USE_KOKKOS)
+  #ifdef USE_RAJA
          vectorRealView const & coefx,
          vectorRealView const & coefy,
          vectorRealView const & coefz,
          vectorRealView const & vp,
          vectorRealView const & pnp1,
-         vectorRealView const & pn)const
+         vectorRealView const & pn  ,
+         vectorRealView const & pnm1)const
+  #elif defined USE_KOKKOS
+         vectorReal const & coefx,
+         vectorReal const & coefy,
+         vectorReal const & coefz,
+         vectorReal const & vp,
+         vectorReal const & pnp1,
+         vectorReal const & pn,
+         vectorReal const & pnm1)const
   #else
          vectorReal  & coefx,
          vectorReal  & coefy,
          vectorReal  & coefz,
          vectorReal  & vp,
          vectorReal  & pnp1,
-         vectorReal  & pn)
-  #endif
+         vectorReal  & pn  ,
+         vectorReal  & pnm1)
+#endif
   {
-  #ifdef USE_RAJA
-     RAJA::TypedRangeSegment<int> KRange(z3, z4);
-     RAJA::TypedRangeSegment<int> JRange(y3, y4);
-     RAJA::TypedRangeSegment<int> IRange(x3, x4);
-
-
-     #ifdef ENABLE_CUDA
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::cuda_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::cuda_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::cuda_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-     #elif defined ENABLE_HIP
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::HipKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::hip_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::hip_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::hip_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-     #endif
-     
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) 
+#ifdef USE_RAJA
+     RAJANestedLoop(x3,y3,z3,x4,y4,z4)
      {
 #elif defined USE_KOKKOS
      Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({z3,x3,y3},{z4,x4,y4}),KOKKOS_LAMBDA(int k,int i,int j)
@@ -151,7 +167,7 @@ struct FDTDKernel
                  +coefz[2]*(pn[IDX3_l(i,j,k+2)]+pn[IDX3_l(i,j,k-2)])
                  +coefz[3]*(pn[IDX3_l(i,j,k+3)]+pn[IDX3_l(i,j,k-3)])
                  +coefz[4]*(pn[IDX3_l(i,j,k+4)]+pn[IDX3_l(i,j,k-4)]));
-      pnp1[IDX3_l(i,j,k)]=2.*pn[IDX3_l(i,j,k)]-pnp1[IDX3_l(i,j,k)]
+      pnp1[IDX3_l(i,j,k)]=2.*pn[IDX3_l(i,j,k)]-pnm1[IDX3_l(i,j,k)]
                          +vp[IDX3(i,j,k)]*(coef0*pn[IDX3_l(i,j,k)]+lapx+lapy+lapz);
 #ifdef USE_RAJA
      });
@@ -172,7 +188,7 @@ struct FDTDKernel
              const int lx, const int ly, const int lz,
              const float coef0,
              const float hdx_2, const float hdy_2, const float hdz_2,
-#if defined(USE_RAJA) || defined(USE_KOKKOS)
+#ifdef USE_RAJA
              vectorRealView const & coefx,
              vectorRealView const & coefy,
              vectorRealView const & coefz,
@@ -180,7 +196,18 @@ struct FDTDKernel
              vectorRealView const & phi,
              vectorRealView const & eta,
              vectorRealView const & pnp1,
-             vectorRealView const & pn)const
+             vectorRealView const & pn ,
+             vectorRealView const & pnm1)const
+#elif defined USE_KOKKOS
+             vectorReal const & coefx,
+             vectorReal const & coefy,
+             vectorReal const & coefz,
+             vectorReal const & vp,
+             vectorReal const & phi,
+             vectorReal const & eta,
+             vectorReal const & pnp1,
+             vectorReal const & pn  ,
+             vectorReal const & pnm1)const
 #else
              vectorReal  & coefx,
              vectorReal  & coefy,
@@ -189,43 +216,12 @@ struct FDTDKernel
              vectorReal  & phi,
              vectorReal  & eta,
              vectorReal  & pnp1,
-             vectorReal  & pn)
+             vectorReal  & pn  ,
+             vectorReal  & pnm1)
 #endif
   {
 #ifdef USE_RAJA
-     RAJA::TypedRangeSegment<int> KRange(z3, z4);
-     RAJA::TypedRangeSegment<int> JRange(y3, y4);
-     RAJA::TypedRangeSegment<int> IRange(x3, x4);
-
-     #ifdef ENABLE_CUDA
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::cuda_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::cuda_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::cuda_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-     #elif defined ENABLE_HIP
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::HipKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::hip_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::hip_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::hip_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-     #endif
- 
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) 
+     RAJANestedLoop(x3,y3,z3,x4,y4,z4)
      {
 #elif defined USE_KOKKOS
      Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({z3,x3,y3},{z4,x4,y4}),KOKKOS_LAMBDA(int k,int i,int j)
@@ -258,7 +254,7 @@ struct FDTDKernel
 
        pnp1[IDX3_l(i,j,k)]=((2.-eta[IDX3_eta1(i,j,k)]*eta[IDX3_eta1(i,j,k)]
                   +2.*eta[IDX3_eta1(i,j,k)])*pn[IDX3_l(i,j,k)]
-                  -pnp1[IDX3_l(i,j,k)]
+                  -pnm1[IDX3_l(i,j,k)]
                   +vp[IDX3(i,j,k)]*(lap+phi[IDX3(i,j,k)]))/(1.+2.*eta[IDX3_eta1(i,j,k)]);
 
        phi[IDX3(i,j,k)]=(phi[IDX3(i,j,k)]-((eta[IDX3_eta1(i+1,j,k)]-eta[IDX3_eta1(i-1,j,k)])
@@ -284,10 +280,14 @@ struct FDTDKernel
   int addRHS(const int nx,const int ny,const int nz,
 	     const int lx,const int ly,const int lz,
 	     const int xs,const int ys,const int zs,const int itSample,
-#if defined(USE_RAJA) || defined(USE_KOKKOS)
+#ifdef USE_RAJA
 	     vectorRealView const & RHSTerm,
 	     vectorRealView const & vp,
 	     vectorRealView const & pn) const
+#elif defined USE_KOKKOS
+	     vectorReal const & RHSTerm,
+	     vectorReal const & vp,
+	     vectorReal const & pn) const
 #else
 	     vectorReal & RHSTerm,
 	     vectorReal & vp,
@@ -295,40 +295,7 @@ struct FDTDKernel
 #endif
   {
 #ifdef USE_RAJA
-     // define policy for source term
-     RAJA::TypedRangeSegment<int> KRanges(xs, xs+1);
-     RAJA::TypedRangeSegment<int> JRanges(ys, ys+1);
-     RAJA::TypedRangeSegment<int> IRanges(zs, zs+1);
-
-     #ifdef ENABLE_CUDA
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::cuda_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::cuda_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::cuda_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-     #elif defined ENABLE_HIP
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::HipKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::hip_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::hip_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::hip_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-     #endif
- 
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRanges, JRanges, KRanges), [=] __device__ (int i, int j, int k)
+     RAJANestedLoop(xs,ys,zs,xs+1,ys+1,zs+1)
      {
        pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
      });
@@ -346,51 +313,25 @@ struct FDTDKernel
   // swap wavefields
   int swapWavefields(const int nx,const int ny,const int nz,
 		     const int lx,const int ly,const int lz,
-#if defined(USE_RAJA) || defined(USE_KOKKOS)
+#ifdef USE_RAJA
 		     vectorRealView const & pnp1,
-		     vectorRealView const & pn) const
+		     vectorRealView const & pn  ,
+		     vectorRealView const & pnm1) const
+#elif defined USE_KOKKOS
+		     vectorReal const & pnp1,
+		     vectorReal const & pn  ,
+		     vectorReal const & pnm1) const
 #else
 		     vectorReal & pnp1,
+		     vectorReal & pn  ,
 		     vectorReal & pn)
 #endif
   {
 #ifdef USE_RAJA
-     // define policy for swapping
-     RAJA::TypedRangeSegment<int> KRange(0, nx);
-     RAJA::TypedRangeSegment<int> JRange(0, ny);
-     RAJA::TypedRangeSegment<int> IRange(0, ny);
- 
-     #ifdef ENABLE_CUDA
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::cuda_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::cuda_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::cuda_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-     #elif defined ENABLE_HIP
-     using EXEC_POL =
-     RAJA::KernelPolicy<
-        RAJA::statement::HipKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,
-          RAJA::statement::For<0, RAJA::hip_global_size_z_direct<x_block_sz>,     //z
-            RAJA::statement::For<1, RAJA::hip_global_size_y_direct<y_block_sz>,   //g
-              RAJA::statement::For<2, RAJA::hip_global_size_x_direct<z_block_sz>,
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>
-             >
-           >
-         >
-       >
-     >;
-     #endif
- 
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k)
+     RAJANestedLoop(0,0,0,nx,ny,nz)
      {
-         pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
+        pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
+        pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
      });
 #elif defined USE_KOKKOS
      Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({0,0,0},{nz+2*lz,nx+2*lx,ny+2*ly}),KOKKOS_LAMBDA(int K,int I,int J)
@@ -398,6 +339,7 @@ struct FDTDKernel
         int i=I-lx;
         int j=J-ly;
         int k=K-lz;
+        pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
         pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
      });
 #else
@@ -410,6 +352,7 @@ struct FDTDKernel
          {
             for( int k=0; k<nz;k++)
             {
+	       pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
                pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
             }
          }
@@ -429,7 +372,7 @@ struct FDTDKernel
 	             const int z4, const int z5, const int z6,
                      const float coef0,
                      const float hdx_2, const float hdy_2, const float hdz_2,
-#if defined(USE_RAJA) || defined(USE_KOKKOS)
+#ifdef USE_RAJA
                      vectorRealView const & coefx,
                      vectorRealView const & coefy,
                      vectorRealView const & coefz,
@@ -437,7 +380,18 @@ struct FDTDKernel
                      vectorRealView const & phi,
                      vectorRealView const & eta,
                      vectorRealView const & pnp1,
-                     vectorRealView const & pn)const
+                     vectorRealView const & pn  ,
+                     vectorRealView const & pnm1)const
+#elif defined USE_KOKKOS
+                     vectorReal const & coefx,
+                     vectorReal const & coefy,
+                     vectorReal const & coefz,
+                     vectorReal const & vp,
+                     vectorReal const & phi,
+                     vectorReal const & eta,
+                     vectorReal const & pnp1,
+                     vectorReal const & pn  ,
+                     vectorReal const & pnm1)const
 #else
                      vectorReal  & coefx,
                      vectorReal  & coefy,
@@ -446,25 +400,27 @@ struct FDTDKernel
                      vectorReal  & phi,
                      vectorReal  & eta,
                      vectorReal  & pnp1,
-                     vectorReal  & pn)
+                     vectorReal  & pn  ,
+                     vectorReal  & pnm1)
 #endif
   {
     //up
-    pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn);
+    pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
     //front
-    pml3D(nx,ny,nz,0,nx,y1,y2,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn);
+    pml3D(nx,ny,nz,0,nx,y1,y2,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
     //left
-    pml3D(nx,ny,nz,x1,x2,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn);
+    pml3D(nx,ny,nz,x1,x2,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
     //inner points
-    inner3D(nx,ny,nz,x3,x4,y3,y4,z3,z4,lx,ly,lz,coef0,coefx,coefy,coefz,vp,pnp1,pn);
+    inner3D(nx,ny,nz,x3,x4,y3,y4,z3,z4,lx,ly,lz,coef0,coefx,coefy,coefz,vp,pnp1,pn,pnm1);
     //right
-    pml3D(nx,ny,nz,x5,x6,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn);
+    pml3D(nx,ny,nz,x5,x6,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
     //back
-    pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn);
+    pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
     // bottom
-    pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn);
+    pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
     return(0);
   }
 
 };
 #endif //FDTDKERNE_HPP
+

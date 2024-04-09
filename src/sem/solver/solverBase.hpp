@@ -80,6 +80,7 @@ public:
   vectorDouble quadraturePoints;
   vectorDouble weights;
   vectorDouble weights2D;
+  vectorDouble weights3D;
 
   // get basis function and corresponding derivatives
   arrayDouble basisFunction1D;

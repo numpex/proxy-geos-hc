@@ -62,7 +62,7 @@ protected:
   float myTimeStep=0.001;
 
   const int myNumSamples=myTimeMax/myTimeStep;
-  const int myOrderNumber=4;
+  const int myOrderNumber=1;
   
    // arrays
   arrayReal myRHSLocation;
@@ -71,7 +71,7 @@ protected:
   arrayReal pnGlobal;
 
   // initialize mesh
-  simpleMesh  myMesh {50, 50, 2000, 2000, myOrderNumber};
+  simpleMesh  myMesh {200, 200,200, 2000, 2000, 2000, myOrderNumber};
 
   QkGL myQk;
   solverUtils myUtils;

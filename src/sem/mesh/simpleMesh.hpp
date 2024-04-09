@@ -17,14 +17,13 @@ namespace grid
 class simpleMesh
 {
 private:
-  int ex, ey;
-  int nx, ny;
-  float lx, ly;
-  float hx, hy;
-  int order;
+  int ex, ey, ez;
+  int nx, ny, nz;
+  float lx, ly, lz;
+  float hx, hy, hz;
+  int orderx, ordery,orderz, order;
   int nbFaces;
 public:
-  simpleMesh( const int & ex_in, const int & ey_in, const float & lx_in, const float & ly_in, const int & order_in );
 
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE simpleMesh();
@@ -34,6 +33,10 @@ public:
   simpleMesh();
   #endif
 
+  simpleMesh( const int & ex_in, const int & ey_in, const int & ez_in,
+                        const float & lx_in, const float & ly_in,const float & lz_in,
+                        const int & order_in);
+
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE ~simpleMesh();
   #elif defined USE_KOKKOS
@@ -41,38 +44,40 @@ public:
   #else
   ~simpleMesh();
   #endif
+
   // Returns number of Nodes in the mesh
   int  getNumberOfNodes() const;
+
   //  Returns the number of elements of the mesh
   int  getNumberOfElements() const;
+
   // get number of points per element
   int getNumberOfPointsPerElement() const;
-  //get nx
-  int getNx() const;
-  //get ny
-  int getNy() const;
-  //get Dx
-  int getDx()const;
-  //get Dy
-  int getDy() const;
+
   //get number of interior elements
   int getNumberOfInteriorElements() const;
+
   //get number of interior elements
   int getNumberOfInteriorNodes() const;
-  // get number of Boundary Faces
-  int getNumberOfBoundaryFaces() const;
-  // get number of Boundary nodes
-  int getNumberOfBoundaryNodes() const;
-  // sort element by color
-  // red=0, green=1, blue=2, yellow=3
-  int getNumberOfElementsByColor() const;
-  #ifdef USE_RAJA
-  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const;
-  #elif defined USE_KOKKOS
-  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const;
-  #else
-  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt  & listOfElementsByColor) const;
-  #endif
+
+  //get nx
+  int getNx() const;
+
+  //get ny
+  int getNy() const;
+
+  //get nz
+  int getNz() const;
+
+  //get Dx
+  int getDx()const;
+
+  //get Dy
+  int getDy() const;
+
+  //get Dz
+  int getDz() const;
+
   // Initialize nodal coordinates.
   #ifdef USE_RAJA
   void nodesCoordinates( const int & numberOfNodes, arrayReal const & nodeCoords ) const;
@@ -81,6 +86,7 @@ public:
   #else
   void nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const;
   #endif
+
   //  list of global nodes ( vertices)
   #ifdef USE_RAJA
   void globalNodesList(const int & numberOfElements, arrayInt const & nodesList ) const;
@@ -89,6 +95,7 @@ public:
   #else
   void globalNodesList(const int & numberOfElements, arrayInt & nodesList ) const;
   #endif
+
   // local to global
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE int localToGlobalNodes( const int & elementNumber, 
@@ -106,8 +113,28 @@ public:
                           arrayInt  & nodesList, 
                           int localToGlobal[]) const;
   #endif
-  // compute element e where (x,y) belongs to
-  int getElementNumberFromPoints( const float & x, const float & y ) const;
+
+  // compute element e where (x,y,z) belongs to
+  int getElementNumberFromPoints( const float & x, const float & y, const float & z ) const;
+
+  // get list of interior Elements
+  #ifdef USE_RAJA
+  void getListOfInteriorElements(vectorInt const & listOfInteriorElements) const;
+  #elif defined USE_KOKKOS
+  void getListOfInteriorElements(vectorInt const & listOfInteriorElements) const;
+  #else
+  void getListOfInteriorElements(vectorInt & listOfInteriorElements) const;
+  #endif
+
+  //  get list of global interior nodes
+  #ifdef USE_RAJA
+  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt const & listOfInteriorNodes ) const;
+  #elif defined USE_KOKKOS
+  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt const & listOfInteriorNodes ) const;
+  #else
+  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt & listOfInteriorNodes ) const;
+  #endif
+
   // set model
   #ifdef USE_RAJA
   void getModel( const int & numberOfNodes, vectorReal const & model ) const;
@@ -116,31 +143,24 @@ public:
   #else
   void getModel( const int & numberOfNodes, vectorReal & model ) const;
   #endif
-  // list of neighbours of element e
+
+  // sort element by color
+  // red=0, green=1, blue=2, yellow=3
+  int getNumberOfElementsByColor() const;
   #ifdef USE_RAJA
-  void neighbors( const int & e, vectorInt const & neigh ) const;
+  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const;
   #elif defined USE_KOKKOS
-  void neighbors( const int & e, vectorInt const & neigh ) const;
+  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const;
   #else
-  void neighbors( const int & e, vectorInt & neigh ) const;
+  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt  & listOfElementsByColor) const;
   #endif
-  // get global coordinates of element e
-  #ifdef USE_RAJA
-  LVARRAY_HOST_DEVICE int  getXi( const int & numberOfPointsPerElement,
-                                  arrayRealView const & globalNodesCoords,
-                                  int const  localToGlobal[] , 
-                                  double  Xi[][2]) const;
-  #elif defined USE_KOKKOS
-  KOKKOS_FUNCTION int  getXi( const int & numberOfPointsPerElement,
-                              arrayReal const & globalNodesCoords,
-                              int const  localToGlobal[] , 
-                              double  Xi[][2]) const;
-  #else
-  int  getXi( const int & numberOfPointsPerElement,
-              arrayReal  & globalNodesCoords,
-              int const  localToGlobal[] , 
-              double  Xi[][2]) const;
-  #endif
+
+  // get number of Boundary Faces
+  int getNumberOfBoundaryFaces() const;
+
+  // get number of Boundary nodes
+  int getNumberOfBoundaryNodes() const;
+
   // get global DOF belonging to the faces of element e
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE int getGlobalDofOfFace(  const int & e,
@@ -158,6 +178,7 @@ public:
                           int const localToGlobal[],
                           int  nodesFace[][6]) const;
   #endif
+
   // provides informations about boundary  faces:
   // element number,
   // orientation of the face
@@ -168,22 +189,7 @@ public:
   #else
   void getBoundaryFacesInfos(arrayInt & faceInfos)const;
   #endif
-  // get list of interior Elements
-  #ifdef USE_RAJA
-  void getListOfInteriorElements(vectorInt const & listOfInteriorElements) const;
-  #elif defined USE_KOKKOS
-  void getListOfInteriorElements(vectorInt const & listOfInteriorElements) const;
-  #else
-  void getListOfInteriorElements(vectorInt & listOfInteriorElements) const;
-  #endif
-  //  get list of global interior nodes
-  #ifdef USE_RAJA
-  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt const & listOfInteriorNodes ) const;
-  #elif defined USE_KOKKOS
-  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt const & listOfInteriorNodes ) const;
-  #else
-  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt & listOfInteriorNodes ) const;
-  #endif
+
   //  get list of global boundary nodes
   #ifdef USE_RAJA
   int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt const & listOfBoundaryNodes ) const;
@@ -200,10 +206,16 @@ public:
   #else
   void getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFaceNode) const;
   #endif
-  // compute global to local node indes
+
+  // compute global to local node index
+  int Itoijk( const int & I, int & i, int & j, int & k ) const;
+
+  // compute global to local node index
   int Itoij( const int & I, int & i, int & j ) const;
+
   // project vector node to grid
   std::vector<std::vector<float>> projectToGrid( const int numberOfNodes, const std::vector<float> inputVector ) const;
+
 };
 }
 #endif //SIMPLE_MESH_

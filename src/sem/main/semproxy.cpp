@@ -16,18 +16,20 @@ void SEMProxy::init()
   numberOfElements=myMesh.getNumberOfElements();
 
   // allocate arrays and vectors
-  myRHSLocation=allocateArray2D<arrayReal>( myNumberOfRHS, 2 );
+  myRHSLocation=allocateArray2D<arrayReal>( myNumberOfRHS, 3 );
   myRHSTerm=allocateArray2D<arrayReal>( myNumberOfRHS, myNumSamples );
-  nodeList=allocateArray2D<arrayInt>(numberOfElements,(myOrderNumber+1)*(myOrderNumber+1));
+  int numberOfPointsPerElement=myMesh.getNumberOfPointsPerElement();
+  nodeList=allocateArray2D<arrayInt>(numberOfElements,numberOfPointsPerElement);
   pnGlobal=allocateArray2D<arrayReal>( numberOfNodes, 2 );
 
   // set number of rhs and location
-  myRHSLocation(0,0)=501;
-  myRHSLocation(0,1)=501;
-  cout << "Source location: "<<myRHSLocation(0,0)<<", "<<myRHSLocation(0,1)<<endl;
+  myRHSLocation(0,0)=1001;
+  myRHSLocation(0,1)=1001;
+  myRHSLocation(0,2)=1001;
+  cout << "Source location: "<<myRHSLocation(0,0)<<", "<<myRHSLocation(0,1)<<", "<<myRHSLocation(0,2)<<endl;
 
   // get element number of source term
-  myElementSource=myMesh.getElementNumberFromPoints( myRHSLocation(0,0), myRHSLocation(0,1) );
+  myElementSource=myMesh.getElementNumberFromPoints( myRHSLocation(0,0), myRHSLocation(0,1),myRHSLocation(0,2) );
   cout <<"Element number for the source location: "<<myElementSource<<endl;
 
   // initialize source term
@@ -43,17 +45,21 @@ void SEMProxy::init()
       cout<<"Sample "<<i<<"\t: sourceTerm = "<<sourceTerm[i]<<endl;
   }
 
+  printf("ici\n");
   // get nodelist 
   myMesh.globalNodesList( numberOfElements, nodeList );
 
+  printf("ici\n");
   rhsElement=allocateVector<vectorInt>(myNumberOfRHS);
   for( int i=0; i<myNumberOfRHS; i++ )
   {
     //extract element number for current rhs
     float x=myRHSLocation(i,0);
     float y=myRHSLocation(i,1);
-    int rhsE=myMesh.getElementNumberFromPoints( x, y );
+    float z=myRHSLocation(i,2);
+    int rhsE=myMesh.getElementNumberFromPoints( x, y,z );
     rhsElement[i]=rhsE;
+    printf(" rhsElement=%d\n",rhsElement[i]);
   }
 
   _CALIPER_MARK_END( "InitTime" );
