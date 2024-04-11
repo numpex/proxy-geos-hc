@@ -87,7 +87,7 @@ void SEMProxy::run()
     {
       cout<<" pnGlobal @ elementSource location "<<myElementSource
           <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),i1)<<endl;
-      //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
+      myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
     }
     swap( i1, i2 );
   }

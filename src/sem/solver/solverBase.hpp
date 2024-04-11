@@ -23,7 +23,14 @@ class solverBase
 {
 public:
 
+#ifdef USE_RAJA
+  LVARRAY_HOST_DEVICE solverBase(){};
+#elif defined USE_KOKKOS
+  KOKKOS_FUNCTION solverBase(){};
+#else
   solverBase(){};
+#endif
+
 #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE ~solverBase(){};
 #elif defined USE_KOKKOS
