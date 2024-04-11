@@ -178,7 +178,7 @@ struct FDTDKernel
           }
       }
 #endif
-     return (0);
+     return 0;
   }
 
   int pml3D(const int nx, const int ny, const int nz,

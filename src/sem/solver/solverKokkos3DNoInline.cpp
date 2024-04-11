@@ -40,39 +40,31 @@ void solverKokkos::computeOneStep(  const int & timeStep,
   Kokkos::parallel_for( numberOfElements, KOKKOS_CLASS_LAMBDA ( const int e ) 
   {
     // start parallel section
-    double B[125][6];
-    double R[125][125];
-    double massMatrixLocal[125];
-    double pnLocal[125];
-    double Y[125];
+    double B[64][6];
+    double R[64];
+    double massMatrixLocal[64];
+    double pnLocal[64];
+    double Y[64];
 
-    // compute Jacobian, massMatrix and B
-    int o=Qk.computeB( e,order,globalNodesList,globalNodesCoords,weights2D,
-                       derivativeBasisFunction1D,massMatrixLocal,B );
-    // compute stifness  matrix ( durufle's optimization)
-    int p=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights3D, B, derivativeBasisFunction1D, R );
     // get pnGlobal to pnLocal
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
       int localToGlobal=globalNodesList(e,i);
-      massMatrixLocal[i]/=(model[e]*model[e]);
       pnLocal[i]=pnGlobal(localToGlobal,i2);
     }
-    // compute Y=R*pnLocal
-    for( int i=0; i<numberOfPointsPerElement; i++ )
-    {
-      Y[i]=0;
-      for( int j=0; j<numberOfPointsPerElement; j++ )
-      {
-        Y[i]+=R[i][j]*pnLocal[j];
-      }
-    }
-    //compute gloval mass Matrix and global stiffness vector
+
+    // compute Jacobian, massMatrix and B
+    int o=Qk.computeB( e,order,globalNodesList,globalNodesCoords,weights3D,
+                       derivativeBasisFunction1D,massMatrixLocal,B );
+
+    // compute stifness  matrix ( durufle's optimization)
+    int p=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights3D, derivativeBasisFunction1D,B, pnLocal, R, Y );
+
+    //compute global mass Matrix and global stiffness vector
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
       int gIndex=globalNodesList(e,i);
-      //massMatrixGlobal[gIndex]+=massMatrixLocal(threadId,i)
-      //yGlobal[gIndex]+=Y(threadId,i);
+      massMatrixLocal[i]/=(model[e]*model[e]);
       Kokkos::atomic_add(&massMatrixGlobal[gIndex],massMatrixLocal[i]);
       Kokkos::atomic_add(&yGlobal[gIndex],Y[i]);
     } 

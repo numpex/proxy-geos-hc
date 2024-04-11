@@ -14,8 +14,8 @@
 void solverRaja::computeOneStep(  const int & timeStep,
                                   const float & timeSample,
                                   const int & order,
-                                  int & i1,
-                                  int & i2,
+                                  int & it1,
+                                  int & it2,
                                   const int & numberOfRHS,
                                   vectorInt & rhsElement,
                                   arrayReal & rhsTerm,
@@ -58,32 +58,34 @@ void solverRaja::computeOneStep(  const int & timeStep,
   RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfRHS ), [=] LVARRAY_HOST_DEVICE  ( int i ) 
   {
     int nodeRHS=d_globalNodesList(d_rhsElement[i],0);
-    d_pnGlobal(nodeRHS,i2)+=timeSample*timeSample*d_model[d_rhsElement[i]]*d_model[d_rhsElement[i]]*d_rhsTerm(i,timeStep);
+    d_pnGlobal(nodeRHS,it2)+=timeSample*timeSample*d_model[d_rhsElement[i]]*d_model[d_rhsElement[i]]*d_rhsTerm(i,timeStep);
   });
  
   int numberOfPointsPerElement=(order+1)*(order+1)*(order+1);
   RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfElements ), [=] LVARRAY_HOST_DEVICE ( int e )
   {
         // start parallel section
-	double B[125][6];
-        double R[125][125];
-        double massMatrixLocal[125];
-	double pnLocal[125];
-	double Y[125];
+	double B[64][6];
+        double R[64];
+        double massMatrixLocal[64];
+	double pnLocal[64];
+	double Y[64];
+	int    orderPow2=(order+1)*(order+1);
+        // get pnGlobal to pnLocal
+        for( int i=0; i<numberOfPointsPerElement; i++ )
+        {
+           int localToGlobal=d_globalNodesList(e,i);
+           pnLocal[i]=d_pnGlobal(localToGlobal,it2);
+        }
+
+	//compute Jac, B  and Mass Matrix
 	for (int i3=0;i3<order+1;i3++)
 	{
 	   for (int i2=0;i2<order+1;i2++)
 	   {
 	       for (int i1=0;i1<order+1;i1++)
 	       {
-	          int i=i1+i2*(order+1)+i3*(order+1)*(order+1);
-		  /*
-	              int localToGlobal=d_globalNodesList(e,i);
-                      double X=d_globalNodesCoords(localToGlobal,0);
-                      double Y=d_globalNodesCoords(localToGlobal,2);
-                      double Z=d_globalNodesCoords(localToGlobal,1);
-		  if(e==0)printf("element %d quadrature point %d  XZY=%lf %lf %lf\n",e,i,X,Z,Y);
-		  */
+	          int i=i1+i2*(order+1)+i3*orderPow2;
 	          // compute jacobian matrix
                   double jac00=0;
                   double jac01=0;
@@ -97,7 +99,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
 
 	          for (int j1=0;j1<order+1;j1++)
 	          {
-	              int j=j1+i2*(order+1)+i3*(order+1)*(order+1);
+	              int j=j1+i2*(order+1)+i3*orderPow2;
 	              int localToGlobal=d_globalNodesList(e,j);
                       double X=d_globalNodesCoords(localToGlobal,0);
                       double Y=d_globalNodesCoords(localToGlobal,2);
@@ -108,7 +110,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
 		  }
 	          for (int j2=0;j2<order+1;j2++)
 	          {
-	              int j=i1+j2*(order+1)+i3*(order+1)*(order+1);
+	              int j=i1+j2*(order+1)+i3*orderPow2;
 	              int localToGlobal=d_globalNodesList(e,j);
                       double X=d_globalNodesCoords(localToGlobal,0);
                       double Y=d_globalNodesCoords(localToGlobal,2);
@@ -119,7 +121,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
 	          }
 	          for (int j3=0;j3<order+1;j3++)
 	          {
-	              int j=i1+i2*(order+1)+j3*(order+1)*(order+1);
+	              int j=i1+i2*(order+1)+j3*orderPow2;
 	              int localToGlobal=d_globalNodesList(e,j);
                       double X=d_globalNodesCoords(localToGlobal,0);
                       double Y=d_globalNodesCoords(localToGlobal,2);
@@ -166,67 +168,59 @@ void solverRaja::computeOneStep(  const int & timeStep,
 
 	          //M
                   massMatrixLocal[i]=d_weights3D[i]*detJ;
-	      }
+               }
 	   }
         }
-        
+
+	// compute Stiffness matrixAND STIFFNESS VECTOR
 	for (int i3=0;i3<order+1;i3++)
 	{
 	   for (int i2=0;i2<order+1;i2++)
 	   {
 	       for (int i1=0;i1<order+1;i1++)
 	       {
-	          int i=i1+i2*(order+1)+i3*(order+1)*(order+1);
+	          int i=i1+i2*(order+1)+i3*orderPow2;
+
                   for( int j3=0; j3<order+1; j3++ )
                   {
                      for( int j2=0; j2<order+1; j2++ )
                      {
                         for( int j1=0; j1<order+1; j1++ )
                         {
-	                   int j=j1+j2*(order+1)+j3*(order+1)*(order+1);
-			   R[i][j]=0;
+	                   int j=j1+j2*(order+1)+j3*orderPow2;
+			   R[j]=0;
 			}
 	             }
 		  }
-	       }
-	   }
-        }	   
-	for (int i1=0;i1<order+1;i1++)
-	{
-	   for (int i2=0;i2<order+1;i2++)
-	   {
-	       for (int i3=0;i3<order+1;i3++)
-	       {
-	          int i=i1+i2*(order+1)+i3*(order+1)*(order+1);
 
 	          //B11
                   for( int j1=0; j1<order+1; j1++ )
                   {
-                      int j=j1+i2*(order+1)+i3*(order+1)*(order+1);
+                      int j=j1+i2*(order+1)+i3*orderPow2;
                       for( int l=0; l<order+1; l++ )
                       {
-                          R[i][j]+=d_weights3D[l+i2*(order+1)+i3*(order+1)*(order+1)]*(B[l+i2*(order+1)+i3*(order+1)*(order+1)][0]*
-		                d_derivativeBasisFunction1D(i1,l)*d_derivativeBasisFunction1D(j1,l));
+			  int ll=l+i2*(order+1)+i3*orderPow2;
+                          R[j]+=d_weights3D[ll]*(B[ll][0]*d_derivativeBasisFunction1D(i1,l)*d_derivativeBasisFunction1D(j1,l));
                       }
                   }
 		  //B22
                   for( int j2=0; j2<order+1; j2++ )
                   {
-                      int j=i1+j2*(order+1)+i3*(order+1)*(order+1);
+                      int j=i1+j2*(order+1)+i3*orderPow2;
                       for( int m=0; m<order+1; m++ )
                       {
-                          R[i][j]+=d_weights3D[i1+m*(order+1)+i3*(order+1)*(order+1)]*(B[i1+m*(order+1)+i3*(order+1)*(order+1)][1]*
-                                d_derivativeBasisFunction1D(i2,m)*d_derivativeBasisFunction1D(j2,m));
+			  int mm=i1+m*(order+1)+i3*orderPow2;
+                          R[j]+=d_weights3D[mm]*(B[mm][1]*d_derivativeBasisFunction1D(i2,m)*d_derivativeBasisFunction1D(j2,m));
                       }
                   }
                   //B33 
                   for( int j3=0; j3<order+1; j3++ )
                   {
-                      int j=i1+i2*(order+1)+j3*(order+1)*(order+1);
+                      int j=i1+i2*(order+1)+j3*orderPow2;
                       for( int n=0; n<order+1; n++ )
                       {
-                          R[i][j]+=d_weights3D[i1+i2*(order+1)+n*(order+1)*(order+1)]*(B[i1+i2*(order+1)+n*(order+1)*(order+1)][2]*
-                                d_derivativeBasisFunction1D(i3,n)*d_derivativeBasisFunction1D(j3,n));
+			  int nn=i1+i2*(order+1)+n*orderPow2;
+                          R[j]+=d_weights3D[nn]*(B[nn][2]*d_derivativeBasisFunction1D(i3,n)*d_derivativeBasisFunction1D(j3,n));
                       }
                   }
                   // B12,B21 (B[][3])
@@ -234,11 +228,11 @@ void solverRaja::computeOneStep(  const int & timeStep,
                   {
                     for( int j2=0; j2<order+1; j2++ )
                     {
-                      int j=j1+j2*(order+1)+i3*(order+1)*(order+1);
-                      R[i][j]+=d_weights3D[j1+i2*(order+1)+i3*(order+1)*(order+1)]*(B[j1+i2*(order+1)+i3*(order+1)*(order+1)][3]*
-	                      d_derivativeBasisFunction1D(i1,j1)*d_derivativeBasisFunction1D(j2,i2))+
-                              d_weights3D[i1+j2*(order+1)+i3*(order+1)*(order+1)]*(B[i1+j2*(order+1)+i3*(order+1)*(order+1)][3]*
-	                      d_derivativeBasisFunction1D(j1,i1)*d_derivativeBasisFunction1D(i2,j2));
+                      int j=j1+j2*(order+1)+i3*orderPow2;
+		      int k=j1+i2*(order+1)+i3*orderPow2;
+		      int l=i1+j2*(order+1)+i3*orderPow2;
+                      R[j]+=d_weights3D[k]*(B[k][3]*d_derivativeBasisFunction1D(i1,j1)*d_derivativeBasisFunction1D(j2,i2))+
+                            d_weights3D[l]*(B[l][3]*d_derivativeBasisFunction1D(j1,i1)*d_derivativeBasisFunction1D(i2,j2));
                     }
                   }
                   // B13,B31 (B[][4])
@@ -246,11 +240,11 @@ void solverRaja::computeOneStep(  const int & timeStep,
                   {
                     for( int j1=0; j1<order+1; j1++ )
                     {
-                      int j=j1+i2*(order+1)+i3*(order+1)*(order+1);
-                      R[i][j]+=d_weights3D[j1+i2*(order+1)+i3*(order+1)*(order+1)]*(B[j1+i2*(order+1)+i3*(order+1)*(order+1)][4]*
-	                       d_derivativeBasisFunction1D(j1,i1)*d_derivativeBasisFunction1D(j3,i3))+
-                               d_weights3D[j1+i2*(order+1)+j3*(order+1)*(order+1)]*(B[j1+i2*(order+1)+j3*(order+1)*(order+1)][4]*
-	                       d_derivativeBasisFunction1D(j1,i1)*d_derivativeBasisFunction1D(i3,j3));
+                      int j=j1+i2*(order+1)+i3*orderPow2;
+		      int k=j1+i2*(order+1)+i3*orderPow2;
+		      int l=j1+i2*(order+1)+j3*orderPow2;
+                      R[j]+=d_weights3D[k]*(B[k][4]*d_derivativeBasisFunction1D(j1,i1)*d_derivativeBasisFunction1D(j3,i3))+
+                            d_weights3D[l]*(B[l][4]*d_derivativeBasisFunction1D(j1,i1)*d_derivativeBasisFunction1D(i3,j3));
                     }
                   }
                   // B23,B32 (B[][5])
@@ -258,40 +252,30 @@ void solverRaja::computeOneStep(  const int & timeStep,
                   {
                     for( int j2=0; j2<order+1; j2++ )
                     {
-                      int j=i1+j2*(order+1)+j3*(order+1)*(order+1);
-                      R[i][j]+=d_weights3D[i1+j2*(order+1)+i3*(order+1)*(order+1)]*(B[i1+j2*(order+1)+i3*(order+1)*(order+1)][5]*
-	                       d_derivativeBasisFunction1D(i2,i2)*d_derivativeBasisFunction1D(j3,i3))+
-                               d_weights3D[i1+i2*(order+1)+j3*(order+1)*(order+1)]*(B[i1+i2*(order+1)+j3*(order+1)*(order+1)][5]*
-	                       d_derivativeBasisFunction1D(j2,i2)*d_derivativeBasisFunction1D(i3,j3));
+                      int j=i1+j2*(order+1)+j3*orderPow2;
+		      int k=i1+j2*(order+1)+i3*orderPow2;
+		      int l=i1+i2*(order+1)+j3*orderPow2;
+                      R[j]+=d_weights3D[k]*(B[k][5]*d_derivativeBasisFunction1D(i2,i2)*d_derivativeBasisFunction1D(j3,i3))+
+                            d_weights3D[l]*(B[l][5]*d_derivativeBasisFunction1D(j2,i2)*d_derivativeBasisFunction1D(i3,j3));
                     }
                   }
+
+                  Y[i]=0;
+                  for( int j=0; j<numberOfPointsPerElement; j++ )
+                  {
+                    Y[i]+=R[j]*pnLocal[j];
+                  }
+
                }
 	   }
         }
 
 
-       // get pnGlobal to pnLocal
-      for( int i=0; i<numberOfPointsPerElement; i++ )
-      {
-	int localToGlobal=d_globalNodesList(e,i);
-        massMatrixLocal[i]/=(d_model[e]*d_model[e]);
-        pnLocal[i]=d_pnGlobal(localToGlobal,i2);
-      }
-
-      // compute Y=R*pnLocal
-      for( int i=0; i<numberOfPointsPerElement; i++ )
-      {
-        Y[i]=0;
-        for( int j=0; j<numberOfPointsPerElement; j++ )
-        {
-          Y[i]+=R[i][j]*pnLocal[j];
-        }
-      }
-
       //compute global mass Matrix and global stiffness vector
       for( int i=0; i<numberOfPointsPerElement; i++ )
       {
         int gIndex=d_globalNodesList(e,i);
+        massMatrixLocal[i]/=(d_model[e]*d_model[e]);
         RAJA::atomicAdd< deviceAtomicPolicy >(&d_massMatrixGlobal[gIndex],massMatrixLocal[i]);
         RAJA::atomicAdd< deviceAtomicPolicy>(&d_yGlobal[gIndex],Y[i]);
       }
@@ -301,7 +285,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
   RAJA::forall< deviceExecPolicy>( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
     int I=d_listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
-    d_pnGlobal[I][i1]=2*d_pnGlobal[I][i2]-d_pnGlobal[I][i1]-tmp*d_yGlobal[I]/d_massMatrixGlobal[I];
+    d_pnGlobal[I][it1]=2*d_pnGlobal[I][it2]-d_pnGlobal[I][it1]-tmp*d_yGlobal[I]/d_massMatrixGlobal[I];
   });
 
   
@@ -310,7 +294,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
      int nodeRHS=d_globalNodesList(d_rhsElement[0],0);
      RAJA::forall< RAJA::seq_exec>( RAJA::RangeSegment( 0, numberOfNodes ), [=] LVARRAY_HOST_DEVICE ( int i )
      {
-          pnGlobal(nodeRHS,i1)=d_pnGlobal(nodeRHS,i1);
+          pnGlobal(nodeRHS,it1)=d_pnGlobal(nodeRHS,it1);
      });
   }
 }

@@ -40,43 +40,36 @@ void solverKokkos::computeOneStep( const int & timeStep,
     {
       // start parallel section
       int e=listOfElementsByColor(color,eColor);
-      double B[125][4];
-      double R[125][125];
-      double massMatrixLocal[125];
-      double pnLocal[125];
-      double Y[125];
-      // compute Jacobian, massMatrix and B
-      int o=Qk.computeB( e,order,globalNodesList,globalNodesCoords,weights2D,
-                         derivativeBasisFunction1D,massMatrixLocal,B );
-      // compute stifness  matrix ( durufle's optimization)
-      int p=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights3D, B, derivativeBasisFunction1D, R );
+      double B[64][4];
+      double R[64];
+      double massMatrixLocal[64];
+      double pnLocal[64];
+      double Y[64];
+
       // get pnGlobal to pnLocal
       for( int i=0; i<numberOfPointsPerElement; i++ )
       {
-        massMatrixLocal[i]/=(model[e]*model[e]);
         pnLocal[i]=pnGlobal(localToGlobal[i],i2);
       }
-      // compute Y=R*pnLocal
-      for( int i=0; i<numberOfPointsPerElement; i++ )
-      {
-        Y[i]=0;
-        for( int j=0; j<numberOfPointsPerElement; j++ )
-        {
-          Y[i]+=R[i][j]*pnLocal[j];
-        }
-      }
+
+      // compute Jacobian, massMatrix and B
+      int o=Qk.computeB( e,order,globalNodesList,globalNodesCoords,weights3D,
+                         derivativeBasisFunction1D,massMatrixLocal,B );
+
+      // compute stifness  matrix ( durufle's optimization)
+      int p=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights3D,  derivativeBasisFunction1D,B, pnLocal, R, Y );
+
       //compute gloval mass Matrix and global stiffness vector
       for( int i=0; i<numberOfPointsPerElement; i++ )
       {
         int gIndex=localToGlobal[i];
-        //Kokkos::atomic_add(&massMatrixGlobal[gIndex],massMatrixLocal[i]);
-        //Kokkos::atomic_add(&yGlobal[gIndex],Y[i]);
+        massMatrixLocal[i]/=(model[e]*model[e]);
         massMatrixGlobal[gIndex]+=massMatrixLocal[i];
         yGlobal[gIndex]+=Y[i];
       } 
     });
-    //Kokkos::fence();
   } // end color loop
+
   // update pressure
   Kokkos::parallel_for( range_policy(0,numberOfInteriorNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {

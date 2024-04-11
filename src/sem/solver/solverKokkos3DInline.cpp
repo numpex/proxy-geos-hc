@@ -14,8 +14,8 @@
 void solverKokkos::computeOneStep(  const int & timeStep,
                                    const float & timeSample,
                                    const int & order,
-                                   int & i1,
-                                   int & i2,
+                                   int & it1,
+                                   int & it2,
                                    const int & numberOfRHS,
                                    vectorInt & rhsElement,
                                    arrayReal & rhsTerm,
@@ -33,33 +33,35 @@ void solverKokkos::computeOneStep(  const int & timeStep,
   Kokkos::parallel_for(numberOfRHS,KOKKOS_CLASS_LAMBDA (const int i)
   {
     int nodeRHS=globalNodesList(rhsElement[i],0);
-    pnGlobal(nodeRHS,i2)+=timeSample*timeSample*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
+    pnGlobal(nodeRHS,it2)+=timeSample*timeSample*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   });
  
-  int numberOfPointsPerElement=(order+1)*(order+1);
+  int numberOfPointsPerElement=orderPow2;
   Kokkos::parallel_for( numberOfElements, KOKKOS_CLASS_LAMBDA ( const int e )
   {
         // start parallel section
-	double B[125][6];
-        double R[125][125];
-        double massMatrixLocal[125];
-	double pnLocal[125];
-	double Y[125];
+	double B[64][6];
+        double R[64];
+        double massMatrixLocal[64];
+	double pnLocal[64];
+	double Y[64];
+	int    orderPow2=orderPow2;
 
+        // get pnGlobal to pnLocal
+        for( int i=0; i<numberOfPointsPerElement; i++ )
+        {
+           int localToGlobal=globalNodesList(e,i);
+           pnLocal[i]=pnGlobal(localToGlobal,it2);
+        }
+
+	// compute Jac and B
 	for (int i3=0;i3<order+1;i3++)
 	{
 	   for (int i2=0;i2<order+1;i2++)
 	   {
 	       for (int i1=0;i1<order+1;i1++)
 	       {
-	          int i=i1+i2*(order+1)+i3*(order+1)*(order+1);
-		  /*
-	              int localToGlobal=globalNodesList(e,i);
-                      double X=globalNodesCoords(localToGlobal,0);
-                      double Y=globalNodesCoords(localToGlobal,2);
-                      double Z=globalNodesCoords(localToGlobal,1);
-		  if(e==0)printf("element %d quadrature point %d  XZY=%lf %lf %lf\n",e,i,X,Z,Y);
-		  */
+	          int i=i1+i2*(order+1)+i3*orderPow2;
 	          // compute jacobian matrix
                   double jac00=0;
                   double jac01=0;
@@ -73,7 +75,7 @@ void solverKokkos::computeOneStep(  const int & timeStep,
 
 	          for (int j1=0;j1<order+1;j1++)
 	          {
-	              int j=j1+i2*(order+1)+i3*(order+1)*(order+1);
+	              int j=j1+i2*(order+1)+i3*orderPow2;
 	              int localToGlobal=globalNodesList(e,j);
                       double X=globalNodesCoords(localToGlobal,0);
                       double Y=globalNodesCoords(localToGlobal,2);
@@ -84,7 +86,7 @@ void solverKokkos::computeOneStep(  const int & timeStep,
 		  }
 	          for (int j2=0;j2<order+1;j2++)
 	          {
-	              int j=i1+j2*(order+1)+i3*(order+1)*(order+1);
+	              int j=i1+j2*(order+1)+i3*orderPow2;
 	              int localToGlobal=globalNodesList(e,j);
                       double X=globalNodesCoords(localToGlobal,0);
                       double Y=globalNodesCoords(localToGlobal,2);
@@ -95,7 +97,7 @@ void solverKokkos::computeOneStep(  const int & timeStep,
 	          }
 	          for (int j3=0;j3<order+1;j3++)
 	          {
-	              int j=i1+i2*(order+1)+j3*(order+1)*(order+1);
+	              int j=i1+i2*(order+1)+j3*orderPow2;
 	              int localToGlobal=globalNodesList(e,j);
                       double X=globalNodesCoords(localToGlobal,0);
                       double Y=globalNodesCoords(localToGlobal,2);
@@ -146,63 +148,45 @@ void solverKokkos::computeOneStep(  const int & timeStep,
 	   }
         }
         
-	for (int i3=0;i3<order+1;i3++)
-	{
-	   for (int i2=0;i2<order+1;i2++)
-	   {
-	       for (int i1=0;i1<order+1;i1++)
-	       {
-	          int i=i1+i2*(order+1)+i3*(order+1)*(order+1);
-                  for( int j3=0; j3<order+1; j3++ )
-                  {
-                     for( int j2=0; j2<order+1; j2++ )
-                     {
-                        for( int j1=0; j1<order+1; j1++ )
-                        {
-	                   int j=j1+j2*(order+1)+j3*(order+1)*(order+1);
-			   R[i][j]=0;
-			}
-	             }
-		  }
-	       }
-	   }
-        }	   
+	// compute R and Y
 	for (int i1=0;i1<order+1;i1++)
 	{
 	   for (int i2=0;i2<order+1;i2++)
 	   {
 	       for (int i3=0;i3<order+1;i3++)
 	       {
-	          int i=i1+i2*(order+1)+i3*(order+1)*(order+1);
-
-	          //B11
+                  for( int j=0; j<numberOfPointsPerElement; j++ )
+                  {
+	             R[j]=0;
+		  }
+                  //B11
                   for( int j1=0; j1<order+1; j1++ )
                   {
-                      int j=j1+i2*(order+1)+i3*(order+1)*(order+1);
+                      int j=j1+i2*(order+1)+i3*orderPow2;
                       for( int l=0; l<order+1; l++ )
                       {
-                          R[i][j]+=weights3D[l+i2*(order+1)+i3*(order+1)*(order+1)]*(B[l+i2*(order+1)+i3*(order+1)*(order+1)][0]*
-		                derivativeBasisFunction1D(i1,l)*derivativeBasisFunction1D(j1,l));
+                          int ll=l+i2*(order+1)+i3*orderPow2;
+                          R[j]+=weights3D[ll]*(B[ll][0]*derivativeBasisFunction1D(i1,l)*derivativeBasisFunction1D(j1,l));
                       }
                   }
-		  //B22
+                  //B22
                   for( int j2=0; j2<order+1; j2++ )
                   {
-                      int j=i1+j2*(order+1)+i3*(order+1)*(order+1);
+                      int j=i1+j2*(order+1)+i3*orderPow2;
                       for( int m=0; m<order+1; m++ )
                       {
-                          R[i][j]+=weights3D[i1+m*(order+1)+i3*(order+1)*(order+1)]*(B[i1+m*(order+1)+i3*(order+1)*(order+1)][1]*
-                                derivativeBasisFunction1D(i2,m)*derivativeBasisFunction1D(j2,m));
+                          int mm=i1+m*(order+1)+i3*orderPow2;
+                          R[j]+=weights3D[mm]*(B[mm][1]*derivativeBasisFunction1D(i2,m)*derivativeBasisFunction1D(j2,m));
                       }
                   }
                   //B33 
                   for( int j3=0; j3<order+1; j3++ )
                   {
-                      int j=i1+i2*(order+1)+j3*(order+1)*(order+1);
+                      int j=i1+i2*(order+1)+j3*orderPow2;
                       for( int n=0; n<order+1; n++ )
                       {
-                          R[i][j]+=weights3D[i1+i2*(order+1)+n*(order+1)*(order+1)]*(B[i1+i2*(order+1)+n*(order+1)*(order+1)][2]*
-                                derivativeBasisFunction1D(i3,n)*derivativeBasisFunction1D(j3,n));
+                          int nn=i1+i2*(order+1)+n*orderPow2;
+                          R[j]+=weights3D[nn]*(B[nn][2]*derivativeBasisFunction1D(i3,n)*derivativeBasisFunction1D(j3,n));
                       }
                   }
                   // B12,B21 (B[][3])
@@ -210,11 +194,11 @@ void solverKokkos::computeOneStep(  const int & timeStep,
                   {
                     for( int j2=0; j2<order+1; j2++ )
                     {
-                      int j=j1+j2*(order+1)+i3*(order+1)*(order+1);
-                      R[i][j]+=weights3D[j1+i2*(order+1)+i3*(order+1)*(order+1)]*(B[j1+i2*(order+1)+i3*(order+1)*(order+1)][3]*
-	                      derivativeBasisFunction1D(i1,j1)*derivativeBasisFunction1D(j2,i2))+
-                              weights3D[i1+j2*(order+1)+i3*(order+1)*(order+1)]*(B[i1+j2*(order+1)+i3*(order+1)*(order+1)][3]*
-	                      derivativeBasisFunction1D(j1,i1)*derivativeBasisFunction1D(i2,j2));
+                      int j=j1+j2*(order+1)+i3*orderPow2;
+                      int k=j1+i2*(order+1)+i3*orderPow2;
+                      int l=i1+j2*(order+1)+i3*orderPow2;
+                      R[j]+=weights3D[k]*(B[k][3]*derivativeBasisFunction1D(i1,j1)*derivativeBasisFunction1D(j2,i2))+
+                            weights3D[l]*(B[l][3]*derivativeBasisFunction1D(j1,i1)*derivativeBasisFunction1D(i2,j2));
                     }
                   }
                   // B13,B31 (B[][4])
@@ -222,11 +206,11 @@ void solverKokkos::computeOneStep(  const int & timeStep,
                   {
                     for( int j1=0; j1<order+1; j1++ )
                     {
-                      int j=j1+i2*(order+1)+i3*(order+1)*(order+1);
-                      R[i][j]+=weights3D[j1+i2*(order+1)+i3*(order+1)*(order+1)]*(B[j1+i2*(order+1)+i3*(order+1)*(order+1)][4]*
-	                       derivativeBasisFunction1D(j1,i1)*derivativeBasisFunction1D(j3,i3))+
-                               weights3D[j1+i2*(order+1)+j3*(order+1)*(order+1)]*(B[j1+i2*(order+1)+j3*(order+1)*(order+1)][4]*
-	                       derivativeBasisFunction1D(j1,i1)*derivativeBasisFunction1D(i3,j3));
+                      int j=j1+i2*(order+1)+i3*orderPow2;
+                      int k=j1+i2*(order+1)+i3*orderPow2;
+                      int l=j1+i2*(order+1)+j3*orderPow2;
+                      R[j]+=weights3D[k]*(B[k][4]*derivativeBasisFunction1D(j1,i1)*derivativeBasisFunction1D(j3,i3))+
+			    weights3D[l]*(B[l][4]*derivativeBasisFunction1D(j1,i1)*derivativeBasisFunction1D(i3,j3));
                     }
                   }
                   // B23,B32 (B[][5])
@@ -234,50 +218,46 @@ void solverKokkos::computeOneStep(  const int & timeStep,
                   {
                     for( int j2=0; j2<order+1; j2++ )
                     {
-                      int j=i1+j2*(order+1)+j3*(order+1)*(order+1);
-                      R[i][j]+=weights3D[i1+j2*(order+1)+i3*(order+1)*(order+1)]*(B[i1+j2*(order+1)+i3*(order+1)*(order+1)][5]*
-	                       derivativeBasisFunction1D(i2,i2)*derivativeBasisFunction1D(j3,i3))+
-                               weights3D[i1+i2*(order+1)+j3*(order+1)*(order+1)]*(B[i1+i2*(order+1)+j3*(order+1)*(order+1)][5]*
-	                       derivativeBasisFunction1D(j2,i2)*derivativeBasisFunction1D(i3,j3));
+                      int j=i1+j2*(order+1)+j3*orderPow2;
+                      int k=i1+j2*(order+1)+i3*orderPow2;
+                      int l=i1+i2*(order+1)+j3*orderPow2;
+                      R[j]+=weights3D[k]*(B[k][5]*derivativeBasisFunction1D(i2,i2)*derivativeBasisFunction1D(j3,i3))+
+                            weights3D[l]*(B[l][5]*derivativeBasisFunction1D(j2,i2)*derivativeBasisFunction1D(i3,j3));
                     }
                   }
+
+
+	          int i=i1+i2*(order+1)+i3*orderPow2;
+                  Y[i]=0;
+                  for( int j=0; j<numberOfPointsPerElement; j++ )
+                  {
+                    Y[i]+=R[j]*pnLocal[j];
+                  }
+
                }
 	   }
         }
 
 
-       // get pnGlobal to pnLocal
-      for( int i=0; i<numberOfPointsPerElement; i++ )
-      {
-	int localToGlobal=globalNodesList(e,i);
-        massMatrixLocal[i]/=(model[e]*model[e]);
-        pnLocal[i]=pnGlobal(localToGlobal,i2);
-      }
 
-      // compute Y=R*pnLocal
-      for( int i=0; i<numberOfPointsPerElement; i++ )
-      {
-        Y[i]=0;
-        for( int j=0; j<numberOfPointsPerElement; j++ )
-        {
-          Y[i]+=R[i][j]*pnLocal[j];
-        }
-      }
 
       //compute global mass Matrix and global stiffness vector
       for( int i=0; i<numberOfPointsPerElement; i++ )
       {
         int gIndex=globalNodesList(e,i);
-        RAJA::atomicAdd< deviceAtomicPolicy >(&massMatrixGlobal[gIndex],massMatrixLocal[i]);
-        RAJA::atomicAdd< deviceAtomicPolicy>(&yGlobal[gIndex],Y[i]);
+        massMatrixLocal[i]/=(model[e]*model[e]);
+	Kokkos::atomic_add(&massMatrixGlobal[gIndex],massMatrixLocal[i]);
+        Kokkos::atomic_add(&yGlobal[gIndex],Y[i]);
       }
 
   });
-  // update pressure
-  RAJA::forall< deviceExecPolicy>( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
+    // update pressure
+  Kokkos::parallel_for( range_policy(0,numberOfInteriorNodes), KOKKOS_CLASS_LAMBDA ( const int i )
+  {
     int I=listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
-    pnGlobal[I][i1]=2*pnGlobal[I][i2]-pnGlobal[I][i1]-tmp*yGlobal[I]/massMatrixGlobal[I];
-  });
+    pnGlobal(I,it1)=2*pnGlobal(I,it2)-pnGlobal(I,it1)-tmp*yGlobal[I]/massMatrixGlobal[I];
+  } );
+
   Kokkos::fence();
 }
