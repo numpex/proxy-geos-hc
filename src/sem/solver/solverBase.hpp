@@ -61,6 +61,8 @@ public:
 
   int i1=0, i2=1;
 
+  static constexpr int NumPointsPerElem=8;
+
   // get infos from mesh
   int numberOfNodes;
   int numberOfElements;
@@ -103,6 +105,6 @@ public:
   
   simpleMesh mesh;
   QkGL Qk;
-  
+
 };
 #endif //SOLVER_BASE_HPP_

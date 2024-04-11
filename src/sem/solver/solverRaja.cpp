@@ -65,11 +65,12 @@ void solverRaja::computeOneStep(  const int & timeStep,
   RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfElements ), [=] LVARRAY_HOST_DEVICE ( int e )
   {
         // start parallel section
-	double B[64][6];
-        double R[64];
-        double massMatrixLocal[64];
-	double pnLocal[64];
-	double Y[64];
+	double B[NumPointsPerElem][6];
+        double R[NumPointsPerElem];
+        double massMatrixLocal[NumPointsPerElem];
+	double pnLocal[NumPointsPerElem];
+	double Y[NumPointsPerElem];
+
 	int    orderPow2=(order+1)*(order+1);
         // get pnGlobal to pnLocal
         for( int i=0; i<numberOfPointsPerElement; i++ )
