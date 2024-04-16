@@ -22,6 +22,12 @@
 // add Tests directory (CMake option)
 #cmakedefine addTests 
 
+// Enables use of ENABLE_HIP (CMake option)
+#cmakedefine ENABLE_HIP
+
+// Enables use of ENABLE_CUDA (CMake option)
+#cmakedefine ENABLE_CUDA
+
 #endif
 
 

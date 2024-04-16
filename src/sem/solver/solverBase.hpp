@@ -13,8 +13,7 @@
 #include    "QkGL.hpp"
 #include    "simpleMesh.hpp"
 #include    "dataType.hpp"
-#include    "omp.h"
-#include    "vector"
+#include    "commonMacro.hpp"
 
 using namespace grid;
 using namespace FE;
@@ -23,14 +22,8 @@ class solverBase
 {
 public:
 
-  solverBase(){};
-#ifdef USE_RAJA
-  LVARRAY_HOST_DEVICE ~solverBase(){};
-#elif defined USE_KOKKOS
-  KOKKOS_FUNCTION ~solverBase(){};
-#else
-  ~solverBase(){};
-#endif
+PROXY_HOST_DEVICE solverBase(){};
+PROXY_HOST_DEVICE ~solverBase(){};
 
   /**
    * @brief computeFEInit function:
@@ -80,6 +73,7 @@ public:
   vectorDouble quadraturePoints;
   vectorDouble weights;
   vectorDouble weights2D;
+  vectorDouble weights3D;
 
   // get basis function and corresponding derivatives
   arrayDouble basisFunction1D;
@@ -89,8 +83,8 @@ public:
   arrayDouble derivativeBasisFunction2DY;
 
   //shared arrays
-  vectorDouble massMatrixGlobal;
-  vectorDouble yGlobal;
+  vectorReal massMatrixGlobal;
+  vectorReal yGlobal;
   vectorReal ShGlobal;
   
   simpleMesh mesh;

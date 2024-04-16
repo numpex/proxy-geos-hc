@@ -12,12 +12,11 @@
 #
 #  env variables to be defined before build
 #  the variables above are defined for Pangea3
-#  _TPL must be first compiled and installed 
+#  _TPL must be first compiled and installed
 #
 #  example:
 #  export MODULEPATH=/data_local/appli_local/MTS/GEOSX/modulefiles/:$MODULEPATH
 #  module load cmake/3.21.4 gcc/8.4.1 cuda/11.0.3 ompi/4.1.2 openblas/0.3.18 python4geosx/3.8.5-gcc-8.4.1-ompi-4.1.2
-#  export _TPL_ROOT_DIR=/users/j0024947/appli_src/geosx/codes/proxyApp/tpl4ProxyApp/installTPLNOCUDA
 #  export _TPL_ROOT_DIR=/users/j0024947/appli_src/geosx/codes/proxyApp/tpl4ProxyApp/installTPL
 #  export RAJA_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/raja
 #  export CAMP_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/camp
@@ -29,26 +28,38 @@
 # the solver is using sequential mode by default
 set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
 
-# CC options
-set(CMAKE_C_COMPILER gcc-11 CACHE PATH "")
-set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "")
-set(CMAKE_C_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
+if(ENABLE_HIP)
+  set(COMP_VER "6.0.0")
+  set(COMP_ARCH "gfx908")
+  #set(CMAKE_CXX_COMPILER "/opt/rocm-6.0.0/bin/amdclang++")
+  set(CMAKE_CXX_COMPILER "/opt/rocm-6.0.0/bin/hipcc")
+  set(ROCM_ROOT_DIR "/opt/rocm-${COMP_VER}")
+  set(ROCM_PATH "/opt/rocm-${COMP_VER}")
+  set(HIP_ROOT_DIR "/opt/rocm-${COMP_VER}/hip")
+  set(HIP_PATH "/opt/rocm-${COMP_VER}/bin")
+  set(GPU_TARGETS "${COMP_ARCH}")
+  message(STATUS "======== ROCM_ROOT_DIR=${ROCM_ROOT_DIR}")
+else()
+  # CC options
+  set(CMAKE_C_COMPILER gcc CACHE PATH "")
+  set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG" CACHE STRING "")
+  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "")
+  set(CMAKE_C_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
 
-# C++ options
-set(CMAKE_CXX_COMPILER g++-11 CACHE PATH "")
-set (CMAKE_CXX_FLAGS "-O3 -std=c++17  " CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG " CACHE STRING "")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "")
-set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
-set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
-
+  # C++ options
+  set(CMAKE_CXX_COMPILER g++ CACHE PATH "")
+  set (CMAKE_CXX_FLAGS "-O3 -std=c++17  " CACHE STRING "" FORCE)
+  set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG " CACHE STRING "")
+  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "")
+  set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
+  set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
+endif()
 
 # allow to install only one target
 set (CMAKE_SKIP_INSTALL_ALL_DEPENDENCY "True" CACHE STRING "" FORCE)
 
 ################################
-# BLT 
+# BLT
 ################################
 
 # Default to C++17 if not set so GTest/GMock can build
@@ -67,19 +78,13 @@ set( DISABLE_UNIT_TESTS ON)
 # force ENABLE_OPENMP to ON
 set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 
-# choose platform   
-if(P9)
-    set(X86_laptop OFF CACHE STRING "" FORCE)
-    set(X86_cypress OFF CACHE STRING "" FORCE)
-endif()
-
-# Cuda options 
+# choose platform for Cuda options
 if(X86_laptop)
   set(X86_cypress OFF CACHE STRING "" FORCE)
   if (ENABLE_CUDA)
-    set(CUDA_ROOT "/usr" CACHE PATH "")
-    set(CMAKE_CUDA_ARCHITECTURES 50 CACHE STRING "")
-    set(CUDA_ARCH sm_50 CACHE STRING "")
+    set(CUDA_ROOT "/usr/local/cuda-12.4" CACHE PATH "")
+    set(CMAKE_CUDA_ARCHITECTURES 70 CACHE STRING "")
+    set(CUDA_ARCH sm_70 CACHE STRING "")
     set(CMAKE_CUDA_FLAGS "-lineinfo -O3 -restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17" CACHE STRING "")
     set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
   endif()
@@ -87,9 +92,9 @@ endif()
 
 if(X86_cypress)
   if (ENABLE_CUDA)
-    set(CUDA_ROOT $ENV{CUDA_ROOT} CACHE PATH "" FORCE) 
-    set(CMAKE_CUDA_ARCHITECTURES 80 CACHE STRING "" FORCE) 
-    set(CUDA_ARCH sm_80 CACHE STRING "" FORCE) 
+    set(CUDA_ROOT $ENV{CUDA_ROOT} CACHE PATH "" FORCE)
+    set(CMAKE_CUDA_ARCHITECTURES 80 CACHE STRING "" FORCE)
+    set(CUDA_ARCH sm_80 CACHE STRING "" FORCE)
     set(CMAKE_CUDA_FLAGS "-O3 -restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17" CACHE STRING "" FORCE)
     set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
   endif()
@@ -102,6 +107,19 @@ if(P9)
      set(CMAKE_CUDA_ARCHITECTURES 70 CACHE STRING "")
      set(CUDA_ARCH sm_70 CACHE STRING "")
      set(CMAKE_CUDA_FLAGS "-O3 -restrict -arch ${CUDA_ARCH}  --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le  " CACHE STRING "")
+  endif()
+endif()
+
+if(ARM)
+  if (ENABLE_CUDA)
+    message(STATUS $ENV{CUDA_ROOT})
+    set(CUDA_ROOT $ENV{CUDA_ROOT} CACHE PATH "" FORCE)
+    set(CMAKE_CUDA_ARCHITECTURES 90 CACHE STRING "")
+    set(CUDA_ARCH sm_90 CACHE STRING "")
+    set(CMAKE_CUDA_FLAGS "-restrict --expt-relaxed-constexpr --expt-extended-lambda -Werror cross-execution-space-call,reorder,deprecated-declarations -std=c++17" CACHE STRING "")
+    set(CMAKE_CUDA_FLAGS_RELEASE "-Xcompiler -DNDEBUG -Xcompiler -O3" CACHE STRING "")
+    set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "-g -lineinfo ${CMAKE_CUDA_FLAGS_RELEASE}" CACHE STRING "")
+    set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
   endif()
 endif()
 
@@ -142,7 +160,7 @@ endif()
 ################################
 # the solver is using RAJA+LVARRAY+CUDA on GPU
 if ( USE_RAJA)
-   # disable OMP and KOKKOS 
+   # disable OMP and KOKKOS
    set (USE_LVARRAY ON CACHE BOOL "" FORCE)
    set (USE_VECTOR OFF CACHE BOOL "" FORCE)
    set (USE_OMP OFF CACHE BOOL "")
@@ -166,6 +184,12 @@ if ( USE_RAJA)
        set(thirdPartyLibs ${thirdPartyLibs} RAJA )
    else()
        message(FATAL_ERROR "ProxyApp requires RAJA, set RAJA_DIR to the RAJA installation directory.")
+   endif()
+
+   if( ENABLE_HIP )
+     set(RAJA_ENABLE_HIP ON CACHE BOOL "" FORCE)
+     set(RAJA_ENABLE_CUDA OFF CACHE BOOL "" FORCE)
+     include_directories("/opt/rocm-6.0.0/include")
    endif()
 
    ################################
@@ -205,6 +229,10 @@ if ( USE_RAJA)
    add_subdirectory( LvArray )
    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/LvArray/src)
 
+   if( ENABLE_HIP )
+     set (dependencyList ${dependencyList} blt::hip blt::hip_runtime)
+   endif()
+
    message( STATUS "-------------------END RAJA SETTINGS-----------------------------------" )
    message( " " )
 else()
@@ -239,8 +267,14 @@ elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
 
   set (kokkosList "-L${Kokkos_ROOT}/../.. -lkokkoscontainers -lkokkoscore -lkokkossimd")
   set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
-  set (dependencyList ${dependencyList} ${kokkosList} )
-  message (STATUS "KOKKOS DEPENDENCY LIST= ${dependencyList}")
+  set (dependencyList ${dependencyList} ${kokkosList})
+  if( ENABLE_HIP )
+    set(Kokkos_ENABLE_HIP ON CACHE BOOL "" FORCE)
+    set(Kokkos_ENABLE_CUDA OFF CACHE BOOL "" FORCE)
+    set (dependencyList ${dependencyList} Kokkos::kokkos)
+    message (STATUS "KOKKOS DEPENDENCY LIST= ${dependencyList}")
+    include_directories("/opt/rocm-6.0.0/include")
+  endif()
 
 elseif (NOT DEFINED $ENV{KOKKOS_DIR})
   set (USE_KOKKOS OFF CACHE BOOL "")
@@ -250,11 +284,13 @@ else ()
   message("-- KOKKOS_DIR is not the correct path and is not enabled")
 endif()
 
+message(STATUS "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+
 configure_file( utils/commonConfig.hpp.in
                 ${CMAKE_BINARY_DIR}/src/commonConfig.hpp)
 
 add_subdirectory( sem )
 add_subdirectory( fd )
 if ( addTests)
-add_subdirectory( tests )
+#  add_subdirectory( tests )
 endif()

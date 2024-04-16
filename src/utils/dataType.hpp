@@ -2,10 +2,8 @@
 #define DATATYPE_HPP_
 
 #include "commonConfig.hpp"
-#include <iostream>
 
 #ifdef USE_VECTOR
-  #include <vector>
   template<class T> class Vector 
   {
   public:
@@ -38,6 +36,7 @@
   private:
     std::vector< std::vector< T > > data;
   };
+
   template< class T > class Array3D
   {
   public:
@@ -60,6 +59,11 @@
   using array3DReal=Array3D< float >;
   using array3DDouble=Array3D< double >;
 
+  using vectorDoubleView=std::vector< double >;
+  using arrayIntView=Array2D< int >;
+  using arrayRealView=Array2D< float >;
+  using arrayDoubleView=Array2D< double >;
+ 
   template<class T>
   T allocateVector(int n1)
   {
@@ -91,9 +95,15 @@
   #include "ChaiBuffer.hpp"
   using hostExecPolicy=RAJA::omp_parallel_for_exec;
   using hostAtomicPolicy=RAJA::omp_atomic;
+  #ifdef ENABLE_CUDA
   using deviceAtomicPolicy=RAJA::cuda_atomic;
   using deviceExecPolicy=RAJA::cuda_exec<32>;
-  // define vectors and  arrays.
+  #endif
+  #ifdef ENABLE_HIP
+  using deviceAtomicPolicy=RAJA::hip_atomic;
+  using deviceExecPolicy=RAJA::hip_exec<32>;
+  #endif
+ // define vectors and  arrays.
   using vectorInt=LvArray::Array< int,
                                   1,
                                   camp::idx_seq< 0 >,
@@ -211,16 +221,25 @@
 #endif //USE_LVARRAY
 
 #ifdef USE_KOKKOS
+
+  #ifdef ENABLE_HIP
+    #define __HIP_PLATFORM_AMD__ 1
+  #endif
+
   #include <Kokkos_Core.hpp>
   #define MemSpace Kokkos::SharedSpace
+  //#define MemSpace Kokkos::HostSpace
+  //using DeviceMemorySpace = typename Kokkos::DefaultExecutionSpace::memory_space;
   using ExecSpace = MemSpace::execution_space;
   using range_policy = Kokkos::RangePolicy<>;
   using Layout=Kokkos::LayoutLeft;
+
   //#ifdef ENABLE_CUDA
   //  using Layout=Kokkos::LayoutLeft;
   //#else
   //  using Layout=Kokkos::LayoutRight;
   //#endif
+
   typedef Kokkos::View<int*,     Layout, MemSpace> vectorInt;
   typedef Kokkos::View<float*,   Layout,  MemSpace> vectorReal;
   typedef Kokkos::View<double*,  Layout, MemSpace> vectorDouble;
@@ -232,6 +251,25 @@
   typedef Kokkos::View<int***,    Layout, MemSpace> array3DInt;
   typedef Kokkos::View<float***,  Layout, MemSpace> array3DReal;
   typedef Kokkos::View<double***, Layout, MemSpace> array3DDouble;
+
+  typedef Kokkos::View<double*,  Layout, MemSpace> vectorDoubleView;
+  typedef Kokkos::View<float*,   Layout,  MemSpace> vectorRealView;
+  typedef Kokkos::View<int**,    Layout, MemSpace> arrayIntView;
+  typedef Kokkos::View<float**,  Layout, MemSpace> arrayRealView;
+  typedef Kokkos::View<double**, Layout, MemSpace> arrayDoubleView;
+  /*
+  typedef Kokkos::View<int*,     Layout, DeviceMemorySpace> vectorIntView;
+  typedef Kokkos::View<float*,   Layout,  DeviceMemorySpace> vectorRealView;
+  typedef Kokkos::View<double*,  Layout, DeviceMemorySpace> vectorDoubleView;
+
+  typedef Kokkos::View<int**,    Layout, DeviceMemorySpace> arrayIntView;
+  typedef Kokkos::View<float**,  Layout, DeviceMemorySpace> arrayRealView;
+  typedef Kokkos::View<double**, Layout, DeviceMemorySpace> arrayDoubleView;
+
+  typedef Kokkos::View<int***,    Layout, DeviceMemorySpace> array3DIntView;
+  typedef Kokkos::View<float***,  Layout, DeviceMemorySpace> array3DRealView;
+  typedef Kokkos::View<double***, Layout, DeviceMemorySpace> array3DDoubleView;
+ */
 
   template<class T>
   T allocateVector(int n1)

@@ -11,11 +11,8 @@
 #include <iostream>
 #include <fstream>
 
-#include "commonMacro.hpp"
-#include "QkGL.hpp"
-#include "simpleMesh.hpp"
+#include "solver.hpp"
 #include "utils.hpp"
-#include "dataType.hpp"
 
 /**
  * @class SEMProxy
@@ -62,7 +59,7 @@ protected:
   float myTimeStep=0.001;
 
   const int myNumSamples=myTimeMax/myTimeStep;
-  const int myOrderNumber=2;
+  const int myOrderNumber=1;
   
    // arrays
   arrayReal myRHSLocation;
@@ -71,21 +68,13 @@ protected:
   arrayReal pnGlobal;
 
   // initialize mesh
-  simpleMesh  myMesh {100, 100, 2000, 2000, myOrderNumber};
+  simpleMesh  myMesh {200, 200,200, 2000, 2000, 2000, myOrderNumber};
 
   QkGL myQk;
   solverUtils myUtils;
 
   vectorInt rhsElement;
-#if defined(USE_RAJA)
-  solverRaja mySolver;
-#elif defined(USE_OMP)
-  solverOMP mySolver;
-#elif defined(USE_KOKKOS)
-  solverKokkos mySolver;
-#else
-  solverSEQUENTIAL mySolver;
-#endif
+  SOLVER mySolver;
 
 };
 

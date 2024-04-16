@@ -1,14 +1,14 @@
 //************************************************************************
 //   proxy application v.0.0.1
 //
-//  solverKokkos.hpp: simple 2D acoustive wave equation solver
+//  solverKokkos.cpp: 2D acoustive wave equation solver
 //
 //  the solverKokkos class is derived from the solverBase class
 //  with the KOKKOS implementation of the solver
 //
 //************************************************************************
 
-#include "solverKokkos.hpp"
+#include "solver.hpp"
 #include <cstdio>
  
 // compute one step of the time dynamic wave equation solver
@@ -39,70 +39,28 @@ void solverKokkos::computeOneStep( const int & timeStep,
     Kokkos::parallel_for( numberOfElementsByColor[color], KOKKOS_CLASS_LAMBDA ( const int eColor )
     {
       // start parallel section
-      int localToGlobal[36];
-      double Xi[36][2];
-      double jacobianMatrix[36][4];
-      double detJ[36];
-      double invJacobianMatrix[36][4];
-      double transpInvJacobianMatrix[36][4];
-      double B[36][4];
-      double R[36][36];
-      double massMatrixLocal[36];
-      double pnLocal[36];
-      double Y[36];
       int e=listOfElementsByColor(color,eColor);
-      // extract global coordinates of element e
-      // get local to global indexes of nodes of element e
-      int i=mesh.localToGlobalNodes( e, numberOfPointsPerElement, globalNodesList, localToGlobal );
-      //get global coordinates Xi of element e
-      int j=mesh.getXi( numberOfPointsPerElement, globalNodesCoords, localToGlobal, Xi );
-      // compute jacobian Matrix
-      int k=Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
-                                      derivativeBasisFunction2DX,
-                                      derivativeBasisFunction2DY,
-                                      jacobianMatrix );
-      // compute determinant of jacobian Matrix
-      int l=Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
-                                                   jacobianMatrix,
-						   detJ);
-      // compute inverse of Jacobian Matrix
-      int m=Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
-                                         jacobianMatrix,
-                                         detJ,
-                                         invJacobianMatrix );
-      // compute transposed inverse of Jacobian Matrix
-      int n=Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
-                                               jacobianMatrix,
-                                               detJ,
-                                               transpInvJacobianMatrix );
-      // compute  geometrical transformation matrix
-      int p=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
-      //int p=Qk.computeB( numberOfPointsPerElement, jacobianMatrix, detJ,B );
-      // compute stifness and mass matrix ( durufle's optimization)
-      int q=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, B, derivativeBasisFunction1D, R );
-      // compute local mass matrix ( used optimzed version)
-      int r=Qk.phiIphiJ( numberOfPointsPerElement, weights2D, detJ, massMatrixLocal );
+      float B[36][4];
+      float R[36];
+      float massMatrixLocal[36];
+      float pnLocal[36];
+      float Y[36];
       // get pnGlobal to pnLocal
       for( int i=0; i<numberOfPointsPerElement; i++ )
       {
-        massMatrixLocal[i]/=(model[e]*model[e]);
-        pnLocal[i]=pnGlobal(localToGlobal[i],i2);
+        int   localToGlobal=globalNodesList(e,i);
+        pnLocal[i]=pnGlobal(localToGlobal,i2);
       }
-      // compute Y=R*pnLocal
-      for( int i=0; i<numberOfPointsPerElement; i++ )
-      {
-        Y[i]=0;
-        for( int j=0; j<numberOfPointsPerElement; j++ )
-        {
-          Y[i]+=R[i][j]*pnLocal[j];
-        }
-      }
+      // compute Jacobian, massMatrix and B
+      int o=Qk.computeB( e,order,globalNodesList,globalNodesCoords,weights2D,
+                         derivativeBasisFunction1D,massMatrixLocal,B );
+      // compute stifness  matrix ( durufle's optimization)
+      int p=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, derivativeBasisFunction1D, B, pnLocal, R, Y );
       //compute gloval mass Matrix and global stiffness vector
       for( int i=0; i<numberOfPointsPerElement; i++ )
       {
-        int gIndex=localToGlobal[i];
-        //Kokkos::atomic_add(&massMatrixGlobal[gIndex],massMatrixLocal[i]);
-        //Kokkos::atomic_add(&yGlobal[gIndex],Y[i]);
+        int gIndex=globalNodesList(e,i);
+        massMatrixLocal[i]/=(model[e]*model[e]);
         massMatrixGlobal[gIndex]+=massMatrixLocal[i];
         yGlobal[gIndex]+=Y[i];
       } 

@@ -6,9 +6,10 @@ It is intended to be a standard tool for evaluating and comparing the performanc
 
 ## Actual applications 
 
-Current implementation of the proxyApp includes SEM ( Spectral finite Element Methods) and FD ( Finite Differences methods) to solve 2nd order acoustic wave equation in 2D space.
-The SEM proxy applicaton is a benchmark designed to simulate wave propagation using the spectral element method (SEM), which is a Galerkin-based finite element method for solving partial differential equations.
-The FD proxy applicaton is a benchmark designed to simulate wave propagation using finite differences stecnils operators for solving partial differential equations.
+Current implementation of the proxyApp includes SEM ( Spectral finite Element Methods) and FD ( Finite Differences methods) to solve 2nd order acoustic wave equation in 2D and 3D spaces:
+* The SEM proxy applicaton is a benchmark designed to simulate wave propagation using the spectral element method (SEM), which is a Galerkin-based finite element method for solving partial differential equations.
+* The FD proxy applicaton is a benchmark designed to simulate wave propagation using finite differences stecnils operators for solving partial differential equations.
+
 One of the key features of the SEM and FD proxy benchmarks are their adaptability to different programming models and HPC architectures. This makes them a useful proxy applications for advancing the state of the art in high-performance computing. In addition to their technical capabilities, they are designed to be easy to build and use. This makes them accessible to a wide range of users, from researchers to developers.
 
 ## What Programming Models users can select to run  proxy applications?

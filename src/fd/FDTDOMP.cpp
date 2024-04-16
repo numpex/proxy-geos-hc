@@ -19,9 +19,10 @@
 
 int main( int argc, char *argv[] )
 {
-    int nx=std::stoi(argv[1]);
+    int nx= (argc > 1)? std::stoi(argv[1]) : 150;
     int ny=nx;
     int nz=nx;
+
     int xs=nx/2;
     int ys=ny/2;
     int zs=nz/2;
@@ -34,15 +35,13 @@ int main( int argc, char *argv[] )
     constexpr float dz=10;
 
     constexpr int   sourceOrder=1;
-    constexpr int   xs=nx/2;
-    constexpr int   ys=ny/2;
-    constexpr int   zs=nz/2;
     constexpr float f0=15.;
     constexpr float fmax=2.5*f0;
-    constexpr float timeMax=0.8;
+    constexpr float timeMax=1.0;
 
     constexpr int ncoefs=5;
-    constexpr float vmax=1500;
+    constexpr float vmin=1500;
+    constexpr float vmax=4500;
     
     // imports utils
     solverUtils myUtils;
@@ -58,27 +57,28 @@ int main( int argc, char *argv[] )
     constexpr float hdz_2=1./(4.*dz*dz);
     constexpr float lambdamax=vmax/fmax;
     constexpr int ndampx=ntaperx*lambdamax/dx;
-    constexpr int ndampy=ntaperx*lambdamax/dx;
-    constexpr int ndampz=ntaperx*lambdamax/dx;
+    constexpr int ndampy=ntapery*lambdamax/dy;
+    constexpr int ndampz=ntaperz*lambdamax/dz;
+    printf("nx=%d ny=%d nz=%d\n",nx, ny,nz);
     printf("ndampx=%d ndampy=%d ndampz=%d\n",ndampx, ndampy,ndampz);
     constexpr int x1=0;
     constexpr int x2=ndampx;
     constexpr int x3=ndampx;
-    constexpr int x4=nx-ndampx;
-    constexpr int x5=nx-ndampx;
-    constexpr int x6=nx;
+    int x4=nx-ndampx;
+    int x5=nx-ndampx;
+    int x6=nx;
     constexpr int y1=0;
     constexpr int y2=ndampy;
     constexpr int y3=ndampy;
-    constexpr int y4=ny-ndampy;
-    constexpr int y5=ny-ndampy;
-    constexpr int y6=ny;
+    int y4=ny-ndampy;
+    int y5=ny-ndampy;
+    int y6=ny;
     constexpr int z1=0;
     constexpr int z2=ndampz;
     constexpr int z3=ndampz;
-    constexpr int z4=nz-ndampz;
-    constexpr int z5=nz-ndampz;
-    constexpr int z6=nz;
+    int z4=nz-ndampz;
+    int z5=nz-ndampz;
+    int z6=nz;
 
     // allocate vector and arrays 
     // FD coefs
@@ -90,7 +90,6 @@ int main( int argc, char *argv[] )
     // pressure fields
     vectorReal pnp1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
     vectorReal pn=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
-    vectorReal pnm1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
     // PML arrays
     vectorReal phi=allocateVector<vectorReal>(nx*ny*nz);
     vectorReal eta=allocateVector<vectorReal>((nx+2)*(ny+2)*(nz+2));
@@ -127,7 +126,7 @@ int main( int argc, char *argv[] )
        {
           for( int k=0; k<nz;k++)
           {
-            vp[IDX3(i,j,k)]=1500.*1500.*timeStep2;
+            vp[IDX3(i,j,k)]=vmin*vmin*timeStep2;
             phi[IDX3(i,j,k)]=0.;
           }
        }
@@ -141,7 +140,6 @@ int main( int argc, char *argv[] )
           {
             pnp1[IDX3_l(i,j,k)]=0.000001;
             pn[IDX3_l(i,j,k)]  =0.000001;
-            pnm1[IDX3_l(i,j,k)]=0.000001;
           }
        }
     }
@@ -172,14 +170,14 @@ int main( int argc, char *argv[] )
                               hdx_2,hdy_2,hdz_2,
                               coefx,coefy,coefz,
                               vp,phi,eta,
-                              pnp1,pn,pnm1);
+                              pnp1,pn);
       // swap wavefields
-      myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,pnp1,pn,pnm1);
+      myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,pnp1,pn);
       // print infos and save wavefields
       if(itSample%50==0)
       {
         printf("result1 %f\n",pn[IDX3_l(xs,ys,zs)]);
-        myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
+        //myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
       }
 
     }

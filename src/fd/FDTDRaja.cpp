@@ -1,3 +1,4 @@
+
 //************************************************************************
 // SEM proxy application v.0.0.1
 //
@@ -18,7 +19,7 @@
 
 int main( int argc, char *argv[] )
 {
-   int nx=std::stoi(argv[1]);
+   int nx= (argc > 1)? std::stoi(argv[1]) : 150;
    int ny=nx;
    int nz=nx;
    int xs=nx/2;
@@ -35,7 +36,7 @@ int main( int argc, char *argv[] )
    constexpr int   sourceOrder=1;
    constexpr float f0=15.;
    constexpr float fmax=2.5*f0;
-   constexpr float timeMax=0.8;
+   constexpr float timeMax=1.0;
 
    constexpr int ncoefs=5;
    constexpr float vmin=1500;
@@ -58,6 +59,12 @@ int main( int argc, char *argv[] )
    constexpr int ndampy=ntapery*lambdamax/dy;
    constexpr int ndampz=ntaperz*lambdamax/dz;
    printf("ndampx=%d ndampy=%d ndampz=%d\n",ndampx, ndampy,ndampz);
+
+   int iz_block_sz=z_block_sz;
+   int iy_block_sz=y_block_sz;
+   int ix_block_sz=x_block_sz;
+   printf("block_size=%d z_block_sz=%d y_block_sz=%d x_block_sz=%d\n",block_size, iz_block_sz, iy_block_sz, ix_block_sz);
+
    int x1=0;
    int x2=ndampx;
    int x3=ndampx;
@@ -199,9 +206,13 @@ int main( int argc, char *argv[] )
       // print infos and save wavefields
      if(itSample%50==0)
      {
-	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i)
-                         {});
-	printf("result1 %f\n",h_pn[IDX3_l(xs,ys,zs)]);
+        #ifdef ENABLE_HIP
+	RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i){});
+        //RAJA::forall<RAJA::hip_exec<256>>(RAJA::RangeSegment(0, nx), [pn] RAJA_DEVICE (int i) {});
+        #else
+	RAJA::forall<RAJA::loop_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i){});
+        #endif
+	printf("Result %f\n",h_pn[IDX3_l(xs,ys,zs)]);
 	myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,h_pn,itSample);
      }
 
@@ -217,3 +228,4 @@ int main( int argc, char *argv[] )
 
    return (0);
 }
+

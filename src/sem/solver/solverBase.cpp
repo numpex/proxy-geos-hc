@@ -29,13 +29,14 @@ void solverBase::computeFEInit( const int & order, simpleMesh mesh, QkGL Qk)
   printf("number of elements color blue %d\n",numberOfElementsByColor[2]);
   printf("number of elements color yellow %d\n",numberOfElementsByColor[3]);
   
-  globalNodesList=allocateArray2D<arrayInt>(numberOfElements,(order+1)*(order+1));
+  numberOfPointsPerElement=mesh.getNumberOfPointsPerElement();
+  globalNodesList=allocateArray2D<arrayInt>(numberOfElements,numberOfPointsPerElement);
   mesh.globalNodesList( numberOfElements, globalNodesList );
 
   listOfInteriorNodes=allocateVector<vectorInt>(numberOfInteriorNodes);
   mesh.getListOfInteriorNodes( numberOfInteriorNodes, listOfInteriorNodes );
 
-  globalNodesCoords=allocateArray2D<arrayReal>(numberOfNodes,2);
+  globalNodesCoords=allocateArray2D<arrayReal>(numberOfNodes,3);
   mesh.nodesCoordinates( numberOfNodes, globalNodesCoords );
 
   // boundary elements
@@ -57,14 +58,15 @@ void solverBase::computeFEInit( const int & order, simpleMesh mesh, QkGL Qk)
 
 
   // get quadrature points and weights
-  numberOfPointsPerElement = ( order + 1 ) * ( order + 1 );
   quadraturePoints=allocateVector<vectorDouble>(order+1);
   Qk.gaussLobattoQuadraturePoints( order, quadraturePoints );
 
   weights=allocateVector<vectorDouble>(order+1);
   Qk.gaussLobattoQuadratureWeights( order, weights );
-  weights2D=allocateVector<vectorDouble>(numberOfPointsPerElement);
-  Qk.getGaussLobattoWeights( quadraturePoints, weights, weights2D );
+  weights2D=allocateVector<vectorDouble>((order+1)*(order+1));
+  Qk.getGaussLobattoWeights2D( quadraturePoints, weights, weights2D );
+  weights3D=allocateVector<vectorDouble>((order+1)*(order+1)*(order+1));
+  Qk.getGaussLobattoWeights3D( quadraturePoints, weights, weights3D );
 
   // get basis function and corresponding derivatives
   basisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1);
@@ -86,8 +88,8 @@ void solverBase::computeFEInit( const int & order, simpleMesh mesh, QkGL Qk)
   cout<<"fin allocation  shared:"<<endl;
 
   //shared arrays
-  massMatrixGlobal=allocateVector<vectorDouble>( numberOfNodes );
-  yGlobal=allocateVector<vectorDouble>( numberOfNodes );
+  massMatrixGlobal=allocateVector<vectorReal>( numberOfNodes );
+  yGlobal=allocateVector<vectorReal>( numberOfNodes );
   ShGlobal=allocateVector<vectorReal>( numberOfBoundaryNodes );
   std::cout<<"end of shared arrays initialization\n";
 

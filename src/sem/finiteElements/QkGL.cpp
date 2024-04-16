@@ -1,31 +1,11 @@
 // C++ Code generated from Python Code:
-#include <iostream>
-#include <vector>
-#include <cmath>
 #include "QkGL.hpp"
-#include "commonMacro.hpp"
 
 
 namespace FE
 {
 
-QkGL::QkGL(){};
-
-#ifdef USE_RAJA
- QkGL::~QkGL(){};
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION QkGL::~QkGL(){};
-#else
-  QkGL::~QkGL(){};
-#endif
-
-#ifdef USE_RAJA
 void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
-#elif defined USE_KOKKOS
-void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
-#else
-void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoints ) const
-#endif
 {
   if( order == 1 )
   {
@@ -63,13 +43,8 @@ void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoi
     quadraturePoints[5]=1.0;
   }
 }
-#ifdef USE_RAJA
+
 void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const
-#elif defined USE_KOKKOS
-void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const
-#else
-void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) const
-#endif
 {
   if( order == 1 )
   {
@@ -107,6 +82,7 @@ void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) co
     weights[5]=0.06666667;
   }
 }
+
 std::vector<double> QkGL::shapeFunction1D( int order, double xi ) const
 {
   std::vector<double> shapeFunction( order+1 );
@@ -182,6 +158,7 @@ std::vector<double> QkGL::shapeFunction1D( int order, double xi ) const
   }
   return shapeFunction;
 }
+
 std::vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) const
 {
   std::vector<double> derivativeShapeFunction( order+1 );
@@ -313,15 +290,10 @@ std::vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) cons
   }
   return derivativeShapeFunction;
 }
+
 // get 1D basis functions @ quadrature points
 // returns 2D vector basisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-#ifdef USE_RAJA
 void QkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble const & basisFunction1D ) const
-#elif defined USE_KOKKOS
-void QkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble const & basisFunction1D ) const
-#else
-void QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints, arrayDouble & basisFunction1D ) const
-#endif
 {
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -338,16 +310,8 @@ void QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints, array
 
 // get derivative of 1D basis functions @ quadrature points
 // returns 2D vector derivativeBasisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-#ifdef USE_RAJA
 void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
                                           arrayDouble const & derivativeBasisFunction1D ) const
-#elif defined USE_KOKKOS
-void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
-                                          arrayDouble const & derivativeBasisFunction1D ) const
-#else
-void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints, 
-                                          arrayDouble & derivativeBasisFunction1D ) const
-#endif
 {
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -361,20 +325,11 @@ void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoi
     }
   }
 }
+
 // compute 2D gauss-lobatto weights
-#ifdef USE_RAJA
-void QkGL::getGaussLobattoWeights( vectorDouble const & quadraturePoints,
+void QkGL::getGaussLobattoWeights2D( vectorDouble const & quadraturePoints,
                                            vectorDouble const & weights,
                                            vectorDouble const & W )const
-#elif defined USE_KOKKOS
-void QkGL::getGaussLobattoWeights( vectorDouble const & quadraturePoints,
-                                           vectorDouble const & weights,
-                                           vectorDouble const & W )const
-#else
-void QkGL::getGaussLobattoWeights( vectorDouble & quadraturePoints,
-                                           vectorDouble & weights,
-                                           vectorDouble & W )const
-#endif
 {
   for( int j=0; j<quadraturePoints.size(); j++ )
   {
@@ -385,23 +340,28 @@ void QkGL::getGaussLobattoWeights( vectorDouble & quadraturePoints,
   }
 }
 
+// compute 3D gauss-lobatto weights
+void QkGL::getGaussLobattoWeights3D( vectorDouble const & quadraturePoints,
+                                           vectorDouble const & weights,
+                                           vectorDouble const & W )const
+{
+  for( int k=0; k<quadraturePoints.size(); k++ )
+  {
+     for( int j=0; j<quadraturePoints.size(); j++ )
+     {
+       for( int i=0; i<quadraturePoints.size(); i++ )
+       {
+         W[i+j*quadraturePoints.size()+k*quadraturePoints.size()*quadraturePoints.size()]= weights[i]*weights[j]*weights[k];
+       }
+     }
+  }
+}
+
 // returns 2D vector basisFunction2D of dimensions nBasisFunctions,nQuadraturePoints
-#ifdef USE_RAJA
 void QkGL::getBasisFunction2D( vectorDouble const & quadraturePoints,
                                arrayDouble const & a,
                                arrayDouble const & b,
                                arrayDouble const & c )const                                      
-#elif defined USE_KOKKOS
-void QkGL::getBasisFunction2D( vectorDouble const & quadraturePoints,
-                               arrayDouble const & a,
-                               arrayDouble const & b,
-                               arrayDouble const & c )const                                      
-#else
-void QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
-                               arrayDouble & a,
-                               arrayDouble & b,
-                               arrayDouble & c )const                                      
-#endif
 {
   for( int j = 0; j < quadraturePoints.size(); j++ )
   {
@@ -417,471 +377,349 @@ void QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
     }
   }
 }
-// compute jacobian matrix for element to ref element coordinates
-// Xi[0,..,1][0,..,nPointsPerElement], global coordinate of element
-// dxPhi,dyPhi 2D derivative of basis Functions
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::computeJacobianMatrix(  const int & nPointsPerElement,
-                                                      double const  Xi[][2],
-                                                      arrayDoubleView const & dxPhi,
-                                                      arrayDoubleView const & dyPhi,
-                                                      double  jacobianMatrix[][4] )const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeJacobianMatrix( const int & nPointsPerElement,
-                                                 double const Xi[][2],
-                                                 arrayDouble const & dxPhi,
-                                                 arrayDouble const & dyPhi,
-                                                 double  jacobianMatrix[][4] )const
-#else
-int QkGL::computeJacobianMatrix(  const int & nPointsPerElement,
-                                  double const  Xi[][2],
-                                  arrayDouble & dxPhi,
-                                  arrayDouble & dyPhi,
-                                  double  jacobianMatrix[][4] )const
-#endif
-{
-  for( int i=0; i<nPointsPerElement; i++ )
-  {
-    jacobianMatrix[i][0]=0;
-    jacobianMatrix[i][1]=0;
-    jacobianMatrix[i][2]=0;
-    jacobianMatrix[i][3]=0;
-    for( int j=0; j<nPointsPerElement; j++ )
-    {
-      jacobianMatrix[i][0]+=Xi[j][0]*dxPhi(j,i);
-      jacobianMatrix[i][1]+=Xi[j][0]*dyPhi(j,i);
-      jacobianMatrix[i][2]+=Xi[j][1]*dxPhi(j,i);
-      jacobianMatrix[i][3]+=Xi[j][1]*dyPhi(j,i);
-    }
-  }
-  return 0;
-}
 
-// compute jacobian matrix determinant
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::computeDeterminantOfJacobianMatrix(  const int & nPointsPerElement,
-                                                                   double const jacobianMatrix[][4],
-                                                                   double detJ[] ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeDeterminantOfJacobianMatrix(  const int & nPointsPerElement,
-                                                               double const jacobianMatrix[][4],
-                                                               double detJ[] ) const
-#else
-int QkGL::computeDeterminantOfJacobianMatrix( const int & nPointsPerElement,
-                                              double const jacobianMatrix[][4],
-                                              double detJ[]  ) const
-#endif
-{
-  for( int i=0; i<nPointsPerElement; i++ )
-  {
-    detJ[i]=(jacobianMatrix[i][0]*jacobianMatrix[i][3]-jacobianMatrix[i][2]*jacobianMatrix[i][1]);
-    //detJ[i]=1./detJ[i];
-  }
-  return 0;
-}
-
-// compute inverse of Jacobian Matrix
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
-                                                        double const  jacobianMatrix[][4],
-                                                        double const  detJ[],
-                                                        double invJacobianMatrix [][4]) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
-                                                    double const  jacobianMatrix[][4],
-                                                    double const  detJ[],
-                                                    double invJacobianMatrix [][4] ) const
-#else
-int QkGL::computeInvJacobianMatrix( const int & nPointsPerElement,
-                                    double const  jacobianMatrix[][4],
-                                    double const  detJ[],
-                                    double invJacobianMatrix [][4]  ) const
-#endif
-{
-  for( int i=0; i<nPointsPerElement; i++ )
-  {
-    invJacobianMatrix[i][0]=jacobianMatrix[i][3];///detJ[i]);
-    invJacobianMatrix[i][1]=-jacobianMatrix[i][1];///detJ[i]);
-    invJacobianMatrix[i][2]=-jacobianMatrix[i][2];///detJ[i]);
-    invJacobianMatrix[i][3]=jacobianMatrix[i][0];///detJ[i]);
-  }
-  return 0;
-}
-
-// compute inverse of Jacobian Matrix
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-                                                              double const  jacobianMatrix[][4],
-                                                              double const detJ[],
-                                                              double  transpInvJacobianMatrix[][4] ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-                                                          double const  jacobianMatrix[][4],
-                                                          double const detJ[],
-                                                          double transpInvJacobianMatrix[][4] ) const
-#else
-int QkGL::computeTranspInvJacobianMatrix( const int & nPointsPerElement,
-                                          double const  jacobianMatrix[][4],
-                                          double const detJ[],
-                                          double  transpInvJacobianMatrix[][4] ) const
-#endif
-{
-  for( int i=0; i<nPointsPerElement; i++ )
-  {
-    transpInvJacobianMatrix[i][0]=jacobianMatrix[i][3];///detJ[i]);
-    transpInvJacobianMatrix[i][1]=-jacobianMatrix[i][2];///detJ[i]);
-    transpInvJacobianMatrix[i][2]=-jacobianMatrix[i][1];///detJ[i]);
-    transpInvJacobianMatrix[i][3]=jacobianMatrix[i][0];///detJ[i]);
-  }
-  return 0;
-}
-
+// 2D version
 // compute B and M  
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::computeB( const int & elementNumber,
-		                        const int & nPointsPerElement,
-					arrayIntView     const & nodesList,
-					arrayRealView    const & nodesCoords,
-                                        vectorDoubleView const & weights2D,
-                                        arrayDoubleView  const & dxPhi,
-                                        arrayDoubleView  const & dyPhi,
-					double massMatrixLocal[],
-                                        double   B[][4] ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeB( const int & elementNumber,
-		                    const int & nPointsPerElement,
-			            arrayInt     const & nodesList,
-			            arrayReal    const & nodesCoords,
-                                    vectorDouble const & weights2D,
-                                    arrayDouble  const & dxPhi,
-                                    arrayDouble  const & dyPhi,
-				    double massMatrixLocal[],
-                                    double   B[][4]) const
-#else
-int QkGL::computeB( const int & elementNumber,
-	            const int & nPointsPerElement,
-                    arrayInt  & nodesList,
-                    arrayReal & nodesCoords,
-                    vectorDouble & weights2D,
-                    arrayDouble  & dxPhi,
-                    arrayDouble  & dyPhi,
-		    double massMatrixLocal[],
-                    double   B[][4]) const
-#endif
+PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
+		                       const int & order,
+			               arrayIntView     const & nodesList,
+			               arrayRealView    const & nodesCoords,
+                                       vectorDoubleView const & weights2D,
+                                       arrayDoubleView  const & dPhi,
+				       float massMatrixLocal[],
+                                       float B[][4] ) const
 {
-  for( int i=0; i<nPointsPerElement; i++ )
-  {               
-    // compute jacobian matrix
-    double jac0=0;
-    double jac1=0;
-    double jac2=0;
-    double jac3=0;
-    for( int j=0; j<nPointsPerElement; j++ )
-    {
-      int localToGlobal=nodesList(elementNumber,j);
-      double X=nodesCoords(localToGlobal,0);
-      double Y=nodesCoords(localToGlobal,1);
-      jac0+=X*dxPhi(j,i);
-      jac1+=X*dyPhi(j,i);
-      jac2+=Y*dxPhi(j,i);
-      jac3+=Y*dyPhi(j,i);
-    }
-
-    // detJ
-    double detJ=abs(jac0*jac3-jac2*jac1);
-
-    double invJac0=jac3;
-    double invJac1=-jac1;
-    double invJac2=-jac2;
-    double invJac3=jac0;
-    double transpInvJac0=jac3;
-    double transpInvJac1=-jac2;
-    double transpInvJac2=-jac1;
-    double transpInvJac3=jac0;
-
-    double detJM1=1./detJ;
-    // B
-    B[i][0]=(invJac0*transpInvJac0+invJac1*transpInvJac2)*detJM1;
-    B[i][1]=(invJac0*transpInvJac1+invJac1*transpInvJac3)*detJM1;
-    B[i][2]=(invJac2*transpInvJac0+invJac3*transpInvJac2)*detJM1;
-    B[i][3]=(invJac2*transpInvJac1+invJac3*transpInvJac3)*detJM1;
-
-    //M
-    massMatrixLocal[i]=weights2D[i]*detJ;
-  }
-  return 0;
+  for (int i2=0;i2<order+1;i2++)
+   {
+       for (int i1=0;i1<order+1;i1++)
+       {
+          // compute jacobian matrix
+          double jac0=0;
+          double jac1=0;
+          double jac2=0;
+          double jac3=0;
+          int i=i1+i2*(order+1);
+          for (int j1=0;j1<order+1;j1++)
+          {
+              int j=j1+i2*(order+1);
+              int localToGlobal=nodesList(elementNumber,j);
+              double X=nodesCoords(localToGlobal,0);
+              double Y=nodesCoords(localToGlobal,1);
+              jac0+=X*dPhi(j1,i1);
+              jac2+=Y*dPhi(j1,i1);
+          }
+          for (int j2=0; j2<order+1;j2++)
+          {
+              int j=i1+j2*(order+1);
+              int localToGlobal=nodesList(elementNumber,j);
+              double X=nodesCoords(localToGlobal,0);
+              double Y=nodesCoords(localToGlobal,1);
+              jac1+=X*dPhi(j2,i2);
+              jac3+=Y*dPhi(j2,i2);
+          }
+          // detJ
+          double detJ=abs(jac0*jac3-jac2*jac1);
+          double invJac0=jac3;
+          double invJac1=-jac1;
+          double invJac2=-jac2;
+          double invJac3=jac0;
+          double transpInvJac0=jac3;
+          double transpInvJac1=-jac2;
+          double transpInvJac2=-jac1;
+          double transpInvJac3=jac0;
+          double detJM1=1./detJ;
+          // B
+          B[i][0]=(invJac0*transpInvJac0+invJac1*transpInvJac2)*detJM1;
+          B[i][1]=(invJac0*transpInvJac1+invJac1*transpInvJac3)*detJM1;
+          B[i][2]=(invJac2*transpInvJac0+invJac3*transpInvJac2)*detJM1;
+          B[i][3]=(invJac2*transpInvJac1+invJac3*transpInvJac3)*detJM1;
+          //M
+          massMatrixLocal[i]=weights2D[i]*detJ;
+       }
+   }
+   return 0;
 }
 
-// compute B and M  
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::computeB( const int & nPointsPerElement,
-                                        double const  Xi[][2],
-                                        vectorDoubleView const & weights2D,
-                                        arrayDoubleView  const & dxPhi,
-                                        arrayDoubleView  const & dyPhi,
-					double massMatrixLocal[],
-                                        double   B[][4] ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeB( const int & nPointsPerElement,
-                                    double const  Xi[][2],
-                                    vectorDouble const & weights2D,
-                                    arrayDouble  const & dxPhi,
-                                    arrayDouble  const & dyPhi,
-				    double massMatrixLocal[],
-                                    double   B[][4]) const
-#else
-int QkGL::computeB( const int & nPointsPerElement,
-                    double const  Xi[][2],
-                    vectorDouble & weights2D,
-                    arrayDouble  & dxPhi,
-                    arrayDouble  & dyPhi,
-		    double massMatrixLocal[],
-                    double   B[][4]) const
-#endif
+// 3D version
+// compute B and M
+PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
+                                       const int & order,
+                                       arrayIntView     const & nodesList,
+                                       arrayRealView    const & nodesCoords,
+                                       vectorDoubleView const & weights3D,
+                                       arrayDoubleView  const & dPhi,
+                                       float massMatrixLocal[],
+                                       float B[][6] ) const
 {
-  for( int i=0; i<nPointsPerElement; i++ )
-  {               
-    // compute jacobian matrix
-    double jac0=0;
-    double jac1=0;
-    double jac2=0;
-    double jac3=0;
-    for( int j=0; j<nPointsPerElement; j++ )
-    {
-      jac0+=Xi[j][0]*dxPhi(j,i);
-      jac1+=Xi[j][0]*dyPhi(j,i);
-      jac2+=Xi[j][1]*dxPhi(j,i);
-      jac3+=Xi[j][1]*dyPhi(j,i);
-    }
-
-    // detJ
-    double detJ=abs(jac0*jac3-jac2*jac1);
-
-    double invJac0=jac3;
-    double invJac1=-jac1;
-    double invJac2=-jac2;
-    double invJac3=jac0;
-    double transpInvJac0=jac3;
-    double transpInvJac1=-jac2;
-    double transpInvJac2=-jac1;
-    double transpInvJac3=jac0;
-
-    double detJM1=1./detJ;
-    // B
-    B[i][0]=(invJac0*transpInvJac0+invJac1*transpInvJac2)*detJM1;
-    B[i][1]=(invJac0*transpInvJac1+invJac1*transpInvJac3)*detJM1;
-    B[i][2]=(invJac2*transpInvJac0+invJac3*transpInvJac2)*detJM1;
-    B[i][3]=(invJac2*transpInvJac1+invJac3*transpInvJac3)*detJM1;
-
-    //M
-    massMatrixLocal[i]=weights2D[i]*detJ;
-  }
-  return 0;
-}
-
-// compute B the matrix containing the geometrical informations
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::computeB( const int & nPointsPerElement,
-                                        double const invJacobianMatrix[][4],
-                                        double const transpInvJacobianMatrix[][4],
-                                        double const detJ[],
-                                        double   B[][4] ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeB( const int & nPointsPerElement,
-                                    double const invJacobianMatrix[][4],
-                                    double const transpInvJacobianMatrix[][4],
-                                    double const detJ[],
-                                    double   B[][4]) const
-#else
-int QkGL::computeB( const int & nPointsPerElement,
-                    double const invJacobianMatrix[][4],
-                    double const transpInvJacobianMatrix[][4],
-                    double const detJ[],
-                    double   B[][4]) const
-#endif
-{
-  for( int i=0; i<nPointsPerElement; i++ )
+  for (int i3=0;i3<order+1;i3++)
   {
-    double detJM1=abs(1./detJ[i]);
-    B[i][0]=(invJacobianMatrix[i][0]*transpInvJacobianMatrix[i][0]+
-            invJacobianMatrix[i][1]*transpInvJacobianMatrix[i][2])*detJM1;
-    B[i][1]=(invJacobianMatrix[i][0]*transpInvJacobianMatrix[i][1]+
-            invJacobianMatrix[i][1]*transpInvJacobianMatrix[i][3])*detJM1;
-    B[i][2]=(invJacobianMatrix[i][2]*transpInvJacobianMatrix[i][0]+
-            invJacobianMatrix[i][3]*transpInvJacobianMatrix[i][2])*detJM1;
-    B[i][3]=(invJacobianMatrix[i][2]*transpInvJacobianMatrix[i][1]+
-            invJacobianMatrix[i][3]*transpInvJacobianMatrix[i][3])*detJM1;
-  }
-  return 0;
-}
-
-// compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
-// Marc Durufle Formulae
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                                              const int & order,
-                                              vectorDoubleView const & weights2D,
-                                              double const  B[][4],
-                                              arrayDoubleView const & dPhi,
-                                              double   R[][36] ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                                          const int & order,
-                                          vectorDouble const & weights2D,
-                                          double const  B[][4],
-                                          arrayDouble const & dPhi,
-                                          double   R[][36] ) const
-#else
-int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                          const int & order,
-                          vectorDouble  & weights2D,
-                          double const  B[][4],
-                          arrayDouble & dPhi,
-                          double   R[][36] ) const
-#endif
-{
-  for (int j=0;j<nPointsPerElement;j++)
-  {
-      for (int i=0; i<nPointsPerElement;i++)
+      for (int i2=0;i2<order+1;i2++)
       {
-        R[j][i]=0;
+          for (int i1=0;i1<order+1;i1++)
+          {
+              int i=i1+i2*(order+1)+i3*(order+1)*(order+1);
+              // compute jacobian matrix
+              double jac00=0;
+              double jac01=0;
+              double jac02=0;
+              double jac10=0;
+              double jac11=0;
+              double jac12=0;
+              double jac20=0;
+              double jac21=0;
+              double jac22=0;
+
+              for (int j1=0;j1<order+1;j1++)
+              {
+                  int j=j1+i2*(order+1)+i3*(order+1)*(order+1);
+                  int localToGlobal=nodesList(elementNumber,j);
+                  double X=nodesCoords(localToGlobal,0);
+                  double Y=nodesCoords(localToGlobal,2);
+                  double Z=nodesCoords(localToGlobal,1);
+                  jac00+=X*dPhi(j1,i1);
+                  jac10+=Z*dPhi(j1,i1);
+                  jac20+=Y*dPhi(j1,i1);
+              }
+              for (int j2=0;j2<order+1;j2++)
+              {
+                  int j=i1+j2*(order+1)+i3*(order+1)*(order+1);
+                  int localToGlobal=nodesList(elementNumber,j);
+                  double X=nodesCoords(localToGlobal,0);
+                  double Y=nodesCoords(localToGlobal,2);
+                  double Z=nodesCoords(localToGlobal,1);
+                  jac01+=X*dPhi(j2,i2);
+                  jac11+=Z*dPhi(j2,i2);
+                  jac21+=Y*dPhi(j2,i2);
+              }
+              for (int j3=0;j3<order+1;j3++)
+              {
+                  int j=i1+i2*(order+1)+j3*(order+1)*(order+1);
+                  int localToGlobal=nodesList(elementNumber,j);
+                  double X=nodesCoords(localToGlobal,0);
+                  double Y=nodesCoords(localToGlobal,2);
+                  double Z=nodesCoords(localToGlobal,1);
+                  jac02+=X*dPhi(j3,i3);
+                  jac12+=Z*dPhi(j3,i3);
+                  jac22+=Y*dPhi(j3,i3);
+              }
+              // detJ
+              double detJ=abs(jac00*(jac11*jac22-jac21*jac12)
+                             -jac01*(jac10*jac22-jac20*jac12)
+                             +jac02*(jac10*jac21-jac20*jac11));
+
+              // inv of jac is equal of the minors of the transposed of jac
+              double invJac00=jac11*jac22-jac12*jac21;
+              double invJac01=jac02*jac21-jac01*jac22;
+              double invJac02=jac01*jac12-jac02*jac11;
+              double invJac10=jac12*jac20-jac10*jac22;
+              double invJac11=jac00*jac22-jac02*jac20;
+              double invJac12=jac02*jac10-jac00*jac12;
+              double invJac20=jac10*jac21-jac11*jac20;
+              double invJac21=jac01*jac20-jac00*jac21;
+              double invJac22=jac00*jac11-jac01*jac10;
+
+              double transpInvJac00=invJac00;
+              double transpInvJac01=invJac10;
+              double transpInvJac02=invJac20;
+              double transpInvJac10=invJac01;
+              double transpInvJac11=invJac11;
+              double transpInvJac12=invJac21;
+              double transpInvJac20=invJac02;
+              double transpInvJac21=invJac12;
+              double transpInvJac22=invJac22;
+
+              double detJM1=1./detJ;
+
+              // B
+              B[i][0]=(invJac00*transpInvJac00+invJac01*transpInvJac10+invJac02*transpInvJac20)*detJM1;//B11
+              B[i][1]=(invJac10*transpInvJac01+invJac11*transpInvJac11+invJac12*transpInvJac21)*detJM1;//B22
+              B[i][2]=(invJac20*transpInvJac02+invJac21*transpInvJac12+invJac22*transpInvJac22)*detJM1;//B33
+              B[i][3]=(invJac00*transpInvJac01+invJac01*transpInvJac11+invJac02*transpInvJac21)*detJM1;//B12,B21
+              B[i][4]=(invJac00*transpInvJac02+invJac01*transpInvJac12+invJac02*transpInvJac22)*detJM1;//B13,B31
+              B[i][5]=(invJac10*transpInvJac02+invJac11*transpInvJac12+invJac12*transpInvJac22)*detJM1;//B23,B32
+
+              //M
+              massMatrixLocal[i]=weights3D[i]*detJ;
+          }
       }
   }
+  return 0;
+}
+
+// 2D version
+// compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
+// Marc Durufle Formulae
+PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+                                              const int & order,
+                                              vectorDoubleView const & weights2D,
+                                              arrayDoubleView const & dPhi,
+                                              float const  B[][4],
+			                      float const pnLocal[],
+                                              float R[],
+	                                      float Y[]) const
+{
   // B11
   for( int i1=0; i1<order+1; i1++ )
   {
     for( int i2=0; i2<order+1; i2++ )
     {
-      int i=i1+i2*(order+1);
+      for (int j=0; j<nPointsPerElement;j++)
+      {
+        R[j]=0;
+      }
       for( int j1=0; j1<order+1; j1++ )
       {
         int j=j1+i2*(order+1);
         for( int m=0; m<order+1; m++ )
         {
-          R[i][j]+=weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*dPhi(i1,m)*dPhi(j1,m));
+          R[j]+=weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*dPhi(i1,m)*dPhi(j1,m));
         }
       }
-    }
-  }
-  // B21
-  for( int i1=0; i1<order+1; i1++ )
-  {
-    for( int i2=0; i2<order+1; i2++ )
-    {
-      int i=i1+i2*(order+1);
+      // B21
       for( int j1=0; j1<order+1; j1++ )
       {
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-          R[i][j]+=weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*dPhi(i2,j2)*dPhi(j1,i1));
+          R[j]+=weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*dPhi(i2,j2)*dPhi(j1,i1));
         }
       }
-    }
-  }
-  // B12
-  for( int i1=0; i1<order+1; i1++ )
-  {
-    for( int i2=0; i2<order+1; i2++ )
-    {
-      int i=i1+i2*(order+1);
+      // B12
       for( int j1=0; j1<order+1; j1++ )
       {
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-          R[i][j]+=weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*dPhi(i1,j1)*dPhi(j2,i2));
+          R[j]+=weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*dPhi(i1,j1)*dPhi(j2,i2));
         }
       }
-    }
-  }
-  // B22
-  for( int i1=0; i1<order+1; i1++ )
-  {
-    for( int i2=0; i2<order+1; i2++ )
-    {
-      int i=i1+i2*(order+1);
+      // B22
       for( int j2=0; j2<order+1; j2++ )
       {
         int j=i1+j2*(order+1);
         for( int n=0; n<order+1; n++ )
         {
-          R[i][j]+=weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*dPhi(i2,n)*dPhi(j2,n));
+          R[j]+=weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*dPhi(i2,n)*dPhi(j2,n));
         }
       }
-    }
-  }
-  return 0;
-}
-// compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                                              vectorDoubleView const & weights2D,
-                                              double const  B[][4],
-                                              arrayDoubleView const & dxPhi,
-                                              arrayDoubleView const & dyPhi,
-                                              double  R[][36] ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                                          vectorDouble const & weights2D,
-                                          double const  B[][4],
-                                          arrayDouble const & dxPhi,
-                                          arrayDouble const & dyPhi,
-                                          double  R[][36] ) const
-#else
-int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                          vectorDouble const & weights2D,
-                          double const  B[][4],
-                          arrayDouble  & dxPhi,
-                          arrayDouble  & dyPhi,
-                          double  R[][36]) const
-#endif
-{
-  for( int i=0; i<nPointsPerElement; i++ )
-  {
-    for( int j=0; j<nPointsPerElement; j++ )
-    {
-      double tmp=0;
-      for( int r=0; r<nPointsPerElement; r++ )
+      int i=i1+i2*(order+1);
+      Y[i]=0;
+      for( int j=0; j<nPointsPerElement; j++ )
       {
-        tmp+=weights2D[r]*(B[r][0]*dxPhi(i,r)*dxPhi(j,r)+
-                           B[r][1]*dxPhi(i,r)*dyPhi(j,r)+
-                           B[r][2]*dyPhi(i,r)*dxPhi(j,r)+
-                           B[r][3]*dyPhi(i,r)*dyPhi(j,r));
-
+         Y[i]+=R[j]*pnLocal[j];
       }
-      R[j][i]=tmp;
     }
   }
   return 0;
 }
-// compute the matrix $M_{i,j}=\int_{K}{{\phi_i}.{\phi_j}dx}$ (optimized formulation)
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::phiIphiJ( const int & nPointsPerElement,
-                                        vectorDoubleView const & weights2D,
-                                        double const  detJ[],
-                                        double massMatrixLocal[] ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::phiIphiJ( const int & nPointsPerElement,
-                                    vectorDouble const & weights2D,
-                                    double const  detJ[],
-                                    double massMatrixLocal[] ) const
-#else
-int QkGL::phiIphiJ( const int & nPointsPerElement,
-                    vectorDouble & weights2D,
-                    double const  detJ[],
-                    double massMatrixLocal[]) const
-#endif
+
+// 3D version
+// compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
+// Marc Durufle Formulae
+PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+                                              const int & order,
+                                              vectorDoubleView const & weights3D,
+                                              arrayDoubleView const & dPhi,
+                                              float const B[][6],
+					      float const pnLocal[],
+                                              float R[],
+	                                      float Y[]) const
 {
-  for( int i=0; i<nPointsPerElement; i++ )
+  int orderPow2=(order+1)*(order+1);
+  for (int i1=0;i1<order+1;i1++)
   {
-    massMatrixLocal[i]=weights2D[i]*abs( detJ[i] );
+      for (int i2=0;i2<order+1;i2++)
+      {
+          for (int i3=0;i3<order+1;i3++)
+          {
+
+              for( int j=0; j<nPointsPerElement; j++ )
+              {
+                 R[j]=0;
+              }
+
+	      //B11
+              for( int j1=0; j1<order+1; j1++ )
+              {
+                  int j=j1+i2*(order+1)+i3*orderPow2;
+                  for( int l=0; l<order+1; l++ )
+                  {
+                      int ll=l+i2*(order+1)+i3*orderPow2;
+                      R[j]+=weights3D[ll]*(B[ll][0]*dPhi(i1,l)*dPhi(j1,l));
+                  }
+              }
+              //B22
+              for( int j2=0; j2<order+1; j2++ )
+              {
+                  int j=i1+j2*(order+1)+i3*orderPow2;
+                  for( int m=0; m<order+1; m++ )
+                  {
+                      int mm=i1+m*(order+1)+i3*orderPow2;
+                      R[j]+=weights3D[mm]*(B[mm][1]*dPhi(i2,m)*dPhi(j2,m));
+                  }
+              }
+              //B33
+              for( int j3=0; j3<order+1; j3++ )
+              {
+                  int j=i1+i2*(order+1)+j3*orderPow2;
+                  for( int n=0; n<order+1; n++ )
+                  {
+                      int nn=i1+i2*(order+1)+n*orderPow2;
+                      R[j]+=weights3D[nn]*(B[nn][2]*dPhi(i3,n)*dPhi(j3,n));
+                  }
+              }
+              // B12,B21 (B[][3])
+              for( int j1=0; j1<order+1; j1++ )
+              {
+                for( int j2=0; j2<order+1; j2++ )
+                {
+                  int j=j1+j2*(order+1)+i3*orderPow2;
+                  int k=j1+i2*(order+1)+i3*orderPow2;
+                  int l=i1+j2*(order+1)+i3*orderPow2;
+                  R[j]+=weights3D[k]*(B[k][3]*dPhi(i1,j1)*dPhi(j2,i2))+
+                        weights3D[l]*(B[l][3]*dPhi(j1,i1)*dPhi(i2,j2));
+                }
+              }
+              // B13,B31 (B[][4])
+              for( int j3=0; j3<order+1; j3++ )
+              {
+                for( int j1=0; j1<order+1; j1++ )
+                {
+                  int j=j1+i2*(order+1)+i3*orderPow2;
+                  int k=j1+i2*(order+1)+i3*orderPow2;
+                  int l=j1+i2*(order+1)+j3*orderPow2;
+                  R[j]+=weights3D[k]*(B[k][4]*dPhi(j1,i1)*dPhi(j3,i3))+
+                        weights3D[l]*(B[l][4]*dPhi(j1,i1)*dPhi(i3,j3));
+	        }
+              }
+              // B23,B32 (B[][5])
+              for( int j3=0; j3<order+1; j3++ )
+              {
+                for( int j2=0; j2<order+1; j2++ )
+                {
+                  int j=i1+j2*(order+1)+j3*orderPow2;
+                  int k=i1+j2*(order+1)+i3*orderPow2;
+                  int l=i1+i2*(order+1)+j3*orderPow2;
+                  R[j]+=weights3D[k]*(B[k][5]*dPhi(i2,i2)*dPhi(j3,i3))+
+                        weights3D[l]*(B[l][5]*dPhi(j2,i2)*dPhi(i3,j3));
+                }
+              }
+
+              int i=i1+i2*(order+1)+i3*orderPow2;
+              Y[i]=0;
+              for( int j=0; j<nPointsPerElement; j++ )
+              {
+                Y[i]+=R[j]*pnLocal[j];
+              }
+
+          }
+      }
   }
   return 0;
 }
+
 //computeDs
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
+PROXY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
                                           const int & order,
                                           arrayIntView const & faceInfos,
                                           int  numOfBasisFunctionOnFace[],
@@ -890,27 +728,6 @@ LVARRAY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
                                           arrayDoubleView const & derivativeBasisFunction2DX,
                                           arrayDoubleView const & derivativeBasisFunction2DY,
                                           float  ds[]  ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeDs(  const int & iFace,
-                                      const int & order,
-                                      arrayInt  const & faceInfos,
-                                      int  numOfBasisFunctionOnFace[],
-                                      float  Js[][6],
-                                      arrayReal   const & globalNodesCoords,
-                                      arrayDouble const & derivativeBasisFunction2DX,
-                                      arrayDouble const & derivativeBasisFunction2DY,
-                                      float  ds[] ) const
-#else
-int QkGL::computeDs(  const int & iFace,
-                      const int & order,
-                      arrayInt & faceInfos,
-                      int  numOfBasisFunctionOnFace[],
-                      float  Js[][6],
-                      arrayReal    & globalNodesCoords,
-                      arrayDouble  & derivativeBasisFunction2DX,
-                      arrayDouble  & derivativeBasisFunction2DY,
-                      float  ds[] ) const
-#endif
 {
   int face=faceInfos(iFace,1);
   // get basis functions on Boundary faces

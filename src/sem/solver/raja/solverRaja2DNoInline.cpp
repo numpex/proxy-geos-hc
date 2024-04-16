@@ -1,14 +1,14 @@
 //************************************************************************
 //   proxy application v.0.0.1
 //
-//  solverRaja.cpp: simple 2D acoustive wave equation solver
+//  solverRaja.cpp: 2D acoustive wave equation solver
 //
 //  the solverRaja class is derived from the solverBase class
 //  with the RAJA implementation of the solver
 //
 //************************************************************************
 
-#include "solverRaja.hpp"
+#include "solver.hpp"
 
 // compute one step of the time dynamic wave equation solver
 void solverRaja::computeOneStep(  const int & timeStep,
@@ -50,8 +50,8 @@ void solverRaja::computeOneStep(  const int & timeStep,
   arrayDoubleView d_derivativeBasisFunction2DY=derivativeBasisFunction2DY.toView();
 
   //shared arrays
-  vectorDoubleView d_massMatrixGlobal=massMatrixGlobal.toView();
-  vectorDoubleView d_yGlobal=yGlobal.toView();
+  vectorRealView d_massMatrixGlobal=massMatrixGlobal.toView();
+  vectorRealView d_yGlobal=yGlobal.toView();
   vectorRealView d_ShGlobal=ShGlobal.toView();
 
   RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfNodes ),  [=] LVARRAY_HOST_DEVICE  ( int i ) {
@@ -68,104 +68,63 @@ void solverRaja::computeOneStep(  const int & timeStep,
  
   int numberOfPointsPerElement=(order+1)*(order+1);
 
-
-  // loop over mesh elements
   RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfElements ), [=] LVARRAY_HOST_DEVICE ( int e )
   {
     int nPointsPerElement=(order+1)*(order+1);
     // start parallel section
-    int  localToGlobal[36];
-    double Xi[36][2];
+    float B[36][4];
+    float R[36];
+    float massMatrixLocal[36];
+    float pnLocal[36];
+    float Y[36];
 
-    double jacobianMatrix[36][4];
-    double detJ[36];
-    double invJacobianMatrix[36][4];
-    double transpInvJacobianMatrix[36][4];
-
-    double B[36][4];
-    double R[36][36];
-
-    double massMatrixLocal[36];
-
-    double pnLocal[36];
-    double Y[36];
-
-    // extract global coordinates of element e
-    // get local to global indexes of nodes of element e
-    int i=mesh.localToGlobalNodes( e, numberOfPointsPerElement, d_globalNodesList, localToGlobal );
-    //get global coordinates Xi of element e
-    int j=mesh.getXi( nPointsPerElement, d_globalNodesCoords, localToGlobal, Xi );
-    // compute jacobian Matrix
-    int k=Qk.computeJacobianMatrix( numberOfPointsPerElement, Xi,
-                              d_derivativeBasisFunction2DX,
-                              d_derivativeBasisFunction2DY,
-                              jacobianMatrix );
-    // compute determinant of jacobian Matrix
-    int l=Qk.computeDeterminantOfJacobianMatrix( numberOfPointsPerElement,
-                                           jacobianMatrix,
-                                           detJ );
-    // compute inverse of Jacobian Matrix
-    int m=Qk.computeInvJacobianMatrix( numberOfPointsPerElement,
-                                 jacobianMatrix,
-                                 detJ,
-                                 invJacobianMatrix );
-    // compute transposed inverse of Jacobian Matrix
-    int n=Qk.computeTranspInvJacobianMatrix( numberOfPointsPerElement,
-                                       jacobianMatrix,
-                                       detJ,
-                                       transpInvJacobianMatrix );
-    // compute  geometrical transformation matrix
-    int o=Qk.computeB( numberOfPointsPerElement, invJacobianMatrix, transpInvJacobianMatrix, detJ,B );
-    // compute stifness and mass matrix ( durufle's optimization)
-    int p=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, d_weights2D, B, d_derivativeBasisFunction1D, R );
-    // compute local mass matrix ( used optimez version)
-    int q=Qk.phiIphiJ( numberOfPointsPerElement, d_weights2D, detJ, massMatrixLocal );
     // get pnGlobal to pnLocal
     for( int i=0; i<nPointsPerElement; i++ )
     {
-      massMatrixLocal[i]/=(d_model[e]*d_model[e]);
-      pnLocal[i]=d_pnGlobal(localToGlobal[i],i2);
+      int localToGlobal=d_globalNodesList(e,i);
+      pnLocal[i]=d_pnGlobal(localToGlobal,i2);
     }
-    // compute Y=R*pnLocal
-    for( int i=0; i<nPointsPerElement; i++ )
-    {
-      Y[i]=0;
-      for( int j=0; j<nPointsPerElement; j++ )
-      {
-        Y[i]+=R[i][j]*pnLocal[j];
-      }
-    }
+
+    // compute Jacobian, massMatrix and B
+    int o=Qk.computeB( e,order,d_globalNodesList,d_globalNodesCoords,d_weights2D,
+                       d_derivativeBasisFunction1D,massMatrixLocal,B );
+
+    // compute stifness  matrix ( durufle's optimization)
+    int p=Qk.gradPhiGradPhi( numberOfPointsPerElement, order, d_weights2D, d_derivativeBasisFunction1D, B, pnLocal, R, Y );
+
     //compute gloval mass Matrix and global stiffness vector
     for( int i=0; i<nPointsPerElement; i++ )
     {
-      int gIndex=localToGlobal[i];
-      //massMatrixGlobal[gIndex]+=massMatrixLocal(threadId,i)
-      //yGlobal[gIndex]+=Y(threadId,i);
+      int gIndex=d_globalNodesList(e,i);
+      massMatrixLocal[i]/=(d_model[e]*d_model[e]);
       RAJA::atomicAdd< deviceAtomicPolicy >(&d_massMatrixGlobal[gIndex],massMatrixLocal[i]);
       RAJA::atomicAdd< deviceAtomicPolicy>(&d_yGlobal[gIndex],Y[i]);
     } 
-  } );
+  });
+
   // update pressure
   RAJA::forall< deviceExecPolicy>( RAJA::RangeSegment( 0, numberOfInteriorNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
     int I=d_listOfInteriorNodes[i];
     float tmp=timeSample*timeSample;
     d_pnGlobal[I][i1]=2*d_pnGlobal[I][i2]-d_pnGlobal[I][i1]-tmp*d_yGlobal[I]/d_massMatrixGlobal[I];
   } );
+
   RAJA::forall< deviceExecPolicy>( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
     d_ShGlobal[i]=0;
   } );
+
   RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfBoundaryFaces ), [=] LVARRAY_HOST_DEVICE ( int iFace ){
     //get ds
     float ds[6];
     float Sh[6];
     int numOfBasisFunctionOnFace[6];
     float Js[2][6];
-
     
     int i=Qk.computeDs( iFace, order, d_faceInfos,numOfBasisFunctionOnFace,
                   Js, d_globalNodesCoords, d_derivativeBasisFunction2DX,
                   d_derivativeBasisFunction2DY,
                   ds );
+    
     //compute Sh and ShGlobal
     for( int i=0; i<order+1; i++ )
     {
@@ -174,6 +133,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
       RAJA::atomicAdd< deviceAtomicPolicy >(&d_ShGlobal[gIndexFaceNode],Sh[i]);
     }
   } );
+
   // update pressure @ boundaries;
   float tmp=timeSample*timeSample;
   RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, numberOfBoundaryNodes ), [=] LVARRAY_HOST_DEVICE ( int i ) {
@@ -182,6 +142,7 @@ void solverRaja::computeOneStep(  const int & timeStep,
     float MmSh=d_massMatrixGlobal[I]-timeSample*d_ShGlobal[i]*0.5;
     d_pnGlobal[I][i1]=invMpSh*(2*d_massMatrixGlobal[I]*d_pnGlobal[I][i2]-MmSh*d_pnGlobal[I][i1]-tmp*d_yGlobal[I]);
   } );
+  
   if(timeStep%100==0)
   {
      int nodeRHS=d_globalNodesList(d_rhsElement[0],0);

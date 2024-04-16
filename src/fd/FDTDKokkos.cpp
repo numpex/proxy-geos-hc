@@ -1,3 +1,4 @@
+
 //************************************************************************
 //  SEM proxy application v.0.0.1
 //
@@ -21,7 +22,7 @@ int main( int argc, char *argv[] )
 {
   Kokkos::initialize(argc,argv);
   {
-    int nx=std::stoi(argv[1]);
+    int nx= (argc > 1)? std::stoi(argv[1]) : 150;
     int ny=nx;
     int nz=nx;
     int   xs=nx/2;
@@ -55,7 +56,7 @@ int main( int argc, char *argv[] )
     constexpr float hdx_2=1./(4.*dx*dx);
     constexpr float hdy_2=1./(4.*dy*dy);
     constexpr float hdz_2=1./(4.*dz*dz);
-    constexpr float lambdamax=vmax/fmax;
+    constexpr float lambdamax=vmin/fmax;
     constexpr int ndampx=ntaperx*lambdamax/dx;
     constexpr int ndampy=ntapery*lambdamax/dy;
     constexpr int ndampz=ntaperz*lambdamax/dz;
@@ -206,3 +207,4 @@ int main( int argc, char *argv[] )
   Kokkos::finalize();
   return (0);
 }
+
