@@ -33,22 +33,6 @@ simpleMesh::simpleMesh( const int & ex_in, const int & ey_in, const int & ez_in,
   cout<<"nx, ny, nz="<<nx<<", "<<ny<<", "<<nz<<endl;
 }
 
-#ifdef USE_RAJA
-  LVARRAY_HOST_DEVICE simpleMesh::simpleMesh(){};
-#elif defined USE_KOKKOS
-  KOKKOS_FUNCTION simpleMesh::simpleMesh(){};
-#else
-  simpleMesh::simpleMesh(){};
-#endif
-
-#ifdef USE_RAJA
-  LVARRAY_HOST_DEVICE simpleMesh::~simpleMesh(){};
-#elif defined USE_KOKKOS
-  KOKKOS_FUNCTION simpleMesh::~simpleMesh(){};
-#else
-  simpleMesh::~simpleMesh(){};
-#endif
-
 int simpleMesh::getNumberOfNodes() const
 {
   int numberOfNodes=(ex*orderx+1)*(ey*ordery+1)*(ez*orderz+1);

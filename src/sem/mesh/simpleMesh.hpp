@@ -26,11 +26,11 @@ private:
 public:
 
   #ifdef USE_RAJA
-  LVARRAY_HOST_DEVICE simpleMesh();
+  LVARRAY_HOST_DEVICE simpleMesh(){};
   #elif defined USE_KOKKOS
-  KOKKOS_FUNCTION simpleMesh();
+  KOKKOS_FUNCTION simpleMesh(){};
   #else
-  simpleMesh();
+  simpleMesh(){};
   #endif
 
   simpleMesh( const int & ex_in, const int & ey_in, const int & ez_in,
@@ -38,11 +38,11 @@ public:
                         const int & order_in);
 
   #ifdef USE_RAJA
-  LVARRAY_HOST_DEVICE ~simpleMesh();
+  LVARRAY_HOST_DEVICE ~simpleMesh(){};
   #elif defined USE_KOKKOS
-  KOKKOS_FUNCTION ~simpleMesh();
+  KOKKOS_FUNCTION ~simpleMesh(){};
   #else
-  ~simpleMesh();
+  ~simpleMesh(){};
   #endif
 
   // Returns number of Nodes in the mesh

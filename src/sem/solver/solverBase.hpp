@@ -23,7 +23,7 @@ class solverBase
 {
 public:
 
-#ifdef USE_RAJA
+ #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE solverBase(){};
 #elif defined USE_KOKKOS
   KOKKOS_FUNCTION solverBase(){};
@@ -61,8 +61,6 @@ public:
 
   int i1=0, i2=1;
 
-  static constexpr int NumPointsPerElem=8;
-
   // get infos from mesh
   int numberOfNodes;
   int numberOfElements;
@@ -99,12 +97,12 @@ public:
   arrayDouble derivativeBasisFunction2DY;
 
   //shared arrays
-  vectorDouble massMatrixGlobal;
-  vectorDouble yGlobal;
+  vectorReal massMatrixGlobal;
+  vectorReal yGlobal;
   vectorReal ShGlobal;
   
   simpleMesh mesh;
   QkGL Qk;
-
+  
 };
 #endif //SOLVER_BASE_HPP_

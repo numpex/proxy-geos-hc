@@ -21,20 +21,20 @@ namespace FE
     int order;
   public:
 
-   #ifdef USE_RAJA
-   LVARRAY_HOST_DEVICE QkGL();
-   #elif defined USE_KOKKOS
-   KOKKOS_FUNCTION QkGL();
-   #else
-   QkGL();
-   #endif
+  #ifdef USE_RAJA
+  LVARRAY_HOST_DEVICE QkGL(){};
+  #elif defined USE_KOKKOS
+  KOKKOS_FUNCTION QkGL(){};
+  #else
+  QkGL(){};
+  #endif
 
   #ifdef USE_RAJA
-  LVARRAY_HOST_DEVICE ~QkGL();
+  LVARRAY_HOST_DEVICE ~QkGL(){};
   #elif defined USE_KOKKOS
-  KOKKOS_FUNCTION ~QkGL();
+  KOKKOS_FUNCTION ~QkGL(){};
   #else
-  ~QkGL();
+  ~QkGL(){};
   #endif
 
   // get Gauss Lobatto quadrature points
@@ -136,8 +136,8 @@ namespace FE
                                     arrayRealView    const & nodesCoords,
                                     vectorDoubleView const & weights2D,
                                     arrayDoubleView  const & dPhi,
-                                    double massMatrixLocal[],
-                                    double   B[][4] ) const;
+                                    float massMatrixLocal[],
+                                    float   B[][4] ) const;
   #elif defined USE_KOKKOS
   KOKKOS_FUNCTION int computeB( const int & elementNumber,
                                 const int & order,
@@ -145,8 +145,8 @@ namespace FE
                                 arrayReal    const & nodesCoords,
                                 vectorDouble const & weights2D,
                                 arrayDouble  const & dPhi,
-                                double massMatrixLocal[],
-                                double   B[][4]) const;
+                                float massMatrixLocal[],
+                                float   B[][4]) const;
   #else
   int computeB( const int & elementNumber,
                 const int & order,
@@ -154,12 +154,11 @@ namespace FE
                 arrayReal & nodesCoords,
                 vectorDouble & weights2D,
                 arrayDouble  & dPhi,
-                double massMatrixLocal[],
-                double   B[][4]) const;
+                float massMatrixLocal[],
+                float   B[][4]) const;
   #endif
 
   //3D
-  // compute B and M
   #ifdef USE_RAJA
   LVARRAY_HOST_DEVICE int computeB( const int & elementNumber,
                                     const int & order,
@@ -167,8 +166,8 @@ namespace FE
                                     arrayRealView    const & nodesCoords,
                                     vectorDoubleView const & weights3D,
                                     arrayDoubleView  const & dPhi,
-                                    double massMatrixLocal[],
-                                    double   B[][6] ) const;
+                                    float massMatrixLocal[],
+                                    float   B[][6] ) const;
   #elif defined USE_KOKKOS
   KOKKOS_FUNCTION int computeB( const int & elementNumber,
                                 const int & order,
@@ -176,8 +175,8 @@ namespace FE
                                 arrayReal    const & nodesCoords,
                                 vectorDouble const & weights3D,
                                 arrayDouble  const & dPhi,
-                                double massMatrixLocal[],
-                                double   B[][6]) const;
+                                float massMatrixLocal[],
+                                float   B[][6]) const;
   #else
   int computeB( const int & elementNumber,
                 const int & order,
@@ -185,8 +184,8 @@ namespace FE
                 arrayReal & nodesCoords,
                 vectorDouble & weights3D,
                 arrayDouble  & dPhi,
-                double massMatrixLocal[],
-                double   B[][6]) const;
+                float massMatrixLocal[],
+                float   B[][6]) const;
   #endif
 
   // 2D
@@ -196,49 +195,61 @@ namespace FE
   LVARRAY_HOST_DEVICE int  gradPhiGradPhi( const int & nPointsPerElement,
                                            const int & order,
                                            vectorDoubleView const & weights2D,
-                                           double const B[][4],
                                            arrayDoubleView const & dPhi,
-                                           double  R[][36] ) const;
+                                           float const B[][4],
+                                           float const pnLocal[],
+                                           float R[],
+                                           float Y[]) const;
   #elif defined USE_KOKKOS
   KOKKOS_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
                                        const int & order,
                                        vectorDouble const & weights2D,
-                                       double const B[][4],
                                        arrayDouble const & dPhi,
-                                       double  R[][36] ) const;
+                                       float const B[][4],
+                                       float const pnLocal[],
+                                       float R[],
+                                       float Y[]) const;
   #else
   int  gradPhiGradPhi( const int & nPointsPerElement,
                        const int & order,
                        vectorDouble  & weights2D,
-                       double const B[][4],
                        arrayDouble  & dPhi,
-                       double  R[][36]) const;
+                       float const B[][4],
+                       float const pnLocal[],
+                       float R[],
+                       float Y[]) const;
   #endif
 
-  // 3D
+  // 3D version
   // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
   // Marc Durufle Formulae
   #ifdef USE_RAJA
-  LVARRAY_HOST_DEVICE int  gradPhiGradPhi( const int & nPointsPerElement,
-                                           const int & order,
-                                           vectorDoubleView const & weights3D,
-                                           double const B[][6],
-                                           arrayDoubleView const & dPhi,
-                                           double  R[][8] ) const;
+  LVARRAY_HOST_DEVICE int gradPhiGradPhi( const int & nPointsPerElement,
+                                      const int & order,
+                                      vectorDoubleView const & weights3D,
+                                      arrayDoubleView const & dPhi,
+                                      float const B[][6],
+                                      float const pnLocal[],
+                                      float R[],
+                                      float Y[]) const;
   #elif defined USE_KOKKOS
-  KOKKOS_FUNCTION int  gradPhiGradPhi( const int & nPointsPerElement,
-                                       const int & order,
-                                       vectorDouble const & weights3D,
-                                       double const B[][6],
-                                       arrayDouble const & dPhi,
-                                       double  R[][8] ) const;
+  KOKKOS_FUNCTION int gradPhiGradPhi( const int & nPointsPerElement,
+                                  const int & order,
+                                  vectorDouble const & weights3D,
+                                  arrayDouble const & dPhi,
+                                  float const B[][6],
+                                  float const pnLocal[],
+                                  float R[],
+                                  float Y[]) const;
   #else
-  int  gradPhiGradPhi( const int & nPointsPerElement,
-                       const int & order,
-                       vectorDouble  & weights3D,
-                       double const B[][6],
-                       arrayDouble  & dPhi,
-                       double  R[][8]) const;
+  int gradPhiGradPhi( const int & nPointsPerElement,
+                  const int & order,
+                  vectorDouble  & weights3D,
+                  arrayDouble & dPhi,
+                  float const B[][6],
+                  float const pnLocal[],
+                  float R[],
+                  float Y[]) const;
   #endif
 
   // compute dx

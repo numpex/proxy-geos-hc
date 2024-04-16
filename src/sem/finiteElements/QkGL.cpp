@@ -10,22 +10,6 @@ namespace FE
 {
 
 #ifdef USE_RAJA
-  LVARRAY_HOST_DEVICE QkGL::QkGL(){};
-#elif defined USE_KOKKOS
-  KOKKOS_FUNCTION QkGL::QkGL(){};
-#else
-  QkGL::QkGL(){};
-#endif
-
-#ifdef USE_RAJA
-  LVARRAY_HOST_DEVICE QkGL::~QkGL(){};
-#elif defined USE_KOKKOS
-  KOKKOS_FUNCTION QkGL::~QkGL(){};
-#else
-  QkGL::~QkGL(){};
-#endif
-
-#ifdef USE_RAJA
 void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
 #elif defined USE_KOKKOS
 void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
@@ -459,8 +443,8 @@ LVARRAY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
 			               arrayRealView    const & nodesCoords,
                                        vectorDoubleView const & weights2D,
                                        arrayDoubleView  const & dPhi,
-				       double massMatrixLocal[],
-                                       double B[][4] ) const
+				       float massMatrixLocal[],
+                                       float B[][4] ) const
 #elif defined USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::computeB(const int & elementNumber,
 		                   const int & order,
@@ -468,8 +452,8 @@ KOKKOS_FUNCTION int QkGL::computeB(const int & elementNumber,
 			           arrayReal    const & nodesCoords,
                                    vectorDouble const & weights2D,
                                    arrayDouble  const & dPhi,
-				   double massMatrixLocal[],
-                                   double B[][4]) const
+				   float massMatrixLocal[],
+                                   float B[][4]) const
 #else
 int QkGL::computeB(const int & elementNumber,
 		   const int & order,
@@ -477,8 +461,8 @@ int QkGL::computeB(const int & elementNumber,
 	           arrayReal & nodesCoords,
                    vectorDouble & weights2D,
                    arrayDouble  & dPhi,
-		   double massMatrixLocal[],
-                   double B[][4]) const
+		   float massMatrixLocal[],
+                   float B[][4]) const
 #endif
 {
   for (int i2=0;i2<order+1;i2++)
@@ -541,8 +525,8 @@ LVARRAY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
                                        arrayRealView    const & nodesCoords,
                                        vectorDoubleView const & weights3D,
                                        arrayDoubleView  const & dPhi,
-                                       double massMatrixLocal[],
-                                       double B[][6] ) const
+                                       float massMatrixLocal[],
+                                       float B[][6] ) const
 #elif defined USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::computeB(const int & elementNumber,
                                    const int & order,
@@ -550,8 +534,8 @@ KOKKOS_FUNCTION int QkGL::computeB(const int & elementNumber,
                                    arrayReal    const & nodesCoords,
                                    vectorDouble const & weights3D,
                                    arrayDouble  const & dPhi,
-                                   double massMatrixLocal[],
-                                   double B[][6]) const
+                                   float massMatrixLocal[],
+                                   float B[][6]) const
 #else
 int QkGL::computeB(const int & elementNumber,
                    const int & order,
@@ -559,8 +543,8 @@ int QkGL::computeB(const int & elementNumber,
                    arrayReal & nodesCoords,
                    vectorDouble & weights3D,
                    arrayDouble  & dPhi,
-                   double massMatrixLocal[],
-                   double B[][6]) const
+                   float massMatrixLocal[],
+                   float B[][6]) const
 #endif
 {
   for (int i3=0;i3<order+1;i3++)
@@ -665,98 +649,86 @@ int QkGL::computeB(const int & elementNumber,
 LVARRAY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                               const int & order,
                                               vectorDoubleView const & weights2D,
-                                              double const  B[][4],
                                               arrayDoubleView const & dPhi,
-                                              double   R[][36] ) const
+                                              float const  B[][4],
+			                      float const pnLocal[],
+                                              float R[],
+	                                      float Y[]) const
 #elif defined USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                           const int & order,
                                           vectorDouble const & weights2D,
-                                          double const  B[][4],
                                           arrayDouble const & dPhi,
-                                          double   R[][36] ) const
+                                          float const  B[][4],
+			                  float const pnLocal[],
+                                          float R[],
+	                                  float Y[]) const
 #else
 int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                           const int & order,
                           vectorDouble  & weights2D,
-                          double const  B[][4],
                           arrayDouble & dPhi,
-                          double   R[][36] ) const
+                          float const  B[][4],
+			  float const pnLocal[],
+                          float R[],
+	                  float Y[]) const
 #endif
 {
-  for (int j=0;j<nPointsPerElement;j++)
-  {
-      for (int i=0; i<nPointsPerElement;i++)
-      {
-        R[i][j]=0;
-      }
-  }
   // B11
   for( int i1=0; i1<order+1; i1++ )
   {
     for( int i2=0; i2<order+1; i2++ )
     {
-      int i=i1+i2*(order+1);
+      for (int j=0; j<nPointsPerElement;j++)
+      {
+        R[j]=0;
+      }
       for( int j1=0; j1<order+1; j1++ )
       {
         int j=j1+i2*(order+1);
         for( int m=0; m<order+1; m++ )
         {
-          R[i][j]+=weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*dPhi(i1,m)*dPhi(j1,m));
+          R[j]+=weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*dPhi(i1,m)*dPhi(j1,m));
         }
       }
-    }
-  }
-  // B21
-  for( int i1=0; i1<order+1; i1++ )
-  {
-    for( int i2=0; i2<order+1; i2++ )
-    {
-      int i=i1+i2*(order+1);
+      // B21
       for( int j1=0; j1<order+1; j1++ )
       {
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-          R[i][j]+=weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*dPhi(i2,j2)*dPhi(j1,i1));
+          R[j]+=weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*dPhi(i2,j2)*dPhi(j1,i1));
         }
       }
-    }
-  }
-  // B12
-  for( int i1=0; i1<order+1; i1++ )
-  {
-    for( int i2=0; i2<order+1; i2++ )
-    {
-      int i=i1+i2*(order+1);
+      // B12
       for( int j1=0; j1<order+1; j1++ )
       {
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-          R[i][j]+=weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*dPhi(i1,j1)*dPhi(j2,i2));
+          R[j]+=weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*dPhi(i1,j1)*dPhi(j2,i2));
         }
       }
-    }
-  }
-  // B22
-  for( int i1=0; i1<order+1; i1++ )
-  {
-    for( int i2=0; i2<order+1; i2++ )
-    {
-      int i=i1+i2*(order+1);
+      // B22
       for( int j2=0; j2<order+1; j2++ )
       {
         int j=i1+j2*(order+1);
         for( int n=0; n<order+1; n++ )
         {
-          R[i][j]+=weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*dPhi(i2,n)*dPhi(j2,n));
+          R[j]+=weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*dPhi(i2,n)*dPhi(j2,n));
         }
+      }
+      int i=i1+i2*(order+1);
+      Y[i]=0;
+      for( int j=0; j<nPointsPerElement; j++ )
+      {
+         Y[i]+=R[j]*pnLocal[j];
       }
     }
   }
   return 0;
 }
+
 // 3D version
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
 // Marc Durufle Formulae
@@ -764,120 +736,118 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 LVARRAY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                               const int & order,
                                               vectorDoubleView const & weights3D,
-                                              double const  B[][6],
                                               arrayDoubleView const & dPhi,
-                                              double   R[][8] ) const
+                                              float const B[][6],
+					      float const pnLocal[],
+                                              float R[],
+	                                      float Y[]) const
 #elif defined USE_KOKKOS
 KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                           const int & order,
                                           vectorDouble const & weights3D,
-                                          double const  B[][6],
                                           arrayDouble const & dPhi,
-                                          double   R[][8] ) const
+                                          float const B[][6],
+					  float const pnLocal[],
+                                          float R[],
+	                                  float Y[]) const
 #else
 int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                           const int & order,
                           vectorDouble  & weights3D,
-                          double const  B[][6],
                           arrayDouble & dPhi,
-                          double   R[][8] ) const
+                          float const B[][6],
+			  float const pnLocal[],
+                          float R[],
+	                  float Y[]) const
 #endif
 {
-  for (int i3=0;i3<order+1;i3++)
-  {
-      for (int i2=0;i2<order+1;i2++)
-      {
-          for (int i1=0;i1<order+1;i1++)
-          {
-              int i=i1+i2*(order+1)+i3*(order+1)*(order+1);
-              for( int j3=0; j3<order+1; j3++ )
-              {
-                 for( int j2=0; j2<order+1; j2++ )
-                 {
-                    for( int j1=0; j1<order+1; j1++ )
-                    {
-                       int j=j1+j2*(order+1)+j3*(order+1)*(order+1);
-                       R[i][j]=0;
-                    }
-                 }
-             }
-          }
-      }
-  }
+  int orderPow2=(order+1)*(order+1);
   for (int i1=0;i1<order+1;i1++)
   {
       for (int i2=0;i2<order+1;i2++)
       {
           for (int i3=0;i3<order+1;i3++)
           {
-              int i=i1+i2*(order+1)+i3*(order+1)*(order+1);
 
-              //B11
+              for( int j=0; j<nPointsPerElement; j++ )
+              {
+                 R[j]=0;
+              }
+
+	      //B11
               for( int j1=0; j1<order+1; j1++ )
               {
-                 int j=j1+i2*(order+1)+i3*(order+1)*(order+1);
-                 for( int l=0; l<order+1; l++ )
-                 {
-                    R[i][j]+=weights3D[l+i2*(order+1)+i3*(order+1)*(order+1)]*(B[l+i2*(order+1)+i3*(order+1)*(order+1)][0]*
-                             dPhi(i1,l)*dPhi(j1,l));
+                  int j=j1+i2*(order+1)+i3*orderPow2;
+                  for( int l=0; l<order+1; l++ )
+                  {
+                      int ll=l+i2*(order+1)+i3*orderPow2;
+                      R[j]+=weights3D[ll]*(B[ll][0]*dPhi(i1,l)*dPhi(j1,l));
                   }
               }
               //B22
               for( int j2=0; j2<order+1; j2++ )
               {
-                  int j=i1+j2*(order+1)+i3*(order+1)*(order+1);
+                  int j=i1+j2*(order+1)+i3*orderPow2;
                   for( int m=0; m<order+1; m++ )
                   {
-                     R[i][j]+=weights3D[i1+m*(order+1)+i3*(order+1)*(order+1)]*(B[i1+m*(order+1)+i3*(order+1)*(order+1)][1]*
-                              dPhi(i2,m)*dPhi(j2,m));
+                      int mm=i1+m*(order+1)+i3*orderPow2;
+                      R[j]+=weights3D[mm]*(B[mm][1]*dPhi(i2,m)*dPhi(j2,m));
                   }
               }
               //B33
               for( int j3=0; j3<order+1; j3++ )
               {
-                 int j=i1+i2*(order+1)+j3*(order+1)*(order+1);
-                 for( int n=0; n<order+1; n++ )
-                 {
-                    R[i][j]+=weights3D[i1+i2*(order+1)+n*(order+1)*(order+1)]*(B[i1+i2*(order+1)+n*(order+1)*(order+1)][2]*
-                             dPhi(i3,n)*dPhi(j3,n));
-                 }
+                  int j=i1+i2*(order+1)+j3*orderPow2;
+                  for( int n=0; n<order+1; n++ )
+                  {
+                      int nn=i1+i2*(order+1)+n*orderPow2;
+                      R[j]+=weights3D[nn]*(B[nn][2]*dPhi(i3,n)*dPhi(j3,n));
+                  }
               }
               // B12,B21 (B[][3])
               for( int j1=0; j1<order+1; j1++ )
               {
-                 for( int j2=0; j2<order+1; j2++ )
-                 {
-                    int j=j1+j2*(order+1)+i3*(order+1)*(order+1);
-                    R[i][j]+=weights3D[j1+i2*(order+1)+i3*(order+1)*(order+1)]*(B[j1+i2*(order+1)+i3*(order+1)*(order+1)][3]*
-                             dPhi(i1,j1)*dPhi(j2,i2))+
-                             weights3D[i1+j2*(order+1)+i3*(order+1)*(order+1)]*(B[i1+j2*(order+1)+i3*(order+1)*(order+1)][3]*
-                             dPhi(j1,i1)*dPhi(i2,j2));
-                 }
+                for( int j2=0; j2<order+1; j2++ )
+                {
+                  int j=j1+j2*(order+1)+i3*orderPow2;
+                  int k=j1+i2*(order+1)+i3*orderPow2;
+                  int l=i1+j2*(order+1)+i3*orderPow2;
+                  R[j]+=weights3D[k]*(B[k][3]*dPhi(i1,j1)*dPhi(j2,i2))+
+                        weights3D[l]*(B[l][3]*dPhi(j1,i1)*dPhi(i2,j2));
+                }
               }
               // B13,B31 (B[][4])
               for( int j3=0; j3<order+1; j3++ )
-	      {
-                 for( int j1=0; j1<order+1; j1++ )
-                 {
-                    int j=j1+i2*(order+1)+i3*(order+1)*(order+1);
-                    R[i][j]+=weights3D[j1+i2*(order+1)+i3*(order+1)*(order+1)]*(B[j1+i2*(order+1)+i3*(order+1)*(order+1)][4]*
-                             dPhi(j1,i1)*dPhi(j3,i3))+
-                             weights3D[j1+i2*(order+1)+j3*(order+1)*(order+1)]*(B[j1+i2*(order+1)+j3*(order+1)*(order+1)][4]*
-                             dPhi(j1,i1)*dPhi(i3,j3));
-                 }
+              {
+                for( int j1=0; j1<order+1; j1++ )
+                {
+                  int j=j1+i2*(order+1)+i3*orderPow2;
+                  int k=j1+i2*(order+1)+i3*orderPow2;
+                  int l=j1+i2*(order+1)+j3*orderPow2;
+                  R[j]+=weights3D[k]*(B[k][4]*dPhi(j1,i1)*dPhi(j3,i3))+
+                        weights3D[l]*(B[l][4]*dPhi(j1,i1)*dPhi(i3,j3));
+	        }
               }
               // B23,B32 (B[][5])
               for( int j3=0; j3<order+1; j3++ )
               {
-                 for( int j2=0; j2<order+1; j2++ )
-                 {
-                    int j=i1+j2*(order+1)+j3*(order+1)*(order+1);
-                    R[i][j]+=weights3D[i1+j2*(order+1)+i3*(order+1)*(order+1)]*(B[i1+j2*(order+1)+i3*(order+1)*(order+1)][5]*
-                             dPhi(i2,i2)*dPhi(j3,i3))+
-                             weights3D[i1+i2*(order+1)+j3*(order+1)*(order+1)]*(B[i1+i2*(order+1)+j3*(order+1)*(order+1)][5]*
-                             dPhi(j2,i2)*dPhi(i3,j3));
-                 }
+                for( int j2=0; j2<order+1; j2++ )
+                {
+                  int j=i1+j2*(order+1)+j3*orderPow2;
+                  int k=i1+j2*(order+1)+i3*orderPow2;
+                  int l=i1+i2*(order+1)+j3*orderPow2;
+                  R[j]+=weights3D[k]*(B[k][5]*dPhi(i2,i2)*dPhi(j3,i3))+
+                        weights3D[l]*(B[l][5]*dPhi(j2,i2)*dPhi(i3,j3));
+                }
               }
+
+              int i=i1+i2*(order+1)+i3*orderPow2;
+              Y[i]=0;
+              for( int j=0; j<nPointsPerElement; j++ )
+              {
+                Y[i]+=R[j]*pnLocal[j];
+              }
+
           }
       }
   }

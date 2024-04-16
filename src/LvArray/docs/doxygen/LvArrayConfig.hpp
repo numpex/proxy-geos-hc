@@ -24,9 +24,9 @@
 
 #define LVARRAY_USE_CHAI
 
-/* #undef LVARRAY_USE_CUDA */
+#define LVARRAY_USE_CUDA
 
-#define LVARRAY_USE_HIP
+/* #undef LVARRAY_USE_HIP */
 
 /* #undef LVARRAY_USE_TOTALVIEW_OUTPUT */
 

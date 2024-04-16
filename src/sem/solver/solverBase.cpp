@@ -88,8 +88,8 @@ void solverBase::computeFEInit( const int & order, simpleMesh mesh, QkGL Qk)
   cout<<"fin allocation  shared:"<<endl;
 
   //shared arrays
-  massMatrixGlobal=allocateVector<vectorDouble>( numberOfNodes );
-  yGlobal=allocateVector<vectorDouble>( numberOfNodes );
+  massMatrixGlobal=allocateVector<vectorReal>( numberOfNodes );
+  yGlobal=allocateVector<vectorReal>( numberOfNodes );
   ShGlobal=allocateVector<vectorReal>( numberOfBoundaryNodes );
   std::cout<<"end of shared arrays initialization\n";
 
