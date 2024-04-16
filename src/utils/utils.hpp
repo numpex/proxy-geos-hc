@@ -4,6 +4,9 @@
 #include  <cmath>
 #include <vector>
 #include "dataType.hpp"
+#include "../sem/mesh/simpleMesh.hpp"
+
+using namespace grid;
 
 struct solverUtils
 {
