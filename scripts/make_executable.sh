@@ -1,6 +1,8 @@
 #!/bin/sh
 
-# to compile on cypress
+# to compile 
+
+source env/env_{system}.sh
 
 mkdir build; cd build
 

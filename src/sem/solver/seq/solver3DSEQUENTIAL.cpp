@@ -1,18 +1,18 @@
 //************************************************************************
 //   proxy application v.0.0.1
 //
-//  solverOMP.cpp: simple 2D acoustive wave equation solver
+//  solverSEQUENTIAL.cpp: 3D acoustive wave equation solver
 //
-//  the solverOMP class is derived from the solverBase class
+//  the solverSEQUENTIAL class is derived from the solverBase class
 //  with the openMP implementation of the solver
 //
 //************************************************************************
 
-#include "solverSEQUENTIAL.hpp"
+#include "solver.hpp"
 
 // compute one step of the time dynamic wave equation solver
 
-void solverOMP::computeOneStep( const int & timeStep,
+void solverSEQUENTIAL::computeOneStep( const int & timeStep,
                                 const float & timeSample,
                                 const int & order,
                                 int & i1,
@@ -22,13 +22,12 @@ void solverOMP::computeOneStep( const int & timeStep,
                                 arrayReal & rhsTerm,
                                 arrayReal & pnGlobal)
 {
-  { // start parallel section
 
-    float B[64][6];
-    float R[64];
-    float massMatrixLocal[64];
-    float pnLocal[64];
-    float Y[64];
+  float B[64][6];
+  float R[64];
+  float massMatrixLocal[64];
+  float pnLocal[64];
+  float Y[64];
 
   for( int i=0; i<numberOfNodes; i++ )
   {
@@ -77,5 +76,4 @@ void solverOMP::computeOneStep( const int & timeStep,
     pnGlobal[I][i1]=2*pnGlobal[I][i2]-pnGlobal[I][i1]-tmp*yGlobal[I]/massMatrixGlobal[I];
   }
   
-}// end parallel region
 }

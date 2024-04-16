@@ -1,14 +1,14 @@
 //************************************************************************
 //   proxy application v.0.0.1
 //
-//  solverOMP.cpp: simple 2D acoustive wave equation solver
+//  solverOMP.cpp: 3D acoustive wave equation solver
 //
 //  the solverOMP class is derived from the solverBase class
 //  with the openMP implementation of the solver
 //
 //************************************************************************
 
-#include "solverOMP.hpp"
+#include "solver.hpp"
 
 // compute one step of the time dynamic wave equation solver
 

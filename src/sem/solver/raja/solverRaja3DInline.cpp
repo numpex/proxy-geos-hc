@@ -1,14 +1,14 @@
 //************************************************************************
 //   proxy application v.0.0.1
 //
-//  solverRaja.cpp: simple 2D acoustive wave equation solver
+//  solverRaja.cpp: 3D acoustive wave equation solver
 //
 //  the solverRaja class is derived from the solverBase class
 //  with the RAJA implementation of the solver
 //
 //************************************************************************
 
-#include "solverRaja.hpp"
+#include "solver.hpp"
 
 // compute one step of the time dynamic wave equation solver
 void solverRaja::computeOneStep(  const int & timeStep,

@@ -1,21 +1,11 @@
 // C++ Code generated from Python Code:
-#include <iostream>
-#include <vector>
-#include <cmath>
 #include "QkGL.hpp"
-#include "commonMacro.hpp"
 
 
 namespace FE
 {
 
-#ifdef USE_RAJA
 void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
-#elif defined USE_KOKKOS
-void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
-#else
-void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoints ) const
-#endif
 {
   if( order == 1 )
   {
@@ -53,13 +43,8 @@ void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoi
     quadraturePoints[5]=1.0;
   }
 }
-#ifdef USE_RAJA
+
 void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const
-#elif defined USE_KOKKOS
-void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const
-#else
-void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) const
-#endif
 {
   if( order == 1 )
   {
@@ -97,6 +82,7 @@ void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) co
     weights[5]=0.06666667;
   }
 }
+
 std::vector<double> QkGL::shapeFunction1D( int order, double xi ) const
 {
   std::vector<double> shapeFunction( order+1 );
@@ -172,6 +158,7 @@ std::vector<double> QkGL::shapeFunction1D( int order, double xi ) const
   }
   return shapeFunction;
 }
+
 std::vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) const
 {
   std::vector<double> derivativeShapeFunction( order+1 );
@@ -303,15 +290,10 @@ std::vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) cons
   }
   return derivativeShapeFunction;
 }
+
 // get 1D basis functions @ quadrature points
 // returns 2D vector basisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-#ifdef USE_RAJA
 void QkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble const & basisFunction1D ) const
-#elif defined USE_KOKKOS
-void QkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble const & basisFunction1D ) const
-#else
-void QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints, arrayDouble & basisFunction1D ) const
-#endif
 {
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -328,16 +310,8 @@ void QkGL::getBasisFunction1D( int order, vectorDouble & quadraturePoints, array
 
 // get derivative of 1D basis functions @ quadrature points
 // returns 2D vector derivativeBasisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-#ifdef USE_RAJA
 void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
                                           arrayDouble const & derivativeBasisFunction1D ) const
-#elif defined USE_KOKKOS
-void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
-                                          arrayDouble const & derivativeBasisFunction1D ) const
-#else
-void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoints, 
-                                          arrayDouble & derivativeBasisFunction1D ) const
-#endif
 {
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -351,20 +325,11 @@ void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble & quadraturePoi
     }
   }
 }
+
 // compute 2D gauss-lobatto weights
-#ifdef USE_RAJA
 void QkGL::getGaussLobattoWeights2D( vectorDouble const & quadraturePoints,
                                            vectorDouble const & weights,
                                            vectorDouble const & W )const
-#elif defined USE_KOKKOS
-void QkGL::getGaussLobattoWeights2D( vectorDouble const & quadraturePoints,
-                                           vectorDouble const & weights,
-                                           vectorDouble const & W )const
-#else
-void QkGL::getGaussLobattoWeights2D( vectorDouble & quadraturePoints,
-                                           vectorDouble & weights,
-                                           vectorDouble & W )const
-#endif
 {
   for( int j=0; j<quadraturePoints.size(); j++ )
   {
@@ -376,19 +341,9 @@ void QkGL::getGaussLobattoWeights2D( vectorDouble & quadraturePoints,
 }
 
 // compute 3D gauss-lobatto weights
-#ifdef USE_RAJA
 void QkGL::getGaussLobattoWeights3D( vectorDouble const & quadraturePoints,
                                            vectorDouble const & weights,
                                            vectorDouble const & W )const
-#elif defined USE_KOKKOS
-void QkGL::getGaussLobattoWeights3D( vectorDouble const & quadraturePoints,
-                                           vectorDouble const & weights,
-                                           vectorDouble const & W )const
-#else
-void QkGL::getGaussLobattoWeights3D( vectorDouble & quadraturePoints,
-                                           vectorDouble & weights,
-                                           vectorDouble & W )const
-#endif
 {
   for( int k=0; k<quadraturePoints.size(); k++ )
   {
@@ -403,22 +358,10 @@ void QkGL::getGaussLobattoWeights3D( vectorDouble & quadraturePoints,
 }
 
 // returns 2D vector basisFunction2D of dimensions nBasisFunctions,nQuadraturePoints
-#ifdef USE_RAJA
 void QkGL::getBasisFunction2D( vectorDouble const & quadraturePoints,
                                arrayDouble const & a,
                                arrayDouble const & b,
                                arrayDouble const & c )const                                      
-#elif defined USE_KOKKOS
-void QkGL::getBasisFunction2D( vectorDouble const & quadraturePoints,
-                               arrayDouble const & a,
-                               arrayDouble const & b,
-                               arrayDouble const & c )const                                      
-#else
-void QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
-                               arrayDouble & a,
-                               arrayDouble & b,
-                               arrayDouble & c )const                                      
-#endif
 {
   for( int j = 0; j < quadraturePoints.size(); j++ )
   {
@@ -434,10 +377,10 @@ void QkGL::getBasisFunction2D( vectorDouble & quadraturePoints,
     }
   }
 }
+
 // 2D version
 // compute B and M  
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
+PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
 		                       const int & order,
 			               arrayIntView     const & nodesList,
 			               arrayRealView    const & nodesCoords,
@@ -445,25 +388,6 @@ LVARRAY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
                                        arrayDoubleView  const & dPhi,
 				       float massMatrixLocal[],
                                        float B[][4] ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeB(const int & elementNumber,
-		                   const int & order,
-			           arrayInt     const & nodesList,
-			           arrayReal    const & nodesCoords,
-                                   vectorDouble const & weights2D,
-                                   arrayDouble  const & dPhi,
-				   float massMatrixLocal[],
-                                   float B[][4]) const
-#else
-int QkGL::computeB(const int & elementNumber,
-		   const int & order,
-	           arrayInt  & nodesList,
-	           arrayReal & nodesCoords,
-                   vectorDouble & weights2D,
-                   arrayDouble  & dPhi,
-		   float massMatrixLocal[],
-                   float B[][4]) const
-#endif
 {
   for (int i2=0;i2<order+1;i2++)
    {
@@ -518,8 +442,7 @@ int QkGL::computeB(const int & elementNumber,
 
 // 3D version
 // compute B and M
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
+PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
                                        const int & order,
                                        arrayIntView     const & nodesList,
                                        arrayRealView    const & nodesCoords,
@@ -527,25 +450,6 @@ LVARRAY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
                                        arrayDoubleView  const & dPhi,
                                        float massMatrixLocal[],
                                        float B[][6] ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeB(const int & elementNumber,
-                                   const int & order,
-                                   arrayInt     const & nodesList,
-                                   arrayReal    const & nodesCoords,
-                                   vectorDouble const & weights3D,
-                                   arrayDouble  const & dPhi,
-                                   float massMatrixLocal[],
-                                   float B[][6]) const
-#else
-int QkGL::computeB(const int & elementNumber,
-                   const int & order,
-                   arrayInt  & nodesList,
-                   arrayReal & nodesCoords,
-                   vectorDouble & weights3D,
-                   arrayDouble  & dPhi,
-                   float massMatrixLocal[],
-                   float B[][6]) const
-#endif
 {
   for (int i3=0;i3<order+1;i3++)
   {
@@ -645,8 +549,7 @@ int QkGL::computeB(const int & elementNumber,
 // 2D version
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
 // Marc Durufle Formulae
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                               const int & order,
                                               vectorDoubleView const & weights2D,
                                               arrayDoubleView const & dPhi,
@@ -654,25 +557,6 @@ LVARRAY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 			                      float const pnLocal[],
                                               float R[],
 	                                      float Y[]) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                                          const int & order,
-                                          vectorDouble const & weights2D,
-                                          arrayDouble const & dPhi,
-                                          float const  B[][4],
-			                  float const pnLocal[],
-                                          float R[],
-	                                  float Y[]) const
-#else
-int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                          const int & order,
-                          vectorDouble  & weights2D,
-                          arrayDouble & dPhi,
-                          float const  B[][4],
-			  float const pnLocal[],
-                          float R[],
-	                  float Y[]) const
-#endif
 {
   // B11
   for( int i1=0; i1<order+1; i1++ )
@@ -732,8 +616,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 // 3D version
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
 // Marc Durufle Formulae
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                               const int & order,
                                               vectorDoubleView const & weights3D,
                                               arrayDoubleView const & dPhi,
@@ -741,25 +624,6 @@ LVARRAY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 					      float const pnLocal[],
                                               float R[],
 	                                      float Y[]) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                                          const int & order,
-                                          vectorDouble const & weights3D,
-                                          arrayDouble const & dPhi,
-                                          float const B[][6],
-					  float const pnLocal[],
-                                          float R[],
-	                                  float Y[]) const
-#else
-int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                          const int & order,
-                          vectorDouble  & weights3D,
-                          arrayDouble & dPhi,
-                          float const B[][6],
-			  float const pnLocal[],
-                          float R[],
-	                  float Y[]) const
-#endif
 {
   int orderPow2=(order+1)*(order+1);
   for (int i1=0;i1<order+1;i1++)
@@ -855,8 +719,7 @@ int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 }
 
 //computeDs
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
+PROXY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
                                           const int & order,
                                           arrayIntView const & faceInfos,
                                           int  numOfBasisFunctionOnFace[],
@@ -865,27 +728,6 @@ LVARRAY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
                                           arrayDoubleView const & derivativeBasisFunction2DX,
                                           arrayDoubleView const & derivativeBasisFunction2DY,
                                           float  ds[]  ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int QkGL::computeDs(  const int & iFace,
-                                      const int & order,
-                                      arrayInt  const & faceInfos,
-                                      int  numOfBasisFunctionOnFace[],
-                                      float  Js[][6],
-                                      arrayReal   const & globalNodesCoords,
-                                      arrayDouble const & derivativeBasisFunction2DX,
-                                      arrayDouble const & derivativeBasisFunction2DY,
-                                      float  ds[] ) const
-#else
-int QkGL::computeDs(  const int & iFace,
-                      const int & order,
-                      arrayInt & faceInfos,
-                      int  numOfBasisFunctionOnFace[],
-                      float  Js[][6],
-                      arrayReal    & globalNodesCoords,
-                      arrayDouble  & derivativeBasisFunction2DX,
-                      arrayDouble  & derivativeBasisFunction2DY,
-                      float  ds[] ) const
-#endif
 {
   int face=faceInfos(iFace,1);
   // get basis functions on Boundary faces

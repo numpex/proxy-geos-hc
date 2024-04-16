@@ -1,9 +1,6 @@
 #ifndef SIMPLEMESH_HPP_
 #define SIMPLEMESH_HPP_
 
-#include <iostream>
-#include <cmath>
-#include "dataType.hpp"
 #include "simpleMesh.hpp"
 
 namespace grid
@@ -86,13 +83,7 @@ int simpleMesh::getDz() const
 {return hz;}
 
 // Initialize nodal coordinates.
-#ifdef USE_RAJA
 void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayReal const & nodeCoords ) const
-#elif defined USE_KOKKOS
-void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayReal const & nodeCoords ) const
-#else
-void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const
-#endif
 {
   std::vector<float> coordX( nx );
   std::vector<float> coordY( ny );
@@ -188,13 +179,7 @@ void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCo
 }
 
 //  list of global nodes ( vertices) for each element
-#ifdef USE_RAJA
 void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt const & nodesList ) const
-#elif defined USE_KOKKOS
-void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt const & nodesList ) const
-#else
-void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt & nodesList ) const
-#endif
 {
    for( int j=0; j<((ey==0)?1:ey); j++ )
    {
@@ -223,22 +208,10 @@ void simpleMesh::globalNodesList( const int & numberOfElements, arrayInt & nodes
 }
 
 // local to global
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE  int simpleMesh::localToGlobalNodes( const int & elementNumber, 
+PROXY_HOST_DEVICE int simpleMesh::localToGlobalNodes( const int & elementNumber, 
                                                         const int & nPointsPerElement, 
                                                         arrayIntView const & nodesList,  
                                                         int   localToGlobal[])const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int simpleMesh::localToGlobalNodes(const int & elementNumber, 
-                                                   const int & nPointsPerElement, 
-                                                   arrayInt const & nodesList,  
-                                                   int  localToGlobal[])const
-#else
-int simpleMesh::localToGlobalNodes( const int & elementNumber, 
-                                    const int & nPointsPerElement, 
-                                    arrayInt & nodesList,  
-                                    int  localToGlobal[])const
-#endif
 {
   for( int i=0; i<nPointsPerElement; i++ )
   {
@@ -301,13 +274,7 @@ int simpleMesh::getElementNumberFromPoints( const float & x, const float & y, co
 }
 
 // set model
-#ifdef USE_RAJA
 void simpleMesh::getModel( const int & numberOfElements, vectorReal const & model ) const
-#elif defined USE_KOKKOS
-void simpleMesh::getModel( const int & numberOfElements, vectorReal const & model ) const
-#else
-void simpleMesh::getModel( const int & numberOfElements, vectorReal & model ) const
-#endif
 {
   for( int i=0; i<numberOfElements; i++ )
   {
@@ -316,16 +283,8 @@ void simpleMesh::getModel( const int & numberOfElements, vectorReal & model ) co
 }
 
 //  get list of global interior nodes
-#ifdef USE_RAJA
 int simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
                                          vectorInt const & listOfInteriorNodes ) const
-#elif defined USE_KOKKOS
-int simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
-                                         vectorInt const & listOfInteriorNodes ) const
-#else
-int simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
-                                         vectorInt & listOfInteriorNodes ) const
-#endif
 {
   int m=0;
   if(ny==1)
@@ -357,13 +316,7 @@ int simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
 }
 
 // get list of interior Elements
-#ifdef USE_RAJA
 void simpleMesh::getListOfInteriorElements(vectorInt const & listOfInteriorElements) const
-#elif defined USE_KOKKOS
-void simpleMesh::getListOfInteriorElements(vectorInt const & listOfInteriorElements) const
-#else
-void simpleMesh::getListOfInteriorElements(vectorInt & listOfInteriorElements) const
-#endif
 {
   int m=0;
   if(ey==0)
@@ -398,14 +351,9 @@ void simpleMesh::getListOfInteriorElements(vectorInt & listOfInteriorElements) c
 // get
 int simpleMesh::getNumberOfElementsByColor() const
 {return ((ey==0)?(ex/2+ex%2)*(ez/2+ez%2):(ex/2+ex%2)*(ey/2+ey%2)*(ez/2+ez%2));}
+
 //sort
-#ifdef USE_RAJA
 void simpleMesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const
-#elif defined USE_KOKKOS
-void simpleMesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const
-#else
-void simpleMesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt  & listOfElementsByColor) const
-#endif
 {
   // red
   int k=0;
@@ -470,22 +418,10 @@ int simpleMesh::getNumberOfBoundaryNodes() const
 //   |           |
 //   |______1____|
 //
-#ifdef USE_RAJA
-LVARRAY_HOST_DEVICE int simpleMesh::getGlobalDofOfFace( const int & e,
+PROXY_HOST_DEVICE int simpleMesh::getGlobalDofOfFace( const int & e,
                                                         arrayIntView  const & globalNodesList,
                                                         int const localToGlobal[],
                                                         int  nodesFace[][6] ) const
-#elif defined USE_KOKKOS
-KOKKOS_FUNCTION int simpleMesh::getGlobalDofOfFace( const int & e,
-                                                    arrayInt  const & globalNodesList,
-                                                    int const localToGlobal[],
-                                                    int  nodesFace[][6] ) const
-#else
-int simpleMesh::getGlobalDofOfFace( const int & e,
-                                    arrayInt  & globalNodesList,
-                                    int const localToGlobal[],
-                                    int  nodesFace[][6]) const
-#endif
 {
   //left face
   for( int i=0; i<order+1; i++ )
@@ -513,15 +449,10 @@ int simpleMesh::getGlobalDofOfFace( const int & e,
   }
   return 0;
 }
+
 // list of global indexes
 // this method is sequential only for omp !!!
-#ifdef USE_RAJA
 void  simpleMesh::getBoundaryFacesInfos(arrayInt const & faceInfos) const
-#elif defined USE_KOKKOS
-void  simpleMesh::getBoundaryFacesInfos(arrayInt const & faceInfos) const
-#else
-void  simpleMesh::getBoundaryFacesInfos(arrayInt & faceInfos) const
-#endif
 {
   int numFace=0;
   // bottom, j=0, l=0
@@ -577,14 +508,9 @@ void  simpleMesh::getBoundaryFacesInfos(arrayInt & faceInfos) const
     }
   }
 }
+
 //  get list of global boundary nodes
-#ifdef USE_RAJA
 int simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt const & listOfBoundaryNodes ) const
-#elif defined USE_KOKKOS
-int simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt const & listOfBoundaryNodes ) const
-#else
-int simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt & listOfBoundaryNodes ) const
-#endif
 {
   int k=0;
   //bottom
@@ -617,14 +543,9 @@ int simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vecto
   }
   return 0;
 }
+
 // provides a mapping between local node of a face and global node Face:
-#ifdef USE_RAJA
 void simpleMesh::getLocalFaceNodeToGlobalFaceNode(arrayInt const &localFaceNodeToGlobalFaceNode) const
-#elif defined USE_KOKKOS
-void simpleMesh::getLocalFaceNodeToGlobalFaceNode(arrayInt const &localFaceNodeToGlobalFaceNode) const
-#else
-void simpleMesh::getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFaceNode) const
-#endif
 {
   int numFace=0;
   int offset;

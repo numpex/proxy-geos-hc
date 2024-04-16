@@ -8,7 +8,7 @@
 //
 //************************************************************************
 
-#include "solverOMP.hpp"
+#include "solver.hpp"
 
 // compute one step of the time dynamic wave equation solver
 

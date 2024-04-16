@@ -1,21 +1,17 @@
 #include "commonConfig.hpp"
 
-#ifdef USE_RAJA
-
-#include "solverRaja.hpp"
-
-#elif defined USE_OMP
-
-#include "solverOMP.hpp"
-
-#elif defined USE_KOKKOS
-
-#include "solverKokkos.hpp"
-
+#if defined (USE_RAJA)
+  #define PROXY_HOST_DEVICE LVARRAY_HOST_DEVICE
+  #define SOLVER solverRaja
+#elif defined (USE_KOKKOS)
+  #define PROXY_HOST_DEVICE KOKKOS_FUNCTION 
+  #define SOLVER solverKokkos
+#elif defined (USE_OMP)
+  #define PROXY_HOST_DEVICE
+  #define SOLVER solverOMP
 #else
-
-#include "solverSEQUENTIAL.hpp"
-
+  #define PROXY_HOST_DEVICE
+  #define SOLVER solverSEQUENTIAL
 #endif
 
 #ifdef USE_CALIPER

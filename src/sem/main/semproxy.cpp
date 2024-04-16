@@ -6,6 +6,7 @@
 //************************************************************************
 
 #include "semproxy.hpp"
+
 // Initialize the simulation.
 void SEMProxy::init()
 {

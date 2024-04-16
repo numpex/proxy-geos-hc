@@ -1,14 +1,14 @@
 //************************************************************************
 //   proxy application v.0.0.1
 //
-//  solverRaja.cpp: simple 2D acoustive wave equation solver
+//  solverKokkos.cpp: 2D acoustive wave equation solver
 //
-//  the solverRaja class is derived from the solverBase class
-//  with the RAJA implementation of the solver
+//  the solverKokkos class is derived from the solverBase class
+//  with the KOKKOS implementation of the solver
 //
 //************************************************************************
 
-#include "solverKokkos.hpp"
+#include "solver.hpp"
 
 // compute one step of the time dynamic wave equation solver
 void solverKokkos::computeOneStep(  const int & timeStep,

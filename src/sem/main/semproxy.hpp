@@ -11,11 +11,8 @@
 #include <iostream>
 #include <fstream>
 
-#include "commonMacro.hpp"
-#include "QkGL.hpp"
-#include "simpleMesh.hpp"
+#include "solver.hpp"
 #include "utils.hpp"
-#include "dataType.hpp"
 
 /**
  * @class SEMProxy
@@ -77,15 +74,7 @@ protected:
   solverUtils myUtils;
 
   vectorInt rhsElement;
-#if defined(USE_RAJA)
-  solverRaja mySolver;
-#elif defined(USE_OMP)
-  solverOMP mySolver;
-#elif defined(USE_KOKKOS)
-  solverKokkos mySolver;
-#else
-  solverSEQUENTIAL mySolver;
-#endif
+  SOLVER mySolver;
 
 };
 

@@ -1,25 +1,26 @@
 //************************************************************************
 //  proxy application v.0.0.1
 //
-//  solverRaja.hpp: simple 2D acoustive wave equation solver
+//  solver.hpp: 2D or 3D acoustive wave equation solver
 //
-//  the solverRaja class is derived from the solverBase class
-//  with the RAJA implementation of the solver
+//  the solver class is derived from the solverBase class
+//  with the RAJA, Kokkos, OMP, or Sequential implementation of the solver
 //
 //************************************************************************
 
-#ifndef SOLVER_Raja_HPP_
-#define SOLVER_Raja_HPP_
+#ifndef SOLVER_HPP_
+#define SOLVER_HPP_
 
 #include    "solverBase.hpp"
 
-class solverRaja : public solverBase
+
+class SOLVER: public solverBase
 {
 
 public:
 
-LVARRAY_HOST_DEVICE  solverRaja(){};
-LVARRAY_HOST_DEVICE  ~solverRaja(){};
+  PROXY_HOST_DEVICE SOLVER(){};
+  PROXY_HOST_DEVICE ~SOLVER(){};
 
   void computeOneStep( const int & timeStep,
                        const float & timeSample,
@@ -31,4 +32,6 @@ LVARRAY_HOST_DEVICE  ~solverRaja(){};
                       arrayReal & rhsTerm,
                       arrayReal & pnGlobal);
 };
-#endif //SOLVER_Raja_HPP_
+
+
+#endif //SOLVER_HPP_

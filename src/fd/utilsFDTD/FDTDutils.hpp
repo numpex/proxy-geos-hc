@@ -1,18 +1,8 @@
 #ifndef FDTDUTILS_HPP
 #define FDTDUTILS_HPP
 
-#include <stdlib.h>
-#include <stdio.h>
-#include  <cmath>
-#include <vector>
 #include "dataType.hpp"
-
-#define POW2(x) ((x)*(x))
-#define IDX3(i,j,k) (nz*ny*(i) + nz*(j) + (k))
-#define IDX3_l(i,j,k) ((nz+2*lz)*(ny+2*ly)*((i)+lx) + (nz+2*lz)*((j)+ly) + ((k)+lz))
-#define IDX3_eta1(i,j,k) ((nz+2)*(ny+2)*((i)+1) + (nz+2)*((j)+1) + ((k)+1))
-#define IDX3_eta0(i,j,k) ((nz+2)*(ny+2)*(i) + (nz+2)*(j) + (k))
-
+#include "FDTDMacros.hpp"
 
 struct FDTDUtils
 {
@@ -166,16 +156,6 @@ struct FDTDUtils
                 x1+1, x2, x5+1, x6,
                 y1+1, y2, y3+1, y4, y5+1, y6,
                 z1+1, z2, z3+1, z4, z5+1, z6);
-
-    /*
-    #ifndef USE_VECTOR
-    #ifndef USE_LVARRAY
-    free(etax);
-    free(etay);
-    free(etaz);
-    #endif
-    #endif
-    */
 
   }
 };

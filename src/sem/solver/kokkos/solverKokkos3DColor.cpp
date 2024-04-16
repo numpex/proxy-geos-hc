@@ -1,14 +1,14 @@
 //************************************************************************
 //   proxy application v.0.0.1
 //
-//  solverKokkos.hpp: simple 2D acoustive wave equation solver
+//  solverKokkos.cpp: 3D acoustive wave equation solver
 //
 //  the solverKokkos class is derived from the solverBase class
 //  with the KOKKOS implementation of the solver
 //
 //************************************************************************
 
-#include "solverKokkos.hpp"
+#include "solver.hpp"
 #include <cstdio>
  
 // compute one step of the time dynamic wave equation solver

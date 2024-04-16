@@ -2,105 +2,7 @@
 #define FDTDKERNEL_HPP
 
 #include "dataType.hpp"
-#ifdef USE_RAJA
-#include"Array.hpp"
-#include"RAJA/RAJA.hpp"
-#include"Macros.hpp"
-#include"ChaiBuffer.hpp"
-#elif defined USE_KOKKOS
-#include <Kokkos_Macros.hpp>
-#include <Kokkos_Core.hpp>
-#include <Kokkos_ScatterView.hpp>
-#endif
-
-
-#ifdef USE_RAJA
-// implementation of sqrt via binary search
-// copied from https://stackoverflow.com/questions/8622256/in-c11-is-sqrt-defined-as-constexpr
-constexpr size_t sqrt_helper(size_t n, size_t lo, size_t hi)
-{
-  return (lo == hi)
-           ? lo // search complete
-           : ((n / ((lo + hi + 1) / 2) < ((lo + hi + 1) / 2))
-                ? sqrt_helper(n, lo, ((lo + hi + 1) / 2)-1) // search lower half
-                : sqrt_helper(n, ((lo + hi + 1) / 2), hi)); // search upper half
-}
-// constexpr integer sqrt
-constexpr size_t sqrt(size_t n)
-{               
-  return sqrt_helper(n, 0, n/2 + 1); 
-}
-// implementation of lesser_of_squarest_factor_pair via linear search
-constexpr size_t lesser_of_squarest_factor_pair_helper(size_t n, size_t guess)
-{
-  return ((n / guess) * guess == n)
-           ? guess // search complete, guess is a factor
-           : lesser_of_squarest_factor_pair_helper(n, guess - 1); // continue searching
-}
-// constexpr return the lesser of the most square pair of factors of n
-// ex. 12 has pairs of factors (1, 12) (2, 6) *(3, 4)* and returns 3
-constexpr size_t lesser_of_squarest_factor_pair(size_t n)
-{
-  return (n == 0)
-      ? 0 // return 0 in the 0 case
-      : lesser_of_squarest_factor_pair_helper(n, sqrt(n));
-}
-// constexpr return the greater of the most square pair of factors of n
-// ex. 12 has pairs of factors (1, 12) (2, 6) *(3, 4)* and returns 4
-constexpr size_t greater_of_squarest_factor_pair(size_t n)
-{
-  return (n == 0)
-      ? 0 // return 0 in the 0 case
-      : n / lesser_of_squarest_factor_pair_helper(n, sqrt(n));
-}
-
-//#define block_size (512)
-#define block_size (128)
-#define z_block_sz (32)
-#define y_block_sz (greater_of_squarest_factor_pair(block_size/z_block_sz))
-#define x_block_sz (lesser_of_squarest_factor_pair(block_size/z_block_sz))
-
-#ifdef ENABLE_CUDA
-#define RAJANestedLoop(x3,y3,z3,x4,y4,z4)\
-     RAJA::TypedRangeSegment<int> KRange(z3, z4);\
-     RAJA::TypedRangeSegment<int> JRange(y3, y4);\
-     RAJA::TypedRangeSegment<int> IRange(x3, x4);\
-     using EXEC_POL =\
-     RAJA::KernelPolicy<\
-        RAJA::statement::CudaKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,\
-          RAJA::statement::For<0, RAJA::cuda_global_size_z_direct<x_block_sz>, \
-            RAJA::statement::For<1, RAJA::cuda_global_size_y_direct<y_block_sz>,\
-              RAJA::statement::For<2, RAJA::cuda_global_size_x_direct<z_block_sz>,\
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>\
-             >\
-           >\
-         >\
-       >\
-     >;\
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) 
-#endif
-
-
-#ifdef ENABLE_HIP
-#define RAJANestedLoop(x3,y3,z3,x4,y4,z4)\
-     RAJA::TypedRangeSegment<int> KRange(z3, z4);\
-     RAJA::TypedRangeSegment<int> JRange(y3, y4);\
-     RAJA::TypedRangeSegment<int> IRange(x3, x4);\
-     using EXEC_POL =\
-     RAJA::KernelPolicy<\
-        RAJA::statement::HipKernelFixedAsync<x_block_sz*y_block_sz*z_block_sz,\
-          RAJA::statement::For<0, RAJA::hip_global_size_z_direct<x_block_sz>, \
-            RAJA::statement::For<1, RAJA::hip_global_size_y_direct<y_block_sz>,\
-              RAJA::statement::For<2, RAJA::hip_global_size_x_direct<z_block_sz>,\
-               RAJA::statement::Lambda<0,RAJA::Segs<0,1,2>>\
-             >\
-           >\
-         >\
-       >\
-     >;\
-     RAJA::kernel<EXEC_POL>( RAJA::make_tuple(IRange, JRange, KRange), [=] __device__ (int i, int j, int k) 
-#endif
-#endif
+#include "FDTDMacros.hpp"
 
 struct FDTDKernel
 {
@@ -111,7 +13,6 @@ struct FDTDKernel
          const int z3, const int z4,
          const int lx, const int ly, const int lz,
          const float coef0,
-  #ifdef USE_RAJA
          vectorRealView const & coefx,
          vectorRealView const & coefy,
          vectorRealView const & coefz,
@@ -119,42 +20,8 @@ struct FDTDKernel
          vectorRealView const & pnp1,
          vectorRealView const & pn  ,
          vectorRealView const & pnm1)const
-  #elif defined USE_KOKKOS
-         vectorReal const & coefx,
-         vectorReal const & coefy,
-         vectorReal const & coefz,
-         vectorReal const & vp,
-         vectorReal const & pnp1,
-         vectorReal const & pn,
-         vectorReal const & pnm1)const
-  #else
-         vectorReal  & coefx,
-         vectorReal  & coefy,
-         vectorReal  & coefz,
-         vectorReal  & vp,
-         vectorReal  & pnp1,
-         vectorReal  & pn  ,
-         vectorReal  & pnm1)
-#endif
   {
-#ifdef USE_RAJA
-     RAJANestedLoop(x3,y3,z3,x4,y4,z4)
-     {
-#elif defined USE_KOKKOS
-     Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({z3,x3,y3},{z4,x4,y4}),KOKKOS_LAMBDA(int k,int i,int j)
-     {
-#else
-#ifdef USE_OMP
-      #pragma omp parallel for collapse(3)
-#endif
-      for (int i = x3; i < x4; ++i)
-      {
-          for (int j = y3; j < y4; ++j)
-          {
-              for (int k = z3; k < z4; ++k)
-              {
-
-#endif
+      LOOP3DHEAD
       float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                  +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
                  +coefx[3]*(pn[IDX3_l(i+3,j,k)]+pn[IDX3_l(i-3,j,k)])
@@ -169,16 +36,8 @@ struct FDTDKernel
                  +coefz[4]*(pn[IDX3_l(i,j,k+4)]+pn[IDX3_l(i,j,k-4)]));
       pnp1[IDX3_l(i,j,k)]=2.*pn[IDX3_l(i,j,k)]-pnm1[IDX3_l(i,j,k)]
                          +vp[IDX3(i,j,k)]*(coef0*pn[IDX3_l(i,j,k)]+lapx+lapy+lapz);
-#ifdef USE_RAJA
-     });
-#elif defined USE_KOKKOS
-     });
-#else
-             }
-          }
-      }
-#endif
-     return 0;
+      LOOP3DEND
+      return 0;
   }
 
   int pml3D(const int nx, const int ny, const int nz,
@@ -188,7 +47,6 @@ struct FDTDKernel
              const int lx, const int ly, const int lz,
              const float coef0,
              const float hdx_2, const float hdy_2, const float hdz_2,
-#ifdef USE_RAJA
              vectorRealView const & coefx,
              vectorRealView const & coefy,
              vectorRealView const & coefz,
@@ -198,45 +56,8 @@ struct FDTDKernel
              vectorRealView const & pnp1,
              vectorRealView const & pn ,
              vectorRealView const & pnm1)const
-#elif defined USE_KOKKOS
-             vectorReal const & coefx,
-             vectorReal const & coefy,
-             vectorReal const & coefz,
-             vectorReal const & vp,
-             vectorReal const & phi,
-             vectorReal const & eta,
-             vectorReal const & pnp1,
-             vectorReal const & pn  ,
-             vectorReal const & pnm1)const
-#else
-             vectorReal  & coefx,
-             vectorReal  & coefy,
-             vectorReal  & coefz,
-             vectorReal  & vp,
-             vectorReal  & phi,
-             vectorReal  & eta,
-             vectorReal  & pnp1,
-             vectorReal  & pn  ,
-             vectorReal  & pnm1)
-#endif
   {
-#ifdef USE_RAJA
-     RAJANestedLoop(x3,y3,z3,x4,y4,z4)
-     {
-#elif defined USE_KOKKOS
-     Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({z3,x3,y3},{z4,x4,y4}),KOKKOS_LAMBDA(int k,int i,int j)
-     {
-#else
-#ifdef USE_OMP
-      #pragma omp parallel for collapse(3)
-#endif
-      for (int i = x3; i < x4; ++i)
-      {
-          for (int j = y3; j < y4; ++j)
-          {
-              for (int k = z3; k < z4; ++k)
-              {
-#endif
+       LOOP3DHEAD
        float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                   +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
                   +coefx[3]*(pn[IDX3_l(i+3,j,k)]+pn[IDX3_l(i-3,j,k)])
@@ -264,15 +85,7 @@ struct FDTDKernel
                   +(eta[IDX3_eta1(i,j,k+1)]-eta[IDX3_eta1(i,j,k-1)])
                   *(pn[IDX3_l(i,j,k+1)]-pn[IDX3_l(i,j,k-1)])*hdz_2))
                   /(1.+eta[IDX3_eta1(i,j,k)]);
-#ifdef USE_RAJA
-     });
-#elif defined USE_KOKKOS
-     });
-#else
-             }
-          }
-      }
-#endif
+     LOOP3DEND
      return(0);
   }
 
@@ -280,19 +93,9 @@ struct FDTDKernel
   int addRHS(const int nx,const int ny,const int nz,
 	     const int lx,const int ly,const int lz,
 	     const int xs,const int ys,const int zs,const int itSample,
-#ifdef USE_RAJA
 	     vectorRealView const & RHSTerm,
 	     vectorRealView const & vp,
 	     vectorRealView const & pn) const
-#elif defined USE_KOKKOS
-	     vectorReal const & RHSTerm,
-	     vectorReal const & vp,
-	     vectorReal const & pn) const
-#else
-	     vectorReal & RHSTerm,
-	     vectorReal & vp,
-	     vectorReal & pn)
-#endif
   {
 #ifdef USE_RAJA
      RAJANestedLoop(xs,ys,zs,xs+1,ys+1,zs+1)
@@ -313,19 +116,9 @@ struct FDTDKernel
   // swap wavefields
   int swapWavefields(const int nx,const int ny,const int nz,
 		     const int lx,const int ly,const int lz,
-#ifdef USE_RAJA
 		     vectorRealView const & pnp1,
 		     vectorRealView const & pn  ,
 		     vectorRealView const & pnm1) const
-#elif defined USE_KOKKOS
-		     vectorReal const & pnp1,
-		     vectorReal const & pn  ,
-		     vectorReal const & pnm1) const
-#else
-		     vectorReal & pnp1,
-		     vectorReal & pn  ,
-		     vectorReal & pn)
-#endif
   {
 #ifdef USE_RAJA
      RAJANestedLoop(0,0,0,nx,ny,nz)
@@ -372,7 +165,6 @@ struct FDTDKernel
 	             const int z4, const int z5, const int z6,
                      const float coef0,
                      const float hdx_2, const float hdy_2, const float hdz_2,
-#ifdef USE_RAJA
                      vectorRealView const & coefx,
                      vectorRealView const & coefy,
                      vectorRealView const & coefz,
@@ -382,27 +174,6 @@ struct FDTDKernel
                      vectorRealView const & pnp1,
                      vectorRealView const & pn  ,
                      vectorRealView const & pnm1)const
-#elif defined USE_KOKKOS
-                     vectorReal const & coefx,
-                     vectorReal const & coefy,
-                     vectorReal const & coefz,
-                     vectorReal const & vp,
-                     vectorReal const & phi,
-                     vectorReal const & eta,
-                     vectorReal const & pnp1,
-                     vectorReal const & pn  ,
-                     vectorReal const & pnm1)const
-#else
-                     vectorReal  & coefx,
-                     vectorReal  & coefy,
-                     vectorReal  & coefz,
-                     vectorReal  & vp,
-                     vectorReal  & phi,
-                     vectorReal  & eta,
-                     vectorReal  & pnp1,
-                     vectorReal  & pn  ,
-                     vectorReal  & pnm1)
-#endif
   {
     //up
     pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);

@@ -1,8 +1,6 @@
 #ifndef UTILS_HPP_
 #define UTILS_HPP_
 
-#include  <cmath>
-#include <vector>
 #include "dataType.hpp"
 #include "../sem/mesh/simpleMesh.hpp"
 

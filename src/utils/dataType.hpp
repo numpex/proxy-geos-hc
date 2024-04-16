@@ -2,10 +2,8 @@
 #define DATATYPE_HPP_
 
 #include "commonConfig.hpp"
-#include <iostream>
 
 #ifdef USE_VECTOR
-  #include <vector>
   template<class T> class Vector 
   {
   public:
@@ -38,6 +36,7 @@
   private:
     std::vector< std::vector< T > > data;
   };
+
   template< class T > class Array3D
   {
   public:
@@ -60,6 +59,11 @@
   using array3DReal=Array3D< float >;
   using array3DDouble=Array3D< double >;
 
+  using vectorDoubleView=std::vector< double >;
+  using arrayIntView=Array2D< int >;
+  using arrayRealView=Array2D< float >;
+  using arrayDoubleView=Array2D< double >;
+ 
   template<class T>
   T allocateVector(int n1)
   {
@@ -248,6 +252,11 @@
   typedef Kokkos::View<float***,  Layout, MemSpace> array3DReal;
   typedef Kokkos::View<double***, Layout, MemSpace> array3DDouble;
 
+  typedef Kokkos::View<double*,  Layout, MemSpace> vectorDoubleView;
+  typedef Kokkos::View<float*,   Layout,  MemSpace> vectorRealView;
+  typedef Kokkos::View<int**,    Layout, MemSpace> arrayIntView;
+  typedef Kokkos::View<float**,  Layout, MemSpace> arrayRealView;
+  typedef Kokkos::View<double**, Layout, MemSpace> arrayDoubleView;
   /*
   typedef Kokkos::View<int*,     Layout, DeviceMemorySpace> vectorIntView;
   typedef Kokkos::View<float*,   Layout,  DeviceMemorySpace> vectorRealView;
