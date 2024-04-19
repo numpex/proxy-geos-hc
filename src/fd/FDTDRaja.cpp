@@ -43,7 +43,7 @@ int main( int argc, char *argv[] )
    constexpr float vmax=4500;
    
    // imports utils
-   solverUtils myUtils;
+   SolverUtils myUtils;
    FDTDUtils myFDTDUtils;
    FDTDKernel myKernel;
 

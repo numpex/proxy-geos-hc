@@ -60,6 +60,7 @@
   using array3DDouble=Array3D< double >;
 
   using vectorDoubleView=std::vector< double >;
+  using vectorRealView=std::vector< float >;
   using arrayIntView=Array2D< int >;
   using arrayRealView=Array2D< float >;
   using arrayDoubleView=Array2D< double >;

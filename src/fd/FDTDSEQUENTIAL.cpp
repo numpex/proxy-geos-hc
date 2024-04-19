@@ -19,7 +19,7 @@
 
 int main( int argc, char *argv[] )
 {
-    int nx=std::stoi(argv[1]);
+    int nx= (argc > 1)? std::stoi(argv[1]) : 150;
     int ny=nx;
     int nz=nx;
     int xs=nx/2;
@@ -33,18 +33,16 @@ int main( int argc, char *argv[] )
     constexpr float dz=10;
 
     constexpr int   sourceOrder=1;
-    constexpr int   xs=nx/2;
-    constexpr int   ys=ny/2;
-    constexpr int   zs=nz/2;
     constexpr float f0=15.;
     constexpr float fmax=2.5*f0;
     constexpr float timeMax=0.8;
 
     constexpr int ncoefs=5;
-    constexpr float vmax=1500;
+    constexpr float vmin=1500;
+    constexpr float vmax=4500;
     
     // imports utils
-    solverUtils myUtils;
+    SolverUtils myUtils;
     FDTDUtils myFDTDUtils;
     FDTDKernel myKernel;
 
@@ -55,29 +53,30 @@ int main( int argc, char *argv[] )
     constexpr float hdx_2=1./(4.*dx*dx);
     constexpr float hdy_2=1./(4.*dy*dy);
     constexpr float hdz_2=1./(4.*dz*dz);
-    constexpr float lambdamax=vmax/fmax;
+    constexpr float lambdamax=vmin/fmax;
     constexpr int ndampx=ntaperx*lambdamax/dx;
     constexpr int ndampy=ntaperx*lambdamax/dx;
     constexpr int ndampz=ntaperx*lambdamax/dx;
+
     printf("ndampx=%d ndampy=%d ndampz=%d\n",ndampx, ndampy,ndampz);
-    constexpr int x1=0;
-    constexpr int x2=ndampx;
-    constexpr int x3=ndampx;
-    constexpr int x4=nx-ndampx;
-    constexpr int x5=nx-ndampx;
-    constexpr int x6=nx;
-    constexpr int y1=0;
-    constexpr int y2=ndampy;
-    constexpr int y3=ndampy;
-    constexpr int y4=ny-ndampy;
-    constexpr int y5=ny-ndampy;
-    constexpr int y6=ny;
-    constexpr int z1=0;
-    constexpr int z2=ndampz;
-    constexpr int z3=ndampz;
-    constexpr int z4=nz-ndampz;
-    constexpr int z5=nz-ndampz;
-    constexpr int z6=nz;
+    int x1=0;
+    int x2=ndampx;
+    int x3=ndampx;
+    int x4=nx-ndampx;
+    int x5=nx-ndampx;
+    int x6=nx;
+    int y1=0;
+    int y2=ndampy;
+    int y3=ndampy;
+    int y4=ny-ndampy;
+    int y5=ny-ndampy;
+    int y6=ny;
+    int z1=0;
+    int z2=ndampz;
+    int z3=ndampz;
+    int z4=nz-ndampz;
+    int z5=nz-ndampz;
+    int z6=nz;
 
     // allocate vector and arrays 
     // FD coefs
@@ -187,7 +186,7 @@ int main( int argc, char *argv[] )
 
     std::cout << "started computation at " << std::ctime(&start_time)<<std::endl
               << "finished computation at " << std::ctime(&end_time)<<std::endl
-              << "elapsed time: " << elapsed_seconds.count() << "s\n";
+             << "elapsed time: " << elapsed_seconds.count() << "s\n";
 
     return (0);
 }

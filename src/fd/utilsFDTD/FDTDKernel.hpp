@@ -17,10 +17,13 @@ struct FDTDKernel
          vectorRealView const & coefy,
          vectorRealView const & coefz,
          vectorRealView const & vp,
-         vectorRealView const & pnp1,
-         vectorRealView const & pn  ,
+         VECTORVIEW pnp1,
+         VECTORVIEW pn  ,
          vectorRealView const & pnm1)const
   {
+  #ifdef USE_OMP
+      #pragma omp parallel for collapse(3)
+  #endif
       LOOP3DHEAD
       float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                  +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
@@ -51,12 +54,15 @@ struct FDTDKernel
              vectorRealView const & coefy,
              vectorRealView const & coefz,
              vectorRealView const & vp,
-             vectorRealView const & phi,
+             VECTORVIEW phi,
              vectorRealView const & eta,
-             vectorRealView const & pnp1,
-             vectorRealView const & pn ,
+             VECTORVIEW pnp1,
+             VECTORVIEW pn ,
              vectorRealView const & pnm1)const
   {
+  #ifdef USE_OMP
+      #pragma omp parallel for collapse(3)
+  #endif
        LOOP3DHEAD
        float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                   +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
@@ -95,7 +101,7 @@ struct FDTDKernel
 	     const int xs,const int ys,const int zs,const int itSample,
 	     vectorRealView const & RHSTerm,
 	     vectorRealView const & vp,
-	     vectorRealView const & pn) const
+	     VECTORVIEW pn) const
   {
 #ifdef USE_RAJA
      RAJANestedLoop(xs,ys,zs,xs+1,ys+1,zs+1)
@@ -117,8 +123,8 @@ struct FDTDKernel
   int swapWavefields(const int nx,const int ny,const int nz,
 		     const int lx,const int ly,const int lz,
 		     vectorRealView const & pnp1,
-		     vectorRealView const & pn  ,
-		     vectorRealView const & pnm1) const
+		     VECTORVIEW pn  ,
+		     VECTORVIEW pnm1) const
   {
 #ifdef USE_RAJA
      RAJANestedLoop(0,0,0,nx,ny,nz)
@@ -169,10 +175,10 @@ struct FDTDKernel
                      vectorRealView const & coefy,
                      vectorRealView const & coefz,
                      vectorRealView const & vp,
-                     vectorRealView const & phi,
+                     VECTORVIEW phi,
                      vectorRealView const & eta,
-                     vectorRealView const & pnp1,
-                     vectorRealView const & pn  ,
+                     VECTORVIEW pnp1,
+                     VECTORVIEW pn  ,
                      vectorRealView const & pnm1)const
   {
     //up

@@ -44,7 +44,7 @@ int main( int argc, char *argv[] )
     constexpr float vmax=4500;
     
     // imports utils
-    solverUtils myUtils;
+    SolverUtils myUtils;
     FDTDUtils myFDTDUtils;
     FDTDKernel myKernel;
 
@@ -90,6 +90,7 @@ int main( int argc, char *argv[] )
     // pressure fields
     vectorReal pnp1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
     vectorReal pn=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
+    vectorReal pnm1=allocateVector<vectorReal>((nx+2*lx)*(ny+2*ly)*(nz+2*lz));
     // PML arrays
     vectorReal phi=allocateVector<vectorReal>(nx*ny*nz);
     vectorReal eta=allocateVector<vectorReal>((nx+2)*(ny+2)*(nz+2));
@@ -140,6 +141,7 @@ int main( int argc, char *argv[] )
           {
             pnp1[IDX3_l(i,j,k)]=0.000001;
             pn[IDX3_l(i,j,k)]  =0.000001;
+            pnm1[IDX3_l(i,j,k)]  =0.000001;
           }
        }
     }
@@ -170,14 +172,14 @@ int main( int argc, char *argv[] )
                               hdx_2,hdy_2,hdz_2,
                               coefx,coefy,coefz,
                               vp,phi,eta,
-                              pnp1,pn);
+                              pnp1,pn,pnm1);
       // swap wavefields
-      myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,pnp1,pn);
+      myKernel.swapWavefields(nx,ny,nz,lx,ly,lz,pnp1,pn,pnm1);
       // print infos and save wavefields
       if(itSample%50==0)
       {
         printf("result1 %f\n",pn[IDX3_l(xs,ys,zs)]);
-        //myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
+        myFDTDUtils.write_io(nx,ny,nz,lx,ly,lz,0,nx,ny/2,ny/2,0,nz,pn,itSample);
       }
 
     }
