@@ -47,9 +47,9 @@ So you will get an executable named "sem_SEQUENTIAL.exe" and FDTDSEQUENTIAL.exe 
    install/bin/proxyName_SEQUENTIAL.exe ( with proxyName: sem or fd)
 ```
 
-## available configuration:
+## Available configuration:
 
-## OPEN_MP
+### OPEN_MP
 in the case of OPENMP std::vector container is used.
 ```
    mkdir ./build
@@ -57,7 +57,7 @@ in the case of OPENMP std::vector container is used.
    cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON  ..  
    make; make install
 ```
-## RAJA + OPEN_MP + CUDA (on Nvidia GPUs)
+### RAJA + OPEN_MP + CUDA (on Nvidia GPUs)
 in the case of RAJA Lvarray container is used.
 ```
    mkdir ./build
@@ -66,30 +66,34 @@ in the case of RAJA Lvarray container is used.
    make; make install
  
 ```
-## KOKKOS + OPEN_MP + CUDA (on Nvidia GPUs)
+
+### KOKKOS + OPEN_MP + CUDA (on Nvidia GPUs)
 KOKKOS provides its own data container.
 ```
    mkdir ./build
    cd build
    cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON  ..  
    make install
- 
-## RAJA + OPEN_MP + HIP (on AMD GPUs)
+```
+
+### RAJA + OPEN_MP + HIP (on AMD GPUs)
 ```
    mkdir ./build
    cd build
    cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_HIP=ON  ..  
    make; make install
- 
 ```
-## KOKKOS + OPEN_MP + HIP (on AMD GPUs)
+
+### KOKKOS + OPEN_MP + HIP (on AMD GPUs)
 ```
    mkdir ./build
    cd build
    cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_HIP=ON  ..  
    make install
  
-## RAJA + OPEN_MP + CUDA + ARM (on Nvidia Grace-Hopper)
+```
+
+### RAJA + OPEN_MP + CUDA + ARM (on Nvidia Grace-Hopper)
 in the case of RAJA Lvarray container is used.
 ```
    mkdir ./build
@@ -98,7 +102,8 @@ in the case of RAJA Lvarray container is used.
    make; make install
  
 ```
-## KOKKOS + OPEN_MP + CUDA + ARM (on Nvidia Grace-Hopper)
+
+### KOKKOS + OPEN_MP + CUDA + ARM (on Nvidia Grace-Hopper)
 KOKKOS provides its own data container.
 ```
    mkdir ./build
@@ -106,3 +111,4 @@ KOKKOS provides its own data container.
    cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON  -DARM=ON ..  
    make install
  
+```
