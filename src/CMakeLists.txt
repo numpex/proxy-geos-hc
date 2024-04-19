@@ -111,6 +111,8 @@ if(P9)
 endif()
 
 if(ARM)
+  set(X86_cypress OFF CACHE BOOL "" FORCE) 
+  set(X86_laptop OFF CACHE BOOL "" FORCE) 
   if (ENABLE_CUDA)
     message(STATUS $ENV{CUDA_ROOT})
     set(CUDA_ROOT $ENV{CUDA_ROOT} CACHE PATH "" FORCE)

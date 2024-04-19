@@ -35,7 +35,7 @@ The data containers included in the current sem proxy implementations include:
    mkdir ./build
    cd build
    cmake -DCMAKE_INSTALL_PREFIX=../install  ..  
-   make install
+   make; make install
 ```
 
 The default compilation is sequential mode with std::vector implementation. 
@@ -55,22 +55,54 @@ in the case of OPENMP std::vector container is used.
    mkdir ./build
    cd build
    cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON  ..  
-   make install
+   make; make install
 ```
-## RAJA + OPEN_MP + CUDA
+## RAJA + OPEN_MP + CUDA (on Nvidia GPUs)
 in the case of RAJA Lvarray container is used.
 ```
    mkdir ./build
    cd build
-   cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_OPENMP=ON -DENABLE_CUDA=ON  ..  
-   make install
+   cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON  ..  
+   make; make install
  
 ```
-## KOKKOS + OPEN_MP + CUDA
+## KOKKOS + OPEN_MP + CUDA (on Nvidia GPUs)
 KOKKOS provides its own data container.
 ```
    mkdir ./build
    cd build
-   cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_OPENMP=ON -DENABLE_CUDA=ON  ..  
+   cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON  ..  
+   make install
+ 
+## RAJA + OPEN_MP + HIP (on AMD GPUs)
+```
+   mkdir ./build
+   cd build
+   cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_HIP=ON  ..  
+   make; make install
+ 
+```
+## KOKKOS + OPEN_MP + HIP (on AMD GPUs)
+```
+   mkdir ./build
+   cd build
+   cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_HIP=ON  ..  
+   make install
+ 
+## RAJA + OPEN_MP + CUDA + ARM (on Nvidia Grace-Hopper)
+in the case of RAJA Lvarray container is used.
+```
+   mkdir ./build
+   cd build
+   cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON -DARM=ON ..  
+   make; make install
+ 
+```
+## KOKKOS + OPEN_MP + CUDA + ARM (on Nvidia Grace-Hopper)
+KOKKOS provides its own data container.
+```
+   mkdir ./build
+   cd build
+   cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON  -DARM=ON ..  
    make install
  
