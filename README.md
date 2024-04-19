@@ -94,21 +94,17 @@ KOKKOS provides its own data container.
 ```
 
 ### RAJA + OPEN_MP + CUDA + ARM (on Nvidia Grace-Hopper)
-in the case of RAJA Lvarray container is used.
 ```
    mkdir ./build
    cd build
    cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON -DARM=ON ..  
    make; make install
- 
 ```
 
 ### KOKKOS + OPEN_MP + CUDA + ARM (on Nvidia Grace-Hopper)
-KOKKOS provides its own data container.
 ```
    mkdir ./build
    cd build
    cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON  -DARM=ON ..  
    make install
- 
 ```
