@@ -11,7 +11,6 @@
 #include "solver.hpp"
 
 // compute one step of the time dynamic wave equation solver
-
 void solverOMP::computeOneStep( const int & timeStep,
                                 const float & timeSample,
                                 const int & order,
@@ -54,7 +53,8 @@ void solverOMP::computeOneStep( const int & timeStep,
     // get pnGlobal to pnLocal
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
-      pnLocal[i]=pnGlobal[localToGlobal[i]][i2];
+      int localToGlobal=globalNodesList(e,i);
+      pnLocal[i]=pnGlobal(localToGlobal,i2);
     }
 
     // compute Jacobian, massMatrix and B
@@ -67,7 +67,7 @@ void solverOMP::computeOneStep( const int & timeStep,
     //compute global mass Matrix and global stiffness vector
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
-      int gIndex=localToGlobal[i];
+      int gIndex=globalNodesList(e,i);
       massMatrixLocal[i]/=(model[e]*model[e]);
       massMatrixGlobal[gIndex]+=massMatrixLocal[i];
       yGlobal[gIndex]+=Y[i];

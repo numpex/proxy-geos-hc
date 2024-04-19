@@ -5,7 +5,7 @@
 namespace FE
 {
 
-void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
+void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoints ) const
 {
   if( order == 1 )
   {
@@ -44,7 +44,7 @@ void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble const & quadrat
   }
 }
 
-void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const
+void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) const
 {
   if( order == 1 )
   {
@@ -293,7 +293,7 @@ std::vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) cons
 
 // get 1D basis functions @ quadrature points
 // returns 2D vector basisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-void QkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble const & basisFunction1D ) const
+void QkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble & basisFunction1D ) const
 {
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -311,7 +311,7 @@ void QkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints,
 // get derivative of 1D basis functions @ quadrature points
 // returns 2D vector derivativeBasisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
 void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
-                                          arrayDouble const & derivativeBasisFunction1D ) const
+                                          arrayDouble & derivativeBasisFunction1D ) const
 {
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -329,7 +329,7 @@ void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadrat
 // compute 2D gauss-lobatto weights
 void QkGL::getGaussLobattoWeights2D( vectorDouble const & quadraturePoints,
                                            vectorDouble const & weights,
-                                           vectorDouble const & W )const
+                                           vectorDouble & W )const
 {
   for( int j=0; j<quadraturePoints.size(); j++ )
   {
@@ -343,7 +343,7 @@ void QkGL::getGaussLobattoWeights2D( vectorDouble const & quadraturePoints,
 // compute 3D gauss-lobatto weights
 void QkGL::getGaussLobattoWeights3D( vectorDouble const & quadraturePoints,
                                            vectorDouble const & weights,
-                                           vectorDouble const & W )const
+                                           vectorDouble & W )const
 {
   for( int k=0; k<quadraturePoints.size(); k++ )
   {
@@ -359,9 +359,9 @@ void QkGL::getGaussLobattoWeights3D( vectorDouble const & quadraturePoints,
 
 // returns 2D vector basisFunction2D of dimensions nBasisFunctions,nQuadraturePoints
 void QkGL::getBasisFunction2D( vectorDouble const & quadraturePoints,
-                               arrayDouble const & a,
-                               arrayDouble const & b,
-                               arrayDouble const & c )const                                      
+                               arrayDouble & a,
+                               arrayDouble & b,
+                               arrayDouble & c )const                                      
 {
   for( int j = 0; j < quadraturePoints.size(); j++ )
   {
@@ -382,10 +382,17 @@ void QkGL::getBasisFunction2D( vectorDouble const & quadraturePoints,
 // compute B and M  
 PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
 		                       const int & order,
-			               arrayIntView     const & nodesList,
-			               arrayRealView    const & nodesCoords,
+#if defined(USE_RAJA) || defined(USE_KOKKOS)
+                                       arrayIntView     const & nodesList,
+                                       arrayRealView    const & nodesCoords,
                                        vectorDoubleView const & weights2D,
                                        arrayDoubleView  const & dPhi,
+#else
+                                       arrayIntView     & nodesList,
+                                       arrayRealView    & nodesCoords,
+                                       vectorDoubleView & weights2D,
+                                       arrayDoubleView  & dPhi,
+#endif
 				       float massMatrixLocal[],
                                        float B[][4] ) const
 {
@@ -444,10 +451,17 @@ PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
 // compute B and M
 PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
                                        const int & order,
+#if defined(USE_RAJA) || defined(USE_KOKKOS)
                                        arrayIntView     const & nodesList,
                                        arrayRealView    const & nodesCoords,
                                        vectorDoubleView const & weights3D,
                                        arrayDoubleView  const & dPhi,
+#else
+                                       arrayIntView     & nodesList,
+                                       arrayRealView    & nodesCoords,
+                                       vectorDoubleView & weights3D,
+                                       arrayDoubleView  & dPhi,
+#endif
                                        float massMatrixLocal[],
                                        float B[][6] ) const
 {
@@ -551,8 +565,13 @@ PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
 // Marc Durufle Formulae
 PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                               const int & order,
+#if defined(USE_RAJA) || defined(USE_KOKKOS)
                                               vectorDoubleView const & weights2D,
                                               arrayDoubleView const & dPhi,
+#else
+                                              vectorDoubleView & weights2D,
+                                              arrayDoubleView & dPhi,
+#endif
                                               float const  B[][4],
 			                      float const pnLocal[],
                                               float R[],
@@ -618,8 +637,13 @@ PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 // Marc Durufle Formulae
 PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                               const int & order,
+#if defined(USE_RAJA) || defined(USE_KOKKOS)
                                               vectorDoubleView const & weights3D,
                                               arrayDoubleView const & dPhi,
+#else
+                                              vectorDoubleView & weights3D,
+                                              arrayDoubleView & dPhi,
+#endif
                                               float const B[][6],
 					      float const pnLocal[],
                                               float R[],
@@ -721,12 +745,12 @@ PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 //computeDs
 PROXY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
                                           const int & order,
-                                          arrayIntView const & faceInfos,
+                                          arrayIntView & faceInfos,
                                           int  numOfBasisFunctionOnFace[],
                                           float  Js[][6],
-                                          arrayRealView   const & globalNodesCoords,
-                                          arrayDoubleView const & derivativeBasisFunction2DX,
-                                          arrayDoubleView const & derivativeBasisFunction2DY,
+                                          arrayRealView   & globalNodesCoords,
+                                          arrayDoubleView & derivativeBasisFunction2DX,
+                                          arrayDoubleView & derivativeBasisFunction2DY,
                                           float  ds[]  ) const
 {
   int face=faceInfos(iFace,1);

@@ -64,33 +64,33 @@ public:
   int getDz() const;
 
   // Initialize nodal coordinates.
-  void nodesCoordinates( const int & numberOfNodes, arrayReal const & nodeCoords ) const;
+  void nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const;
 
   //  list of global nodes ( vertices)
-  void globalNodesList(const int & numberOfElements, arrayInt const & nodesList ) const;
+  void globalNodesList(const int & numberOfElements, arrayInt & nodesList ) const;
 
   // local to global
   PROXY_HOST_DEVICE int localToGlobalNodes( const int & elementNumber, 
                                               const int & nPointsPerElement, 
-                                              arrayIntView const & nodesList, 
+                                              arrayIntView & nodesList, 
                                               int localToGlobal[]) const;
 
   // compute element e where (x,y,z) belongs to
   int getElementNumberFromPoints( const float & x, const float & y, const float & z ) const;
 
   // get list of interior Elements
-  void getListOfInteriorElements(vectorInt const & listOfInteriorElements) const;
+  void getListOfInteriorElements(vectorInt & listOfInteriorElements) const;
 
   //  get list of global interior nodes
-  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt const & listOfInteriorNodes ) const;
+  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt & listOfInteriorNodes ) const;
 
   // set model
-  void getModel( const int & numberOfNodes, vectorReal const & model ) const;
+  void getModel( const int & numberOfNodes, vectorReal & model ) const;
 
   // sort element by color
   // red=0, green=1, blue=2, yellow=3
   int getNumberOfElementsByColor() const;
-  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt const & listOfElementsByColor) const;
+  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt & listOfElementsByColor) const;
 
   // get number of Boundary Faces
   int getNumberOfBoundaryFaces() const;
@@ -100,20 +100,20 @@ public:
 
   // get global DOF belonging to the faces of element e
   PROXY_HOST_DEVICE int getGlobalDofOfFace(  const int & e,
-                                               arrayIntView  const & globalNodesList,
+                                               arrayIntView  & globalNodesList,
                                                int const localToGlobal[],
                                                int  nodesFace[][6] ) const;
 
   // provides informations about boundary  faces:
   // element number,
   // orientation of the face
-  void getBoundaryFacesInfos(arrayInt const & faceInfos)const;
+  void getBoundaryFacesInfos(arrayInt & faceInfos)const;
 
   //  get list of global boundary nodes
-  int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt const & listOfBoundaryNodes ) const;
+  int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt & listOfBoundaryNodes ) const;
 
   // provides a mapping between local node of a face and global node Face:
-  void getLocalFaceNodeToGlobalFaceNode(arrayInt const &localFaceNodeToGlobalFaceNode) const;
+  void getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFaceNode) const;
 
   // compute global to local node index
   int Itoijk( const int & I, int & i, int & j, int & k ) const;

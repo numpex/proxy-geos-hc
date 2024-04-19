@@ -6,7 +6,7 @@
 
 using namespace grid;
 
-struct solverUtils
+struct SolverUtils
 {
 
   float evaluateRicker( float const & time_n, float const & f0, int order )

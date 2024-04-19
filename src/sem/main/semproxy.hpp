@@ -71,7 +71,7 @@ protected:
   simpleMesh  myMesh {200, 200,200, 2000, 2000, 2000, myOrderNumber};
 
   QkGL myQk;
-  solverUtils myUtils;
+  SolverUtils myUtils;
 
   vectorInt rhsElement;
   SOLVER mySolver;
