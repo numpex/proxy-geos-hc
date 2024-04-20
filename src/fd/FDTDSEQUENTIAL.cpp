@@ -35,7 +35,7 @@ int main( int argc, char *argv[] )
     constexpr int   sourceOrder=1;
     constexpr float f0=15.;
     constexpr float fmax=2.5*f0;
-    constexpr float timeMax=0.8;
+    constexpr float timeMax=1.0;
 
     constexpr int ncoefs=5;
     constexpr float vmin=1500;

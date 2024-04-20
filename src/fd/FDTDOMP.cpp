@@ -22,11 +22,9 @@ int main( int argc, char *argv[] )
     int nx= (argc > 1)? std::stoi(argv[1]) : 150;
     int ny=nx;
     int nz=nx;
-
     int xs=nx/2;
     int ys=ny/2;
     int zs=nz/2;
-
     constexpr int lx=4;
     constexpr int ly=4;
     constexpr int lz=4;
@@ -42,7 +40,7 @@ int main( int argc, char *argv[] )
     constexpr int ncoefs=5;
     constexpr float vmin=1500;
     constexpr float vmax=4500;
-    
+
     // imports utils
     SolverUtils myUtils;
     FDTDUtils myFDTDUtils;
@@ -55,27 +53,27 @@ int main( int argc, char *argv[] )
     constexpr float hdx_2=1./(4.*dx*dx);
     constexpr float hdy_2=1./(4.*dy*dy);
     constexpr float hdz_2=1./(4.*dz*dz);
-    constexpr float lambdamax=vmax/fmax;
+    constexpr float lambdamax=vmin/fmax;
     constexpr int ndampx=ntaperx*lambdamax/dx;
-    constexpr int ndampy=ntapery*lambdamax/dy;
-    constexpr int ndampz=ntaperz*lambdamax/dz;
-    printf("nx=%d ny=%d nz=%d\n",nx, ny,nz);
+    constexpr int ndampy=ntaperx*lambdamax/dx;
+    constexpr int ndampz=ntaperx*lambdamax/dx;
+
     printf("ndampx=%d ndampy=%d ndampz=%d\n",ndampx, ndampy,ndampz);
-    constexpr int x1=0;
-    constexpr int x2=ndampx;
-    constexpr int x3=ndampx;
+    int x1=0;
+    int x2=ndampx;
+    int x3=ndampx;
     int x4=nx-ndampx;
     int x5=nx-ndampx;
     int x6=nx;
-    constexpr int y1=0;
-    constexpr int y2=ndampy;
-    constexpr int y3=ndampy;
+    int y1=0;
+    int y2=ndampy;
+    int y3=ndampy;
     int y4=ny-ndampy;
     int y5=ny-ndampy;
     int y6=ny;
-    constexpr int z1=0;
-    constexpr int z2=ndampz;
-    constexpr int z3=ndampz;
+    int z1=0;
+    int z2=ndampz;
+    int z3=ndampz;
     int z4=nz-ndampz;
     int z5=nz-ndampz;
     int z6=nz;
