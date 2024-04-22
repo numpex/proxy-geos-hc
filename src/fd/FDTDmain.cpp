@@ -44,11 +44,7 @@ int main( int argc, char *argv[] )
       myKernel.addRHS(myGrids, itSample, myModels.RHSTerm, myModels.vp, myModels.pn);                     
 
       //compute one step
-      myKernel.computeOneStep(myGrids, myFDTDInit.coef0, 
-                              myModels.coefx, myModels.coefy, myModels.coefz,
-                              myModels.vp, myModels.phi, myModels.eta,
-                              myModels.pnp1, myModels.pn, myModels.pnm1);
-
+      myKernel.computeOneStep( myGrids, myFDTDInit.coef0, myModels );
 
       // swap wavefields
       myKernel.swapWavefields(myGrids, myModels.pnp1, myModels.pn, myModels.pnm1);

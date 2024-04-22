@@ -30,12 +30,11 @@ struct FDTDUtils
       return 2*cfl/(sqrtf(ftmp)*vmax);
   }
 
-  void write_io(int nx, int ny, int nz,
-		int lx, int ly, int lz,
-		int x0, int x1, 
-		int y0, int y1, 
-		int z0, int z1, 
-                vectorReal const &u, int istep)
+  void write_io( FDTDGRIDS &myGrids,
+		 int x0, int x1, 
+		 int y0, int y1, 
+		 int z0, int z1, 
+                 vectorReal const &u, int istep)
   {
       char filename_buf[32];
       snprintf(filename_buf, sizeof(filename_buf), "snapshot_it_%d.H@", istep);
@@ -76,15 +75,15 @@ struct FDTDUtils
     }
   }
 
-  void pml_profile_extend(int nx, int ny, int nz,
-                          vectorReal &  eta, vectorReal & etax, vectorReal & etay, vectorReal & etaz,
-                          int xbeg, int xend, int ybeg, int yend, int zbeg, int zend)
+  void pml_profile_extend( int nx, int ny, int nz,
+                           vectorReal &  eta, vectorReal & etax, vectorReal & etay, vectorReal & etaz,
+                           int xbeg, int xend, int ybeg, int yend, int zbeg, int zend)
   {
     const int n_ghost = 1;
     for (int ix = xbeg-n_ghost; ix <= xend+n_ghost; ++ix) {
         for (int iy = ybeg-n_ghost; iy <= yend+n_ghost; ++iy) {
             for (int iz = zbeg-n_ghost; iz <= zend+n_ghost; ++iz) {
-                eta[IDX3_eta0(ix,iy,iz)] = etax[ix] + etay[iy] + etaz[iz];
+                eta[(nz+2)*(ny+2)*ix + (nz+2)*(iy) + iz ] = etax[ix] + etay[iy] + etaz[iz];
             }
         }
     }
@@ -128,7 +127,7 @@ struct FDTDUtils
     for (int i = -1; i < nx+1; ++i) {
         for (int j = -1; j < ny+1; ++j) {
             for (int k = -1; k < nz+1; ++k) {
-                eta[IDX3_eta1(i,j,k)] = 0.f;
+                eta[(nz+2)*(ny+2)*(i+1) + (nz+2)*(j+1) + (k+1)] = 0.f;
             }
         }
     }
@@ -173,16 +172,9 @@ struct FDTDUtils
         Kokkos::fence();
         #endif
 
-        //printf("result1 %f\n",pn[IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs)]);
+        printf("result0 %f\n",pn[IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs)]);
 
-        printf("result1 %f\n", 
-        pn[(myGrids.nz+2*myGrids.lz)*(myGrids.ny+2*myGrids.ly)*(myGrids.xs+myGrids.lx) 
-                     +(myGrids.nz+2*myGrids.lz)*(myGrids.ys+myGrids.ly)+(myGrids.zs+myGrids.lz)]);
-
-        write_io( myGrids.nx ,myGrids.ny ,myGrids.nz,
-                              myGrids.lx ,myGrids.ly ,myGrids.lz,
-                              0 ,myGrids.nx ,myGrids.ny/2 ,myGrids.ny/2, 0 ,myGrids.nz,
-                              pn, itSample);
+        write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pn, itSample);
 
       } 
 

@@ -5,16 +5,14 @@ struct FDTDKernel
 {
 
   //innerpoints
-  int inner3D( FDTDGRIDS &myGrids,
+  int inner3D(const int nx, const int ny, const int nz,
          const int x3, const int x4,
          const int y3, const int y4,
          const int z3, const int z4,
+         const int lx, const int ly, const int lz,
          const float coef0,
          FDTDMODELS &myModels ) const
   {
-#ifdef USE_OMP
-      #pragma omp parallel for collapse(3)
-#endif
       LOOP3DHEAD
       float lapx=(myModels.coefx[1]*(myModels.pn[IDX3_l(i+1,j,k)]+myModels.pn[IDX3_l(i-1,j,k)])
                  +myModels.coefx[2]*(myModels.pn[IDX3_l(i+2,j,k)]+myModels.pn[IDX3_l(i-2,j,k)])
@@ -34,16 +32,14 @@ struct FDTDKernel
       return 0;
   }
 
-  int pml3D( FDTDGRIDS &myGrids,
+  int pml3D(const int nx, const int ny, const int nz,
              const int x3, const int x4, 
              const int y3, const int y4, 
              const int z3, const int z4,
+             const int lx, const int ly, const int lz,
              const float coef0,
              FDTDMODELS &myModels ) const
   {
-#ifdef USE_OMP
-      #pragma omp parallel for collapse(3)
-#endif
        LOOP3DHEAD
        float lapx=(myModels.coefx[1]*(myModels.pn[IDX3_l(i+1,j,k)]+myModels.pn[IDX3_l(i-1,j,k)])
                  +myModels.coefx[2]*(myModels.pn[IDX3_l(i+2,j,k)]+myModels.pn[IDX3_l(i-2,j,k)])
@@ -63,14 +59,14 @@ struct FDTDKernel
        myModels.pnp1[IDX3_l(i,j,k)]=((2.-myModels.eta[IDX3_eta1(i,j,k)]*myModels.eta[IDX3_eta1(i,j,k)]
                   +2.*myModels.eta[IDX3_eta1(i,j,k)])*myModels.pn[IDX3_l(i,j,k)]
                   -myModels.pnm1[IDX3_l(i,j,k)]
-                  +myModels.vp[IDX3(i,j,k)]*(lap+myModels.phi[IDX3(i,j,k)]))/(1.+2.*myModels.eta[IDX3_eta1(i,j,k)]);
+                  +vp[IDX3(i,j,k)]*(lap+phi[IDX3(i,j,k)]))/(1.+2.*myModels.eta[IDX3_eta1(i,j,k)]);
 
        myModels.phi[IDX3(i,j,k)]=(myModels.phi[IDX3(i,j,k)]-((myModels.eta[IDX3_eta1(i+1,j,k)]-myModels.eta[IDX3_eta1(i-1,j,k)])
-                  *(myModels.pn[IDX3_l(i+1,j,k)]-myModels.pn[IDX3_l(i-1,j,k)])*myGrids.hdx_2
+                  *(myModels.pn[IDX3_l(i+1,j,k)]-myModels.pn[IDX3_l(i-1,j,k)])*hdx_2
                   +(myModels.eta[IDX3_eta1(i,j+1,k)]-myModels.eta[IDX3_eta1(i,j-1,k)])
-                  *(myModels.pn[IDX3_l(i,j+1,k)]-myModels.pn[IDX3_l(i,j-1,k)])*myGrids.hdy_2
+                  *(myModels.pn[IDX3_l(i,j+1,k)]-myModels.pn[IDX3_l(i,j-1,k)])*hdy_2
                   +(myModels.eta[IDX3_eta1(i,j,k+1)]-myModels.eta[IDX3_eta1(i,j,k-1)])
-                  *(myModels.pn[IDX3_l(i,j,k+1)]-myModels.pn[IDX3_l(i,j,k-1)])*myGrids.hdz_2))
+                  *(myModels.pn[IDX3_l(i,j,k+1)]-myModels.pn[IDX3_l(i,j,k-1)])*hdz_2))
                   /(1.+myModels.eta[IDX3_eta1(i,j,k)]);
 
      LOOP3DEND
@@ -130,20 +126,57 @@ struct FDTDKernel
                      const float coef0,
                      FDTDMODELS &myModels ) const
   {
+    //printf("INFO INFO: coef0=%f \n", coef0);
+    //for (int index=0; index<150; index++)
+     // printf("INFO INFO: eta[index]=%f \n", eta[index]);
+
+    int nx=myGrids.nx;
+    int ny=myGrids.ny;
+    int nz=myGrids.nz;
+
+    int lx=myGrids.lx;
+    int ly=myGrids.ly;
+    int lz=myGrids.lz;
+    
+    int x1=myGrids.x1;
+    int x2=myGrids.x2;
+    int x3=myGrids.x3;
+    int x4=myGrids.x4;
+    int x5=myGrids.x5;
+    int x6=myGrids.x6;
+
+    int y1=myGrids.y1;
+    int y2=myGrids.y2;
+    int y3=myGrids.y3;
+    int y4=myGrids.y4;
+    int y5=myGrids.y5;
+    int y6=myGrids.y6;
+
+    int z1=myGrids.z1;
+    int z2=myGrids.z2;
+    int z3=myGrids.z3;
+    int z4=myGrids.z4;
+    int z5=myGrids.z5;
+    int z6=myGrids.z6;
+
+    float hdx_2=myGrids.hdx_2;
+    float hdy_2=myGrids.hdy_2;
+    float hdz_2=myGrids.hdz_2;
+
     //up
-    pml3D(myGrids, 0, myGrids.nx, 0, myGrids.ny, myGrids.z1, myGrids.z2, coef0, myModels);
+    pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,myGrids);
     //front
-    pml3D(myGrids, 0, myGrids.nx, myGrids.y1, myGrids.y2, myGrids.z3, myGrids.z4, coef0, myModels);
+    pml3D(nx,ny,nz,0,nx,y1,y2,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,myGrids);
     //left
-    pml3D(myGrids, myGrids.x1, myGrids.x2, myGrids.y3, myGrids.y4, myGrids.z3, myGrids.z4, coef0, myModels);
+    pml3D(nx,ny,nz,x1,x2,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,myGrids);
     //inner points
-    inner3D(myGrids, myGrids.x3, myGrids.x4, myGrids.y3, myGrids.y4, myGrids.z3, myGrids.z4, coef0, myModels);
+    inner3D(nx,ny,nz,x3,x4,y3,y4,z3,z4,lx,ly,lz,coef0,myGrids);
     //right
-    pml3D(myGrids, myGrids.x5, myGrids.x6, myGrids.y3, myGrids.y4, myGrids.z3, myGrids.z4, coef0, myModels);
+    pml3D(nx,ny,nz,x5,x6,y3,y4,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,myGrids);
     //back
-    pml3D(myGrids, 0, myGrids.nx, myGrids.y5, myGrids.y6, myGrids.z3, myGrids.z4, coef0, myModels);
+    pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,myGrids);
     // bottom
-    pml3D(myGrids, 0, myGrids.nx, 0, myGrids.ny, myGrids.z5, myGrids.z6, coef0, myModels);
+    pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,myGrids);
 
     return(0);
   }
