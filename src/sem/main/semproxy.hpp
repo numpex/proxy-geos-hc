@@ -8,9 +8,6 @@
 #ifndef SEMPROXY_HPP_
 #define SEMPROXY_HPP_
 
-#include <iostream>
-#include <fstream>
-
 #include "solver.hpp"
 #include "utils.hpp"
 

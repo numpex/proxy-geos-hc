@@ -1,11 +1,9 @@
 #ifndef FDTDKERNEL_HPP
 #define FDTDKERNEL_HPP
 
-#include "dataType.hpp"
-#include "FDTDMacros.hpp"
-
 struct FDTDKernel
 {
+
   //innerpoints
   int inner3D(const int nx, const int ny, const int nz,
          const int x3, const int x4,
@@ -17,13 +15,10 @@ struct FDTDKernel
          vectorRealView const & coefy,
          vectorRealView const & coefz,
          vectorRealView const & vp,
-         VECTORVIEW pnp1,
-         VECTORVIEW pn  ,
+         vectorRealView const & pnp1,
+         vectorRealView const & pn  ,
          vectorRealView const & pnm1)const
   {
-  #ifdef USE_OMP
-      #pragma omp parallel for collapse(3)
-  #endif
       LOOP3DHEAD
       float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                  +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
@@ -54,15 +49,12 @@ struct FDTDKernel
              vectorRealView const & coefy,
              vectorRealView const & coefz,
              vectorRealView const & vp,
-             VECTORVIEW phi,
+             vectorRealView const & phi,
              vectorRealView const & eta,
-             VECTORVIEW pnp1,
-             VECTORVIEW pn ,
+             vectorRealView const & pnp1,
+             vectorRealView const & pn ,
              vectorRealView const & pnm1)const
   {
-  #ifdef USE_OMP
-      #pragma omp parallel for collapse(3)
-  #endif
        LOOP3DHEAD
        float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                   +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
@@ -91,41 +83,25 @@ struct FDTDKernel
                   +(eta[IDX3_eta1(i,j,k+1)]-eta[IDX3_eta1(i,j,k-1)])
                   *(pn[IDX3_l(i,j,k+1)]-pn[IDX3_l(i,j,k-1)])*hdz_2))
                   /(1.+eta[IDX3_eta1(i,j,k)]);
+
      LOOP3DEND
      return(0);
   }
 
-  // add RHS term
-  int addRHS(const int nx,const int ny,const int nz,
-	     const int lx,const int ly,const int lz,
-	     const int xs,const int ys,const int zs,const int itSample,
-	     vectorRealView const & RHSTerm,
-	     vectorRealView const & vp,
-	     VECTORVIEW pn) const
-  {
-#ifdef USE_RAJA
-     RAJANestedLoop(xs,ys,zs,xs+1,ys+1,zs+1)
-     {
-       pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
-     });
-#elif defined USE_KOKKOS
-    Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({xs,xs,zs},{xs+1,ys+1,zs+1}),KOKKOS_LAMBDA(int i,int j,int k)
-    {
-    pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
-    });
-#else
-    pn[IDX3_l(xs,ys,zs)]+=vp[IDX3(xs,ys,zs)]*RHSTerm[itSample];
-#endif
-    return(0);
-  }
-
   // swap wavefields
-  int swapWavefields(const int nx,const int ny,const int nz,
-		     const int lx,const int ly,const int lz,
+  int swapWavefields( FDTDGRIDS &myGrids, 
 		     vectorRealView const & pnp1,
-		     VECTORVIEW pn  ,
-		     VECTORVIEW pnm1) const
+		     vectorRealView const & pn  ,
+		     vectorRealView const & pnm1) const
   {
+    int nx=myGrids.nx;
+    int ny=myGrids.ny;
+    int nz=myGrids.nz;
+
+    int lx=myGrids.lx;
+    int ly=myGrids.ly;
+    int lz=myGrids.lz;
+
 #ifdef USE_RAJA
      RAJANestedLoop(0,0,0,nx,ny,nz)
      {
@@ -161,26 +137,55 @@ struct FDTDKernel
   }
 
   // compute one step
-  int computeOneStep(const int nx, const int ny, const int nz,
-                     const int lx, const int ly, const int lz,
-	             const int x1, const int x2, const int x3, 
-	             const int x4, const int x5, const int x6,
-	             const int y1, const int y2, const int y3, 
-	             const int y4, const int y5, const int y6,
-	             const int z1, const int z2, const int z3, 
-	             const int z4, const int z5, const int z6,
+  int computeOneStep( FDTDGRIDS &myGrids,
                      const float coef0,
-                     const float hdx_2, const float hdy_2, const float hdz_2,
                      vectorRealView const & coefx,
                      vectorRealView const & coefy,
                      vectorRealView const & coefz,
                      vectorRealView const & vp,
-                     VECTORVIEW phi,
+                     vectorRealView const & phi,
                      vectorRealView const & eta,
-                     VECTORVIEW pnp1,
-                     VECTORVIEW pn  ,
+                     vectorRealView const & pnp1,
+                     vectorRealView const & pn  ,
                      vectorRealView const & pnm1)const
   {
+    //printf("INFO INFO: coef0=%f \n", coef0);
+    //for (int index=0; index<150; index++)
+     // printf("INFO INFO: eta[index]=%f \n", eta[index]);
+
+    int nx=myGrids.nx;
+    int ny=myGrids.ny;
+    int nz=myGrids.nz;
+
+    int lx=myGrids.lx;
+    int ly=myGrids.ly;
+    int lz=myGrids.lz;
+    
+    int x1=myGrids.x1;
+    int x2=myGrids.x2;
+    int x3=myGrids.x3;
+    int x4=myGrids.x4;
+    int x5=myGrids.x5;
+    int x6=myGrids.x6;
+
+    int y1=myGrids.y1;
+    int y2=myGrids.y2;
+    int y3=myGrids.y3;
+    int y4=myGrids.y4;
+    int y5=myGrids.y5;
+    int y6=myGrids.y6;
+
+    int z1=myGrids.z1;
+    int z2=myGrids.z2;
+    int z3=myGrids.z3;
+    int z4=myGrids.z4;
+    int z5=myGrids.z5;
+    int z6=myGrids.z6;
+
+    float hdx_2=myGrids.hdx_2;
+    float hdy_2=myGrids.hdy_2;
+    float hdz_2=myGrids.hdz_2;
+
     //up
     pml3D(nx,ny,nz,0,nx,0,ny,z1,z2,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
     //front
@@ -195,8 +200,45 @@ struct FDTDKernel
     pml3D(nx,ny,nz,0,nx,y5,y6,z3,z4,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
     // bottom
     pml3D(nx,ny,nz,0,nx,0,ny,z5,z6,lx,ly,lz,coef0,hdx_2,hdy_2,hdz_2,coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
+
     return(0);
   }
+
+  // add RHS term
+  int addRHS( FDTDGRIDS &myGrids,
+             const int itSample,
+             vectorRealView const & RHSTerm,
+             vectorRealView const & vp, 
+             vectorRealView const & pn) const
+  {
+
+    int ny=myGrids.ny;
+    int nz=myGrids.nz;
+
+    int lx=myGrids.lx;
+    int ly=myGrids.ly;
+    int lz=myGrids.lz;
+    
+    int xs=myGrids.xs;
+    int ys=myGrids.ys;
+    int zs=myGrids.zs;
+
+#ifdef USE_RAJA
+     RAJANestedLoop(xs,ys,zs,xs+1,ys+1,zs+1)
+     {
+       pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
+     });
+#elif defined USE_KOKKOS
+    Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({xs,xs,zs},{xs+1,ys+1,zs+1}),KOKKOS_LAMBDA(int i,int j,int k)
+    {
+    pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
+    });
+#else
+    pn[IDX3_l(xs,ys,zs)]+=vp[IDX3(xs,ys,zs)]*RHSTerm[itSample];
+#endif
+    return(0);
+  }
+
 
 };
 #endif //FDTDKERNE_HPP

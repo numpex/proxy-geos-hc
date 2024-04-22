@@ -2,8 +2,15 @@
 #define DATATYPE_HPP_
 
 #include "commonConfig.hpp"
+#include <fstream>
+#include <cmath>
+#include <chrono>
+#include <iostream> 
 
 #ifdef USE_VECTOR
+
+#include <vector> 
+
   template<class T> class Vector 
   {
   public:
@@ -14,10 +21,17 @@
     {
         return data[index];
     }
-    T & operator[](int index)
+    T & operator[](int index) 
     {
         return data[index];
     }
+
+    T & operator[](int index) const
+    {
+        return const_cast<T &> (data[index]);
+    }
+
+
     int size(){return this->size();}
 
   private:
@@ -49,8 +63,12 @@
   private:
     std::vector<std::vector<std::vector<T> > > data;
   };
+
+
+  using vectorReal=Vector< float >;
+  using vectorRealView=Vector< float >;
+
   using vectorInt=std::vector< int >;
-  using vectorReal=std::vector< float >;
   using vectorDouble=std::vector< double >;
   using arrayInt=Array2D< int >;
   using arrayReal=Array2D< float >;
@@ -59,8 +77,8 @@
   using array3DReal=Array3D< float >;
   using array3DDouble=Array3D< double >;
 
+  //using vectorRealView=std::vector< float >;
   using vectorDoubleView=std::vector< double >;
-  using vectorRealView=std::vector< float >;
   using arrayIntView=Array2D< int >;
   using arrayRealView=Array2D< float >;
   using arrayDoubleView=Array2D< double >;

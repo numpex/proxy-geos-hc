@@ -2,7 +2,8 @@
 #define FDTDUTILS_HPP
 
 #include "dataType.hpp"
-#include "FDTDMacros.hpp"
+#include "FDTDdata.hpp"
+#include "FDTDmacros.hpp"
 
 struct FDTDUtils
 {
@@ -15,7 +16,7 @@ struct FDTDUtils
       coef[3] = 8.f/315.f/dx2;
       coef[4] = -1.f/560.f/dx2;
   }
-  float compute_dt_sch(const float vmax,const vectorReal &coefx,const vectorReal &coefy,const vectorReal &coefz)
+  float compute_dt_sch(const float vmax,const vectorReal &coefx,const vectorReal &coefy,const vectorReal &coefz) 
   {
 
       float ftmp = 0.;
@@ -158,6 +159,37 @@ struct FDTDUtils
                 z1+1, z2, z3+1, z4, z5+1, z6);
 
   }
+      
+  //void output(FDTDGRIDS &myGrids, vectorRealView const & pn, int itSample)
+  void output(FDTDGRIDS &myGrids, vectorRealView &pn, int itSample)
+  {
+
+      if(itSample%50==0)
+      {   
+
+        #ifdef USE_RAJA
+        RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i){});
+        #elif defined USE_KOKKOS
+        Kokkos::fence();
+        #endif
+
+        //printf("result1 %f\n",pn[IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs)]);
+
+        printf("result1 %f\n", 
+        pn[(myGrids.nz+2*myGrids.lz)*(myGrids.ny+2*myGrids.ly)*(myGrids.xs+myGrids.lx) 
+                     +(myGrids.nz+2*myGrids.lz)*(myGrids.ys+myGrids.ly)+(myGrids.zs+myGrids.lz)]);
+
+        write_io( myGrids.nx ,myGrids.ny ,myGrids.nz,
+                              myGrids.lx ,myGrids.ly ,myGrids.lz,
+                              0 ,myGrids.nx ,myGrids.ny/2 ,myGrids.ny/2, 0 ,myGrids.nz,
+                              pn, itSample);
+
+      } 
+
+  }
+
+
+
 };
 
 #endif  //FDTDUTILS_HPP

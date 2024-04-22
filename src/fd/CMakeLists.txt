@@ -15,7 +15,8 @@ message ( "---------------------------------------------------------------------
 # fd proxy application setup
 #-------------------------------------------------------
 
-set (fd_sources FDTD${SOLVER}.cpp) 
+#set (fd_sources FDTD${SOLVER}.cpp) 
+set (fd_sources FDTDmain.cpp) 
 
 blt_add_executable( NAME ${FD_EXECUTABLE}
                     SOURCES ${fd_sources}
