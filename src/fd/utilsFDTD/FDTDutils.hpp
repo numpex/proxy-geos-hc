@@ -111,22 +111,30 @@ struct FDTDUtils
         }
     }
 
+
+    #ifdef USE_RAJA
+    vectorReal etax=allocateVector<vectorReal>(nx+2);
+    vectorReal etay=allocateVector<vectorReal>(ny+2);
+    vectorReal etaz=allocateVector<vectorReal>(nz+2);
+    #else
+    vectorRealView etax=allocateVector<vectorRealView>(nx+2);
+    vectorRealView etay=allocateVector<vectorRealView>(ny+2);
+    vectorRealView etaz=allocateVector<vectorRealView>(nz+2);
+    #endif
+
     // etax 
     float param = dt_sch * 3.f * vmax * logf(1000.f)/(2.f*ndampx*dx);
     printf("param=%f\n",param);
-    vectorReal etax=allocateVector<vectorReal>(nx+2);
     pml_profile_init(etax, 0, nx+1, ndampx, ndampx, param);
 
     // etay 
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampy*dy);
     printf("param=%f\n",param);
-    vectorReal etay=allocateVector<vectorReal>(ny+2);
     pml_profile_init(etay, 0, ny+1, ndampy, ndampy, param);
 
     // etaz 
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampz*dz);
     printf("param=%f\n",param);
-    vectorReal etaz=allocateVector<vectorReal>(nz+2);
     pml_profile_init(etaz, 0, nz+1, ndampz, ndampz, param);
 
     (void)pml_profile_extend_all(nx, ny, nz,

@@ -32,6 +32,8 @@ struct FDTDMODELS {
   vectorRealView pn; 
   vectorRealView pnm1;
 
+#ifdef USE_RAJA
+
   vectorReal h_coefx;
   vectorReal h_coefy;
   vectorReal h_coefz;
@@ -43,6 +45,8 @@ struct FDTDMODELS {
   vectorReal h_pnp1;
   vectorReal h_pn; 
   vectorReal h_pnm1;
+
+#endif
 
 };
 

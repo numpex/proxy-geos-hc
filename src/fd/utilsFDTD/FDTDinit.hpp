@@ -108,15 +108,15 @@ struct FDTDInit
    myModels.phi  = myModels.h_phi.toView();
    myModels.eta  = myModels.h_eta.toView();
    #else 
-   myModels.coefx = allocateVector<vectorReal>(ncoefs);
-   myModels.coefy = allocateVector<vectorReal>(ncoefs);
-   myModels.coefz = allocateVector<vectorReal>(ncoefs);
-   myModels.vp   = allocateVector<vectorReal>( modelVolume );
-   myModels.pnp1 = allocateVector<vectorReal>( extModelVolume );
-   myModels.pn   = allocateVector<vectorReal>( extModelVolume );
-   myModels.pnm1 = allocateVector<vectorReal>( extModelVolume );
-   myModels.phi  = allocateVector<vectorReal>( modelVolume );
-   myModels.eta  = allocateVector<vectorReal>( etaModelVolume );
+   myModels.coefx = allocateVector<vectorRealView>(ncoefs);
+   myModels.coefy = allocateVector<vectorRealView>(ncoefs);
+   myModels.coefz = allocateVector<vectorRealView>(ncoefs);
+   myModels.vp   = allocateVector<vectorRealView>( modelVolume );
+   myModels.pnp1 = allocateVector<vectorRealView>( extModelVolume );
+   myModels.pn   = allocateVector<vectorRealView>( extModelVolume );
+   myModels.pnm1 = allocateVector<vectorRealView>( extModelVolume );
+   myModels.phi  = allocateVector<vectorRealView>( modelVolume );
+   myModels.eta  = allocateVector<vectorRealView>( etaModelVolume );
    #endif
   }
 
@@ -144,7 +144,7 @@ struct FDTDInit
    myModels.h_RHSTerm = allocateVector<vectorReal>(nSamples);
    myModels.RHSTerm = myModels.h_RHSTerm.toView();
    #else
-   myModels.RHSTerm = allocateVector<vectorReal>(nSamples);
+   myModels.RHSTerm = allocateVector<vectorRealView>(nSamples);
    #endif
 
    std::vector<float> sourceTerm=myUtils.computeSourceTerm(nSamples,timeStep,f0,sourceOrder);

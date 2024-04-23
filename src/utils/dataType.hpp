@@ -64,25 +64,18 @@
     std::vector<std::vector<std::vector<T> > > data;
   };
 
-
-  using vectorReal=Vector< float >;
   using vectorRealView=Vector< float >;
+  using vectorIntView=Vector< int >;
+  using vectorDoubleView=Vector< double >;
 
-  using vectorInt=std::vector< int >;
-  using vectorDouble=std::vector< double >;
-  using arrayInt=Array2D< int >;
-  using arrayReal=Array2D< float >;
-  using arrayDouble=Array2D< double >;
-  using array3DInt=Array3D< int >;
-  using array3DReal=Array3D< float >;
-  using array3DDouble=Array3D< double >;
-
-  //using vectorRealView=std::vector< float >;
-  using vectorDoubleView=std::vector< double >;
   using arrayIntView=Array2D< int >;
   using arrayRealView=Array2D< float >;
   using arrayDoubleView=Array2D< double >;
- 
+
+  using array3DIntView=Array3D< int >;
+  using array3DRealView=Array3D< float >;
+  using array3DDoubleView=Array3D< double >;
+
   template<class T>
   T allocateVector(int n1)
   {
@@ -259,26 +252,21 @@
   //  using Layout=Kokkos::LayoutRight;
   //#endif
 
-  typedef Kokkos::View<int*,     Layout, MemSpace> vectorInt;
-  typedef Kokkos::View<float*,   Layout,  MemSpace> vectorReal;
-  typedef Kokkos::View<double*,  Layout, MemSpace> vectorDouble;
-
-  typedef Kokkos::View<int**,    Layout, MemSpace> arrayInt;
-  typedef Kokkos::View<float**,  Layout, MemSpace> arrayReal;
-  typedef Kokkos::View<double**, Layout, MemSpace> arrayDouble;
-
-  typedef Kokkos::View<int***,    Layout, MemSpace> array3DInt;
-  typedef Kokkos::View<float***,  Layout, MemSpace> array3DReal;
-  typedef Kokkos::View<double***, Layout, MemSpace> array3DDouble;
-
-  typedef Kokkos::View<double*,  Layout, MemSpace> vectorDoubleView;
+  typedef Kokkos::View<int*,     Layout, MemSpace> vectorIntView;
   typedef Kokkos::View<float*,   Layout,  MemSpace> vectorRealView;
+  typedef Kokkos::View<double*,  Layout, MemSpace> vectorDoubleView;
+
   typedef Kokkos::View<int**,    Layout, MemSpace> arrayIntView;
   typedef Kokkos::View<float**,  Layout, MemSpace> arrayRealView;
   typedef Kokkos::View<double**, Layout, MemSpace> arrayDoubleView;
+
+  typedef Kokkos::View<int***,    Layout, MemSpace> array3DIntView;
+  typedef Kokkos::View<float***,  Layout, MemSpace> array3DRealView;
+  typedef Kokkos::View<double***, Layout, MemSpace> array3DDoubleView;
+
   /*
-  typedef Kokkos::View<int*,     Layout, DeviceMemorySpace> vectorIntView;
-  typedef Kokkos::View<float*,   Layout,  DeviceMemorySpace> vectorRealView;
+  typedef Kokkos::View<int*,     Layout, DeviceMemorySpace> vectorIntViewView;
+  typedef Kokkos::View<float*,   Layout,  DeviceMemorySpace> vectorRealViewView;
   typedef Kokkos::View<double*,  Layout, DeviceMemorySpace> vectorDoubleView;
 
   typedef Kokkos::View<int**,    Layout, DeviceMemorySpace> arrayIntView;

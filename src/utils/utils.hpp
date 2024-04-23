@@ -59,7 +59,7 @@ struct SolverUtils
   }
 
 
-  void saveSnapShot( const int indexTimeStep, const int i1, arrayReal pnGlobal, simpleMesh mesh )
+  void saveSnapShot( const int indexTimeStep, const int i1, arrayRealView pnGlobal, simpleMesh mesh )
   {
 
     int nx=mesh.getNx();

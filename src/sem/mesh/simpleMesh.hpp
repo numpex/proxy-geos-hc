@@ -64,10 +64,10 @@ public:
   int getDz() const;
 
   // Initialize nodal coordinates.
-  void nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const;
+  void nodesCoordinates( const int & numberOfNodes, arrayRealView & nodeCoords ) const;
 
   //  list of global nodes ( vertices)
-  void globalNodesList(const int & numberOfElements, arrayInt & nodesList ) const;
+  void globalNodesList(const int & numberOfElements, arrayIntView & nodesList ) const;
 
   // local to global
   PROXY_HOST_DEVICE int localToGlobalNodes( const int & elementNumber, 
@@ -79,18 +79,18 @@ public:
   int getElementNumberFromPoints( const float & x, const float & y, const float & z ) const;
 
   // get list of interior Elements
-  void getListOfInteriorElements(vectorInt & listOfInteriorElements) const;
+  void getListOfInteriorElements(vectorIntView & listOfInteriorElements) const;
 
   //  get list of global interior nodes
-  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt & listOfInteriorNodes ) const;
+  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorIntView & listOfInteriorNodes ) const;
 
   // set model
-  void getModel( const int & numberOfNodes, vectorReal & model ) const;
+  void getModel( const int & numberOfNodes, vectorRealView & model ) const;
 
   // sort element by color
   // red=0, green=1, blue=2, yellow=3
   int getNumberOfElementsByColor() const;
-  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt & listOfElementsByColor) const;
+  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayIntView & listOfElementsByColor) const;
 
   // get number of Boundary Faces
   int getNumberOfBoundaryFaces() const;
@@ -107,13 +107,13 @@ public:
   // provides informations about boundary  faces:
   // element number,
   // orientation of the face
-  void getBoundaryFacesInfos(arrayInt & faceInfos)const;
+  void getBoundaryFacesInfos(arrayIntView & faceInfos)const;
 
   //  get list of global boundary nodes
-  int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt & listOfBoundaryNodes ) const;
+  int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorIntView & listOfBoundaryNodes ) const;
 
   // provides a mapping between local node of a face and global node Face:
-  void getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFaceNode) const;
+  void getLocalFaceNodeToGlobalFaceNode(arrayIntView &localFaceNodeToGlobalFaceNode) const;
 
   // compute global to local node index
   int Itoijk( const int & I, int & i, int & j, int & k ) const;
