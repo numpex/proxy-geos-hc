@@ -26,11 +26,16 @@ int main( int argc, char *argv[] )
 
    // initialize geometry 
    myFDTDInit.init_geometry( argc, argv, myGrids );
+
+   // allocate all the vectors
+   myFDTDInit.init_vectors( myGrids, myModels );
+
    // initialize coefficients
    myFDTDInit.init_coefficients( myGrids, myModels );
 
    // initialize source 
    myFDTDInit.init_source( myModels );
+
    // initialize velocity and pressure models, etc
    myFDTDInit.init_models( myGrids, myModels );
 

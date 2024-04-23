@@ -79,13 +79,50 @@ struct FDTDInit
 
   }
 
+  void init_vectors(FDTDGRIDS &myGrids, FDTDMODELS &myModels)
+  {
+   int modelVolume = myGrids.nx * myGrids.ny * myGrids.nz;
+   int extModelVolume = ( myGrids.nx + 2 * myGrids.lx ) * 
+                        ( myGrids.ny + 2 * myGrids.ly ) * 
+                        ( myGrids.nz + 2 * myGrids.lz ) ;
+   int etaModelVolume = ( myGrids.nx + 2 ) * ( myGrids.ny + 2 ) * ( myGrids.nz + 2 ) ;
+
+   #ifdef USE_RAJA
+   vectorReal h_coefx = allocateVector<vectorReal>(ncoefs);
+   vectorReal h_coefy = allocateVector<vectorReal>(ncoefs);
+   vectorReal h_coefz = allocateVector<vectorReal>(ncoefs);
+   vectorReal h_vp   = allocateVector<vectorReal>( modelVolume );
+   vectorReal h_pnp1 = allocateVector<vectorReal>( extModelVolume );
+   vectorReal h_pn   = allocateVector<vectorReal>( extModelVolume );
+   vectorReal h_pnm1 = allocateVector<vectorReal>( extModelVolume );
+   vectorReal h_phi  = allocateVector<vectorReal>( modelVolume );
+   vectorReal h_eta  = allocateVector<vectorReal>( etaModelVolume );
+
+   myModels.coefx = h_coefx.toView();
+   myModels.coefy = h_coefy.toView();
+   myModels.coefz = h_coefy.toView();
+   myModels.vp   = h_vp.toView();
+   myModels.pnp1 = h_pnp1.toView();
+   myModels.pn   = h_pn.toView();
+   myModels.pnm1 = h_pnm1.toView();
+   myModels.phi  = h_phi.toView();
+   myModels.eta  = h_eta.toView();
+   #else 
+   myModels.coefx = allocateVector<vectorReal>(ncoefs);
+   myModels.coefy = allocateVector<vectorReal>(ncoefs);
+   myModels.coefz = allocateVector<vectorReal>(ncoefs);
+   myModels.vp   = allocateVector<vectorReal>( modelVolume );
+   myModels.pnp1 = allocateVector<vectorReal>( extModelVolume );
+   myModels.pn   = allocateVector<vectorReal>( extModelVolume );
+   myModels.pnm1 = allocateVector<vectorReal>( extModelVolume );
+   myModels.phi  = allocateVector<vectorReal>( modelVolume );
+   myModels.eta  = allocateVector<vectorReal>( etaModelVolume );
+   #endif
+  }
+
 
   void init_coefficients(FDTDGRIDS &myGrids, FDTDMODELS &myModels)
   {
-
-   myModels.coefx=allocateVector<vectorReal>(ncoefs);
-   myModels.coefy=allocateVector<vectorReal>(ncoefs);
-   myModels.coefz=allocateVector<vectorReal>(ncoefs);
 
    myFDTDUtils.init_coef(myGrids.dx, myModels.coefx);
    myFDTDUtils.init_coef(myGrids.dy, myModels.coefy);
@@ -103,7 +140,12 @@ struct FDTDInit
   void init_source(FDTDMODELS &myModels)
   {
    // compute source term
-   myModels.RHSTerm=allocateVector<vectorReal>(nSamples);
+   #ifdef USE_RAJA
+   myModels.RHSTerm = allocateVector<vectorReal>(nSamples).toView();
+   #else
+   myModels.RHSTerm = allocateVector<vectorReal>(nSamples);
+   #endif
+
    std::vector<float> sourceTerm=myUtils.computeSourceTerm(nSamples,timeStep,f0,sourceOrder);
    for(int i=0;i<nSamples;i++)
    {
@@ -114,32 +156,8 @@ struct FDTDInit
 
   void init_models(FDTDGRIDS &myGrids, FDTDMODELS &myModels)
   {
-    int nx=myGrids.nx;
-    int ny=myGrids.ny;
-    int nz=myGrids.nz;
 
-    int lx=myGrids.lx;
-    int ly=myGrids.ly;
-    int lz=myGrids.lz;
-
-    int modelVolume = nx * ny * nz;
-    int extModelVolume = ( nx + 2 * lx ) * 
-                         ( ny + 2 * ly ) * 
-                         ( nz + 2 * lz ) ;
-
-   // model
-   myModels.vp=allocateVector<vectorReal>( modelVolume );
-
-   // pressure fields
-   myModels.pnp1=allocateVector<vectorReal>( extModelVolume );
-   myModels.pn=allocateVector<vectorReal>( extModelVolume );
-   myModels.pnm1=allocateVector<vectorReal>( extModelVolume );
-
-   // PML arrays
-   myModels.phi=allocateVector<vectorReal>( modelVolume );
-   myModels.eta=allocateVector<vectorReal>((nx+2)*(ny+2)*(nz+2));
-
-   myFDTDUtils.init_eta( nx,  ny,  nz,
+   myFDTDUtils.init_eta( myGrids.nx,  myGrids.ny,  myGrids.nz,
 		         myGrids.ndampx,  myGrids.ndampy, myGrids.ndampz,
                          myGrids.x1,  myGrids.x2,  myGrids.x3,  myGrids.x4,  myGrids.x5,  myGrids.x6,
                          myGrids.y1,  myGrids.y2,  myGrids.y3,  myGrids.y4,  myGrids.y5,  myGrids.y6,
@@ -151,11 +169,11 @@ struct FDTDInit
 
    // initialize vp and pressure field
    #pragma omp parallel for collapse(3)
-   for( int i=0; i<nx;i++)
+   for( int i=0; i<myGrids.nx;i++)
    {
-      for( int j=0; j<ny;j++)
+      for( int j=0; j<myGrids.ny;j++)
       {
-         for( int k=0; k<nz;k++)
+         for( int k=0; k<myGrids.nz;k++)
          {
            myModels.vp[IDX3(i,j,k)]=init_vp_value;
            myModels.phi[IDX3(i,j,k)]=0.;
@@ -164,11 +182,11 @@ struct FDTDInit
    }
 
    #pragma omp parallel for collapse(3)
-   for( int i=-lx; i<nx+lx;i++)
+   for( int i=-myGrids.lx; i<myGrids.nx+myGrids.lx;i++)
    {
-      for( int j=-ly; j<ny+ly;j++)
+      for( int j=-myGrids.ly; j<myGrids.ny+myGrids.ly;j++)
       {
-         for( int k=-lz; k<nz+lz;k++)
+         for( int k=-myGrids.lz; k<myGrids.nz+myGrids.lz;k++)
          {
            myModels.pnp1[IDX3_l(i,j,k)]=0.000001;
            myModels.pn[IDX3_l(i,j,k)]  =0.000001;
