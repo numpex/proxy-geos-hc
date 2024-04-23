@@ -5,6 +5,7 @@
 #include "../sem/mesh/simpleMesh.hpp"
 
 using namespace grid;
+using namespace std::chrono;
 
 struct SolverUtils
 {

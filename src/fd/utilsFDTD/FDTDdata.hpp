@@ -32,6 +32,18 @@ struct FDTDMODELS {
   vectorRealView pn; 
   vectorRealView pnm1;
 
+  vectorReal h_coefx;
+  vectorReal h_coefy;
+  vectorReal h_coefz;
+  vectorReal h_RHSTerm;
+
+  vectorReal h_vp; 
+  vectorReal h_phi;
+  vectorReal h_eta;
+  vectorReal h_pnp1;
+  vectorReal h_pn; 
+  vectorReal h_pnm1;
+
 };
 
 #endif //FDTDDATA_HPP_

@@ -88,25 +88,25 @@ struct FDTDInit
    int etaModelVolume = ( myGrids.nx + 2 ) * ( myGrids.ny + 2 ) * ( myGrids.nz + 2 ) ;
 
    #ifdef USE_RAJA
-   vectorReal h_coefx = allocateVector<vectorReal>(ncoefs);
-   vectorReal h_coefy = allocateVector<vectorReal>(ncoefs);
-   vectorReal h_coefz = allocateVector<vectorReal>(ncoefs);
-   vectorReal h_vp   = allocateVector<vectorReal>( modelVolume );
-   vectorReal h_pnp1 = allocateVector<vectorReal>( extModelVolume );
-   vectorReal h_pn   = allocateVector<vectorReal>( extModelVolume );
-   vectorReal h_pnm1 = allocateVector<vectorReal>( extModelVolume );
-   vectorReal h_phi  = allocateVector<vectorReal>( modelVolume );
-   vectorReal h_eta  = allocateVector<vectorReal>( etaModelVolume );
+   myModels.h_coefx = allocateVector<vectorReal>(ncoefs);
+   myModels.h_coefy = allocateVector<vectorReal>(ncoefs);
+   myModels.h_coefz = allocateVector<vectorReal>(ncoefs);
+   myModels.h_vp   = allocateVector<vectorReal>( modelVolume );
+   myModels.h_pnp1 = allocateVector<vectorReal>( extModelVolume );
+   myModels.h_pn   = allocateVector<vectorReal>( extModelVolume );
+   myModels.h_pnm1 = allocateVector<vectorReal>( extModelVolume );
+   myModels.h_phi  = allocateVector<vectorReal>( modelVolume );
+   myModels.h_eta  = allocateVector<vectorReal>( etaModelVolume );
 
-   myModels.coefx = h_coefx.toView();
-   myModels.coefy = h_coefy.toView();
-   myModels.coefz = h_coefy.toView();
-   myModels.vp   = h_vp.toView();
-   myModels.pnp1 = h_pnp1.toView();
-   myModels.pn   = h_pn.toView();
-   myModels.pnm1 = h_pnm1.toView();
-   myModels.phi  = h_phi.toView();
-   myModels.eta  = h_eta.toView();
+   myModels.coefx = myModels.h_coefx.toView();
+   myModels.coefy = myModels.h_coefy.toView();
+   myModels.coefz = myModels.h_coefz.toView();
+   myModels.vp   = myModels.h_vp.toView();
+   myModels.pnp1 = myModels.h_pnp1.toView();
+   myModels.pn   = myModels.h_pn.toView();
+   myModels.pnm1 = myModels.h_pnm1.toView();
+   myModels.phi  = myModels.h_phi.toView();
+   myModels.eta  = myModels.h_eta.toView();
    #else 
    myModels.coefx = allocateVector<vectorReal>(ncoefs);
    myModels.coefy = allocateVector<vectorReal>(ncoefs);
@@ -141,7 +141,8 @@ struct FDTDInit
   {
    // compute source term
    #ifdef USE_RAJA
-   myModels.RHSTerm = allocateVector<vectorReal>(nSamples).toView();
+   myModels.h_RHSTerm = allocateVector<vectorReal>(nSamples);
+   myModels.RHSTerm = myModels.h_RHSTerm.toView();
    #else
    myModels.RHSTerm = allocateVector<vectorReal>(nSamples);
    #endif
@@ -152,7 +153,6 @@ struct FDTDInit
      myModels.RHSTerm[i]=sourceTerm[i];
    }
   }
-
 
   void init_models(FDTDGRIDS &myGrids, FDTDMODELS &myModels)
   {
@@ -175,8 +175,13 @@ struct FDTDInit
       {
          for( int k=0; k<myGrids.nz;k++)
          {
+           #ifdef USE_RAJA
+           myModels.h_vp[IDX3(i,j,k)]=init_vp_value;
+           myModels.h_phi[IDX3(i,j,k)]=0;
+           #else
            myModels.vp[IDX3(i,j,k)]=init_vp_value;
-           myModels.phi[IDX3(i,j,k)]=0.;
+           myModels.phi[IDX3(i,j,k)]=0;
+           #endif
          }
       }
    }
@@ -188,14 +193,20 @@ struct FDTDInit
       {
          for( int k=-myGrids.lz; k<myGrids.nz+myGrids.lz;k++)
          {
+           #ifdef USE_RAJA
+           myModels.h_pnp1[IDX3_l(i,j,k)]=0.000001;
+           myModels.h_pnm1[IDX3_l(i,j,k)]=0.000001;
+           myModels.h_pn[IDX3_l(i,j,k)]=0.000001;
+           #else
            myModels.pnp1[IDX3_l(i,j,k)]=0.000001;
-           myModels.pn[IDX3_l(i,j,k)]  =0.000001;
            myModels.pnm1[IDX3_l(i,j,k)]=0.000001;
+           myModels.pn[IDX3_l(i,j,k)]=0.000001;
+           #endif
          }
       }
    }
-
   }
+
 };
 
 #endif  //FDTDINIT_HPP

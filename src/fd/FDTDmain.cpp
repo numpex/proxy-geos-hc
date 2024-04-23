@@ -40,16 +40,19 @@ int main( int argc, char *argv[] )
    myFDTDInit.init_models( myGrids, myModels );
 
    // start timer
-   chrono::time_point< chrono::system_clock > startTime = chrono::system_clock::now();
+   time_point< system_clock > startTime = system_clock::now();
 
    // main loop for wave propagation on each time step
    for (int itSample=0; itSample<myFDTDInit.nSamples;itSample++)
    {
       // add RHS term
-      myKernel.addRHS(myGrids, itSample, myModels.RHSTerm, myModels.vp, myModels.pn);                     
+      myKernel.addRHS(myGrids,itSample,myModels.RHSTerm, myModels.vp, myModels.pn);
 
       //compute one step
-      myKernel.computeOneStep( myGrids, myFDTDInit.coef0, myModels );
+      myKernel.computeOneStep( myGrids, myFDTDInit.coef0,  
+                               myModels.coefx,myModels.coefy,myModels.coefz,
+                               myModels.vp,myModels.phi,myModels.eta,
+                               myModels.pnp1,myModels.pn,myModels.pnm1);
 
       // swap wavefields
       myKernel.swapWavefields(myGrids, myModels.pnp1, myModels.pn, myModels.pnm1);
@@ -58,8 +61,9 @@ int main( int argc, char *argv[] )
       myFDTDUtils.output(myGrids, myModels.pn, itSample);
 
    }
+
    // print timing information
-   cout << "Elapsed Time : "<<chrono::duration_cast< chrono::milliseconds >( chrono::system_clock::now()-startTime ).count()/1000.0 <<" seconds.\n"<<endl;
+   cout << "Elapsed Time : "<<duration_cast< milliseconds >( system_clock::now()-startTime ).count()/1000.0 <<" seconds.\n"<<endl;
 
   #ifdef USE_KOKKOS
   }

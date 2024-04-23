@@ -7,7 +7,7 @@
 
 struct FDTDUtils
 {
-  void init_coef(float dx, vectorReal &coef)
+  void init_coef(float dx, vectorRealView &coef)
   {
       float dx2 = dx*dx;
       coef[0] = -205.f/72.f/dx2;
@@ -16,7 +16,7 @@ struct FDTDUtils
       coef[3] = 8.f/315.f/dx2;
       coef[4] = -1.f/560.f/dx2;
   }
-  float compute_dt_sch(const float vmax,const vectorReal &coefx,const vectorReal &coefy,const vectorReal &coefz) 
+  float compute_dt_sch(const float vmax,const vectorRealView &coefx,const vectorRealView &coefy,const vectorRealView &coefz) 
   {
 
       float ftmp = 0.;
@@ -30,28 +30,7 @@ struct FDTDUtils
       return 2*cfl/(sqrtf(ftmp)*vmax);
   }
 
-  void write_io( FDTDGRIDS &myGrids,
-		 int x0, int x1, 
-		 int y0, int y1, 
-		 int z0, int z1, 
-                 vectorReal const &u, int istep)
-  {
-      char filename_buf[32];
-      snprintf(filename_buf, sizeof(filename_buf), "snapshot_it_%d.H@", istep);
-      FILE *snapshot_file = fopen(filename_buf, "wb");
-      printf(" %d %d %d %d %d %d\n",x0,x1,y0,y1,z0,z1);
-      for (int k = z0; k < z1; ++k) {
-          for (int j = y0; j < y1+1; ++j) {
-              for (int i = x0; i < x1; ++i) {
-		  fwrite(&u[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
-              }
-          }
-      }
-      /* Clean up */
-      fclose(snapshot_file);
-  }
-
-  void pml_profile_init(vectorReal  & profile, int i_min, int i_max, int n_first, int n_last, float scale)
+  void pml_profile_init(vectorRealView  & profile, int i_min, int i_max, int n_first, int n_last, float scale)
   {
     int n = i_max-i_min+1;
     int shift = i_min-1;
@@ -76,7 +55,7 @@ struct FDTDUtils
   }
 
   void pml_profile_extend( int nx, int ny, int nz,
-                           vectorReal &  eta, vectorReal & etax, vectorReal & etay, vectorReal & etaz,
+                           vectorRealView &  eta, vectorRealView & etax, vectorRealView & etay, vectorRealView & etaz,
                            int xbeg, int xend, int ybeg, int yend, int zbeg, int zend)
   {
     const int n_ghost = 1;
@@ -90,7 +69,7 @@ struct FDTDUtils
   }
 
   void pml_profile_extend_all(int nx, int ny, int nz,
-                              vectorReal & eta, vectorReal & etax, vectorReal & etay, vectorReal & etaz,
+                              vectorRealView & eta, vectorRealView & etax, vectorRealView & etay, vectorRealView & etaz,
                               int xmin, int xmax, int ymin, int ymax,
                               int x1, int x2, int x5, int x6,
                               int y1, int y2, int y3, int y4, int y5, int y6,
@@ -122,7 +101,7 @@ struct FDTDUtils
                 int y1, int y2, int y3, int y4, int y5, int y6,
                 int z1, int z2, int z3, int z4, int z5, int z6,
                 float dx, float dy, float dz, float dt_sch,
-                float vmax, vectorReal & eta)
+                float vmax, vectorRealView & eta)
   {
     for (int i = -1; i < nx+1; ++i) {
         for (int j = -1; j < ny+1; ++j) {
@@ -132,19 +111,19 @@ struct FDTDUtils
         }
     }
 
-    /* etax */
+    // etax 
     float param = dt_sch * 3.f * vmax * logf(1000.f)/(2.f*ndampx*dx);
     printf("param=%f\n",param);
     vectorReal etax=allocateVector<vectorReal>(nx+2);
     pml_profile_init(etax, 0, nx+1, ndampx, ndampx, param);
 
-    /* etay */
+    // etay 
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampy*dy);
     printf("param=%f\n",param);
     vectorReal etay=allocateVector<vectorReal>(ny+2);
     pml_profile_init(etay, 0, ny+1, ndampy, ndampy, param);
 
-    /* etaz */
+    // etaz 
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampz*dz);
     printf("param=%f\n",param);
     vectorReal etaz=allocateVector<vectorReal>(nz+2);
@@ -159,15 +138,14 @@ struct FDTDUtils
 
   }
       
-  //void output(FDTDGRIDS &myGrids, vectorRealView const & pn, int itSample)
-  void output(FDTDGRIDS &myGrids, vectorRealView &pn, int itSample)
+  void output(FDTDGRIDS &myGrids, vectorRealView const & pn, int itSample)
   {
 
       if(itSample%50==0)
       {   
 
         #ifdef USE_RAJA
-        RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,nx), [pn] ( int i){});
+        RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,myGrids.nx), [pn] ( int i){});
         #elif defined USE_KOKKOS
         Kokkos::fence();
         #endif
@@ -180,7 +158,26 @@ struct FDTDUtils
 
   }
 
-
+  void write_io( FDTDGRIDS &myGrids,
+		 int x0, int x1, 
+		 int y0, int y1, 
+		 int z0, int z1, 
+                 vectorRealView const &u, int istep)
+  {
+      char filename_buf[32];
+      snprintf(filename_buf, sizeof(filename_buf), "snapshot_it_%d.H@", istep);
+      FILE *snapshot_file = fopen(filename_buf, "wb");
+      printf(" %d %d %d %d %d %d\n",x0,x1,y0,y1,z0,z1);
+      for (int k = z0; k < z1; ++k) {
+          for (int j = y0; j < y1+1; ++j) {
+              for (int i = x0; i < x1; ++i) {
+		  fwrite(&u[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
+              }
+          }
+      }
+      // Clean up 
+      fclose(snapshot_file);
+  }
 
 };
 
