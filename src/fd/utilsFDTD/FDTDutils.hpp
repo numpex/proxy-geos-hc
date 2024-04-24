@@ -16,7 +16,7 @@ struct FDTDUtils
       coef[3] = 8.f/315.f/dx2;
       coef[4] = -1.f/560.f/dx2;
   }
-  float compute_dt_sch(const float vmax,const vectorRealView &coefx,const vectorRealView &coefy,const vectorRealView &coefz) 
+  float compute_dt_sch(const float vmax, vectorRealView const &coefx, vectorRealView const &coefy, vectorRealView const &coefz) 
   {
 
       float ftmp = 0.;
@@ -30,7 +30,7 @@ struct FDTDUtils
       return 2*cfl/(sqrtf(ftmp)*vmax);
   }
 
-  void pml_profile_init(vectorRealView  & profile, int i_min, int i_max, int n_first, int n_last, float scale)
+  void pml_profile_init(vector<float> &profile, int i_min, int i_max, int n_first, int n_last, float scale)
   {
     int n = i_max-i_min+1;
     int shift = i_min-1;
@@ -40,25 +40,29 @@ struct FDTDUtils
     int last_beg  = n - n_last+1 + shift;
     int last_end  = n + shift;
 
+    #pragma omp parallel for
     for (int i = i_min; i <= i_max; ++i) {
         profile[i] = 0.f;
     }
 
     float tmp = scale / POW2(first_end-first_beg+1);
+    #pragma omp parallel for
     for (int i = 1; i <= first_end-first_beg+1; ++i) {
         profile[first_end-i+1] = POW2(i)*tmp;
     }
 
+    #pragma omp parallel for
     for (int i = 1; i <= last_end-last_beg+1; ++i) {
         profile[last_beg+i-1] = POW2(i)*tmp;
     }
   }
 
   void pml_profile_extend( int nx, int ny, int nz,
-                           vectorRealView &  eta, vectorRealView & etax, vectorRealView & etay, vectorRealView & etaz,
+                           vectorRealView &eta, const vector<float> &etax, const vector<float> &etay, const vector<float>& etaz,
                            int xbeg, int xend, int ybeg, int yend, int zbeg, int zend)
   {
     const int n_ghost = 1;
+    #pragma omp parallel for collapse(3) 
     for (int ix = xbeg-n_ghost; ix <= xend+n_ghost; ++ix) {
         for (int iy = ybeg-n_ghost; iy <= yend+n_ghost; ++iy) {
             for (int iz = zbeg-n_ghost; iz <= zend+n_ghost; ++iz) {
@@ -69,7 +73,7 @@ struct FDTDUtils
   }
 
   void pml_profile_extend_all(int nx, int ny, int nz,
-                              vectorRealView & eta, vectorRealView & etax, vectorRealView & etay, vectorRealView & etaz,
+                              vectorRealView &eta, const vector<float> &etax, const vector<float> &etay, const vector<float>& etaz,
                               int xmin, int xmax, int ymin, int ymax,
                               int x1, int x2, int x5, int x6,
                               int y1, int y2, int y3, int y4, int y5, int y6,
@@ -103,6 +107,7 @@ struct FDTDUtils
                 float dx, float dy, float dz, float dt_sch,
                 float vmax, vectorRealView & eta)
   {
+    #pragma omp parallel for collapse(3)    
     for (int i = -1; i < nx+1; ++i) {
         for (int j = -1; j < ny+1; ++j) {
             for (int k = -1; k < nz+1; ++k) {
@@ -111,16 +116,9 @@ struct FDTDUtils
         }
     }
 
-
-    #ifdef USE_RAJA
-    vectorReal etax=allocateVector<vectorReal>(nx+2);
-    vectorReal etay=allocateVector<vectorReal>(ny+2);
-    vectorReal etaz=allocateVector<vectorReal>(nz+2);
-    #else
-    vectorRealView etax=allocateVector<vectorRealView>(nx+2);
-    vectorRealView etay=allocateVector<vectorRealView>(ny+2);
-    vectorRealView etaz=allocateVector<vectorRealView>(nz+2);
-    #endif
+    vector<float>  etax(nx+2);
+    vector<float>  etay(ny+2);
+    vector<float>  etaz(nz+2);
 
     // etax 
     float param = dt_sch * 3.f * vmax * logf(1000.f)/(2.f*ndampx*dx);
@@ -143,7 +141,6 @@ struct FDTDUtils
                 x1+1, x2, x5+1, x6,
                 y1+1, y2, y3+1, y4, y5+1, y6,
                 z1+1, z2, z3+1, z4, z5+1, z6);
-
   }
       
   void output(FDTDGRIDS &myGrids, vectorRealView const & pn, int itSample)
@@ -176,6 +173,8 @@ struct FDTDUtils
       snprintf(filename_buf, sizeof(filename_buf), "snapshot_it_%d.H@", istep);
       FILE *snapshot_file = fopen(filename_buf, "wb");
       printf(" %d %d %d %d %d %d\n",x0,x1,y0,y1,z0,z1);
+     
+      #pragma omp parallel for collapse(3) 
       for (int k = z0; k < z1; ++k) {
           for (int j = y0; j < y1+1; ++j) {
               for (int i = x0; i < x1; ++i) {
