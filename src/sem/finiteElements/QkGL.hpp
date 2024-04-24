@@ -55,34 +55,20 @@ namespace FE
   // compute B and M
   PROXY_HOST_DEVICE int computeB( const int & elementNumber,
                                 const int & order,
-  #if defined(USE_RAJA) || defined(USE_KOKKOS)
-                                arrayIntView     const & nodesList,
-                                arrayRealView    const & nodesCoords,
+                                arrayIntView const     & nodesList,
+                                arrayRealView const    & nodesCoords,
                                 vectorDoubleView const & weights2D,
-                                arrayDoubleView  const & dPhi,
-  #else
-                                arrayIntView     & nodesList,
-                                arrayRealView    & nodesCoords,
-                                vectorDoubleView & weights2D,
-                                arrayDoubleView  & dPhi,
-  #endif
+                                arrayDoubleView const  & dPhi,
                                 float massMatrixLocal[],
                                 float   B[][4]) const;
 
   //3D
   PROXY_HOST_DEVICE int computeB( const int & elementNumber,
                                 const int & order,
-  #if defined(USE_RAJA) || defined(USE_KOKKOS)
-                                arrayIntView     const & nodesList,
-                                arrayRealView    const & nodesCoords,
+                                arrayIntView const     & nodesList,
+                                arrayRealView const    & nodesCoords,
                                 vectorDoubleView const & weights3D,
-                                arrayDoubleView  const & dPhi,
-  #else
-                                arrayIntView     & nodesList,
-                                arrayRealView    & nodesCoords,
-                                vectorDoubleView & weights3D,
-                                arrayDoubleView  & dPhi,
-  #endif
+                                arrayDoubleView const  & dPhi,
                                 float massMatrixLocal[],
                                 float   B[][6]) const;
 
@@ -91,13 +77,8 @@ namespace FE
   // Marc Durufle Formulae
   PROXY_HOST_DEVICE int  gradPhiGradPhi( const int & nPointsPerElement,
                                        const int & order,
-  #if defined(USE_RAJA) || defined(USE_KOKKOS)
                                        vectorDoubleView const & weights2D,
                                        arrayDoubleView const & dPhi,
-  #else
-                                       vectorDoubleView & weights2D,
-                                       arrayDoubleView & dPhi,
-  #endif
                                        float const B[][4],
                                        float const pnLocal[],
                                        float R[],
@@ -108,13 +89,8 @@ namespace FE
   // Marc Durufle Formulae
   PROXY_HOST_DEVICE int gradPhiGradPhi( const int & nPointsPerElement,
                                       const int & order,
-  #if defined(USE_RAJA) || defined(USE_KOKKOS)
                                       vectorDoubleView const & weights3D,
                                       arrayDoubleView const & dPhi,
-  #else
-                                      vectorDoubleView & weights3D,
-                                      arrayDoubleView & dPhi,
-  #endif
                                       float const B[][6],
                                       float const pnLocal[],
                                       float R[],
