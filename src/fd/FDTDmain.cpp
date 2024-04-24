@@ -5,7 +5,7 @@
 //************************************************************************
 
 #include"FDTDinit.hpp"
-#include"FDTDkernel.hpp"
+#include"FDTDkernels.hpp"
 
 int main( int argc, char *argv[] )
 {
