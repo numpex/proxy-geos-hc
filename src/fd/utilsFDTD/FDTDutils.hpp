@@ -151,12 +151,9 @@ struct FDTDUtils
 
         #ifdef USE_RAJA
         RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,myGrids.nx), [pn] ( int i){});
-        #elif defined USE_KOKKOS
-        Kokkos::fence();
         #endif
 
         printf("result0 %f\n",pn[IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs)]);
-
         write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pn, itSample);
 
       } 

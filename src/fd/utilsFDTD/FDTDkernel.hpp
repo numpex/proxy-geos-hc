@@ -3,7 +3,6 @@
 
 struct FDTDKernel
 {
-
   //innerpoints
   int inner3D( FDTDGRIDS &myGrids,
          const int x3, const int x4,
@@ -13,9 +12,6 @@ struct FDTDKernel
          vectorRealView const &coefx, vectorRealView const &coefy, vectorRealView const &coefz, vectorRealView const &vp,
          vectorRealView const &pnp1, vectorRealView const &pn, vectorRealView const &pnm1) const
   {
-#ifdef USE_OMP
-      #pragma omp parallel for collapse(3)
-#endif
       LOOP3DHEAD (x3,y3,z3,x4,y4,z4)
       float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                  +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
@@ -43,9 +39,6 @@ struct FDTDKernel
              vectorRealView const &vp, vectorRealView const &phi, vectorRealView const &eta,
              vectorRealView const &pnp1, vectorRealView const &pn, vectorRealView const &pnm1) const
   {
-#ifdef USE_OMP
-      #pragma omp parallel for collapse(3)
-#endif
        LOOP3DHEAD (x3,y3,z3,x4,y4,z4)
        float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                  +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
@@ -80,9 +73,6 @@ struct FDTDKernel
 		     vectorRealView const & pn  ,
 		     vectorRealView const & pnm1) const
   {
-#ifdef USE_OMP
-     #pragma omp parallel for collapse(3)
-#endif
       LOOP3DHEAD(0,0,0,myGrids.nx,myGrids.ny,myGrids.nz)
         pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
         pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
@@ -97,7 +87,6 @@ struct FDTDKernel
                       vectorRealView const &pnp1, vectorRealView const &pn, vectorRealView const &pnm1) const
   {
     //up
-
     pml3D(myGrids, 0, myGrids.nx, 0, myGrids.ny, myGrids.z1, myGrids.z2, coef0, coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
     //front
     pml3D(myGrids, 0, myGrids.nx, myGrids.y1, myGrids.y2, myGrids.z3, myGrids.z4, coef0, coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
@@ -122,12 +111,9 @@ struct FDTDKernel
              vectorRealView const & vp, 
              vectorRealView const & pn) const
   {
-#ifdef USE_OMP
-     #pragma omp parallel for collapse(3)
-#endif
-      LOOP3DHEAD(myGrids.xs,myGrids.ys,myGrids.zs,myGrids.xs+1,myGrids.ys+1,myGrids.zs+1)
-        pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
-      LOOP3DEND
+    LOOP3DHEAD(myGrids.xs,myGrids.ys,myGrids.zs,myGrids.xs+1,myGrids.ys+1,myGrids.zs+1)
+       pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
+    LOOP3DEND
     return(0);
   }
 

@@ -45,8 +45,8 @@ int main( int argc, char *argv[] )
        //compute one step
        myKernel.computeOneStep( myGrids, myInit.coef0,  
                                 myInit.coefx, myInit.coefy, myInit.coefz,
-                                myModels.vp,myModels.phi,myModels.eta,
-                                myModels.pnp1,myModels.pn,myModels.pnm1);
+                                myModels.vp, myModels.phi, myModels.eta, 
+                                myModels.pnp1, myModels.pn, myModels.pnm1);
 
 
        // swap wavefields
