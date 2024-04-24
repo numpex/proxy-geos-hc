@@ -24,14 +24,11 @@ int main( int argc, char *argv[] )
     // initialize geometry 
     myInit.init_geometry( argc, argv, myGrids );
 
-    // allocate all the vectors
-    myInit.init_vectors( myGrids, myModels );
-
     // initialize coefficients
-    myInit.init_coefficients( myGrids, myModels );
+    myInit.init_coefficients( myGrids );
 
     // initialize source 
-    myInit.init_source( myModels );
+    myInit.init_source();
 
     // initialize velocity and pressure models, etc
     myInit.init_models( myGrids, myModels );
@@ -43,11 +40,11 @@ int main( int argc, char *argv[] )
     for (int itSample=0; itSample<myInit.nSamples;itSample++)
     {
        // add RHS term
-       myKernel.addRHS(myGrids,itSample,myModels.RHSTerm, myModels.vp, myModels.pn);
+       myKernel.addRHS(myGrids,itSample,myInit.RHSTerm, myModels.vp, myModels.pn);
 
        //compute one step
        myKernel.computeOneStep( myGrids, myInit.coef0,  
-                                myModels.coefx, myModels.coefy, myModels.coefz,
+                                myInit.coefx, myInit.coefy, myInit.coefz,
                                 myModels.vp,myModels.phi,myModels.eta,
                                 myModels.pnp1,myModels.pn,myModels.pnm1);
 

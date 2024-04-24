@@ -20,11 +20,6 @@ struct FDTDGRIDS {
 
 struct FDTDMODELS {
 
-  vectorRealView coefx;
-  vectorRealView coefy;
-  vectorRealView coefz;
-  vectorRealView RHSTerm;
-
   vectorRealView vp; 
   vectorRealView phi;
   vectorRealView eta;
@@ -33,11 +28,6 @@ struct FDTDMODELS {
   vectorRealView pnm1;
 
 #ifdef USE_RAJA
-
-  vectorReal h_coefx;
-  vectorReal h_coefy;
-  vectorReal h_coefz;
-  vectorReal h_RHSTerm;
 
   vectorReal h_vp; 
   vectorReal h_phi;
