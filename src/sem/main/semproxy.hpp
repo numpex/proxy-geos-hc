@@ -42,6 +42,7 @@ public:
   void run();
 
 protected:
+
   int i1=0;
   int i2=1;
   int myElementSource;
@@ -58,19 +59,18 @@ protected:
   const int myNumSamples=myTimeMax/myTimeStep;
   const int myOrderNumber=1;
   
-   // arrays
+  // initialize mesh
+  simpleMesh  myMesh {200, 200,200, 2000, 2000, 2000, myOrderNumber};
+
   arrayReal myRHSLocation;
   arrayReal myRHSTerm;
   arrayInt nodeList;
   arrayReal pnGlobal;
-
-  // initialize mesh
-  simpleMesh  myMesh {200, 200,200, 2000, 2000, 2000, myOrderNumber};
+  vectorInt rhsElement;
 
   QkGL myQk;
   SolverUtils myUtils;
 
-  vectorInt rhsElement;
   SOLVER mySolver;
 
 };
