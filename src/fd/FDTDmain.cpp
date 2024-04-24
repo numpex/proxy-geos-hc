@@ -1,6 +1,5 @@
-
 //************************************************************************
-// SEM proxy application v.0.0.1
+// FD proxy application v.0.0.1
 //
 // main.cpp: this main file is simply a driver
 //************************************************************************
@@ -10,60 +9,58 @@
 
 int main( int argc, char *argv[] )
 {
-
   #ifdef USE_KOKKOS
   Kokkos::initialize(argc, argv);
   { 
   #endif
+    struct FDTDGRIDS myGrids;
+    struct FDTDMODELS myModels;
 
-   struct FDTDGRIDS myGrids;
-   struct FDTDMODELS myModels;
+    // imports utility and kernel modules
+    FDTDInit myInit; 
+    FDTDKernel myKernel;
+    FDTDUtils myFDTDUtils;
 
-   // imports utility and kernel modules
-   FDTDInit myFDTDInit; 
-   FDTDKernel myKernel;
-   FDTDUtils myFDTDUtils;
+    // initialize geometry 
+    myInit.init_geometry( argc, argv, myGrids );
 
-   // initialize geometry 
-   myFDTDInit.init_geometry( argc, argv, myGrids );
+    // allocate all the vectors
+    myInit.init_vectors( myGrids, myModels );
 
-   // allocate all the vectors
-   myFDTDInit.init_vectors( myGrids, myModels );
+    // initialize coefficients
+    myInit.init_coefficients( myGrids, myModels );
 
-   // initialize coefficients
-   myFDTDInit.init_coefficients( myGrids, myModels );
+    // initialize source 
+    myInit.init_source( myModels );
 
-   // initialize source 
-   myFDTDInit.init_source( myModels );
+    // initialize velocity and pressure models, etc
+    myInit.init_models( myGrids, myModels );
 
-   // initialize velocity and pressure models, etc
-   myFDTDInit.init_models( myGrids, myModels );
+    // start timer
+    time_point< system_clock > startTime = system_clock::now();
 
-   // start timer
-   time_point< system_clock > startTime = system_clock::now();
+    // main loop for wave propagation on each time step
+    for (int itSample=0; itSample<myInit.nSamples;itSample++)
+    {
+       // add RHS term
+       myKernel.addRHS(myGrids,itSample,myModels.RHSTerm, myModels.vp, myModels.pn);
 
-   // main loop for wave propagation on each time step
-   for (int itSample=0; itSample<myFDTDInit.nSamples;itSample++)
-   {
-      // add RHS term
-      myKernel.addRHS(myGrids,itSample,myModels.RHSTerm, myModels.vp, myModels.pn);
+       //compute one step
+       myKernel.computeOneStep( myGrids, myInit.coef0,  
+                                myModels.coefx, myModels.coefy, myModels.coefz,
+                                myModels.vp,myModels.phi,myModels.eta,
+                                myModels.pnp1,myModels.pn,myModels.pnm1);
 
-      //compute one step
-      myKernel.computeOneStep( myGrids, myFDTDInit.coef0,  
-                               myModels.coefx,myModels.coefy,myModels.coefz,
-                               myModels.vp,myModels.phi,myModels.eta,
-                               myModels.pnp1,myModels.pn,myModels.pnm1);
 
-      // swap wavefields
-      myKernel.swapWavefields(myGrids, myModels.pnp1, myModels.pn, myModels.pnm1);
+       // swap wavefields
+       myKernel.swapWavefields(myGrids, myModels.pnp1, myModels.pn, myModels.pnm1);
 
-      // print infos and save wavefields
-      myFDTDUtils.output(myGrids, myModels.pn, itSample);
-
+       // print infos and save wavefields
+       myFDTDUtils.output(myGrids, myModels.pn, itSample);
    }
 
-   // print timing information
-   cout << "Elapsed Time : "<<duration_cast< milliseconds >( system_clock::now()-startTime ).count()/1000.0 <<" seconds.\n"<<endl;
+    // print timing information
+    cout << "Elapsed Time : "<<( system_clock::now()-startTime ).count()/1E9 <<" seconds.\n"<<endl;
 
   #ifdef USE_KOKKOS
   }
