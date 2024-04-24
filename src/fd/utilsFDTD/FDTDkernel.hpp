@@ -16,7 +16,7 @@ struct FDTDKernel
 #ifdef USE_OMP
       #pragma omp parallel for collapse(3)
 #endif
-      LOOP3DHEAD
+      LOOP3DHEAD (x3,y3,z3,x4,y4,z4)
       float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                  +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
                  +coefx[3]*(pn[IDX3_l(i+3,j,k)]+pn[IDX3_l(i-3,j,k)])
@@ -46,7 +46,7 @@ struct FDTDKernel
 #ifdef USE_OMP
       #pragma omp parallel for collapse(3)
 #endif
-       LOOP3DHEAD
+       LOOP3DHEAD (x3,y3,z3,x4,y4,z4)
        float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
                  +coefx[2]*(pn[IDX3_l(i+2,j,k)]+pn[IDX3_l(i-2,j,k)])
                  +coefx[3]*(pn[IDX3_l(i+3,j,k)]+pn[IDX3_l(i-3,j,k)])
@@ -80,45 +80,13 @@ struct FDTDKernel
 		     vectorRealView const & pn  ,
 		     vectorRealView const & pnm1) const
   {
-    int nx=myGrids.nx;
-    int ny=myGrids.ny;
-    int nz=myGrids.nz;
-
-#ifdef USE_RAJA
-     RAJANestedLoop(0,0,0,nx,ny,nz)
-     {
-        pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
-        pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
-     });
-#elif defined USE_KOKKOS
-    int lx=myGrids.lx;
-    int ly=myGrids.ly;
-    int lz=myGrids.lz;
-
-     Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({0,0,0},{nz+2*lz,nx+2*lx,ny+2*ly}),KOKKOS_LAMBDA(int K,int I,int J)
-     {
-        int i=I-lx;
-        int j=J-ly;
-        int k=K-lz;
-        pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
-        pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
-     });
-#else
 #ifdef USE_OMP
-      #pragma omp parallel for collapse(3)
+     #pragma omp parallel for collapse(3)
 #endif
-      for( int i=0; i<nx;i++)
-      {
-         for( int j=0; j<ny;j++)
-         {
-            for( int k=0; k<nz;k++)
-            {
-	       pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
-               pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
-            }
-         }
-      }
-#endif
+      LOOP3DHEAD(0,0,0,myGrids.nx,myGrids.ny,myGrids.nz)
+        pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
+        pn[IDX3_l(i,j,k)]=pnp1[IDX3_l(i,j,k)];
+      LOOP3DEND
       return(0);
   }
 
@@ -154,24 +122,12 @@ struct FDTDKernel
              vectorRealView const & vp, 
              vectorRealView const & pn) const
   {
-
-     int xs=myGrids.xs;
-     int ys=myGrids.ys;
-     int zs=myGrids.zs;
-
-#ifdef USE_RAJA
-     RAJANestedLoop(xs,ys,zs,xs+1,ys+1,zs+1)
-     {
-       pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
-     });
-#elif defined USE_KOKKOS
-    Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({xs,xs,zs},{xs+1,ys+1,zs+1}),KOKKOS_LAMBDA(int i,int j,int k)
-    {
-      pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
-    });
-#else
-    pn[IDX3_l(xs,ys,zs)]+=vp[IDX3(xs,ys,zs)]*RHSTerm[itSample];
+#ifdef USE_OMP
+     #pragma omp parallel for collapse(3)
 #endif
+      LOOP3DHEAD(myGrids.xs,myGrids.ys,myGrids.zs,myGrids.xs+1,myGrids.ys+1,myGrids.zs+1)
+        pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
+      LOOP3DEND
     return(0);
   }
 
