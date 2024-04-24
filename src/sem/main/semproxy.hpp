@@ -41,6 +41,8 @@ public:
    */
   void run();
 
+  void saveSnapShot( const int indexTimeStep, const int i1, arrayRealView pnGlobal, simpleMesh mesh );
+
 protected:
 
   int i1=0;

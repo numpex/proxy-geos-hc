@@ -2,9 +2,9 @@
 #define UTILS_HPP_
 
 #include "dataType.hpp"
-#include "../sem/mesh/simpleMesh.hpp"
+//#include "../sem/mesh/simpleMesh.hpp"
 
-using namespace grid;
+//using namespace grid;
 using namespace std::chrono;
 
 struct SolverUtils
@@ -58,7 +58,7 @@ struct SolverUtils
     return sourceTerm;
   }
 
-
+/*
   void saveSnapShot( const int indexTimeStep, const int i1, arrayRealView pnGlobal, simpleMesh mesh )
   {
 
@@ -91,6 +91,6 @@ struct SolverUtils
     snapFile.close();
   }
 
-
+*/
 };
 #endif //UTILS_HPP_

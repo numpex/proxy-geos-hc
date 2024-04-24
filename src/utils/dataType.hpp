@@ -6,10 +6,11 @@
 #include <cmath>
 #include <chrono>
 #include <iostream> 
+#include <vector> 
+
+using namespace std;
 
 #ifdef USE_VECTOR
-
-#include <vector> 
 
   template<class T> class Vector 
   {
