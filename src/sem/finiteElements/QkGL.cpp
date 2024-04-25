@@ -1,11 +1,10 @@
 // C++ Code generated from Python Code:
 #include "QkGL.hpp"
 
-
 namespace FE
 {
 
-void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoints ) const
+void QkGL::gaussLobattoQuadraturePoints( int order, vectorDoubleView const & quadraturePoints ) const
 {
   if( order == 1 )
   {
@@ -43,8 +42,7 @@ void QkGL::gaussLobattoQuadraturePoints( int order, vectorDouble & quadraturePoi
     quadraturePoints[5]=1.0;
   }
 }
-
-void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) const
+void QkGL::gaussLobattoQuadratureWeights( int order, vectorDoubleView const & weights ) const
 {
   if( order == 1 )
   {
@@ -82,8 +80,7 @@ void QkGL::gaussLobattoQuadratureWeights( int order, vectorDouble & weights ) co
     weights[5]=0.06666667;
   }
 }
-
-std::vector<double> QkGL::shapeFunction1D( int order, double xi ) const
+vector<double> QkGL::shapeFunction1D( int order, double xi ) const
 {
   std::vector<double> shapeFunction( order+1 );
   if( order==1 )
@@ -158,8 +155,7 @@ std::vector<double> QkGL::shapeFunction1D( int order, double xi ) const
   }
   return shapeFunction;
 }
-
-std::vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) const
+vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) const
 {
   std::vector<double> derivativeShapeFunction( order+1 );
 
@@ -291,9 +287,7 @@ std::vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) cons
   return derivativeShapeFunction;
 }
 
-// get 1D basis functions @ quadrature points
-// returns 2D vector basisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-void QkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble & basisFunction1D ) const
+void QkGL::getBasisFunction1D( int order, vectorDoubleView const & quadraturePoints, arrayDoubleView const & basisFunction1D ) const
 {
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -308,10 +302,8 @@ void QkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints,
   }
 }
 
-// get derivative of 1D basis functions @ quadrature points
-// returns 2D vector derivativeBasisDunction1D of dimensions nBasisFunction1D,nQuadraturePoints
-void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
-                                          arrayDouble & derivativeBasisFunction1D ) const
+void QkGL::getDerivativeBasisFunction1D( int order, vectorDoubleView const & quadraturePoints, 
+                                          arrayDoubleView const & derivativeBasisFunction1D ) const
 {
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -325,53 +317,51 @@ void QkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadrat
     }
   }
 }
-
 // compute 2D gauss-lobatto weights
-void QkGL::getGaussLobattoWeights2D( vectorDouble const & quadraturePoints,
-                                           vectorDouble const & weights,
-                                           vectorDouble & W )const
+void QkGL::getGaussLobattoWeights2D( const int & order,
+                                     vectorDoubleView const & weights,
+                                     vectorDoubleView const & W )const
 {
-  for( int j=0; j<quadraturePoints.size(); j++ )
+  for( int j=0; j<order+1; j++ )
   {
-    for( int i=0; i<quadraturePoints.size(); i++ )
+    for( int i=0; i<order+1; i++ )
     {
-      W[i+j*quadraturePoints.size()]= weights[i]*weights[j];
+      W[i+j*(order+1)]= weights[i]*weights[j];
     }
   }
 }
 
 // compute 3D gauss-lobatto weights
-void QkGL::getGaussLobattoWeights3D( vectorDouble const & quadraturePoints,
-                                           vectorDouble const & weights,
-                                           vectorDouble & W )const
+void QkGL::getGaussLobattoWeights3D( const int & order,
+                                     vectorDoubleView const & weights,
+                                     vectorDoubleView const & W )const
 {
-  for( int k=0; k<quadraturePoints.size(); k++ )
+  for( int k=0; k<order+1; k++ )
   {
-     for( int j=0; j<quadraturePoints.size(); j++ )
+     for( int j=0; j<order+1; j++ )
      {
-       for( int i=0; i<quadraturePoints.size(); i++ )
+       for( int i=0; i<order+1; i++ )
        {
-         W[i+j*quadraturePoints.size()+k*quadraturePoints.size()*quadraturePoints.size()]= weights[i]*weights[j]*weights[k];
+         W[i+j*(order+1)+k*(order+1)*(order+1)]= weights[i]*weights[j]*weights[k];
        }
      }
   }
 }
 
-// returns 2D vector basisFunction2D of dimensions nBasisFunctions,nQuadraturePoints
-void QkGL::getBasisFunction2D( vectorDouble const & quadraturePoints,
-                               arrayDouble & a,
-                               arrayDouble & b,
-                               arrayDouble & c )const                                      
+void QkGL::getBasisFunction2D( const int & order, 
+                               arrayDoubleView const & a,
+                               arrayDoubleView const & b,
+                               arrayDoubleView const & c )const                                      
 {
-  for( int j = 0; j < quadraturePoints.size(); j++ )
+  for( int j = 0; j <order+1 ; j++ )
   {
-    for( int i = 0; i<quadraturePoints.size(); i++ )
+    for( int i = 0; i<order+1; i++ )
     {
-      for( int k = 0; k< quadraturePoints.size(); k++ )
+      for( int k = 0; k<order+1 ; k++ )
       {
-        for( int l=0; l<quadraturePoints.size(); l++ )
+        for( int l=0; l<order+1; l++ )
         {
-          c(i+quadraturePoints.size()*j,l+quadraturePoints.size()*k)=a(i,l)*b(j,k);
+          c(i+(order+1)*j,l+(order+1)*k)=a(i,l)*b(j,k);
         }
       }
     }
@@ -382,8 +372,8 @@ void QkGL::getBasisFunction2D( vectorDouble const & quadraturePoints,
 // compute B and M  
 PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
 		                       const int & order,
-                                       arrayIntView     const & nodesList,
-                                       arrayRealView    const & nodesCoords,
+			               arrayIntView     const & nodesList,
+			               arrayRealView    const & nodesCoords,
                                        vectorDoubleView const & weights2D,
                                        arrayDoubleView  const & dPhi,
 				       float massMatrixLocal[],
@@ -559,9 +549,9 @@ PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 	                                      float Y[]) const
 {
   // B11
-  for( int i1=0; i1<order+1; i1++ )
+  for( int i2=0; i2<order+1; i2++ )
   {
-    for( int i2=0; i2<order+1; i2++ )
+    for( int i1=0; i1<order+1; i1++ )
     {
       for (int j=0; j<nPointsPerElement;j++)
       {
@@ -626,11 +616,11 @@ PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 	                                      float Y[]) const
 {
   int orderPow2=(order+1)*(order+1);
-  for (int i1=0;i1<order+1;i1++)
+  for (int i3=0;i3<order+1;i3++)
   {
       for (int i2=0;i2<order+1;i2++)
       {
-          for (int i3=0;i3<order+1;i3++)
+          for (int i1=0;i1<order+1;i1++)
           {
 
               for( int j=0; j<nPointsPerElement; j++ )
@@ -669,9 +659,9 @@ PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
                   }
               }
               // B12,B21 (B[][3])
-              for( int j1=0; j1<order+1; j1++ )
+              for( int j2=0; j2<order+1; j2++ )
               {
-                for( int j2=0; j2<order+1; j2++ )
+                for( int j1=0; j1<order+1; j1++ )
                 {
                   int j=j1+j2*(order+1)+i3*orderPow2;
                   int k=j1+i2*(order+1)+i3*orderPow2;
@@ -721,12 +711,12 @@ PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 //computeDs
 PROXY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
                                           const int & order,
-                                          arrayIntView & faceInfos,
+                                          arrayIntView const & faceInfos,
                                           int  numOfBasisFunctionOnFace[],
                                           float  Js[][6],
-                                          arrayRealView   & globalNodesCoords,
-                                          arrayDoubleView & derivativeBasisFunction2DX,
-                                          arrayDoubleView & derivativeBasisFunction2DY,
+                                          arrayRealView   const & globalNodesCoords,
+                                          arrayDoubleView const & derivativeBasisFunction2DX,
+                                          arrayDoubleView const & derivativeBasisFunction2DY,
                                           float  ds[]  ) const
 {
   int face=faceInfos(iFace,1);
@@ -786,4 +776,41 @@ PROXY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
   }
   return 0;
 }
+//computeDs
+PROXY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
+                                          const int & order,
+                                          arrayIntView const & faceInfos,
+                                          int  numOfBasisFunctionOnFace[],
+                                          float  Js[][6],
+                                          arrayRealView   const & globalNodesCoords,
+                                          arrayDoubleView const & dPhi,
+                                          float  ds[]  ) const
+{
+  // compute ds
+  int face=faceInfos(iFace,1);
+  for( int j=0; j<order+1; j++ )
+  {
+    Js[0][j]=0;    // x
+    Js[1][j]=0;    // y
+    for( int i=0; i<order+1; i++ )
+    {
+      float xi=globalNodesCoords(faceInfos(iFace,2+i),0);
+      float yi=globalNodesCoords(faceInfos(iFace,2+i),1);
+      if( face==0 || face==2 )
+      {
+        Js[0][j]+=dPhi(i,j)*xi;
+        Js[1][j]+=dPhi(i,j)*yi;
+      }
+      if( face==1 || face==3 )
+      {
+        Js[0][j]+=dPhi(i,j)*xi;
+        Js[1][j]+=dPhi(i,j)*yi;
+      }
+    }
+    ds[j]=sqrt( Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j] );
+    //cout<<"j="<<j<<", ds="<<ds[j]<<", "<<Js[0][j]<<", "<<Js[1][j]<<endl;
+  }
+  return 0;
+}
+
 } // namespace FE

@@ -28,9 +28,9 @@ public:
                        int & i1,
                        int & i2,
                       const int & numberOfRHS,
-                      vectorInt & rhsElement,
-                      arrayReal & rhsTerm,
-                      arrayReal & pnGlobal);
+                      vectorIntView & rhsElement,
+                      arrayRealView & rhsTerm,
+                      arrayRealView & pnGlobal);
 };
 
 

@@ -1,14 +1,9 @@
 #ifndef SIMPLE_MESH_
 #define SIMPLE_MESH_
 
-#include    "dataType.hpp"
-#include    "commonMacro.hpp"
+#include "dataType.hpp"
+using namespace std;
 
-using    namespace std;
-
-/*
- *  simple 2D quadrangle element mesh
- */
 namespace grid
 {
 
@@ -63,34 +58,31 @@ public:
   //get Dz
   int getDz() const;
 
+  //get coord in one direction
+  vector<float> getCoordInOneDirection(const int & order,const int & nCoord, const int & h, const int & nElement) const;
+
   // Initialize nodal coordinates.
-  void nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const;
+  void nodesCoordinates( const int & numberOfNodes, arrayRealView & nodeCoords ) const;
 
   //  list of global nodes ( vertices)
-  void globalNodesList(const int & numberOfElements, arrayInt & nodesList ) const;
-
-  // local to global
-  PROXY_HOST_DEVICE int localToGlobalNodes( const int & elementNumber, 
-                                              const int & nPointsPerElement, 
-                                              arrayIntView & nodesList, 
-                                              int localToGlobal[]) const;
+  void globalNodesList(const int & numberOfElements, arrayIntView & nodesList ) const;
 
   // compute element e where (x,y,z) belongs to
   int getElementNumberFromPoints( const float & x, const float & y, const float & z ) const;
 
   // get list of interior Elements
-  void getListOfInteriorElements(vectorInt & listOfInteriorElements) const;
+  void getListOfInteriorElements(vectorIntView & listOfInteriorElements) const;
 
   //  get list of global interior nodes
-  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt & listOfInteriorNodes ) const;
+  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorIntView & listOfInteriorNodes ) const;
 
   // set model
-  void getModel( const int & numberOfNodes, vectorReal & model ) const;
+  void getModel( const int & numberOfNodes, vectorRealView & model ) const;
 
   // sort element by color
   // red=0, green=1, blue=2, yellow=3
   int getNumberOfElementsByColor() const;
-  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt & listOfElementsByColor) const;
+  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayIntView  & listOfElementsByColor) const;
 
   // get number of Boundary Faces
   int getNumberOfBoundaryFaces() const;
@@ -98,22 +90,16 @@ public:
   // get number of Boundary nodes
   int getNumberOfBoundaryNodes() const;
 
-  // get global DOF belonging to the faces of element e
-  PROXY_HOST_DEVICE int getGlobalDofOfFace(  const int & e,
-                                               arrayIntView  & globalNodesList,
-                                               int const localToGlobal[],
-                                               int  nodesFace[][6] ) const;
-
   // provides informations about boundary  faces:
   // element number,
   // orientation of the face
-  void getBoundaryFacesInfos(arrayInt & faceInfos)const;
+  void getBoundaryFacesInfos(arrayIntView & faceInfos)const;
 
   //  get list of global boundary nodes
-  int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt & listOfBoundaryNodes ) const;
+  int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorIntView & listOfBoundaryNodes ) const;
 
   // provides a mapping between local node of a face and global node Face:
-  void getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFaceNode) const;
+  void getLocalFaceNodeToGlobalFaceNode(arrayIntView &localFaceNodeToGlobalFaceNode) const;
 
   // compute global to local node index
   int Itoijk( const int & I, int & i, int & j, int & k ) const;
@@ -122,7 +108,7 @@ public:
   int Itoij( const int & I, int & i, int & j ) const;
 
   // project vector node to grid
-  std::vector<std::vector<float>> projectToGrid( const int numberOfNodes, const std::vector<float> inputVector ) const;
+  vector<vector<float>> projectToGrid( const int numberOfNodes, const vector<float> inputVector ) const;
 
 };
 }

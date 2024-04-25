@@ -5,6 +5,8 @@
 #include "FDTDdata.hpp"
 #include "FDTDmacros.hpp"
 
+using namespace std;
+
 struct FDTDUtils
 {
   void init_coef(float dx, vectorRealView &coef)

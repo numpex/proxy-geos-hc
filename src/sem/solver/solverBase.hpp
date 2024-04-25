@@ -12,8 +12,6 @@
 
 #include    "QkGL.hpp"
 #include    "simpleMesh.hpp"
-#include    "dataType.hpp"
-#include    "commonMacro.hpp"
 
 using namespace grid;
 using namespace FE;
@@ -38,9 +36,9 @@ PROXY_HOST_DEVICE ~solverBase(){};
                                int & i1,
                                int & i2,
                                const int & numberOfRHS,
-                               vectorInt & rhsElement,
-                               arrayReal & rhsTerm,
-                               arrayReal & pnGlobal) = 0;
+                               vectorIntView & rhsElement,
+                               arrayRealView & rhsTerm,
+                               arrayRealView & pnGlobal) = 0;
 
 
 public:
@@ -58,34 +56,34 @@ public:
 
   //shared arrays
   int numberOfElementsByColor[4];
-  arrayInt listOfElementsByColor;
-  arrayInt globalNodesList;
-  arrayReal globalNodesCoords;
-  vectorInt listOfInteriorNodes;
-  vectorInt listOfBoundaryNodes;
-  arrayInt faceInfos;
-  arrayInt localFaceNodeToGlobalFaceNode;
+  arrayIntView listOfElementsByColor;
+  arrayIntView globalNodesList;
+  arrayRealView globalNodesCoords;
+  vectorIntView listOfIntVieweriorNodes;
+  vectorIntView listOfBoundaryNodes;
+  arrayIntView faceInfos;
+  arrayIntView localFaceNodeToGlobalFaceNode;
   
   // get model
-  vectorReal model;
+  vectorRealView model;
 
   // get quadrature points and weights
-  vectorDouble quadraturePoints;
-  vectorDouble weights;
-  vectorDouble weights2D;
-  vectorDouble weights3D;
+  vectorDoubleView quadraturePoints;
+  vectorDoubleView weights;
+  vectorDoubleView weights2D;
+  vectorDoubleView weights3D;
 
   // get basis function and corresponding derivatives
-  arrayDouble basisFunction1D;
-  arrayDouble derivativeBasisFunction1D;
-  arrayDouble basisFunction2D;
-  arrayDouble derivativeBasisFunction2DX;
-  arrayDouble derivativeBasisFunction2DY;
+  arrayDoubleView basisFunction1D;
+  arrayDoubleView derivativeBasisFunction1D;
+  arrayDoubleView basisFunction2D;
+  arrayDoubleView derivativeBasisFunction2DX;
+  arrayDoubleView derivativeBasisFunction2DY;
 
   //shared arrays
-  vectorReal massMatrixGlobal;
-  vectorReal yGlobal;
-  vectorReal ShGlobal;
+  vectorRealView massMatrixGlobal;
+  vectorRealView yGlobal;
+  vectorRealView ShGlobal;
   
   simpleMesh mesh;
   QkGL Qk;

@@ -1,14 +1,13 @@
 #ifndef DATATYPE_HPP_
 #define DATATYPE_HPP_
 
-#include "commonConfig.hpp"
 #include <fstream>
 #include <cmath>
 #include <chrono>
 #include <iostream> 
 #include <vector> 
 
-using namespace std;
+#include "commonMacro.hpp"
 
 #ifdef USE_VECTOR
 

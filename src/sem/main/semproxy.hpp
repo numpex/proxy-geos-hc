@@ -9,7 +9,7 @@
 #define SEMPROXY_HPP_
 
 #include "solver.hpp"
-#include "utils.hpp"
+#include "SEMdata.hpp"
 
 /**
  * @class SEMProxy
@@ -41,40 +41,16 @@ public:
    */
   void run();
 
-  void saveSnapShot( const int indexTimeStep, const int i1, arrayRealView pnGlobal, simpleMesh mesh );
 
 protected:
 
-  int i1=0;
-  int i2=1;
-  int myElementSource;
+  SEMdata myData;
 
-  int numberOfNodes;
-  int numberOfElements;
-
-  const int myNumberOfRHS=1;
-  int   sourceOrder=1;
-  float f0=10.;
-  float myTimeMax=1.0;
-  float myTimeStep=0.001;
-
-  const int myNumSamples=myTimeMax/myTimeStep;
-  const int myOrderNumber=1;
-  
-  // initialize mesh
-  simpleMesh  myMesh {200, 200,200, 2000, 2000, 2000, myOrderNumber};
-
-  arrayReal myRHSLocation;
-  arrayReal myRHSTerm;
-  arrayInt nodeList;
-  arrayReal pnGlobal;
-  vectorInt rhsElement;
-
+  //SEMQkGL myQk;
   QkGL myQk;
-  SolverUtils myUtils;
 
-  SOLVER mySolver;
-
+  //SEMsolver mySolver;
+  
 };
 
 #endif /* SEMPROXY_HPP_ */

@@ -292,7 +292,7 @@ configure_file( utils/commonConfig.hpp.in
                 ${CMAKE_BINARY_DIR}/src/commonConfig.hpp)
 
 add_subdirectory( sem )
-#add_subdirectory( fd )
+add_subdirectory( fd )
 if ( addTests)
 #  add_subdirectory( tests )
 endif()

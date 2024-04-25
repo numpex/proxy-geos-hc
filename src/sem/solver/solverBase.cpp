@@ -11,6 +11,7 @@
 
 void solverBase::computeFEInit( const int & order, simpleMesh mesh, QkGL Qk)
 {
+/*
 
   // get infos from mesh
   //interior elements
@@ -92,6 +93,6 @@ void solverBase::computeFEInit( const int & order, simpleMesh mesh, QkGL Qk)
   yGlobal=allocateVector<vectorReal>( numberOfNodes );
   ShGlobal=allocateVector<vectorReal>( numberOfBoundaryNodes );
   std::cout<<"end of shared arrays initialization\n";
-
+*/
 }
 
