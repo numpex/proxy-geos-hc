@@ -14,22 +14,15 @@ void SEMsolver::computeFEInit( const int & order, SEMmesh mesh )
 
   // get infos from mesh
   //interior elements
+  int nBasisFunctions=(order+1)*(order+1); 
   numberOfNodes=mesh.getNumberOfNodes();
   numberOfElements=mesh.getNumberOfElements();
   numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
+  numberOfPointsPerElement=mesh.getNumberOfPointsPerElement();
+  numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
+  numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
   printf("numberOfNodes %d numberOfElements %d \n",numberOfNodes,numberOfElements);
 
-  // number Of elements by color
-  // sort element by color 
-  int numberMaxOfElementsByColor=mesh.getNumberOfElementsByColor();
-  listOfElementsByColor=allocateArray2D<arrayIntView>(numberOfColors,numberMaxOfElementsByColor);
-  mesh.sortElementsByColor(numberOfElementsByColor,listOfElementsByColor); 
-  printf("number of elements color red %d\n",numberOfElementsByColor[0]);
-  printf("number of elements color green %d\n",numberOfElementsByColor[1]);
-  printf("number of elements color blue %d\n",numberOfElementsByColor[2]);
-  printf("number of elements color yellow %d\n",numberOfElementsByColor[3]);
-  
-  numberOfPointsPerElement=mesh.getNumberOfPointsPerElement();
 
   globalNodesList=allocateArray2D<arrayIntView>(numberOfElements,numberOfPointsPerElement);
   mesh.globalNodesList( numberOfElements, globalNodesList );
@@ -41,9 +34,6 @@ void SEMsolver::computeFEInit( const int & order, SEMmesh mesh )
   mesh.nodesCoordinates( numberOfNodes, globalNodesCoords );
 
   // boundary elements
-  numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
-  numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
-
   listOfBoundaryNodes=allocateVector<vectorIntView>(numberOfBoundaryNodes);
   mesh.getListOfBoundaryNodes( numberOfBoundaryNodes, listOfBoundaryNodes );
 
@@ -56,7 +46,6 @@ void SEMsolver::computeFEInit( const int & order, SEMmesh mesh )
   // get model
   model=allocateVector<vectorRealView>(numberOfElements);
   mesh.getModel( numberOfElements, model );
-
 
   // get quadrature points and weights
   quadraturePoints=allocateVector<vectorDoubleView>(order+1);
@@ -76,7 +65,6 @@ void SEMsolver::computeFEInit( const int & order, SEMmesh mesh )
   derivativeBasisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
   myQk.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
 
-  int nBasisFunctions=(order+1)*(order+1); 
   basisFunction2D=allocateArray2D<arrayDoubleView>(nBasisFunctions,nBasisFunctions);
   myQk.getBasisFunction2D( order, basisFunction1D, basisFunction1D, basisFunction2D );
 

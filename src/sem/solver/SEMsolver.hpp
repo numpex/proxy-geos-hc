@@ -12,7 +12,6 @@
 
 #include "SEMQkGL.hpp"
 #include "SEMmesh.hpp"
-#include "utils.hpp"
 
 class SEMsolver
 {
@@ -42,8 +41,6 @@ PROXY_HOST_DEVICE ~SEMsolver(){};
                        arrayRealView & pnGlobal);
 
 private:
-
-  int i1=0, i2=1;
 
   // get infos from mesh
   int numberOfNodes;
