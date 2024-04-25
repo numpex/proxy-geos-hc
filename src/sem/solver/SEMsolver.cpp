@@ -9,48 +9,40 @@
 
 #include "SEMsolver.hpp"
 
-void SEMsolver::computeFEInit( const int & order, SEMmesh mesh )
+void SEMsolver::computeFEInit( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
 {
 
-  // get infos from mesh
+  order = myMeshinfo.myOrderNumber;
+
   //interior elements
-  int nBasisFunctions=(order+1)*(order+1); 
-  numberOfNodes=mesh.getNumberOfNodes();
-  numberOfElements=mesh.getNumberOfElements();
-  numberOfInteriorNodes=mesh.getNumberOfInteriorNodes();
-  numberOfPointsPerElement=mesh.getNumberOfPointsPerElement();
-  numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
-  numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
-  printf("numberOfNodes %d numberOfElements %d \n",numberOfNodes,numberOfElements);
+  globalNodesList=allocateArray2D<arrayIntView>(myMeshinfo.numberOfElements,myMeshinfo.numberOfPointsPerElement);
+  mesh.globalNodesList( myMeshinfo.numberOfElements, globalNodesList );
 
+  listOfInteriorNodes=allocateVector<vectorIntView>(myMeshinfo.numberOfInteriorNodes);
+  mesh.getListOfInteriorNodes( myMeshinfo.numberOfInteriorNodes, listOfInteriorNodes );
 
-  globalNodesList=allocateArray2D<arrayIntView>(numberOfElements,numberOfPointsPerElement);
-  mesh.globalNodesList( numberOfElements, globalNodesList );
-
-  listOfInteriorNodes=allocateVector<vectorIntView>(numberOfInteriorNodes);
-  mesh.getListOfInteriorNodes( numberOfInteriorNodes, listOfInteriorNodes );
-
-  globalNodesCoords=allocateArray2D<arrayRealView>(numberOfNodes,3);
-  mesh.nodesCoordinates( numberOfNodes, globalNodesCoords );
+  globalNodesCoords=allocateArray2D<arrayRealView>(myMeshinfo.numberOfNodes,3);
+  mesh.nodesCoordinates( myMeshinfo.numberOfNodes, globalNodesCoords );
 
   // boundary elements
-  listOfBoundaryNodes=allocateVector<vectorIntView>(numberOfBoundaryNodes);
-  mesh.getListOfBoundaryNodes( numberOfBoundaryNodes, listOfBoundaryNodes );
+  listOfBoundaryNodes=allocateVector<vectorIntView>(myMeshinfo.numberOfBoundaryNodes);
+  mesh.getListOfBoundaryNodes( myMeshinfo.numberOfBoundaryNodes, listOfBoundaryNodes );
 
-  faceInfos=allocateArray2D<arrayIntView>(numberOfBoundaryFaces,2+(order+1));
+  faceInfos=allocateArray2D<arrayIntView>(myMeshinfo.numberOfBoundaryFaces,2+(order+1));
   mesh.getBoundaryFacesInfos(faceInfos);
 
-  localFaceNodeToGlobalFaceNode=allocateArray2D<arrayIntView>(numberOfBoundaryFaces, order+1 );
+  localFaceNodeToGlobalFaceNode=allocateArray2D<arrayIntView>(myMeshinfo.numberOfBoundaryFaces, order+1 );
   mesh.getLocalFaceNodeToGlobalFaceNode(localFaceNodeToGlobalFaceNode);
 
   // get model
-  model=allocateVector<vectorRealView>(numberOfElements);
-  mesh.getModel( numberOfElements, model );
+  model=allocateVector<vectorRealView>(myMeshinfo.numberOfElements);
+  mesh.getModel( myMeshinfo.numberOfElements, model );
 
-  // get quadrature points and weights
+  // get quadrature points 
   quadraturePoints=allocateVector<vectorDoubleView>(order+1);
   myQk.gaussLobattoQuadraturePoints( order, quadraturePoints );
 
+  // get gauss-lobatto weights
   weights=allocateVector<vectorDoubleView>(order+1);
   myQk.gaussLobattoQuadratureWeights( order, weights );
   weights2D=allocateVector<vectorDoubleView>((order+1)*(order+1));
@@ -65,53 +57,53 @@ void SEMsolver::computeFEInit( const int & order, SEMmesh mesh )
   derivativeBasisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
   myQk.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
 
-  basisFunction2D=allocateArray2D<arrayDoubleView>(nBasisFunctions,nBasisFunctions);
+  basisFunction2D=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
   myQk.getBasisFunction2D( order, basisFunction1D, basisFunction1D, basisFunction2D );
 
-  derivativeBasisFunction2DX=allocateArray2D<arrayDoubleView>(nBasisFunctions,nBasisFunctions);
+  derivativeBasisFunction2DX=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
   myQk.getBasisFunction2D( order, derivativeBasisFunction1D, basisFunction1D, derivativeBasisFunction2DX );
   
-  derivativeBasisFunction2DY=allocateArray2D<arrayDoubleView>(nBasisFunctions,nBasisFunctions);
+  derivativeBasisFunction2DY=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
   myQk.getBasisFunction2D( order, basisFunction1D, derivativeBasisFunction1D, derivativeBasisFunction2DY );
 
   cout<<"fin allocation  shared:"<<endl;
 
   //shared arrays
-  massMatrixGlobal=allocateVector<vectorRealView>( numberOfNodes );
-  yGlobal=allocateVector<vectorRealView>( numberOfNodes );
-  ShGlobal=allocateVector<vectorRealView>( numberOfBoundaryNodes );
+  massMatrixGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfNodes );
+  yGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfNodes );
+  ShGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfBoundaryNodes );
   std::cout<<"end of shared arrays initialization\n";
 
 }
 
 // compute one step of the time dynamic wave equation solver
 void SEMsolver::computeOneStep(  const int & timeStep,
-                                  const float & timeSample,
-                                  const int & order,
-                                  int & i1,
-                                  int & i2,
-                                  const int & numberOfRHS,
-                                  vectorIntView & rhsElement,
-                                  arrayRealView & rhsTerm,
-                                  arrayRealView & pnGlobal)
+                                 SEMmeshinfo &myMeshinfo,
+                                 int & i1,
+                                 int & i2,
+                                 vectorIntView & rhsElement,
+                                 arrayRealView & rhsTerm,
+                                 arrayRealView & pnGlobal)
 {
 
+  // update pressure @ boundaries;
+  float tmp=myMeshinfo.myTimeStep * myMeshinfo.myTimeStep;
 
-  Kokkos::parallel_for( numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
+  Kokkos::parallel_for( myMeshinfo.numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
   {
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
   } );
 
   // update pnGLobal with right hade side
-  Kokkos::parallel_for( numberOfRHS,KOKKOS_CLASS_LAMBDA (const int i)
+  Kokkos::parallel_for( myMeshinfo.myNumberOfRHS,KOKKOS_CLASS_LAMBDA (const int i)
   {
     int nodeRHS=globalNodesList(rhsElement[i],0);
-    pnGlobal(nodeRHS,i2)+=timeSample*timeSample*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
+    pnGlobal(nodeRHS,i2)+=tmp*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   });
  
   int numberOfPointsPerElement=(order+1)*(order+1);
-  Kokkos::parallel_for( numberOfElements, KOKKOS_CLASS_LAMBDA ( const int e ) 
+  Kokkos::parallel_for( myMeshinfo.numberOfElements, KOKKOS_CLASS_LAMBDA ( const int e ) 
   {
     // start parallel section
     float B[36][4];
@@ -149,19 +141,18 @@ void SEMsolver::computeOneStep(  const int & timeStep,
   });
 
   // update pressure
-  Kokkos::parallel_for( range_policy(0,numberOfInteriorNodes), KOKKOS_CLASS_LAMBDA ( const int i )
+  Kokkos::parallel_for( range_policy(0,myMeshinfo.numberOfInteriorNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {
     int I=listOfInteriorNodes[i];
-    float tmp=timeSample*timeSample;
     pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-tmp*yGlobal[I]/massMatrixGlobal[I];
   } );
 
-  Kokkos::parallel_for( range_policy(0,numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA ( const int i )
+  Kokkos::parallel_for( range_policy(0,myMeshinfo.numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {
     ShGlobal[i]=0;
   } );
   
-  Kokkos::parallel_for (numberOfBoundaryFaces, KOKKOS_CLASS_LAMBDA (const int iFace)
+  Kokkos::parallel_for (myMeshinfo.numberOfBoundaryFaces, KOKKOS_CLASS_LAMBDA (const int iFace)
   {
     //get ds
     float ds[6];
@@ -183,15 +174,34 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     }
   } );
 
-  // update pressure @ boundaries;
-  float tmp=timeSample*timeSample;
-  Kokkos::parallel_for( range_policy(0,numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA  ( const int i )
+  Kokkos::parallel_for( range_policy(0,myMeshinfo.numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA  ( const int i )
   {
     int I=listOfBoundaryNodes[i];
-    float invMpSh=1/(massMatrixGlobal[I]+timeSample*ShGlobal[i]*0.5);
-    float MmSh=massMatrixGlobal[I]-timeSample*ShGlobal[i]*0.5;
+    float invMpSh=1/(massMatrixGlobal[I]+myMeshinfo.myTimeStep*ShGlobal[i]*0.5);
+    float MmSh=massMatrixGlobal[I]-myMeshinfo.myTimeStep*ShGlobal[i]*0.5;
     pnGlobal(I,i1)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,i2)-MmSh*pnGlobal(I,i1)-tmp*yGlobal[I]);
   } );
 
   Kokkos::fence();
 }
+
+
+void SEMsolver::outputPnValues(  const int & indexTimeStep,
+                                 int & i1,
+                                 int & myElementSource, 
+                                 arrayIntView & nodeList,
+                                 arrayRealView & pnGlobal)
+{
+    //writes debugging ascii file.
+    if( indexTimeStep%50==0 )
+    {   
+      cout<<"TimeStep="<<indexTimeStep<<endl;
+    }   
+    if( indexTimeStep%100==0 )
+    {   
+      cout<<" pnGlobal @ elementSource location "<<myElementSource
+          <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),i1)<<endl;
+      //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
+    }  
+}
+

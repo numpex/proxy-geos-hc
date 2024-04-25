@@ -12,6 +12,9 @@
 
 #include "SEMQkGL.hpp"
 #include "SEMmesh.hpp"
+#include "SEMdata.hpp"
+
+
 
 class SEMsolver
 {
@@ -20,40 +23,35 @@ public:
 PROXY_HOST_DEVICE SEMsolver(){};
 PROXY_HOST_DEVICE ~SEMsolver(){};
 
+
   /**
    * @brief computeFEInit function:
    * init all FE components for computing mass and stiffness matrices
    */
-  void computeFEInit ( const int & order,SEMmesh mesh);
+  void computeFEInit ( SEMmeshinfo &myMeshinfo, SEMmesh mesh);
 
    /**
    * @brief computeOneStep function:
    * init all FE components for computing mass and stiffness matrices
    */
   void computeOneStep( const int & indexTimeStep,
-                       const float & timeSample,
-                       const int & order,
+                       SEMmeshinfo &myMeshinfo,
                        int & i1,
                        int & i2,
-                       const int & numberOfRHS,
                        vectorIntView & rhsElement,
                        arrayRealView & rhsTerm,
                        arrayRealView & pnGlobal);
 
+  void outputPnValues (  const int & indexTimeStep,
+                         int & i1, 
+                         int & myElementSource, 
+                         arrayIntView & nodeList,
+                         arrayRealView & pnGlobal);
+
 private:
 
-  // get infos from mesh
-  int numberOfNodes;
-  int numberOfElements;
-  int numberOfPointsPerElement;
-  int numberOfInteriorNodes;
-  int numberOfBoundaryNodes;
-  int numberOfBoundaryFaces;
-  const int numberOfColors=4;
-
+  int order; 
   //shared arrays
-  int numberOfElementsByColor[4];
-  arrayIntView listOfElementsByColor;
   arrayIntView globalNodesList;
   arrayRealView globalNodesCoords;
   vectorIntView listOfInteriorNodes;
