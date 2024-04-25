@@ -48,9 +48,15 @@ PROXY_HOST_DEVICE ~SEMsolver(){};
                          arrayIntView & nodeList,
                          arrayRealView & pnGlobal);
 
+  void initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh );
+
+  void allocateFEarrays( SEMmeshinfo &myMeshinfo );
+
 private:
 
   int order; 
+  SEMQkGL myQk;
+  
   //shared arrays
   arrayIntView globalNodesList;
   arrayRealView globalNodesCoords;
@@ -81,6 +87,5 @@ private:
   vectorRealView yGlobal;
   vectorRealView ShGlobal;
   
-  SEMQkGL myQk;
 };
 #endif //SEM_SOLVER_HPP_

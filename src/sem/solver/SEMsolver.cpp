@@ -11,68 +11,9 @@
 
 void SEMsolver::computeFEInit( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
 {
-
   order = myMeshinfo.myOrderNumber;
-
-  //interior elements
-  globalNodesList=allocateArray2D<arrayIntView>(myMeshinfo.numberOfElements,myMeshinfo.numberOfPointsPerElement);
-  mesh.globalNodesList( myMeshinfo.numberOfElements, globalNodesList );
-
-  listOfInteriorNodes=allocateVector<vectorIntView>(myMeshinfo.numberOfInteriorNodes);
-  mesh.getListOfInteriorNodes( myMeshinfo.numberOfInteriorNodes, listOfInteriorNodes );
-
-  globalNodesCoords=allocateArray2D<arrayRealView>(myMeshinfo.numberOfNodes,3);
-  mesh.nodesCoordinates( myMeshinfo.numberOfNodes, globalNodesCoords );
-
-  // boundary elements
-  listOfBoundaryNodes=allocateVector<vectorIntView>(myMeshinfo.numberOfBoundaryNodes);
-  mesh.getListOfBoundaryNodes( myMeshinfo.numberOfBoundaryNodes, listOfBoundaryNodes );
-
-  faceInfos=allocateArray2D<arrayIntView>(myMeshinfo.numberOfBoundaryFaces,2+(order+1));
-  mesh.getBoundaryFacesInfos(faceInfos);
-
-  localFaceNodeToGlobalFaceNode=allocateArray2D<arrayIntView>(myMeshinfo.numberOfBoundaryFaces, order+1 );
-  mesh.getLocalFaceNodeToGlobalFaceNode(localFaceNodeToGlobalFaceNode);
-
-  // get model
-  model=allocateVector<vectorRealView>(myMeshinfo.numberOfElements);
-  mesh.getModel( myMeshinfo.numberOfElements, model );
-
-  // get quadrature points 
-  quadraturePoints=allocateVector<vectorDoubleView>(order+1);
-  myQk.gaussLobattoQuadraturePoints( order, quadraturePoints );
-
-  // get gauss-lobatto weights
-  weights=allocateVector<vectorDoubleView>(order+1);
-  myQk.gaussLobattoQuadratureWeights( order, weights );
-  weights2D=allocateVector<vectorDoubleView>((order+1)*(order+1));
-  myQk.getGaussLobattoWeights2D( order, weights, weights2D );
-  weights3D=allocateVector<vectorDoubleView>((order+1)*(order+1)*(order+1));
-  myQk.getGaussLobattoWeights3D( order, weights, weights3D );
-
-  // get basis function and corresponding derivatives
-  basisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
-  myQk.getBasisFunction1D( order, quadraturePoints,basisFunction1D );
-
-  derivativeBasisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
-  myQk.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
-
-  basisFunction2D=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
-  myQk.getBasisFunction2D( order, basisFunction1D, basisFunction1D, basisFunction2D );
-
-  derivativeBasisFunction2DX=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
-  myQk.getBasisFunction2D( order, derivativeBasisFunction1D, basisFunction1D, derivativeBasisFunction2DX );
-  
-  derivativeBasisFunction2DY=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
-  myQk.getBasisFunction2D( order, basisFunction1D, derivativeBasisFunction1D, derivativeBasisFunction2DY );
-
-  cout<<"fin allocation  shared:"<<endl;
-
-  //shared arrays
-  massMatrixGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfNodes );
-  yGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfNodes );
-  ShGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfBoundaryNodes );
-  std::cout<<"end of shared arrays initialization\n";
+  allocateFEarrays( myMeshinfo );
+  initFEarrays( myMeshinfo, mesh);
 
 }
 
@@ -204,4 +145,59 @@ void SEMsolver::outputPnValues(  const int & indexTimeStep,
       //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
     }  
 }
+
+
+void SEMsolver::initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
+{
+  //interior elements
+  mesh.globalNodesList( myMeshinfo.numberOfElements, globalNodesList );
+  mesh.getListOfInteriorNodes( myMeshinfo.numberOfInteriorNodes, listOfInteriorNodes );
+  mesh.nodesCoordinates( myMeshinfo.numberOfNodes, globalNodesCoords );
+  // boundary elements
+  mesh.getListOfBoundaryNodes( myMeshinfo.numberOfBoundaryNodes, listOfBoundaryNodes );
+  mesh.getBoundaryFacesInfos(faceInfos);
+  mesh.getLocalFaceNodeToGlobalFaceNode(localFaceNodeToGlobalFaceNode);
+  // get model
+  mesh.getModel( myMeshinfo.numberOfElements, model );
+  // get quadrature points 
+  myQk.gaussLobattoQuadraturePoints( order, quadraturePoints );
+  // get gauss-lobatto weights
+  myQk.gaussLobattoQuadratureWeights( order, weights );
+  myQk.getGaussLobattoWeights2D( order, weights, weights2D );
+  myQk.getGaussLobattoWeights3D( order, weights, weights3D );
+  // get basis function and corresponding derivatives
+  myQk.getBasisFunction1D( order, quadraturePoints,basisFunction1D );
+  myQk.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
+  myQk.getBasisFunction2D( order, basisFunction1D, basisFunction1D, basisFunction2D );
+  myQk.getBasisFunction2D( order, derivativeBasisFunction1D, basisFunction1D, derivativeBasisFunction2DX );
+  myQk.getBasisFunction2D( order, basisFunction1D, derivativeBasisFunction1D, derivativeBasisFunction2DY );
+
+}
+
+void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
+{
+  //interior elements
+  globalNodesList=allocateArray2D<arrayIntView>(myMeshinfo.numberOfElements,myMeshinfo.numberOfPointsPerElement);
+  listOfInteriorNodes=allocateVector<vectorIntView>(myMeshinfo.numberOfInteriorNodes);
+  globalNodesCoords=allocateArray2D<arrayRealView>(myMeshinfo.numberOfNodes,3);
+  listOfBoundaryNodes=allocateVector<vectorIntView>(myMeshinfo.numberOfBoundaryNodes);
+  faceInfos=allocateArray2D<arrayIntView>(myMeshinfo.numberOfBoundaryFaces,2+(order+1));
+  localFaceNodeToGlobalFaceNode=allocateArray2D<arrayIntView>(myMeshinfo.numberOfBoundaryFaces, order+1 );
+  model=allocateVector<vectorRealView>(myMeshinfo.numberOfElements);
+  quadraturePoints=allocateVector<vectorDoubleView>(order+1);
+  weights=allocateVector<vectorDoubleView>(order+1);
+  weights2D=allocateVector<vectorDoubleView>((order+1)*(order+1));
+  weights3D=allocateVector<vectorDoubleView>((order+1)*(order+1)*(order+1));
+  basisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
+  derivativeBasisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
+  basisFunction2D=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
+  derivativeBasisFunction2DX=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
+  derivativeBasisFunction2DY=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
+  //shared arrays
+  massMatrixGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfNodes );
+  yGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfNodes );
+  ShGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfBoundaryNodes );
+
+}
+
 
