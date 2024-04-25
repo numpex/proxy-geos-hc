@@ -8,8 +8,6 @@
 #include <iostream> 
 #include <vector> 
 
-using namespace std;
-
 #ifdef USE_VECTOR
 
   template<class T> class Vector 
