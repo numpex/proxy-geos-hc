@@ -11,6 +11,7 @@
 
 void solverBase::computeFEInit( const int & order, SEMmesh mesh, SEMQkGL Qk)
 {
+/*
 
   // get infos from mesh
   //interior elements
@@ -22,7 +23,7 @@ void solverBase::computeFEInit( const int & order, SEMmesh mesh, SEMQkGL Qk)
   // number Of elements by color
   // sort element by color 
   int numberMaxOfElementsByColor=mesh.getNumberOfElementsByColor();
-  listOfElementsByColor=allocateArray2D<arrayIntView>(numberOfColors,numberMaxOfElementsByColor);
+  listOfElementsByColor=allocateArray2D<arrayInt>(numberOfColors,numberMaxOfElementsByColor);
   mesh.sortElementsByColor(numberOfElementsByColor,listOfElementsByColor); 
   printf("number of elements color red %d\n",numberOfElementsByColor[0]);
   printf("number of elements color green %d\n",numberOfElementsByColor[1]);
@@ -30,69 +31,68 @@ void solverBase::computeFEInit( const int & order, SEMmesh mesh, SEMQkGL Qk)
   printf("number of elements color yellow %d\n",numberOfElementsByColor[3]);
   
   numberOfPointsPerElement=mesh.getNumberOfPointsPerElement();
-
-  globalNodesList=allocateArray2D<arrayIntView>(numberOfElements,numberOfPointsPerElement);
+  globalNodesList=allocateArray2D<arrayInt>(numberOfElements,numberOfPointsPerElement);
   mesh.globalNodesList( numberOfElements, globalNodesList );
 
-  listOfInteriorNodes=allocateVector<vectorIntView>(numberOfInteriorNodes);
+  listOfInteriorNodes=allocateVector<vectorInt>(numberOfInteriorNodes);
   mesh.getListOfInteriorNodes( numberOfInteriorNodes, listOfInteriorNodes );
 
-  globalNodesCoords=allocateArray2D<arrayRealView>(numberOfNodes,3);
+  globalNodesCoords=allocateArray2D<arrayReal>(numberOfNodes,3);
   mesh.nodesCoordinates( numberOfNodes, globalNodesCoords );
 
   // boundary elements
   numberOfBoundaryNodes=mesh.getNumberOfBoundaryNodes();
   numberOfBoundaryFaces=mesh.getNumberOfBoundaryFaces();
 
-  listOfBoundaryNodes=allocateVector<vectorIntView>(numberOfBoundaryNodes);
+  listOfBoundaryNodes=allocateVector<vectorInt>(numberOfBoundaryNodes);
   mesh.getListOfBoundaryNodes( numberOfBoundaryNodes, listOfBoundaryNodes );
 
-  faceInfos=allocateArray2D<arrayIntView>(numberOfBoundaryFaces,2+(order+1));
+  faceInfos=allocateArray2D<arrayInt>(numberOfBoundaryFaces,2+(order+1));
   mesh.getBoundaryFacesInfos(faceInfos);
 
-  localFaceNodeToGlobalFaceNode=allocateArray2D<arrayIntView>(numberOfBoundaryFaces, order+1 );
+  localFaceNodeToGlobalFaceNode=allocateArray2D<arrayInt>(numberOfBoundaryFaces, order+1 );
   mesh.getLocalFaceNodeToGlobalFaceNode(localFaceNodeToGlobalFaceNode);
 
   // get model
-  model=allocateVector<vectorRealView>(numberOfElements);
+  model=allocateVector<vectorReal>(numberOfElements);
   mesh.getModel( numberOfElements, model );
 
 
   // get quadrature points and weights
-  quadraturePoints=allocateVector<vectorDoubleView>(order+1);
+  quadraturePoints=allocateVector<vectorDouble>(order+1);
   Qk.gaussLobattoQuadraturePoints( order, quadraturePoints );
 
-  weights=allocateVector<vectorDoubleView>(order+1);
+  weights=allocateVector<vectorDouble>(order+1);
   Qk.gaussLobattoQuadratureWeights( order, weights );
-  weights2D=allocateVector<vectorDoubleView>((order+1)*(order+1));
-  Qk.getGaussLobattoWeights2D( order, weights, weights2D );
-  weights3D=allocateVector<vectorDoubleView>((order+1)*(order+1)*(order+1));
-  Qk.getGaussLobattoWeights3D( order, weights, weights3D );
+  weights2D=allocateVector<vectorDouble>((order+1)*(order+1));
+  Qk.getGaussLobattoWeights2D( quadraturePoints, weights, weights2D );
+  weights3D=allocateVector<vectorDouble>((order+1)*(order+1)*(order+1));
+  Qk.getGaussLobattoWeights3D( quadraturePoints, weights, weights3D );
 
   // get basis function and corresponding derivatives
-  basisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
+  basisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1);
   Qk.getBasisFunction1D( order, quadraturePoints,basisFunction1D );
 
-  derivativeBasisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
+  derivativeBasisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1);
   Qk.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
 
   int nBasisFunctions=(order+1)*(order+1); 
-  basisFunction2D=allocateArray2D<arrayDoubleView>(nBasisFunctions,nBasisFunctions);
-  Qk.getBasisFunction2D( order, basisFunction1D, basisFunction1D, basisFunction2D );
+  basisFunction2D=allocateArray2D<arrayDouble>(nBasisFunctions,nBasisFunctions);
+  Qk.getBasisFunction2D( quadraturePoints, basisFunction1D, basisFunction1D, basisFunction2D );
 
-  derivativeBasisFunction2DX=allocateArray2D<arrayDoubleView>(nBasisFunctions,nBasisFunctions);
-  Qk.getBasisFunction2D( order, derivativeBasisFunction1D, basisFunction1D, derivativeBasisFunction2DX );
+  derivativeBasisFunction2DX=allocateArray2D<arrayDouble>(nBasisFunctions,nBasisFunctions);
+  Qk.getBasisFunction2D( quadraturePoints, derivativeBasisFunction1D, basisFunction1D, derivativeBasisFunction2DX );
   
-  derivativeBasisFunction2DY=allocateArray2D<arrayDoubleView>(nBasisFunctions,nBasisFunctions);
-  Qk.getBasisFunction2D( order, basisFunction1D, derivativeBasisFunction1D, derivativeBasisFunction2DY );
+  derivativeBasisFunction2DY=allocateArray2D<arrayDouble>(nBasisFunctions,nBasisFunctions);
+  Qk.getBasisFunction2D( quadraturePoints, basisFunction1D, derivativeBasisFunction1D, derivativeBasisFunction2DY );
 
   cout<<"fin allocation  shared:"<<endl;
 
   //shared arrays
-  massMatrixGlobal=allocateVector<vectorRealView>( numberOfNodes );
-  yGlobal=allocateVector<vectorRealView>( numberOfNodes );
-  ShGlobal=allocateVector<vectorRealView>( numberOfBoundaryNodes );
+  massMatrixGlobal=allocateVector<vectorReal>( numberOfNodes );
+  yGlobal=allocateVector<vectorReal>( numberOfNodes );
+  ShGlobal=allocateVector<vectorReal>( numberOfBoundaryNodes );
   std::cout<<"end of shared arrays initialization\n";
-
+*/
 }
 

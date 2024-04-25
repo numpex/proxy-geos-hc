@@ -1,5 +1,5 @@
-#ifndef QKGL_HPP_
-#define QKGL_HPP_
+#ifndef SEMQKGL_HPP_
+#define SEMQKGL_HPP_
 
 #include "dataType.hpp"
 using namespace std;
@@ -8,17 +8,14 @@ using namespace std;
  * This class is the basis class for the hexahedron finite element cells with
  * shape functions defined on Gauss-Lobatto quadrature points.
  */
-namespace FE
+class SEMQkGL
 {
-
-  class QkGL
-  {
   private:
     int order;
 
   public:
-    PROXY_HOST_DEVICE QkGL(){};
-    PROXY_HOST_DEVICE ~QkGL(){};
+    PROXY_HOST_DEVICE SEMQkGL(){};
+    PROXY_HOST_DEVICE ~SEMQkGL(){};
 
   // get Gauss Lobatto quadrature points
   void gaussLobattoQuadraturePoints( int order, vectorDoubleView const & quadraturePoints ) const;
@@ -111,6 +108,5 @@ namespace FE
                                       arrayRealView   const & globalNodesCoords,
                                       arrayDoubleView const & dPhi,
                                       float  ds[]  ) const;
-  };
-}
-#endif //QKGL_HPP_
+};
+#endif //SEMQKGL_HPP_

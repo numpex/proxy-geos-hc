@@ -1,27 +1,25 @@
-#ifndef SIMPLE_MESH_
-#define SIMPLE_MESH_
+#ifndef SEM_MESH_
+#define SEM_MESH_
 
 #include "dataType.hpp"
 using namespace std;
 
-namespace grid
-{
-
-class simpleMesh
+class SEMmesh
 {
 private:
-  int ex, ey, ez;
-  int nx, ny, nz;
-  float lx, ly, lz;
-  float hx, hy, hz;
+  int ex, ey, ez; 
+  int nx, ny, nz; 
+  float lx, ly, lz; 
+  float hx, hy, hz; 
   int orderx, ordery,orderz, order;
   int nbFaces;
+
 public:
 
-  PROXY_HOST_DEVICE simpleMesh(){};
-  PROXY_HOST_DEVICE ~simpleMesh(){};
+  PROXY_HOST_DEVICE SEMmesh(){};
+  PROXY_HOST_DEVICE ~SEMmesh(){};
 
-  simpleMesh( const int & ex_in, const int & ey_in, const int & ez_in,
+  SEMmesh( const int & ex_in, const int & ey_in, const int & ez_in,
                         const float & lx_in, const float & ly_in,const float & lz_in,
                         const int & order_in);
 
@@ -111,5 +109,4 @@ public:
   vector<vector<float>> projectToGrid( const int numberOfNodes, const vector<float> inputVector ) const;
 
 };
-}
-#endif //SIMPLE_MESH_
+#endif //SEM_MESH_

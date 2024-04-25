@@ -1,10 +1,7 @@
 // C++ Code generated from Python Code:
-#include "QkGL.hpp"
+#include "SEMQkGL.hpp"
 
-namespace FE
-{
-
-void QkGL::gaussLobattoQuadraturePoints( int order, vectorDoubleView const & quadraturePoints ) const
+void SEMQkGL::gaussLobattoQuadraturePoints( int order, vectorDoubleView const & quadraturePoints ) const
 {
   if( order == 1 )
   {
@@ -42,7 +39,7 @@ void QkGL::gaussLobattoQuadraturePoints( int order, vectorDoubleView const & qua
     quadraturePoints[5]=1.0;
   }
 }
-void QkGL::gaussLobattoQuadratureWeights( int order, vectorDoubleView const & weights ) const
+void SEMQkGL::gaussLobattoQuadratureWeights( int order, vectorDoubleView const & weights ) const
 {
   if( order == 1 )
   {
@@ -80,7 +77,7 @@ void QkGL::gaussLobattoQuadratureWeights( int order, vectorDoubleView const & we
     weights[5]=0.06666667;
   }
 }
-vector<double> QkGL::shapeFunction1D( int order, double xi ) const
+vector<double> SEMQkGL::shapeFunction1D( int order, double xi ) const
 {
   std::vector<double> shapeFunction( order+1 );
   if( order==1 )
@@ -155,7 +152,7 @@ vector<double> QkGL::shapeFunction1D( int order, double xi ) const
   }
   return shapeFunction;
 }
-vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) const
+vector<double> SEMQkGL::derivativeShapeFunction1D( int order, double xi ) const
 {
   std::vector<double> derivativeShapeFunction( order+1 );
 
@@ -287,7 +284,7 @@ vector<double> QkGL::derivativeShapeFunction1D( int order, double xi ) const
   return derivativeShapeFunction;
 }
 
-void QkGL::getBasisFunction1D( int order, vectorDoubleView const & quadraturePoints, arrayDoubleView const & basisFunction1D ) const
+void SEMQkGL::getBasisFunction1D( int order, vectorDoubleView const & quadraturePoints, arrayDoubleView const & basisFunction1D ) const
 {
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -302,7 +299,7 @@ void QkGL::getBasisFunction1D( int order, vectorDoubleView const & quadraturePoi
   }
 }
 
-void QkGL::getDerivativeBasisFunction1D( int order, vectorDoubleView const & quadraturePoints, 
+void SEMQkGL::getDerivativeBasisFunction1D( int order, vectorDoubleView const & quadraturePoints, 
                                           arrayDoubleView const & derivativeBasisFunction1D ) const
 {
   // loop over quadrature points
@@ -318,7 +315,7 @@ void QkGL::getDerivativeBasisFunction1D( int order, vectorDoubleView const & qua
   }
 }
 // compute 2D gauss-lobatto weights
-void QkGL::getGaussLobattoWeights2D( const int & order,
+void SEMQkGL::getGaussLobattoWeights2D( const int & order,
                                      vectorDoubleView const & weights,
                                      vectorDoubleView const & W )const
 {
@@ -332,7 +329,7 @@ void QkGL::getGaussLobattoWeights2D( const int & order,
 }
 
 // compute 3D gauss-lobatto weights
-void QkGL::getGaussLobattoWeights3D( const int & order,
+void SEMQkGL::getGaussLobattoWeights3D( const int & order,
                                      vectorDoubleView const & weights,
                                      vectorDoubleView const & W )const
 {
@@ -348,7 +345,7 @@ void QkGL::getGaussLobattoWeights3D( const int & order,
   }
 }
 
-void QkGL::getBasisFunction2D( const int & order, 
+void SEMQkGL::getBasisFunction2D( const int & order, 
                                arrayDoubleView const & a,
                                arrayDoubleView const & b,
                                arrayDoubleView const & c )const                                      
@@ -370,7 +367,7 @@ void QkGL::getBasisFunction2D( const int & order,
 
 // 2D version
 // compute B and M  
-PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
+PROXY_HOST_DEVICE int SEMQkGL::computeB(const int & elementNumber,
 		                       const int & order,
 			               arrayIntView     const & nodesList,
 			               arrayRealView    const & nodesCoords,
@@ -432,7 +429,7 @@ PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
 
 // 3D version
 // compute B and M
-PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
+PROXY_HOST_DEVICE int SEMQkGL::computeB(const int & elementNumber,
                                        const int & order,
                                        arrayIntView     const & nodesList,
                                        arrayRealView    const & nodesCoords,
@@ -539,7 +536,7 @@ PROXY_HOST_DEVICE int QkGL::computeB(const int & elementNumber,
 // 2D version
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
 // Marc Durufle Formulae
-PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                               const int & order,
                                               vectorDoubleView const & weights2D,
                                               arrayDoubleView const & dPhi,
@@ -606,7 +603,7 @@ PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 // 3D version
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
 // Marc Durufle Formulae
-PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
+PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                               const int & order,
                                               vectorDoubleView const & weights3D,
                                               arrayDoubleView const & dPhi,
@@ -709,7 +706,7 @@ PROXY_HOST_DEVICE int QkGL::gradPhiGradPhi( const int & nPointsPerElement,
 }
 
 //computeDs
-PROXY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
+PROXY_HOST_DEVICE int SEMQkGL::computeDs(  const int & iFace,
                                           const int & order,
                                           arrayIntView const & faceInfos,
                                           int  numOfBasisFunctionOnFace[],
@@ -777,7 +774,7 @@ PROXY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
   return 0;
 }
 //computeDs
-PROXY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
+PROXY_HOST_DEVICE int SEMQkGL::computeDs(  const int & iFace,
                                           const int & order,
                                           arrayIntView const & faceInfos,
                                           int  numOfBasisFunctionOnFace[],
@@ -813,4 +810,3 @@ PROXY_HOST_DEVICE int QkGL::computeDs(  const int & iFace,
   return 0;
 }
 
-} // namespace FE

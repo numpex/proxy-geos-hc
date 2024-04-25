@@ -1,14 +1,6 @@
-#ifndef SIMPLEMESH_HPP_
-#define SIMPLEMESH_HPP_
+#include "SEMmesh.hpp"
 
-#include <iostream>
-#include <cmath>
-#include "dataType.hpp"
-#include "simpleMesh.hpp"
-
-namespace grid
-{
-simpleMesh::simpleMesh( const int & ex_in, const int & ey_in, const int & ez_in,  
+SEMmesh::SEMmesh( const int & ex_in, const int & ey_in, const int & ez_in,  
 		        const float & lx_in, const float & ly_in,const float & lz_in,
                         const int & order_in)
 {
@@ -28,19 +20,19 @@ simpleMesh::simpleMesh( const int & ex_in, const int & ey_in, const int & ez_in,
   hx=lx/(1.*ex);
   hy=((ey==0)?1:ly/(1.*ey));
   hz=lz/(1.*ez);
-  cout <<"simpleMesh initiliazed\n";
+  cout <<"SEMmesh initiliazed\n";
   cout<<"ex, ey, ez="<<ex<<", "<<ey<<", "<<ez<<endl;
   cout<<"nx, ny, nz="<<nx<<", "<<ny<<", "<<nz<<endl;
 }
 
-int simpleMesh::getNumberOfNodes() const
+int SEMmesh::getNumberOfNodes() const
 {
   int numberOfNodes=(ex*orderx+1)*(ey*ordery+1)*(ez*orderz+1);
   printf("number of nodes %d\n",numberOfNodes);
   return numberOfNodes;
 }
 
-int simpleMesh::getNumberOfElements() const
+int SEMmesh::getNumberOfElements() const
 {
   int numberOfElements=((ey==0)?ex*ez:ex*ey*ez);
   printf("number of element %d\n",numberOfElements);
@@ -48,45 +40,45 @@ int simpleMesh::getNumberOfElements() const
 }
 
 // get number of points per element
-int simpleMesh::getNumberOfPointsPerElement() const
+int SEMmesh::getNumberOfPointsPerElement() const
 {
   return(((ny==1)?(orderx+1)*(orderz+1):(orderx+1)*(ordery+1)*(orderz+1)));
 }
 
 //get number of interior elements
-int simpleMesh::getNumberOfInteriorElements() const
+int SEMmesh::getNumberOfInteriorElements() const
 {return ((ny==1)?(ex-2)*(ez-2):(ex-2)*(ey-2)*(ez-2));}
 
 //get number of interior Nodes
-int simpleMesh::getNumberOfInteriorNodes() const
+int SEMmesh::getNumberOfInteriorNodes() const
 {return ((ny==1)?(nx-2)*(nz-2):(nx-2)*(ny-2)*(nz-2));}
 
 //get nx
-int simpleMesh::getNx() const
+int SEMmesh::getNx() const
 {return nx;}
 
 //get ny
-int simpleMesh::getNy() const
+int SEMmesh::getNy() const
 {return ny;}
 
 //get nz
-int simpleMesh::getNz() const
+int SEMmesh::getNz() const
 {return nz;}
 
 //get dx
-int simpleMesh::getDx() const
+int SEMmesh::getDx() const
 {return hx;}
 
 //get dy
-int simpleMesh::getDy() const
+int SEMmesh::getDy() const
 {return hy;}
 
 //get dz
-int simpleMesh::getDz() const
+int SEMmesh::getDz() const
 {return hz;}
 
 //get coord in one direction
-std::vector<float> simpleMesh::getCoordInOneDirection(const int & order,const int & nCoord, const int & h, const int & nElement) const
+std::vector<float> SEMmesh::getCoordInOneDirection(const int & order,const int & nCoord, const int & h, const int & nElement) const
 {
   std::vector<float> coord( nCoord );
   std::vector<float> xi( order+1 );
@@ -145,7 +137,7 @@ std::vector<float> simpleMesh::getCoordInOneDirection(const int & order,const in
 }
 
 // Initialize nodal coordinates.
-void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayRealView & nodeCoords ) const
+void SEMmesh::nodesCoordinates( const int & numberOfNodes, arrayRealView & nodeCoords ) const
 {
   std::vector<float> coordX( nx );
   std::vector<float> coordY( ny );
@@ -171,7 +163,7 @@ void simpleMesh::nodesCoordinates( const int & numberOfNodes, arrayRealView & no
 }
 
 //  list of global nodes ( vertices) for each element
-void simpleMesh::globalNodesList( const int & numberOfElements, arrayIntView & nodesList ) const
+void SEMmesh::globalNodesList( const int & numberOfElements, arrayIntView & nodesList ) const
 {
    for( int j=0; j<((ey==0)?1:ey); j++ )
    {
@@ -201,7 +193,7 @@ void simpleMesh::globalNodesList( const int & numberOfElements, arrayIntView & n
 
 
 // compute global node to grid  indexes
-int simpleMesh::Itoijk( const int & I, int & i, int & j, int & k ) const
+int SEMmesh::Itoijk( const int & I, int & i, int & j, int & k ) const
 {
   i=I%nx;
   j=int((I%(nx*nz))/nx);
@@ -210,7 +202,7 @@ int simpleMesh::Itoijk( const int & I, int & i, int & j, int & k ) const
 }
 
 // compute global node to grid  indexes
-int simpleMesh::Itoij( const int & I, int & i, int & j ) const
+int SEMmesh::Itoij( const int & I, int & i, int & j ) const
 {
   i=I%nx;
   j=int((I-i)/nx);
@@ -218,7 +210,7 @@ int simpleMesh::Itoij( const int & I, int & i, int & j ) const
 }
 
 // project vector node to grid
-std::vector<std::vector<float>> simpleMesh::projectToGrid( const int numberOfNodes, const std::vector<float> inputVector ) const
+std::vector<std::vector<float>> SEMmesh::projectToGrid( const int numberOfNodes, const std::vector<float> inputVector ) const
 {
   std::vector<vector<float>> grid( nx,std::vector<float> (nz) );
   int i, j;
@@ -232,7 +224,7 @@ std::vector<std::vector<float>> simpleMesh::projectToGrid( const int numberOfNod
 }
 
 // compute element e where (x,y,z) belongs to
-int simpleMesh::getElementNumberFromPoints( const float & x, const float & y, const float & z ) const
+int SEMmesh::getElementNumberFromPoints( const float & x, const float & y, const float & z ) const
 {
   int eX=0, eY=0, eZ=0;
   for( int i=0; i<ex; i++ )
@@ -254,7 +246,7 @@ int simpleMesh::getElementNumberFromPoints( const float & x, const float & y, co
 }
 
 // set model
-void simpleMesh::getModel( const int & numberOfElements, vectorRealView & model ) const
+void SEMmesh::getModel( const int & numberOfElements, vectorRealView & model ) const
 {
 
    for( int j=0; j<((ey==0)?1:ey); j++ )
@@ -280,7 +272,7 @@ void simpleMesh::getModel( const int & numberOfElements, vectorRealView & model 
    }
 }
 //  get list of global interior nodes
-int simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
+int SEMmesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
                                          vectorIntView & listOfInteriorNodes ) const
 {
   int m=0;
@@ -313,7 +305,7 @@ int simpleMesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
 }
 
 // get list of interior Elements
-void simpleMesh::getListOfInteriorElements(vectorIntView & listOfInteriorElements) const
+void SEMmesh::getListOfInteriorElements(vectorIntView & listOfInteriorElements) const
 {
   int m=0;
   if(ey==0)
@@ -346,10 +338,10 @@ void simpleMesh::getListOfInteriorElements(vectorIntView & listOfInteriorElement
 // sort element by color
 // red=0, green=1, blue=2, yellow=3
 // get
-int simpleMesh::getNumberOfElementsByColor() const
+int SEMmesh::getNumberOfElementsByColor() const
 {return ((ey==0)?(ex/2+ex%2)*(ez/2+ez%2):(ex/2+ex%2)*(ey/2+ey%2)*(ez/2+ez%2));}
 //sort
-void simpleMesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayIntView  & listOfElementsByColor) const
+void SEMmesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayIntView  & listOfElementsByColor) const
 {
   // red
   int k=0;
@@ -399,16 +391,16 @@ void simpleMesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayIntVie
 
 
 //get number of boundary Faces
-int simpleMesh::getNumberOfBoundaryFaces() const
+int SEMmesh::getNumberOfBoundaryFaces() const
 {return ((ey==0)?2*(ex+ez):2*(ex*ey+ey*ez+ex*ez));}
 
 // get number of Boundary nodes
-int simpleMesh::getNumberOfBoundaryNodes() const
+int SEMmesh::getNumberOfBoundaryNodes() const
 {return (ey==0?2*(nx+nz)-4:2*((nx-1)*(nz-1)+(nx-1)*(ny-1)+(ny-1)*(ny-1)));}
 
 // list of global indexes
 // this method is sequential only for omp !!!
-void  simpleMesh::getBoundaryFacesInfos(arrayIntView & faceInfos) const
+void  SEMmesh::getBoundaryFacesInfos(arrayIntView & faceInfos) const
 {
   int numFace=0;
   // bottom, j=0, l=0
@@ -465,7 +457,7 @@ void  simpleMesh::getBoundaryFacesInfos(arrayIntView & faceInfos) const
   }
 }
 //  get list of global boundary nodes
-int simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorIntView & listOfBoundaryNodes ) const
+int SEMmesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorIntView & listOfBoundaryNodes ) const
 {
   int k=0;
   //bottom
@@ -499,7 +491,7 @@ int simpleMesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vecto
   return 0;
 }
 // provides a mapping between local node of a face and global node Face:
-void simpleMesh::getLocalFaceNodeToGlobalFaceNode(arrayIntView &localFaceNodeToGlobalFaceNode) const
+void SEMmesh::getLocalFaceNodeToGlobalFaceNode(arrayIntView &localFaceNodeToGlobalFaceNode) const
 {
   int numFace=0;
   int offset;
@@ -589,5 +581,3 @@ void simpleMesh::getLocalFaceNodeToGlobalFaceNode(arrayIntView &localFaceNodeToG
   }
 }
 
-}
-#endif //SIMPLEMESH_HPP_

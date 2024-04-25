@@ -1,47 +1,47 @@
 //************************************************************************
 //   proxy application v.0.0.1
 //
-//  solverBase.hpp: simple 2D acoustive wave equation solver
+//  SEMsolver.hpp: simple 2D acoustive wave equation solver
 //
-//  the solverBase class servers as a base class for the SEM solver
+//  the SEMsolver class servers as a base class for the SEM solver
 //
 //************************************************************************
 
-#ifndef SOLVER_BASE_HPP_
-#define SOLVER_BASE_HPP_
+#ifndef SEM_SOLVER_HPP_
+#define SEM_SOLVER_HPP_
 
-#include    "SEMQkGL.hpp"
-#include    "SEMmesh.hpp"
-#include    "dataType.hpp"
-#include    "omp.h"
-#include    "vector"
+#include "SEMQkGL.hpp"
+#include "SEMmesh.hpp"
+#include "utils.hpp"
 
-class solverBase
+class SEMsolver
 {
 public:
 
-  solverBase(){};
-  ~solverBase(){};
+PROXY_HOST_DEVICE SEMsolver(){};
+PROXY_HOST_DEVICE ~SEMsolver(){};
 
   /**
    * @brief computeFEInit function:
    * init all FE components for computing mass and stiffness matrices
-   * method defines here because shared by all derived classes
    */
-  void computeFEInit ( const int & order,SEMmesh mesh, SEMQkGL Qk);
+  void initFiniteElem(const int & order);
 
-  virtual void computeOneStep( const int & indexTimeStep,
-                               const float & timeSample,
-                               const int & order,
-                               int & i1,
-                               int & i2,
-                               const int & numberOfRHS,
-                               vectorIntView & rhsElement,
-                               arrayRealView & rhsTerm,
-                               arrayRealView & pnGlobal) = 0;
+   /**
+   * @brief computeOneStep function:
+   * init all FE components for computing mass and stiffness matrices
+   */
+  void computeOneStep( const int & indexTimeStep,
+                       const float & timeSample,
+                       const int & order,
+                       int & i1,
+                       int & i2,
+                       const int & numberOfRHS,
+                       vectorIntView & rhsElement,
+                       arrayRealView & rhsTerm,
+                       arrayRealView & pnGlobal);
 
-
-public:
+private:
 
   int i1=0, i2=1;
 
@@ -52,14 +52,11 @@ public:
   int numberOfInteriorNodes;
   int numberOfBoundaryNodes;
   int numberOfBoundaryFaces;
-  const int numberOfColors=4;
 
   //shared arrays
-  int numberOfElementsByColor[4];
-  arrayIntView listOfElementsByColor;
   arrayIntView globalNodesList;
   arrayRealView globalNodesCoords;
-  vectorIntView listOfInteriorNodes;
+  vectorIntView listOfIntVieweriorNodes;
   vectorIntView listOfBoundaryNodes;
   arrayIntView faceInfos;
   arrayIntView localFaceNodeToGlobalFaceNode;
@@ -85,8 +82,5 @@ public:
   vectorRealView yGlobal;
   vectorRealView ShGlobal;
   
-  SEMmesh mesh;
-  SEMQkGL Qk;
-  
 };
-#endif //SOLVER_BASE_HPP_
+#endif //SEM_SOLVER_HPP_
