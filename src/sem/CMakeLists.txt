@@ -18,8 +18,7 @@ message ( "---------------------------------------------------------------------
 set (sem_sources
      finiteElements/SEMQkGL.cpp
      mesh/SEMmesh.cpp
-     solver/solverBase.cpp
-     solver/solver${SOLVER}.cpp
+     solver/SEMsolver.cpp
      main/SEMproxy.cpp
      main/main.cpp)
 

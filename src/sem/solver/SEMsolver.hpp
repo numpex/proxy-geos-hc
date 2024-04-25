@@ -25,7 +25,7 @@ PROXY_HOST_DEVICE ~SEMsolver(){};
    * @brief computeFEInit function:
    * init all FE components for computing mass and stiffness matrices
    */
-  void initFiniteElem(const int & order);
+  void computeFEInit ( const int & order,SEMmesh mesh);
 
    /**
    * @brief computeOneStep function:
@@ -52,10 +52,14 @@ private:
   int numberOfInteriorNodes;
   int numberOfBoundaryNodes;
   int numberOfBoundaryFaces;
+  const int numberOfColors=4;
 
   //shared arrays
+  int numberOfElementsByColor[4];
+  arrayIntView listOfElementsByColor;
   arrayIntView globalNodesList;
   arrayRealView globalNodesCoords;
+  vectorIntView listOfInteriorNodes;
   vectorIntView listOfIntVieweriorNodes;
   vectorIntView listOfBoundaryNodes;
   arrayIntView faceInfos;
@@ -82,5 +86,6 @@ private:
   vectorRealView yGlobal;
   vectorRealView ShGlobal;
   
+  SEMQkGL myQk;
 };
 #endif //SEM_SOLVER_HPP_
