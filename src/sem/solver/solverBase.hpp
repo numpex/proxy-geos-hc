@@ -20,8 +20,8 @@ class solverBase
 {
 public:
 
-  solverBase(){};
-  ~solverBase(){};
+  PROXY_HOST_DEVICE solverBase(){};
+  PROXY_HOST_DEVICE ~solverBase(){};
 
   /**
    * @brief computeFEInit function:
