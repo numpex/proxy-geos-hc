@@ -56,7 +56,7 @@ class SEMQkGL
 		                           const int & dimension,
                                            vectorDoubleView const & weights,
                                            arrayDoubleView const & dPhi,
-                                           float const B[][4],
+                                           float const B[][COL],
                                            float const pnLocal[],
                                            float R[],
                                            float Y[]) const;

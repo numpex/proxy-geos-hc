@@ -87,6 +87,7 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-tmp*yGlobal[I]/massMatrixGlobal[I];
   } );
 
+  if (DIMENSION==2) {
   Kokkos::parallel_for( range_policy(0,myMeshinfo.numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA ( const int i )
   {
     ShGlobal[i]=0;
@@ -121,7 +122,7 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     float MmSh=massMatrixGlobal[I]-myMeshinfo.myTimeStep*ShGlobal[i]*0.5;
     pnGlobal(I,i1)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,i2)-MmSh*pnGlobal(I,i1)-tmp*yGlobal[I]);
   } );
-
+  }
   Kokkos::fence();
 }
 

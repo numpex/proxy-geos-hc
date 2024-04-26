@@ -44,7 +44,7 @@ option (addFD "add finite difference proxy directory" OFF)
 #---------------------------------------------------
 # Option to test SEM-proxy 2D case (default is 3D)
 #---------------------------------------------------
-option (SEM2D "test SEM-proxy 2D case" OFF)
+option (SEM2D "test SEM-proxy 2D case" ON)
 
 add_subdirectory(src)
 
