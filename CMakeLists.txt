@@ -38,9 +38,13 @@ option (USE_CALIPER "Use CALIPER for profiling" OFF)
 # Tests directory to perform differen tests before 
 # integration into proxy apps
 #---------------------------------------------------
-option (addTests " add Tests directory" OFF)
-option (addFD " add finite difference proxy directory" OFF)
+option (addTests "add Tests directory" OFF)
+option (addFD "add finite difference proxy directory" OFF)
 
+#---------------------------------------------------
+# Option to test SEM-proxy 2D case (default is 3D)
+#---------------------------------------------------
+option (SEM2D "test SEM-proxy 2D case" OFF)
 
 add_subdirectory(src)
 

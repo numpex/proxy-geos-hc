@@ -75,8 +75,6 @@ private:
   // get quadrature points and weights
   vectorDoubleView quadraturePoints;
   vectorDoubleView weights;
-  vectorDoubleView weights2D;
-  vectorDoubleView weights3D;
 
   // get basis function and corresponding derivatives
   arrayDoubleView basisFunction1D;

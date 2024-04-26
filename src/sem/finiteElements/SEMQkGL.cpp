@@ -314,36 +314,6 @@ void SEMQkGL::getDerivativeBasisFunction1D( int order, vectorDoubleView const & 
     }
   }
 }
-// compute 2D gauss-lobatto weights
-void SEMQkGL::getGaussLobattoWeights2D( const int & order,
-                                     vectorDoubleView const & weights,
-                                     vectorDoubleView const & W )const
-{
-  for( int j=0; j<order+1; j++ )
-  {
-    for( int i=0; i<order+1; i++ )
-    {
-      W[i+j*(order+1)]= weights[i]*weights[j];
-    }
-  }
-}
-
-// compute 3D gauss-lobatto weights
-void SEMQkGL::getGaussLobattoWeights3D( const int & order,
-                                     vectorDoubleView const & weights,
-                                     vectorDoubleView const & W )const
-{
-  for( int k=0; k<order+1; k++ )
-  {
-     for( int j=0; j<order+1; j++ )
-     {
-       for( int i=0; i<order+1; i++ )
-       {
-         W[i+j*(order+1)+k*(order+1)*(order+1)]= weights[i]*weights[j]*weights[k];
-       }
-     }
-  }
-}
 
 void SEMQkGL::getBasisFunction2D( const int & order, 
                                arrayDoubleView const & a,
@@ -365,18 +335,19 @@ void SEMQkGL::getBasisFunction2D( const int & order,
   }
 }
 
-// 2D version
 // compute B and M  
-PROXY_HOST_DEVICE int SEMQkGL::computeB(const int & elementNumber,
+PROXY_HOST_DEVICE void SEMQkGL::computeB(const int & elementNumber,
 		                       const int & order,
+		                       const int & dimension,
+                                       vectorDoubleView const & weights,
 			               arrayIntView     const & nodesList,
 			               arrayRealView    const & nodesCoords,
-                                       vectorDoubleView const & weights2D,
                                        arrayDoubleView  const & dPhi,
 				       float massMatrixLocal[],
-                                       float B[][4] ) const
+                                       float B[][COL] ) const
 {
-  for (int i2=0;i2<order+1;i2++)
+   if ( dimension==2 ) {
+   for (int i2=0;i2<order+1;i2++)
    {
        for (int i1=0;i1<order+1;i1++)
        {
@@ -421,23 +392,10 @@ PROXY_HOST_DEVICE int SEMQkGL::computeB(const int & elementNumber,
           B[i][2]=(invJac2*transpInvJac0+invJac3*transpInvJac2)*detJM1;
           B[i][3]=(invJac2*transpInvJac1+invJac3*transpInvJac3)*detJM1;
           //M
-          massMatrixLocal[i]=weights2D[i]*detJ;
+          massMatrixLocal[i]=weights[i1]*weights[i2]*detJ;
        }
-   }
-   return 0;
-}
-
-// 3D version
-// compute B and M
-PROXY_HOST_DEVICE int SEMQkGL::computeB(const int & elementNumber,
-                                       const int & order,
-                                       arrayIntView     const & nodesList,
-                                       arrayRealView    const & nodesCoords,
-                                       vectorDoubleView const & weights3D,
-                                       arrayDoubleView  const & dPhi,
-                                       float massMatrixLocal[],
-                                       float B[][6] ) const
-{
+  }}
+  else { //3D case
   for (int i3=0;i3<order+1;i3++)
   {
       for (int i2=0;i2<order+1;i2++)
@@ -526,25 +484,25 @@ PROXY_HOST_DEVICE int SEMQkGL::computeB(const int & elementNumber,
               B[i][5]=(invJac10*transpInvJac02+invJac11*transpInvJac12+invJac12*transpInvJac22)*detJM1;//B23,B32
 
               //M
-              massMatrixLocal[i]=weights3D[i]*detJ;
+              massMatrixLocal[i]=weights[i1]*weights[i2]*weights[i3]*detJ;
           }
       }
-  }
-  return 0;
+  }}
 }
 
-// 2D version
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
 // Marc Durufle Formulae
-PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
+PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                               const int & order,
-                                              vectorDoubleView const & weights2D,
+		                              const int & dimension,
+                                              vectorDoubleView const & weights,
                                               arrayDoubleView const & dPhi,
-                                              float const  B[][4],
+                                              float const  B[][COL],
 			                      float const pnLocal[],
                                               float R[],
 	                                      float Y[]) const
 {
+  if ( dimension==2 ) {
   // B11
   for( int i2=0; i2<order+1; i2++ )
   {
@@ -559,7 +517,7 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
         int j=j1+i2*(order+1);
         for( int m=0; m<order+1; m++ )
         {
-          R[j]+=weights2D[m+i2*(order+1)]*(B[m+i2*(order+1)][0]*dPhi(i1,m)*dPhi(j1,m));
+          R[j]+=weights[m]*weights[i2]*(B[m+i2*(order+1)][0]*dPhi(i1,m)*dPhi(j1,m));
         }
       }
       // B21
@@ -568,7 +526,7 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-          R[j]+=weights2D[i1+j2*(order+1)]*(B[i1+j2*(order+1)][1]*dPhi(i2,j2)*dPhi(j1,i1));
+          R[j]+=weights[i1]*weights[j2]*(B[i1+j2*(order+1)][1]*dPhi(i2,j2)*dPhi(j1,i1));
         }
       }
       // B12
@@ -577,7 +535,7 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
         for( int j2=0; j2<order+1; j2++ )
         {
           int j=j1+j2*(order+1);
-          R[j]+=weights2D[i2+j1*(order+1)]*(B[i2+j1*(order+1)][2]*dPhi(i1,j1)*dPhi(j2,i2));
+          R[j]+=weights[i2]*weights[j1]*(B[i2+j1*(order+1)][2]*dPhi(i1,j1)*dPhi(j2,i2));
         }
       }
       // B22
@@ -586,7 +544,7 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
         int j=i1+j2*(order+1);
         for( int n=0; n<order+1; n++ )
         {
-          R[j]+=weights2D[i1+n*(order+1)]*(B[i1+n*(order+1)][3]*dPhi(i2,n)*dPhi(j2,n));
+          R[j]+=weights[i1]*weights[n]*(B[i1+n*(order+1)][3]*dPhi(i2,n)*dPhi(j2,n));
         }
       }
       int i=i1+i2*(order+1);
@@ -596,22 +554,8 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
          Y[i]+=R[j]*pnLocal[j];
       }
     }
-  }
-  return 0;
-}
-
-// 3D version
-// compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
-// Marc Durufle Formulae
-PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
-                                              const int & order,
-                                              vectorDoubleView const & weights3D,
-                                              arrayDoubleView const & dPhi,
-                                              float const B[][6],
-					      float const pnLocal[],
-                                              float R[],
-	                                      float Y[]) const
-{
+  }}
+  else{
   int orderPow2=(order+1)*(order+1);
   for (int i3=0;i3<order+1;i3++)
   {
@@ -632,7 +576,7 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                   for( int l=0; l<order+1; l++ )
                   {
                       int ll=l+i2*(order+1)+i3*orderPow2;
-                      R[j]+=weights3D[ll]*(B[ll][0]*dPhi(i1,l)*dPhi(j1,l));
+                      R[j]+=weights[l]*weights[i2]*weights[i3]*(B[ll][0]*dPhi(i1,l)*dPhi(j1,l));
                   }
               }
               //B22
@@ -642,7 +586,7 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                   for( int m=0; m<order+1; m++ )
                   {
                       int mm=i1+m*(order+1)+i3*orderPow2;
-                      R[j]+=weights3D[mm]*(B[mm][1]*dPhi(i2,m)*dPhi(j2,m));
+                      R[j]+=weights[i1]*weights[m]*weights[i3]*(B[mm][1]*dPhi(i2,m)*dPhi(j2,m));
                   }
               }
               //B33
@@ -652,7 +596,7 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                   for( int n=0; n<order+1; n++ )
                   {
                       int nn=i1+i2*(order+1)+n*orderPow2;
-                      R[j]+=weights3D[nn]*(B[nn][2]*dPhi(i3,n)*dPhi(j3,n));
+                      R[j]+=weights[i1]*weights[i2]*weights[n]*(B[nn][2]*dPhi(i3,n)*dPhi(j3,n));
                   }
               }
               // B12,B21 (B[][3])
@@ -663,8 +607,8 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                   int j=j1+j2*(order+1)+i3*orderPow2;
                   int k=j1+i2*(order+1)+i3*orderPow2;
                   int l=i1+j2*(order+1)+i3*orderPow2;
-                  R[j]+=weights3D[k]*(B[k][3]*dPhi(i1,j1)*dPhi(j2,i2))+
-                        weights3D[l]*(B[l][3]*dPhi(j1,i1)*dPhi(i2,j2));
+                  R[j]+=weights[j1]*weights[i2]*weights[i3]*(B[k][3]*dPhi(i1,j1)*dPhi(j2,i2))+
+                        weights[i1]*weights[j2]*weights[i3]*(B[l][3]*dPhi(j1,i1)*dPhi(i2,j2));
                 }
               }
               // B13,B31 (B[][4])
@@ -675,8 +619,8 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                   int j=j1+i2*(order+1)+i3*orderPow2;
                   int k=j1+i2*(order+1)+i3*orderPow2;
                   int l=j1+i2*(order+1)+j3*orderPow2;
-                  R[j]+=weights3D[k]*(B[k][4]*dPhi(j1,i1)*dPhi(j3,i3))+
-                        weights3D[l]*(B[l][4]*dPhi(j1,i1)*dPhi(i3,j3));
+                  R[j]+=weights[j1]*weights[i2]*weights[i3]*(B[k][4]*dPhi(j1,i1)*dPhi(j3,i3))+
+                        weights[j1]*weights[i2]*weights[j3]*(B[l][4]*dPhi(j1,i1)*dPhi(i3,j3));
 	        }
               }
               // B23,B32 (B[][5])
@@ -687,8 +631,8 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                   int j=i1+j2*(order+1)+j3*orderPow2;
                   int k=i1+j2*(order+1)+i3*orderPow2;
                   int l=i1+i2*(order+1)+j3*orderPow2;
-                  R[j]+=weights3D[k]*(B[k][5]*dPhi(i2,i2)*dPhi(j3,i3))+
-                        weights3D[l]*(B[l][5]*dPhi(j2,i2)*dPhi(i3,j3));
+                  R[j]+=weights[i1]*weights[j2]*weights[i3]*(B[k][5]*dPhi(i2,i2)*dPhi(j3,i3))+
+                        weights[i1]*weights[i2]*weights[j3]*(B[l][5]*dPhi(j2,i2)*dPhi(i3,j3));
                 }
               }
 
@@ -701,8 +645,7 @@ PROXY_HOST_DEVICE int SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
 
           }
       }
-  }
-  return 0;
+  }}
 }
 
 //computeDs

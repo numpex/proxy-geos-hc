@@ -13,7 +13,7 @@ void SEMsolver::computeFEInit( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
 {
   order = myMeshinfo.myOrderNumber;
   tmp=myMeshinfo.myTimeStep * myMeshinfo.myTimeStep;
-  numberOfPointsPerElement=(order+1)*(order+1);
+  numberOfPointsPerElement=pow((order+1),DIMENSION);
 
   allocateFEarrays( myMeshinfo );
   initFEarrays( myMeshinfo, mesh);
@@ -47,11 +47,11 @@ void SEMsolver::computeOneStep(  const int & timeStep,
   Kokkos::parallel_for( myMeshinfo.numberOfElements, KOKKOS_CLASS_LAMBDA ( const int e ) 
   {
     // start parallel section
-    float B[36][4];
-    float R[36];
-    float massMatrixLocal[36];
-    float pnLocal[36];
-    float Y[36];
+    float B[ROW][COL];
+    float R[ROW];
+    float massMatrixLocal[ROW];
+    float pnLocal[ROW];
+    float Y[ROW];
 
     // get pnGlobal to pnLocal
     for( int i=0; i<numberOfPointsPerElement; i++ )
@@ -61,10 +61,9 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     }
 
     // compute Jacobian, massMatrix and B
-    int o=myQk.computeB( e,order,globalNodesList,globalNodesCoords,weights2D,
-                       derivativeBasisFunction1D,massMatrixLocal,B );
+    myQk.computeB( e,order,DIMENSION, weights, globalNodesList,globalNodesCoords,derivativeBasisFunction1D,massMatrixLocal,B );
     // compute stifness  matrix ( durufle's optimization)
-    int p=myQk.gradPhiGradPhi( numberOfPointsPerElement, order, weights2D, derivativeBasisFunction1D, B, pnLocal, R, Y );
+    myQk.gradPhiGradPhi( numberOfPointsPerElement, order, DIMENSION,weights,derivativeBasisFunction1D, B, pnLocal, R, Y );
     // get pnGlobal to pnLocal
     for( int i=0; i<numberOfPointsPerElement; i++ )
     {
@@ -163,8 +162,6 @@ void SEMsolver::initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
   myQk.gaussLobattoQuadraturePoints( order, quadraturePoints );
   // get gauss-lobatto weights
   myQk.gaussLobattoQuadratureWeights( order, weights );
-  myQk.getGaussLobattoWeights2D( order, weights, weights2D );
-  myQk.getGaussLobattoWeights3D( order, weights, weights3D );
   // get basis function and corresponding derivatives
   myQk.getBasisFunction1D( order, quadraturePoints,basisFunction1D );
   myQk.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
@@ -186,8 +183,6 @@ void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
   model=allocateVector<vectorRealView>(myMeshinfo.numberOfElements);
   quadraturePoints=allocateVector<vectorDoubleView>(order+1);
   weights=allocateVector<vectorDoubleView>(order+1);
-  weights2D=allocateVector<vectorDoubleView>((order+1)*(order+1));
-  weights3D=allocateVector<vectorDoubleView>((order+1)*(order+1)*(order+1));
   basisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
   derivativeBasisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
   basisFunction2D=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);

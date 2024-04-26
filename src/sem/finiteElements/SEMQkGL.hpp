@@ -32,63 +32,34 @@ class SEMQkGL
   void getDerivativeBasisFunction1D( int order, vectorDoubleView const & quadraturePoints, 
                                                 arrayDoubleView const & derivativeBasisFunction1D ) const;
 
-  // compute 2D gauss-lobatto weights
-  void getGaussLobattoWeights2D( const int & order,
-                                 vectorDoubleView const & weights,
-                                 vectorDoubleView const & W )const;
-
-  // compute 3D gauss-lobatto weights
-  void getGaussLobattoWeights3D( const int & order,
-                                 vectorDoubleView const & weights,
-                                 vectorDoubleView const & W )const;
-
   // get  2d shape Functions  for all quadrature points
   void getBasisFunction2D( const int & order,
                            arrayDoubleView const & a,
                            arrayDoubleView const & b,
                            arrayDoubleView const & c) const;
 
-  //2D
   // compute B and M
-  PROXY_HOST_DEVICE int computeB( const int & elementNumber,
+  PROXY_HOST_DEVICE void computeB( const int & elementNumber,
                                     const int & order,
+		                    const int & dimension,
+                                    vectorDoubleView const & weights,
                                     arrayIntView     const & nodesList,
                                     arrayRealView    const & nodesCoords,
-                                    vectorDoubleView const & weights2D,
                                     arrayDoubleView  const & dPhi,
                                     float massMatrixLocal[],
-                                    float   B[][4] ) const;
-  //3D
-  PROXY_HOST_DEVICE int computeB( const int & elementNumber,
-                                    const int & order,
-                                    arrayIntView     const & nodesList,
-                                    arrayRealView    const & nodesCoords,
-                                    vectorDoubleView const & weights3D,
-                                    arrayDoubleView  const & dPhi,
-                                    float massMatrixLocal[],
-                                    float   B[][6] ) const;
-  // 2D
+                                    float   B[][COL] ) const;
+
   // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
   // Marc Durufle Formulae
-  PROXY_HOST_DEVICE int  gradPhiGradPhi( const int & nPointsPerElement,
+  PROXY_HOST_DEVICE void gradPhiGradPhi( const int & nPointsPerElement,
                                            const int & order,
-                                           vectorDoubleView const & weights2D,
+		                           const int & dimension,
+                                           vectorDoubleView const & weights,
                                            arrayDoubleView const & dPhi,
                                            float const B[][4],
                                            float const pnLocal[],
                                            float R[],
                                            float Y[]) const;
-  // 3D version
-  // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
-  // Marc Durufle Formulae
-  PROXY_HOST_DEVICE int gradPhiGradPhi( const int & nPointsPerElement,
-                                      const int & order,
-                                      vectorDoubleView const & weights3D,
-                                      arrayDoubleView const & dPhi,
-                                      float const B[][6],
-                                      float const pnLocal[],
-                                      float R[],
-                                      float Y[]) const;
   // compute dx
   PROXY_HOST_DEVICE int  computeDs( const int & iFace,
                                       const int & order,

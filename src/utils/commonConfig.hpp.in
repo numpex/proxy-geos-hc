@@ -28,6 +28,9 @@
 // Enables use of ENABLE_CUDA (CMake option)
 #cmakedefine ENABLE_CUDA
 
+// Enables use of SEM2D (CMake option)
+#cmakedefine SEM2D 
+
 #endif
 
 

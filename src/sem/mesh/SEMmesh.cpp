@@ -9,10 +9,10 @@ SEMmesh::SEMmesh( const int & ex_in, const int & ey_in, const int & ez_in,
   orderz=order_in;
   order=order_in;
   ex=ex_in;
-  ey=ey_in;
+  ey=ey_in*ZEROED2D;
   ez=ez_in;
   lx=lx_in;
-  ly=ly_in;
+  ly=ly_in*ZEROED2D;
   lz=lz_in;
   nx=ex_in*orderx+1;
   ny=((ey==0)?1:ey_in*ordery+1);
