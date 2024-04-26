@@ -31,7 +31,8 @@
 
 // define Macros for loops
 #if defined (USE_RAJA)
-  #define LOOPHEAD(Range, Iterator) 
+  #define LOOPHEAD(Range, Iterator)\
+    RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, Range),  [=] LVARRAY_HOST_DEVICE  ( int Iterator ) {
   #define LOOPEND   });
 #elif defined (USE_KOKKOS)
   #define LOOPHEAD(Range, Iterator) Kokkos::parallel_for( Range, KOKKOS_CLASS_LAMBDA ( const int Iterator ){
@@ -48,9 +49,12 @@
   #define LOOPEND   }
 #endif
 
-
 // define atomic add operation
 #if defined (USE_RAJA)
+  #define ATOMICADD(ADD1,ADD2) RAJA::atomicAdd< deviceAtomicPolicy >(&ADD1,ADD2);
+  #define FENCE\
+  if(timeStep%100==0)\
+     RAJA::forall< RAJA::seq_exec>( RAJA::RangeSegment( 0, myMeshinfo.numberOfNodes ), [pnGlobal] LVARRAY_HOST_DEVICE ( int i ){});
 #elif defined (USE_KOKKOS)
   #define ATOMICADD(ADD1,ADD2) Kokkos::atomic_add(&ADD1,ADD2)
   #define FENCE Kokkos::fence();

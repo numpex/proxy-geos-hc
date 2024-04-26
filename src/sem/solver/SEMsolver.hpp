@@ -87,6 +87,36 @@ private:
   vectorRealView massMatrixGlobal;
   vectorRealView yGlobal;
   vectorRealView ShGlobal;
+
+#ifdef USE_RAJA
+   //shared arrays
+  arrayInt h_globalNodesList;
+  arrayReal h_globalNodesCoords;
+  vectorInt h_listOfInteriorNodes;
+  vectorInt h_listOfIntVieweriorNodes;
+  vectorInt h_listOfBoundaryNodes;
+  arrayInt h_faceInfos;
+  arrayInt h_localFaceNodeToGlobalFaceNode;
   
+  // get model
+  vectorReal h_model;
+
+  // get quadrature points and weights
+  vectorDouble h_quadraturePoints;
+  vectorDouble h_weights;
+
+  // get basis function and corresponding derivatives
+  arrayDouble h_basisFunction1D;
+  arrayDouble h_derivativeBasisFunction1D;
+  arrayDouble h_basisFunction2D;
+  arrayDouble h_derivativeBasisFunction2DX;
+  arrayDouble h_derivativeBasisFunction2DY;
+
+  //shared arrays
+  vectorReal h_massMatrixGlobal;
+  vectorReal h_yGlobal;
+  vectorReal h_ShGlobal;
+#endif
+ 
 };
 #endif //SEM_SOLVER_HPP_

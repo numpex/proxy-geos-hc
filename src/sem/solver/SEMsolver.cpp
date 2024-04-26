@@ -167,6 +167,47 @@ void SEMsolver::initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
 
 void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
 {
+  #ifdef USE_RAJA
+  h_globalNodesList=allocateArray2D<arrayInt>(myMeshinfo.numberOfElements,myMeshinfo.numberOfPointsPerElement);
+  h_listOfInteriorNodes=allocateVector<vectorInt>(myMeshinfo.numberOfInteriorNodes);
+  h_globalNodesCoords=allocateArray2D<arrayReal>(myMeshinfo.numberOfNodes,3);
+  h_listOfBoundaryNodes=allocateVector<vectorInt>(myMeshinfo.numberOfBoundaryNodes);
+  h_faceInfos=allocateArray2D<arrayInt>(myMeshinfo.numberOfBoundaryFaces,2+(order+1));
+  h_localFaceNodeToGlobalFaceNode=allocateArray2D<arrayInt>(myMeshinfo.numberOfBoundaryFaces, order+1 );
+  h_model=allocateVector<vectorReal>(myMeshinfo.numberOfElements);
+  h_quadraturePoints=allocateVector<vectorDouble>(order+1);
+  h_weights=allocateVector<vectorDouble>(order+1);
+  h_basisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1);
+  h_derivativeBasisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1);
+  h_basisFunction2D=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
+  h_derivativeBasisFunction2DX=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
+  h_derivativeBasisFunction2DY=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
+  h_massMatrixGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes );
+  h_yGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes );
+  h_ShGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfBoundaryNodes );
+
+  //get Views
+  globalNodesList=h_globalNodesList.toView();
+  listOfInteriorNodes=h_listOfInteriorNodes.toView();
+  globalNodesCoords=h_globalNodesCoords.toView();
+  listOfBoundaryNodes=h_listOfBoundaryNodes.toView();
+  faceInfos=h_faceInfos.toView();
+  localFaceNodeToGlobalFaceNode=h_localFaceNodeToGlobalFaceNode.toView();
+  model=h_model.toView();
+  quadraturePoints=h_quadraturePoints.toView();
+  weights=h_weights.toView();
+  basisFunction1D=h_basisFunction1D.toView();
+  derivativeBasisFunction1D=h_derivativeBasisFunction1D.toView();
+  basisFunction2D=h_basisFunction2D.toView();
+  derivativeBasisFunction2DX=h_derivativeBasisFunction2DX.toView();
+  derivativeBasisFunction2DY=h_derivativeBasisFunction2DY.toView();
+  //sharedarrays//sharedarrays
+  massMatrixGlobal=h_massMatrixGlobal.toView();
+  yGlobal=h_yGlobal.toView();
+  ShGlobal=h_ShGlobal.toView();
+
+  #else
+
   //interior elements
   globalNodesList=allocateArray2D<arrayIntView>(myMeshinfo.numberOfElements,myMeshinfo.numberOfPointsPerElement);
   listOfInteriorNodes=allocateVector<vectorIntView>(myMeshinfo.numberOfInteriorNodes);
@@ -187,6 +228,7 @@ void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
   yGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfNodes );
   ShGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfBoundaryNodes );
 
+  #endif
 }
 
 
