@@ -12,6 +12,9 @@
 void SEMsolver::computeFEInit( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
 {
   order = myMeshinfo.myOrderNumber;
+  tmp=myMeshinfo.myTimeStep * myMeshinfo.myTimeStep;
+  numberOfPointsPerElement=(order+1)*(order+1);
+
   allocateFEarrays( myMeshinfo );
   initFEarrays( myMeshinfo, mesh);
 
@@ -28,8 +31,6 @@ void SEMsolver::computeOneStep(  const int & timeStep,
 {
 
   // update pressure @ boundaries;
-  float tmp=myMeshinfo.myTimeStep * myMeshinfo.myTimeStep;
-
   Kokkos::parallel_for( myMeshinfo.numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
   {
     massMatrixGlobal[i]=0;
@@ -43,7 +44,6 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     pnGlobal(nodeRHS,i2)+=tmp*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   });
  
-  int numberOfPointsPerElement=(order+1)*(order+1);
   Kokkos::parallel_for( myMeshinfo.numberOfElements, KOKKOS_CLASS_LAMBDA ( const int e ) 
   {
     // start parallel section
