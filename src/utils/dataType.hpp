@@ -31,7 +31,6 @@
         return const_cast<T &> (data[index]);
     }
 
-
     int size(){return this->size();}
 
   private:
@@ -46,6 +45,7 @@
 
     std::vector< T > & operator[]( int index ){return data[index];}
     T& operator()(int row, int col) {return data[row][col];}
+    T& operator()(int row, int col) const {return const_cast<T &> (data[row][col]);}
 
   private:
     std::vector< std::vector< T > > data;

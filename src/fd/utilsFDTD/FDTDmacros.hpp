@@ -106,9 +106,14 @@ constexpr size_t greater_of_squarest_factor_pair(size_t n)
   #define LOOP3DHEAD(x3,y3,z3,x4,y4,z4) RAJANestedLoop(x3,y3,z3,x4,y4,z4) {
 #elif defined (USE_KOKKOS)
   #define LOOP3DHEAD(x3,y3,z3,x4,y4,z4) Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({z3,x3,y3},{z4,x4,y4}),KOKKOS_LAMBDA(int k,int i,int j) {
-#else
+#elif defined (USE_OMP)
    #define LOOP3DHEAD(x3,y3,z3,x4,y4,z4)\
    _Pragma("omp parallel for collapse(3)")\
+      for (int i = x3; i < x4; ++i){\
+          for (int j = y3; j < y4; ++j){\
+              for (int k = z3; k < z4; ++k){
+#else
+   #define LOOP3DHEAD(x3,y3,z3,x4,y4,z4)\
       for (int i = x3; i < x4; ++i){\
           for (int j = y3; j < y4; ++j){\
               for (int k = z3; k < z4; ++k){

@@ -31,21 +31,18 @@ void SEMsolver::computeOneStep(  const int & timeStep,
 {
 
   // update pressure @ boundaries;
-  Kokkos::parallel_for( myMeshinfo.numberOfNodes, KOKKOS_CLASS_LAMBDA ( const int i )
-  {
+  LOOPHEAD( myMeshinfo.numberOfNodes, i)
     massMatrixGlobal[i]=0;
     yGlobal[i]=0;
-  } );
+  LOOPEND
 
   // update pnGLobal with right hade side
-  Kokkos::parallel_for( myMeshinfo.myNumberOfRHS,KOKKOS_CLASS_LAMBDA (const int i)
-  {
+  LOOPHEAD( myMeshinfo.myNumberOfRHS, i)
     int nodeRHS=globalNodesList(rhsElement[i],0);
     pnGlobal(nodeRHS,i2)+=tmp*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
-  });
+  LOOPEND
  
-  Kokkos::parallel_for( myMeshinfo.numberOfElements, KOKKOS_CLASS_LAMBDA ( const int e ) 
-  {
+  LOOPHEAD( myMeshinfo.numberOfElements, e)
     // start parallel section
     float B[ROW][COL];
     float R[ROW];
@@ -75,26 +72,23 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     {
       int gIndex=globalNodesList(e,i);
       massMatrixLocal[i]/=(model[e]*model[e]);
-      Kokkos::atomic_add(&massMatrixGlobal[gIndex],massMatrixLocal[i]);
-      Kokkos::atomic_add(&yGlobal[gIndex],Y[i]);
+      ATOMICADD( massMatrixGlobal[gIndex], massMatrixLocal[i] );
+      ATOMICADD( yGlobal[gIndex], Y[i]);
     } 
-  });
+  LOOPEND
 
   // update pressure
-  Kokkos::parallel_for( range_policy(0,myMeshinfo.numberOfInteriorNodes), KOKKOS_CLASS_LAMBDA ( const int i )
-  {
+  LOOPHEAD( myMeshinfo.numberOfInteriorNodes, i)
     int I=listOfInteriorNodes[i];
     pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-tmp*yGlobal[I]/massMatrixGlobal[I];
-  } );
+  LOOPEND
 
   if (DIMENSION==2) {
-  Kokkos::parallel_for( range_policy(0,myMeshinfo.numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA ( const int i )
-  {
+  LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i)
     ShGlobal[i]=0;
-  } );
+  LOOPEND
   
-  Kokkos::parallel_for (myMeshinfo.numberOfBoundaryFaces, KOKKOS_CLASS_LAMBDA (const int iFace)
-  {
+  LOOPHEAD( myMeshinfo.numberOfBoundaryFaces, iFace)
     //get ds
     float ds[6];
     float Sh[6];
@@ -111,19 +105,18 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     {
       int gIndexFaceNode=localFaceNodeToGlobalFaceNode(iFace,i);
       Sh[i]=weights[i]*ds[i]/(model[faceInfos(iFace,0)]);
-      Kokkos::atomic_add(&ShGlobal[gIndexFaceNode],Sh[i]);
+      ATOMICADD(ShGlobal[gIndexFaceNode], Sh[i]);
     }
-  } );
+  LOOPEND
 
-  Kokkos::parallel_for( range_policy(0,myMeshinfo.numberOfBoundaryNodes), KOKKOS_CLASS_LAMBDA  ( const int i )
-  {
+  LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i)
     int I=listOfBoundaryNodes[i];
     float invMpSh=1/(massMatrixGlobal[I]+myMeshinfo.myTimeStep*ShGlobal[i]*0.5);
     float MmSh=massMatrixGlobal[I]-myMeshinfo.myTimeStep*ShGlobal[i]*0.5;
     pnGlobal(I,i1)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,i2)-MmSh*pnGlobal(I,i1)-tmp*yGlobal[I]);
-  } );
+  LOOPEND
   }
-  Kokkos::fence();
+  FENCE
 }
 
 
