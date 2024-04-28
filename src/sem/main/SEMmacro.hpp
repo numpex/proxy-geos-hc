@@ -63,3 +63,23 @@
   #define FENCE 
 #endif
 
+// create views only for RAJA
+#if defined (USE_RAJA)
+  #define CREATEVIEWS \
+  vectorRealView massMatrixGlobal=h_massMatrixGlobal.toView(); \
+  vectorRealView yGlobal=h_yGlobal.toView(); \
+  vectorRealView ShGlobal=h_ShGlobal.toView(); \
+  arrayIntView globalNodesList=h_globalNodesList.toView(); \
+  vectorRealView model=h_model.toView(); \
+  vectorIntView listOfInteriorNodes=h_listOfInteriorNodes.toView(); \
+  vectorIntView listOfBoundaryNodes=h_listOfBoundaryNodes.toView(); \
+  arrayIntView faceInfos=h_faceInfos.toView(); \
+  arrayIntView localFaceNodeToGlobalFaceNode=h_localFaceNodeToGlobalFaceNode.toView(); \
+  vectorDoubleView weights=h_weights.toView(); \
+  arrayRealView globalNodesCoords=h_globalNodesCoords.toView(); \
+  arrayDoubleView derivativeBasisFunction1D=h_derivativeBasisFunction1D.toView(); \
+  arrayDoubleView derivativeBasisFunction2DX=h_derivativeBasisFunction2DX.toView(); \
+  arrayDoubleView derivativeBasisFunction2DY=h_derivativeBasisFunction2DY.toView();
+#else
+  #define CREATEVIEWS
+#endif

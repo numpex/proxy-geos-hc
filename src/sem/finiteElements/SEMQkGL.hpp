@@ -2,6 +2,7 @@
 #define SEMQKGL_HPP_
 
 #include "dataType.hpp"
+#include "SEMmacro.hpp"
 using namespace std;
 
 /**

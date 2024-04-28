@@ -7,7 +7,7 @@
 #include <iostream> 
 #include <vector> 
 
-#include "commonMacro.hpp"
+#include "commonConfig.hpp"
 
 #ifdef USE_VECTOR
 
@@ -208,6 +208,20 @@
                                               std::ptrdiff_t,
                                               LvArray::ChaiBuffer >;
   
+  template<class T>
+  T allocateVector(int n1, const char* name)
+  {
+     std::cout<<"allocate vector: "<<name<<": of size "<<n1<<std::endl;
+     T vect(n1);
+    return vect;
+  }
+  template<class T>
+  T allocateArray2D(int n1, int n2,const char* name)
+  {
+    std::cout<<"allocate array: "<<name<<": of size "<<n1<<", "<<n2<<std::endl;
+    T array(n1, n2);
+    return array;
+  }
 
   template<class T>
   T allocateVector(int n1)
