@@ -582,7 +582,7 @@ void SEMmesh::getLocalFaceNodeToGlobalFaceNode(arrayIntView &localFaceNodeToGlob
 
 }
 // save snapshot
-void SEMmesh::saveSnapShot( const int indexTimeStep, const int i1, arrayRealView pnGlobal) const
+void SEMmesh::saveSnapShot( const int indexTimeStep, const int i1, arrayRealView const & u) const
 {
 
   int nx=getNx();
@@ -597,7 +597,7 @@ void SEMmesh::saveSnapShot( const int indexTimeStep, const int i1, arrayRealView
   printf(" nx, ny/2-1, nz %d %d %d offset=%d\n",nx,ny/2-1,nz, offset);
   for( int i = offset; i< offset+numberOfNodes; i++ )
   {
-    inputVector[i-offset]=pnGlobal(i,i1);
+    inputVector[i-offset]=u(i,i1);
   }
   std::vector<std::vector<float>> grid=projectToGrid( numberOfNodes, inputVector );
   fstream snapFile;

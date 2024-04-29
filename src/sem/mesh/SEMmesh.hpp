@@ -110,6 +110,6 @@ public:
   vector<vector<float>> projectToGrid( const int numberOfNodes, const vector<float> inputVector ) const;
 
   // save snapshot
-  void saveSnapShot( const int indexTimeStep, const int i1, arrayRealView pnGlobal ) const;
+  void saveSnapShot( const int indexTimeStep, const int i1, arrayRealView const & u ) const;
 };
 #endif //SEM_MESH_
