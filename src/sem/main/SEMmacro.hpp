@@ -77,9 +77,7 @@
   arrayIntView localFaceNodeToGlobalFaceNode=h_localFaceNodeToGlobalFaceNode.toView(); \
   vectorDoubleView weights=h_weights.toView(); \
   arrayRealView globalNodesCoords=h_globalNodesCoords.toView(); \
-  arrayDoubleView derivativeBasisFunction1D=h_derivativeBasisFunction1D.toView(); \
-  arrayDoubleView derivativeBasisFunction2DX=h_derivativeBasisFunction2DX.toView(); \
-  arrayDoubleView derivativeBasisFunction2DY=h_derivativeBasisFunction2DY.toView();
+  arrayDoubleView derivativeBasisFunction1D=h_derivativeBasisFunction1D.toView(); 
 #else
   #define CREATEVIEWS
 #endif
