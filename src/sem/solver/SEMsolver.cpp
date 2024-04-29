@@ -12,7 +12,6 @@
 void SEMsolver::computeFEInit( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
 {
   order = myMeshinfo.myOrderNumber;
-  tmp=myMeshinfo.myTimeStep * myMeshinfo.myTimeStep;
   numberOfPointsPerElement=pow((order+1),DIMENSION);
 
   allocateFEarrays( myMeshinfo );
@@ -29,7 +28,8 @@ void SEMsolver::computeOneStep(  const int & timeStep,
                                  arrayRealView & rhsTerm,
                                  arrayRealView & pnGlobal)
 {
-
+  CREATEVIEWS
+  
   // update pressure @ boundaries;
   LOOPHEAD( myMeshinfo.numberOfNodes, i)
     massMatrixGlobal[i]=0;
@@ -39,7 +39,7 @@ void SEMsolver::computeOneStep(  const int & timeStep,
   // update pnGLobal with right hade side
   LOOPHEAD( myMeshinfo.myNumberOfRHS, i)
     int nodeRHS=globalNodesList(rhsElement[i],0);
-    pnGlobal(nodeRHS,i2)+=tmp*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
+    pnGlobal(nodeRHS,i2)+=myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   LOOPEND
  
   LOOPHEAD( myMeshinfo.numberOfElements, e)
@@ -51,43 +51,40 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     float Y[ROW];
 
     // get pnGlobal to pnLocal
-    for( int i=0; i<numberOfPointsPerElement; i++ )
+    for( int i=0; i<pow((myMeshinfo.myOrderNumber+1),DIMENSION); i++ )
     {
       int localToGlobal=globalNodesList(e,i);
       pnLocal[i]=pnGlobal(localToGlobal,i2);
     }
 
     // compute Jacobian, massMatrix and B
-    myQk.computeB( e,order,DIMENSION, weights, globalNodesList,globalNodesCoords,derivativeBasisFunction1D,massMatrixLocal,B );
+    myQk.computeB( e,myMeshinfo.myOrderNumber,DIMENSION, weights, globalNodesList,globalNodesCoords,derivativeBasisFunction1D,massMatrixLocal,B );
+
     // compute stifness  matrix ( durufle's optimization)
-    myQk.gradPhiGradPhi( numberOfPointsPerElement, order, DIMENSION,weights,derivativeBasisFunction1D, B, pnLocal, R, Y );
-    // get pnGlobal to pnLocal
-    for( int i=0; i<numberOfPointsPerElement; i++ )
-    {
-      int localToGlobal=globalNodesList(e,i);
-      pnLocal[i]=pnGlobal(localToGlobal,i2);
-    }
+    myQk.gradPhiGradPhi( pow((myMeshinfo.myOrderNumber+1),DIMENSION), myMeshinfo.myOrderNumber, DIMENSION,weights,derivativeBasisFunction1D, B, pnLocal, R, Y );
+
     //compute gloval mass Matrix and global stiffness vector
-    for( int i=0; i<numberOfPointsPerElement; i++ )
+    for( int i=0; i<pow((myMeshinfo.myOrderNumber+1),DIMENSION); i++ )
     {
       int gIndex=globalNodesList(e,i);
       massMatrixLocal[i]/=(model[e]*model[e]);
       ATOMICADD( massMatrixGlobal[gIndex], massMatrixLocal[i] );
       ATOMICADD( yGlobal[gIndex], Y[i]);
     } 
+
   LOOPEND
 
   // update pressure
   LOOPHEAD( myMeshinfo.numberOfInteriorNodes, i)
     int I=listOfInteriorNodes[i];
-    pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-tmp*yGlobal[I]/massMatrixGlobal[I];
+    pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*yGlobal[I]/massMatrixGlobal[I];
   LOOPEND
 
   if (DIMENSION==2) {
   LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i)
     ShGlobal[i]=0;
   LOOPEND
-  
+
   LOOPHEAD( myMeshinfo.numberOfBoundaryFaces, iFace)
     //get ds
     float ds[6];
@@ -95,13 +92,13 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     int numOfBasisFunctionOnFace[6];
     float Js[2][6];
 
-    int i=myQk.computeDs( iFace, order, faceInfos,numOfBasisFunctionOnFace,
+    int i=myQk.computeDs( iFace, myMeshinfo.myOrderNumber, faceInfos,numOfBasisFunctionOnFace,
                   Js, globalNodesCoords, derivativeBasisFunction2DX,
                   derivativeBasisFunction2DY,
                   ds );
-    //
+
     //compute Sh and ShGlobal
-    for( int i=0; i<order+1; i++ )
+    for( int i=0; i<myMeshinfo.myOrderNumber+1; i++ )
     {
       int gIndexFaceNode=localFaceNodeToGlobalFaceNode(iFace,i);
       Sh[i]=weights[i]*ds[i]/(model[faceInfos(iFace,0)]);
@@ -113,7 +110,7 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     int I=listOfBoundaryNodes[i];
     float invMpSh=1/(massMatrixGlobal[I]+myMeshinfo.myTimeStep*ShGlobal[i]*0.5);
     float MmSh=massMatrixGlobal[I]-myMeshinfo.myTimeStep*ShGlobal[i]*0.5;
-    pnGlobal(I,i1)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,i2)-MmSh*pnGlobal(I,i1)-tmp*yGlobal[I]);
+    pnGlobal(I,i1)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,i2)-MmSh*pnGlobal(I,i1)-myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*yGlobal[I]);
   LOOPEND
   }
   FENCE
@@ -168,23 +165,23 @@ void SEMsolver::initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
 void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
 {
   #ifdef USE_RAJA
-  h_globalNodesList=allocateArray2D<arrayInt>(myMeshinfo.numberOfElements,myMeshinfo.numberOfPointsPerElement);
-  h_listOfInteriorNodes=allocateVector<vectorInt>(myMeshinfo.numberOfInteriorNodes);
-  h_globalNodesCoords=allocateArray2D<arrayReal>(myMeshinfo.numberOfNodes,3);
-  h_listOfBoundaryNodes=allocateVector<vectorInt>(myMeshinfo.numberOfBoundaryNodes);
-  h_faceInfos=allocateArray2D<arrayInt>(myMeshinfo.numberOfBoundaryFaces,2+(order+1));
-  h_localFaceNodeToGlobalFaceNode=allocateArray2D<arrayInt>(myMeshinfo.numberOfBoundaryFaces, order+1 );
-  h_model=allocateVector<vectorReal>(myMeshinfo.numberOfElements);
-  h_quadraturePoints=allocateVector<vectorDouble>(order+1);
-  h_weights=allocateVector<vectorDouble>(order+1);
-  h_basisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1);
-  h_derivativeBasisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1);
-  h_basisFunction2D=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
-  h_derivativeBasisFunction2DX=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
-  h_derivativeBasisFunction2DY=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
-  h_massMatrixGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes );
-  h_yGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes );
-  h_ShGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfBoundaryNodes );
+  h_globalNodesList=allocateArray2D<arrayInt>(myMeshinfo.numberOfElements,myMeshinfo.numberOfPointsPerElement,"globalNodesList");
+  h_listOfInteriorNodes=allocateVector<vectorInt>(myMeshinfo.numberOfInteriorNodes,"listOfInteriorNodes");
+  h_globalNodesCoords=allocateArray2D<arrayReal>(myMeshinfo.numberOfNodes,3,"globalNodesCoords");
+  h_listOfBoundaryNodes=allocateVector<vectorInt>(myMeshinfo.numberOfBoundaryNodes,"listOfBoundaryNodes");
+  h_faceInfos=allocateArray2D<arrayInt>(myMeshinfo.numberOfBoundaryFaces,2+(order+1),"faceInfos");
+  h_localFaceNodeToGlobalFaceNode=allocateArray2D<arrayInt>(myMeshinfo.numberOfBoundaryFaces, order+1,"localFaceNodeToGlobalFaceNode" );
+  h_model=allocateVector<vectorReal>(myMeshinfo.numberOfElements,"model");
+  h_quadraturePoints=allocateVector<vectorDouble>(order+1,"quadraturePoints");
+  h_weights=allocateVector<vectorDouble>(order+1,"weights");
+  h_basisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1,"basisFunction1D");
+  h_derivativeBasisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1,"derivativeBasisFunction1D");
+  h_basisFunction2D=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions,"basisFunction2D");
+  h_derivativeBasisFunction2DX=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions,"derivativeBasisFunction2DX");
+  h_derivativeBasisFunction2DY=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions,"derivativeBasisFunction2DY");
+  h_massMatrixGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes,"massMatrixGlobal");
+  h_yGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes,"yGlobal");
+  h_ShGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfBoundaryNodes,"ShGlobal");
 
   //get Views
   globalNodesList=h_globalNodesList.toView();
@@ -201,10 +198,6 @@ void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
   basisFunction2D=h_basisFunction2D.toView();
   derivativeBasisFunction2DX=h_derivativeBasisFunction2DX.toView();
   derivativeBasisFunction2DY=h_derivativeBasisFunction2DY.toView();
-  //sharedarrays//sharedarrays
-  massMatrixGlobal=h_massMatrixGlobal.toView();
-  yGlobal=h_yGlobal.toView();
-  ShGlobal=h_ShGlobal.toView();
 
   #else
 
@@ -230,5 +223,4 @@ void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
 
   #endif
 }
-
 

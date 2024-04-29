@@ -2,6 +2,7 @@
 #define SEM_MESH_
 
 #include "dataType.hpp"
+#include "SEMmacro.hpp"
 using namespace std;
 
 class SEMmesh
