@@ -255,16 +255,16 @@
   #include <Kokkos_Core.hpp>
   #define MemSpace Kokkos::SharedSpace
   //#define MemSpace Kokkos::HostSpace
-  //using DeviceMemorySpace = typename Kokkos::DefaultExecutionSpace::memory_space;
+  using DeviceMemorySpace = typename Kokkos::DefaultExecutionSpace::memory_space;
   using ExecSpace = MemSpace::execution_space;
   using range_policy = Kokkos::RangePolicy<>;
   using Layout=Kokkos::LayoutLeft;
 
-  //#ifdef ENABLE_CUDA
-  //  using Layout=Kokkos::LayoutLeft;
-  //#else
-  //  using Layout=Kokkos::LayoutRight;
-  //#endif
+  #ifdef ENABLE_CUDA
+    using Layout=Kokkos::LayoutLeft;
+  #else
+    using Layout=Kokkos::LayoutRight;
+  #endif
 
   typedef Kokkos::View<int*,     Layout, MemSpace> vectorIntView;
   typedef Kokkos::View<float*,   Layout,  MemSpace> vectorRealView;
