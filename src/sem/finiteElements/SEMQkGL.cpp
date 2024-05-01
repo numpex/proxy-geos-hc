@@ -563,7 +563,6 @@ PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
       {
           for (int i1=0;i1<order+1;i1++)
           {
-
               for( int j=0; j<nPointsPerElement; j++ )
               {
                  R[j]=0;
@@ -648,74 +647,6 @@ PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
   }}
 }
 
-//computeDs
-PROXY_HOST_DEVICE int SEMQkGL::computeDs(  const int & iFace,
-                                          const int & order,
-                                          arrayIntView const & faceInfos,
-                                          int  numOfBasisFunctionOnFace[],
-                                          float  Js[][6],
-                                          arrayRealView   const & globalNodesCoords,
-                                          arrayDoubleView const & derivativeBasisFunction2DX,
-                                          arrayDoubleView const & derivativeBasisFunction2DY,
-                                          float  ds[]  ) const
-{
-  int face=faceInfos(iFace,1);
-  // get basis functions on Boundary faces
-  switch( face )
-  {
-    case 0:     // left
-      for( int i=0; i<order+1; i++ )
-      {
-        numOfBasisFunctionOnFace[i]=i*(order+1);
-      }
-      break;
-    case 1:     // bottom
-      for( int i=0; i<order+1; i++ )
-      {
-        numOfBasisFunctionOnFace[i]=i;
-      }
-      break;
-    case 2:         //right
-      for( int i=0; i<order+1; i++ )
-      {
-        numOfBasisFunctionOnFace[i]=order+i*(order+1);
-      }
-      break;
-    case 3:         //top
-      for( int i=0; i<order+1; i++ )
-      {
-        numOfBasisFunctionOnFace[i]=i+order*(order+1);
-      }
-      break;
-    default:
-      //cout<<"error in element flag, should be set to: 0, 1, 2, 3"<<endl;
-      break;
-  }
-  // compute ds
-  for( int j=0; j<order+1; j++ )
-  {
-    Js[0][j]=0;    // x
-    Js[1][j]=0;    // y
-    for( int i=0; i<order+1; i++ )
-    {
-      float xi=globalNodesCoords(faceInfos(iFace,2+i),0);
-      float yi=globalNodesCoords(faceInfos(iFace,2+i),1);
-      if( face==0 || face==2 )
-      {
-        Js[0][j]+=derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
-        Js[1][j]+=derivativeBasisFunction2DY(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
-      }
-      if( face==1 || face==3 )
-      {
-        Js[0][j]+=derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*xi;
-        Js[1][j]+=derivativeBasisFunction2DX(numOfBasisFunctionOnFace[i],numOfBasisFunctionOnFace[j])*yi;
-      }
-    }
-    ds[j]=sqrt( Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j] );
-    //cout<<"j="<<j<<", ds="<<ds[j]<<", "<<Js[0][j]<<", "<<Js[1][j]<<endl;
-  }
-  return 0;
-}
 //computeDs
 PROXY_HOST_DEVICE int SEMQkGL::computeDs(  const int & iFace,
                                           const int & order,

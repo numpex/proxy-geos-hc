@@ -93,8 +93,7 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     float Js[2][6];
 
     int i=myQk.computeDs( iFace, myMeshinfo.myOrderNumber, faceInfos,numOfBasisFunctionOnFace,
-                  Js, globalNodesCoords, derivativeBasisFunction2DX,
-                  derivativeBasisFunction2DY,
+                  Js, globalNodesCoords, derivativeBasisFunction1D,
                   ds );
 
     //compute Sh and ShGlobal
@@ -117,7 +116,8 @@ void SEMsolver::computeOneStep(  const int & timeStep,
 }
 
 
-void SEMsolver::outputPnValues(  const int & indexTimeStep,
+void SEMsolver::outputPnValues(  SEMmesh mesh,
+		                 const int & indexTimeStep,
                                  int & i1,
                                  int & myElementSource, 
                                  arrayIntView & nodeList,
@@ -132,7 +132,7 @@ void SEMsolver::outputPnValues(  const int & indexTimeStep,
     {   
       cout<<" pnGlobal @ elementSource location "<<myElementSource
           <<" after computeOneStep = "<< pnGlobal(nodeList(myElementSource,0),i1)<<endl;
-      //myUtils.saveSnapShot( indexTimeStep, i1, pnGlobal, myMesh );
+      mesh.saveSnapShot( indexTimeStep, i1, pnGlobal );
     }  
 }
 
@@ -156,9 +156,6 @@ void SEMsolver::initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
   // get basis function and corresponding derivatives
   myQk.getBasisFunction1D( order, quadraturePoints,basisFunction1D );
   myQk.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
-  myQk.getBasisFunction2D( order, basisFunction1D, basisFunction1D, basisFunction2D );
-  myQk.getBasisFunction2D( order, derivativeBasisFunction1D, basisFunction1D, derivativeBasisFunction2DX );
-  myQk.getBasisFunction2D( order, basisFunction1D, derivativeBasisFunction1D, derivativeBasisFunction2DY );
 
 }
 
@@ -176,9 +173,6 @@ void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
   h_weights=allocateVector<vectorDouble>(order+1,"weights");
   h_basisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1,"basisFunction1D");
   h_derivativeBasisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1,"derivativeBasisFunction1D");
-  h_basisFunction2D=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions,"basisFunction2D");
-  h_derivativeBasisFunction2DX=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions,"derivativeBasisFunction2DX");
-  h_derivativeBasisFunction2DY=allocateArray2D<arrayDouble>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions,"derivativeBasisFunction2DY");
   h_massMatrixGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes,"massMatrixGlobal");
   h_yGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes,"yGlobal");
   h_ShGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfBoundaryNodes,"ShGlobal");
@@ -195,9 +189,6 @@ void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
   weights=h_weights.toView();
   basisFunction1D=h_basisFunction1D.toView();
   derivativeBasisFunction1D=h_derivativeBasisFunction1D.toView();
-  basisFunction2D=h_basisFunction2D.toView();
-  derivativeBasisFunction2DX=h_derivativeBasisFunction2DX.toView();
-  derivativeBasisFunction2DY=h_derivativeBasisFunction2DY.toView();
 
   #else
 
@@ -213,9 +204,6 @@ void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
   weights=allocateVector<vectorDoubleView>(order+1);
   basisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
   derivativeBasisFunction1D=allocateArray2D<arrayDoubleView>(order+1,order+1);
-  basisFunction2D=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
-  derivativeBasisFunction2DX=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
-  derivativeBasisFunction2DY=allocateArray2D<arrayDoubleView>(myMeshinfo.nBasisFunctions,myMeshinfo.nBasisFunctions);
   //shared arrays
   massMatrixGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfNodes );
   yGlobal=allocateVector<vectorRealView>( myMeshinfo.numberOfNodes );

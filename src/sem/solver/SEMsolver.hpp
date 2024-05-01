@@ -42,7 +42,8 @@ PROXY_HOST_DEVICE ~SEMsolver(){};
                        arrayRealView & rhsTerm,
                        arrayRealView & pnGlobal);
 
-  void outputPnValues (  const int & indexTimeStep,
+  void outputPnValues (  SEMmesh mesh,
+		         const int & indexTimeStep,
                          int & i1, 
                          int & myElementSource, 
                          arrayIntView & nodeList,
@@ -79,9 +80,6 @@ private:
   // get basis function and corresponding derivatives
   arrayDoubleView basisFunction1D;
   arrayDoubleView derivativeBasisFunction1D;
-  arrayDoubleView basisFunction2D;
-  arrayDoubleView derivativeBasisFunction2DX;
-  arrayDoubleView derivativeBasisFunction2DY;
 
   //shared arrays
   vectorRealView massMatrixGlobal;
@@ -108,9 +106,6 @@ private:
   // get basis function and corresponding derivatives
   arrayDouble h_basisFunction1D;
   arrayDouble h_derivativeBasisFunction1D;
-  arrayDouble h_basisFunction2D;
-  arrayDouble h_derivativeBasisFunction2DX;
-  arrayDouble h_derivativeBasisFunction2DY;
 
   //shared arrays
   vectorReal h_massMatrixGlobal;
