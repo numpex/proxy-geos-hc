@@ -13,7 +13,7 @@ set (CMAKE_VERBOSE_MAKEFILE ON )
 #-----------------------------------------------------
 option (X86_laptop "X86 architecture  default" OFF)
 option (X86_cypress "Compilation on Cypress Cluster" ON)
-option (P9 "Power9 architecture  " OFF)
+option (Power9_pangea3 "Power9 architecture  " OFF)
 option (ARM "ARM aarch64 architecture: e.g. grace CPU" OFF)
 
 #-----------------------------------------------------

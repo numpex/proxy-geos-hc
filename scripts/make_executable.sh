@@ -31,3 +31,7 @@ rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DEN
 rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON -DX86_cypress=OFF -DARM=ON .. ; make 
 rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON -DX86_cypress=OFF -DARM=ON .. ; make 
 
+# on pangea3
+
+rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON -DPower9_pangea3=ON -DX86_cypress=OFF .. ; make 
+rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON -DPower9_pangea3=ON -DX86_cypress=OFF .. ; make 
