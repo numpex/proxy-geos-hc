@@ -66,18 +66,38 @@
 // create views only for RAJA
 #if defined (USE_RAJA)
   #define CREATEVIEWS \
-  vectorRealView massMatrixGlobal=h_massMatrixGlobal.toView(); \
-  vectorRealView yGlobal=h_yGlobal.toView(); \
-  vectorRealView ShGlobal=h_ShGlobal.toView(); \
-  arrayIntView globalNodesList=h_globalNodesList.toView(); \
-  vectorRealView model=h_model.toView(); \
-  vectorIntView listOfInteriorNodes=h_listOfInteriorNodes.toView(); \
-  vectorIntView listOfBoundaryNodes=h_listOfBoundaryNodes.toView(); \
-  arrayIntView faceInfos=h_faceInfos.toView(); \
-  arrayIntView localFaceNodeToGlobalFaceNode=h_localFaceNodeToGlobalFaceNode.toView(); \
-  vectorDoubleView weights=h_weights.toView(); \
-  arrayRealView globalNodesCoords=h_globalNodesCoords.toView(); \
-  arrayDoubleView derivativeBasisFunction1D=h_derivativeBasisFunction1D.toView(); 
+  arrayRealView rhsTerm=myRHSTerm.toView();\
+  arrayRealView pnGlobal=myPnGlobal.toView();\
+  vectorIntView rhsElement=myRhsElement.toView();\
+  vectorRealView massMatrixGlobal=this->massMatrixGlobal.toView(); \
+  vectorRealView yGlobal=this->yGlobal.toView(); \
+  vectorRealView ShGlobal=this->ShGlobal.toView(); \
+  arrayIntView globalNodesList=this->globalNodesList.toView(); \
+  vectorRealView model=this->model.toView(); \
+  vectorIntView listOfInteriorNodes=this->listOfInteriorNodes.toView(); \
+  vectorIntView listOfBoundaryNodes=this->listOfBoundaryNodes.toView(); \
+  arrayIntView faceInfos=this->faceInfos.toView(); \
+  arrayIntView localFaceNodeToGlobalFaceNode=this->localFaceNodeToGlobalFaceNode.toView(); \
+  vectorDoubleView weights=this->weights.toView(); \
+  arrayRealView globalNodesCoords=this->globalNodesCoords.toView(); \
+  arrayDoubleView derivativeBasisFunction1D=this->derivativeBasisFunction1D.toView(); 
 #else
-  #define CREATEVIEWS
+  #define CREATEVIEWS \
+  arrayReal rhsTerm=myRHSTerm; \
+  arrayReal pnGlobal=myPnGlobal; \
+  vectorInt rhsElement=myRhsElement;
+#endif
+
+#if defined (USE_RAJA)
+  #define ARRAY_DOUBLE_VIEW arrayDoubleView 
+  #define ARRAY_REAL_VIEW arrayRealView
+  #define ARRAY_INT_VIEW arrayIntView
+  #define VECTOR_DOUBLE_VIEW vectorDoubleView
+  #define VECTOR_INT_VIEW vectorIntView
+#else
+  #define ARRAY_DOUBLE_VIEW arrayDouble
+  #define ARRAY_REAL_VIEW arrayReal
+  #define ARRAY_INT_VIEW arrayInt
+  #define VECTOR_DOUBLE_VIEW vectorDouble
+  #define VECTOR_INT_VIEW vectorInt
 #endif

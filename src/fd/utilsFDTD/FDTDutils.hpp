@@ -3,13 +3,12 @@
 
 #include "dataType.hpp"
 #include "FDTDdata.hpp"
-#include "FDTDmacros.hpp"
 
 using namespace std;
 
 struct FDTDUtils
 {
-  void init_coef(float dx, vectorRealView &coef)
+  void init_coef(float dx, vectorReal &coef)
   {
       float dx2 = dx*dx;
       coef[0] = -205.f/72.f/dx2;
@@ -18,7 +17,7 @@ struct FDTDUtils
       coef[3] = 8.f/315.f/dx2;
       coef[4] = -1.f/560.f/dx2;
   }
-  float compute_dt_sch(const float vmax, vectorRealView const &coefx, vectorRealView const &coefy, vectorRealView const &coefz) 
+  float compute_dt_sch(const float vmax, vectorReal const &coefx, vectorReal const &coefy, vectorReal const &coefz) 
   {
 
       float ftmp = 0.;
@@ -60,7 +59,7 @@ struct FDTDUtils
   }
 
   void pml_profile_extend( int nx, int ny, int nz,
-                           vectorRealView &eta, const vector<float> &etax, const vector<float> &etay, const vector<float>& etaz,
+                           vectorReal &eta, const vector<float> &etax, const vector<float> &etay, const vector<float>& etaz,
                            int xbeg, int xend, int ybeg, int yend, int zbeg, int zend)
   {
     const int n_ghost = 1;
@@ -75,7 +74,7 @@ struct FDTDUtils
   }
 
   void pml_profile_extend_all(int nx, int ny, int nz,
-                              vectorRealView &eta, const vector<float> &etax, const vector<float> &etay, const vector<float>& etaz,
+                              vectorReal &eta, const vector<float> &etax, const vector<float> &etay, const vector<float>& etaz,
                               int xmin, int xmax, int ymin, int ymax,
                               int x1, int x2, int x5, int x6,
                               int y1, int y2, int y3, int y4, int y5, int y6,
@@ -107,7 +106,7 @@ struct FDTDUtils
                 int y1, int y2, int y3, int y4, int y5, int y6,
                 int z1, int z2, int z3, int z4, int z5, int z6,
                 float dx, float dy, float dz, float dt_sch,
-                float vmax, vectorRealView & eta)
+                float vmax, vectorReal & eta)
   {
     #pragma omp parallel for collapse(3)    
     for (int i = -1; i < nx+1; ++i) {
@@ -145,7 +144,7 @@ struct FDTDUtils
                 z1+1, z2, z3+1, z4, z5+1, z6);
   }
       
-  void output(FDTDGRIDS &myGrids, vectorRealView const & pn, int itSample)
+  void output(FDTDGRIDS &myGrids, VECTOR_REAL_VIEW pn, int itSample)
   {
 
       if(itSample%50==0)
@@ -166,7 +165,7 @@ struct FDTDUtils
 		 int x0, int x1, 
 		 int y0, int y1, 
 		 int z0, int z1, 
-                 vectorRealView const &u, int istep)
+                 VECTOR_REAL_VIEW u, int istep)
   {
       char filename_buf[32];
       snprintf(filename_buf, sizeof(filename_buf), "snapshot_it_%d.H@", istep);

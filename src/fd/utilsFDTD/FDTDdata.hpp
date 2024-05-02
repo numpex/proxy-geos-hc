@@ -1,6 +1,8 @@
 #ifndef FDTDDATA_HPP_
 #define FDTDDATA_HPP_
 
+#include "FDTDmacros.hpp"
+
 struct FDTDGRIDS {
 
    int nx, ny, nz;    // number of grid on the x,y,z direction
@@ -20,23 +22,17 @@ struct FDTDGRIDS {
 
 struct FDTDMODELS {
 
-  vectorRealView vp; 
-  vectorRealView phi;
-  vectorRealView eta;
-  vectorRealView pnp1;
-  vectorRealView pn; 
-  vectorRealView pnm1;
+  VECTOR_REAL_VIEW vp; 
+  VECTOR_REAL_VIEW phi;
+  VECTOR_REAL_VIEW eta;
+  VECTOR_REAL_VIEW pnp1;
+  VECTOR_REAL_VIEW pn; 
+  VECTOR_REAL_VIEW pnm1;
 
-#ifdef USE_RAJA
-
-  vectorReal h_vp; 
-  vectorReal h_phi;
-  vectorReal h_eta;
-  vectorReal h_pnp1;
-  vectorReal h_pn; 
-  vectorReal h_pnm1;
-
-#endif
+  VECTOR_REAL_VIEW RHSTerm;
+  VECTOR_REAL_VIEW coefx;
+  VECTOR_REAL_VIEW coefy;
+  VECTOR_REAL_VIEW coefz;
 
 };
 

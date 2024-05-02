@@ -137,7 +137,7 @@ std::vector<float> SEMmesh::getCoordInOneDirection(const int & order,const int &
 }
 
 // Initialize nodal coordinates.
-void SEMmesh::nodesCoordinates( const int & numberOfNodes, arrayRealView & nodeCoords ) const
+void SEMmesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const
 {
   std::vector<float> coordX( nx );
   std::vector<float> coordY( ny );
@@ -163,7 +163,7 @@ void SEMmesh::nodesCoordinates( const int & numberOfNodes, arrayRealView & nodeC
 }
 
 //  list of global nodes ( vertices) for each element
-void SEMmesh::globalNodesList( const int & numberOfElements, arrayIntView & nodesList ) const
+void SEMmesh::globalNodesList( const int & numberOfElements, arrayInt & nodesList ) const
 {
    for( int j=0; j<((ey==0)?1:ey); j++ )
    {
@@ -246,7 +246,7 @@ int SEMmesh::getElementNumberFromPoints( const float & x, const float & y, const
 }
 
 // set model
-void SEMmesh::getModel( const int & numberOfElements, vectorRealView & model ) const
+void SEMmesh::getModel( const int & numberOfElements, vectorReal & model ) const
 {
 
    for( int j=0; j<((ey==0)?1:ey); j++ )
@@ -273,7 +273,7 @@ void SEMmesh::getModel( const int & numberOfElements, vectorRealView & model ) c
 }
 //  get list of global interior nodes
 int SEMmesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
-                                         vectorIntView & listOfInteriorNodes ) const
+                                         vectorInt & listOfInteriorNodes ) const
 {
   int m=0;
   if(ny==1)
@@ -305,7 +305,7 @@ int SEMmesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
 }
 
 // get list of interior Elements
-void SEMmesh::getListOfInteriorElements(vectorIntView & listOfInteriorElements) const
+void SEMmesh::getListOfInteriorElements(vectorInt & listOfInteriorElements) const
 {
   int m=0;
   if(ey==0)
@@ -341,7 +341,7 @@ void SEMmesh::getListOfInteriorElements(vectorIntView & listOfInteriorElements) 
 int SEMmesh::getNumberOfElementsByColor() const
 {return ((ey==0)?(ex/2+ex%2)*(ez/2+ez%2):(ex/2+ex%2)*(ey/2+ey%2)*(ez/2+ez%2));}
 //sort
-void SEMmesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayIntView  & listOfElementsByColor) const
+void SEMmesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt  & listOfElementsByColor) const
 {
   // red
   int k=0;
@@ -400,7 +400,7 @@ int SEMmesh::getNumberOfBoundaryNodes() const
 
 // list of global indexes
 // this method is sequential only for omp !!!
-void  SEMmesh::getBoundaryFacesInfos(arrayIntView & faceInfos) const
+void  SEMmesh::getBoundaryFacesInfos(arrayInt & faceInfos) const
 {
   int numFace=0;
   // bottom, j=0, l=0
@@ -457,7 +457,7 @@ void  SEMmesh::getBoundaryFacesInfos(arrayIntView & faceInfos) const
   }
 }
 //  get list of global boundary nodes
-int SEMmesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorIntView & listOfBoundaryNodes ) const
+int SEMmesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt & listOfBoundaryNodes ) const
 {
   int k=0;
   //bottom
@@ -491,7 +491,7 @@ int SEMmesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorIn
   return 0;
 }
 // provides a mapping between local node of a face and global node Face:
-void SEMmesh::getLocalFaceNodeToGlobalFaceNode(arrayIntView &localFaceNodeToGlobalFaceNode) const
+void SEMmesh::getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFaceNode) const
 {
   int numFace=0;
   int offset;
@@ -582,7 +582,7 @@ void SEMmesh::getLocalFaceNodeToGlobalFaceNode(arrayIntView &localFaceNodeToGlob
 
 }
 // save snapshot
-void SEMmesh::saveSnapShot( const int indexTimeStep, const int i1, arrayRealView const & u) const
+void SEMmesh::saveSnapShot( const int indexTimeStep, const int i1, arrayReal const & u) const
 {
 
   int nx=getNx();

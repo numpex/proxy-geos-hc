@@ -1,7 +1,7 @@
 // C++ Code generated from Python Code:
 #include "SEMQkGL.hpp"
 
-void SEMQkGL::gaussLobattoQuadraturePoints( int order, vectorDoubleView const & quadraturePoints ) const
+void SEMQkGL::gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
 {
   if( order == 1 )
   {
@@ -39,7 +39,7 @@ void SEMQkGL::gaussLobattoQuadraturePoints( int order, vectorDoubleView const & 
     quadraturePoints[5]=1.0;
   }
 }
-void SEMQkGL::gaussLobattoQuadratureWeights( int order, vectorDoubleView const & weights ) const
+void SEMQkGL::gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const
 {
   if( order == 1 )
   {
@@ -284,7 +284,7 @@ vector<double> SEMQkGL::derivativeShapeFunction1D( int order, double xi ) const
   return derivativeShapeFunction;
 }
 
-void SEMQkGL::getBasisFunction1D( int order, vectorDoubleView const & quadraturePoints, arrayDoubleView const & basisFunction1D ) const
+void SEMQkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble const & basisFunction1D ) const
 {
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -299,8 +299,8 @@ void SEMQkGL::getBasisFunction1D( int order, vectorDoubleView const & quadrature
   }
 }
 
-void SEMQkGL::getDerivativeBasisFunction1D( int order, vectorDoubleView const & quadraturePoints, 
-                                          arrayDoubleView const & derivativeBasisFunction1D ) const
+void SEMQkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
+                                          arrayDouble const & derivativeBasisFunction1D ) const
 {
   // loop over quadrature points
   for( int i = 0; i < order+1; i++ )
@@ -316,9 +316,9 @@ void SEMQkGL::getDerivativeBasisFunction1D( int order, vectorDoubleView const & 
 }
 
 void SEMQkGL::getBasisFunction2D( const int & order, 
-                               arrayDoubleView const & a,
-                               arrayDoubleView const & b,
-                               arrayDoubleView const & c )const                                      
+                               arrayDouble const & a,
+                               arrayDouble const & b,
+                               arrayDouble const & c )const                                      
 {
   for( int j = 0; j <order+1 ; j++ )
   {
@@ -339,10 +339,10 @@ void SEMQkGL::getBasisFunction2D( const int & order,
 PROXY_HOST_DEVICE void SEMQkGL::computeB(const int & elementNumber,
 		                       const int & order,
 		                       const int & dimension,
-                                       vectorDoubleView const & weights,
-			               arrayIntView     const & nodesList,
-			               arrayRealView    const & nodesCoords,
-                                       arrayDoubleView  const & dPhi,
+                                       VECTOR_DOUBLE_VIEW const & weights,
+			               ARRAY_INT_VIEW const & nodesList,
+			               ARRAY_REAL_VIEW const & nodesCoords,
+                                       ARRAY_DOUBLE_VIEW const & dPhi,
 				       float massMatrixLocal[],
                                        float B[][COL] ) const
 {
@@ -495,8 +495,8 @@ PROXY_HOST_DEVICE void SEMQkGL::computeB(const int & elementNumber,
 PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                               const int & order,
 		                              const int & dimension,
-                                              vectorDoubleView const & weights,
-                                              arrayDoubleView const & dPhi,
+                                              VECTOR_DOUBLE_VIEW const & weights,
+                                              ARRAY_DOUBLE_VIEW const & dPhi,
                                               float const  B[][COL],
 			                      float const pnLocal[],
                                               float R[],
@@ -648,13 +648,13 @@ PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
 }
 
 //computeDs
-PROXY_HOST_DEVICE int SEMQkGL::computeDs(  const int & iFace,
+PROXY_HOST_DEVICE int SEMQkGL::computeDs( const int & iFace,
                                           const int & order,
-                                          arrayIntView const & faceInfos,
+                                          ARRAY_INT_VIEW const & faceInfos,
                                           int  numOfBasisFunctionOnFace[],
                                           float  Js[][6],
-                                          arrayRealView   const & globalNodesCoords,
-                                          arrayDoubleView const & dPhi,
+                                          ARRAY_REAL_VIEW const & globalNodesCoords,
+                                          ARRAY_DOUBLE_VIEW const & dPhi,
                                           float  ds[]  ) const
 {
   // compute ds

@@ -28,26 +28,26 @@ PROXY_HOST_DEVICE ~SEMsolver(){};
    * @brief computeFEInit function:
    * init all FE components for computing mass and stiffness matrices
    */
-  void computeFEInit ( SEMmeshinfo &myMeshinfo, SEMmesh mesh);
+  void computeFEInit ( SEMmeshinfo &myMeshinfo, 
+                       SEMmesh mesh);
 
    /**
    * @brief computeOneStep function:
    * init all FE components for computing mass and stiffness matrices
    */
-  void computeOneStep( const int & indexTimeStep,
-                       SEMmeshinfo &myMeshinfo,
-                       int & i1,
-                       int & i2,
-                       vectorIntView & rhsElement,
-                       arrayRealView & rhsTerm,
-                       arrayRealView & pnGlobal);
+  void computeOneStep(  const int & timeStep,
+                                 SEMmeshinfo &myMeshinfo,
+                                 int & i1,
+                                 int & i2,
+                                 arrayReal & myRHSTerm,
+                                 arrayReal & myPnGlobal,
+                                 vectorInt & myRhsElement);
 
   void outputPnValues (  SEMmesh mesh,
 		         const int & indexTimeStep,
                          int & i1, 
                          int & myElementSource, 
-                         arrayIntView & nodeList,
-                         arrayRealView & pnGlobal);
+                         arrayReal & pnGlobal);
 
   void initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh );
 
@@ -62,56 +62,28 @@ private:
   SEMQkGL myQk;
   
   //shared arrays
-  arrayIntView globalNodesList;
-  arrayRealView globalNodesCoords;
-  vectorIntView listOfInteriorNodes;
-  vectorIntView listOfIntVieweriorNodes;
-  vectorIntView listOfBoundaryNodes;
-  arrayIntView faceInfos;
-  arrayIntView localFaceNodeToGlobalFaceNode;
+  arrayInt globalNodesList;
+  arrayReal globalNodesCoords;
+  vectorInt listOfInteriorNodes;
+  vectorInt listOfIntVieweriorNodes;
+  vectorInt listOfBoundaryNodes;
+  arrayInt faceInfos;
+  arrayInt localFaceNodeToGlobalFaceNode;
   
   // get model
-  vectorRealView model;
+  vectorReal model;
 
   // get quadrature points and weights
-  vectorDoubleView quadraturePoints;
-  vectorDoubleView weights;
+  vectorDouble quadraturePoints;
+  vectorDouble weights;
 
   // get basis function and corresponding derivatives
-  arrayDoubleView basisFunction1D;
-  arrayDoubleView derivativeBasisFunction1D;
+  arrayDouble basisFunction1D;
+  arrayDouble derivativeBasisFunction1D;
 
   //shared arrays
-  vectorRealView massMatrixGlobal;
-  vectorRealView yGlobal;
-  vectorRealView ShGlobal;
-
-#ifdef USE_RAJA
-   //shared arrays
-  arrayInt h_globalNodesList;
-  arrayReal h_globalNodesCoords;
-  vectorInt h_listOfInteriorNodes;
-  vectorInt h_listOfIntVieweriorNodes;
-  vectorInt h_listOfBoundaryNodes;
-  arrayInt h_faceInfos;
-  arrayInt h_localFaceNodeToGlobalFaceNode;
-  
-  // get model
-  vectorReal h_model;
-
-  // get quadrature points and weights
-  vectorDouble h_quadraturePoints;
-  vectorDouble h_weights;
-
-  // get basis function and corresponding derivatives
-  arrayDouble h_basisFunction1D;
-  arrayDouble h_derivativeBasisFunction1D;
-
-  //shared arrays
-  vectorReal h_massMatrixGlobal;
-  vectorReal h_yGlobal;
-  vectorReal h_ShGlobal;
-#endif
- 
+  vectorReal massMatrixGlobal;
+  vectorReal yGlobal;
+  vectorReal ShGlobal;
 };
 #endif //SEM_SOLVER_HPP_

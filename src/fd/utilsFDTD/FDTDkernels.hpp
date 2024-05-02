@@ -9,8 +9,8 @@ struct FDTDKernel
          const int y3, const int y4,
          const int z3, const int z4,
          const float coef0,
-         vectorRealView const &coefx, vectorRealView const &coefy, vectorRealView const &coefz, vectorRealView const &vp,
-         vectorRealView const &pnp1, vectorRealView const &pn, vectorRealView const &pnm1) const
+         VECTOR_REAL_VIEW const &coefx, VECTOR_REAL_VIEW const &coefy, VECTOR_REAL_VIEW const &coefz, VECTOR_REAL_VIEW const &vp,
+         VECTOR_REAL_VIEW const &pnp1, VECTOR_REAL_VIEW const &pn, VECTOR_REAL_VIEW const &pnm1) const
   {
       LOOP3DHEAD (x3,y3,z3,x4,y4,z4)
       float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
@@ -35,9 +35,9 @@ struct FDTDKernel
              const int y3, const int y4, 
              const int z3, const int z4,
              const float coef0,
-             vectorRealView const &coefx, vectorRealView const &coefy, vectorRealView const &coefz, 
-             vectorRealView const &vp, vectorRealView const &phi, vectorRealView const &eta,
-             vectorRealView const &pnp1, vectorRealView const &pn, vectorRealView const &pnm1) const
+             VECTOR_REAL_VIEW const &coefx, VECTOR_REAL_VIEW const &coefy, VECTOR_REAL_VIEW const &coefz, 
+             VECTOR_REAL_VIEW const &vp, VECTOR_REAL_VIEW const &phi, VECTOR_REAL_VIEW const &eta,
+             VECTOR_REAL_VIEW const &pnp1, VECTOR_REAL_VIEW const &pn, VECTOR_REAL_VIEW const &pnm1) const
   {
        LOOP3DHEAD (x3,y3,z3,x4,y4,z4)
        float lapx=(coefx[1]*(pn[IDX3_l(i+1,j,k)]+pn[IDX3_l(i-1,j,k)])
@@ -69,9 +69,9 @@ struct FDTDKernel
 
   // swap wavefields
   int swapWavefields( FDTDGRIDS &myGrids, 
-		     vectorRealView const & pnp1,
-		     vectorRealView const & pn  ,
-		     vectorRealView const & pnm1) const
+		     VECTOR_REAL_VIEW const & pnp1,
+		     VECTOR_REAL_VIEW const & pn  ,
+		     VECTOR_REAL_VIEW const & pnm1) const
   {
       LOOP3DHEAD(0,0,0,myGrids.nx,myGrids.ny,myGrids.nz)
         pnm1[IDX3_l(i,j,k)]=pn[IDX3_l(i,j,k)];
@@ -82,9 +82,9 @@ struct FDTDKernel
 
   // compute one step
   int computeOneStep( FDTDGRIDS &myGrids, const float coef0,
-                      vectorRealView const &coefx, vectorRealView const &coefy, vectorRealView const &coefz, 
-                      vectorRealView const &vp, vectorRealView const &phi, vectorRealView const &eta, 
-                      vectorRealView const &pnp1, vectorRealView const &pn, vectorRealView const &pnm1) const
+                      VECTOR_REAL_VIEW const &coefx, VECTOR_REAL_VIEW const &coefy, VECTOR_REAL_VIEW const &coefz, 
+                      VECTOR_REAL_VIEW const &vp, VECTOR_REAL_VIEW const &phi, VECTOR_REAL_VIEW const &eta, 
+                      VECTOR_REAL_VIEW const &pnp1, VECTOR_REAL_VIEW const &pn, VECTOR_REAL_VIEW const &pnm1) const
   {
     //up
     pml3D(myGrids, 0, myGrids.nx, 0, myGrids.ny, myGrids.z1, myGrids.z2, coef0, coefx,coefy,coefz,vp,phi,eta,pnp1,pn,pnm1);
@@ -107,9 +107,9 @@ struct FDTDKernel
   // add RHS term
   int addRHS( FDTDGRIDS &myGrids,
              const int itSample,
-             vectorRealView const & RHSTerm,
-             vectorRealView const & vp, 
-             vectorRealView const & pn) const
+             VECTOR_REAL_VIEW const & RHSTerm,
+             VECTOR_REAL_VIEW const & vp, 
+             VECTOR_REAL_VIEW const & pn) const
   {
     LOOP3DHEAD(myGrids.xs,myGrids.ys,myGrids.zs,myGrids.xs+1,myGrids.ys+1,myGrids.zs+1)
        pn[IDX3_l(i,j,k)]+=vp[IDX3(i,j,k)]*RHSTerm[itSample];
