@@ -60,7 +60,7 @@
   #define FENCE Kokkos::fence();
 #else
   #define ATOMICADD(ADD1,ADD2) ADD1+=ADD2
-  #define FENCE 
+  #define FENCE myPnGlobal=pnGlobal;
 #endif
 
 // create views only for RAJA

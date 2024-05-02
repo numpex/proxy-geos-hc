@@ -12,6 +12,7 @@ export CUDA_ROOT=/data_local/sw/cuda/11.0.3-rhel8/
 
 # don't forget to enable "-DPower9_pangea3=ON"
 
-# for kokkos: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DPower9_pangea3=ON -DX86_cypress=OFF .. ; make 
-# for raja: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DPower9_pangea3=ON -DX86_cypress=OFF .. ; make 
+# for kokkos: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON -DPower9_pangea3=ON .. ; make 
+# for raja: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON -DPower9_pangea3=ON .. ; make 
+# for omp on CPU:  cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON -DUSE_VECTOR=ON .. ; make
 
