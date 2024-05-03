@@ -59,9 +59,9 @@ int main( int argc, char *argv[] )
 {
   Kokkos::initialize(argc,argv);
   {
-    const int n1=100;
-    const int n2=100;
-    const int n3=100;
+    const int n1=650;
+    const int n2=650;
+    const int n3=650;
     const int ncoefs=4;
     float dt=0.001;
 
@@ -101,10 +101,11 @@ int main( int argc, char *argv[] )
       {
         for ( int i=3; i<n1-3;i++)
         {
-		pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)+coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
-                                                     +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
-                                                     +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
-						     -pnm1(i,j,k);
+           pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)
+                      +coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
+                      +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
+                      +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
+                      -pnm1(i,j,k);
         }
       }
     }
@@ -135,10 +136,11 @@ int main( int argc, char *argv[] )
       {
         for ( int i=3; i<n1-3;i++)
         {
-		pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)+coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
-                                                        +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
-                                                        +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
-							-pnm1(i,j,k);
+            pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)
+                       +coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
+                       +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
+                       +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
+                       -pnm1(i,j,k);
         }
       }
     }
@@ -168,10 +170,11 @@ int main( int argc, char *argv[] )
       {
         for ( int i=3; i<n1-3;i++)
         {
-		pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)+coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
-                                                        +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
-                                                        +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
-							-pnm1(i,j,k);
+           pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)
+                      +coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
+                      +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
+                      +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
+           -pnm1(i,j,k);
         }
       }
     }
@@ -194,10 +197,11 @@ int main( int argc, char *argv[] )
       {
         for ( int k=3; k<n3-3;k++)
         {
-		pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)+coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
-                                                        +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
-                                                        +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
-							-pnm1(i,j,k);
+           pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)
+                      +coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
+                      +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
+                      +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
+                      -pnm1(i,j,k);
         }
       }
     });
@@ -216,10 +220,11 @@ int main( int argc, char *argv[] )
     Kokkos::Timer timer5;
     Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>> ({3,3,3},{n1-3,n2-3,n3-3}) , KOKKOS_LAMBDA ( int i,int j, int k)
     {
-		pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)+coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
-                                                        +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
-                                                        +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
-							-pnm1(i,j,k);
+       pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)
+                  +coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
+                  +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
+                  +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
+                  -pnm1(i,j,k);
     });
     Kokkos::fence();
     double time5=timer5.seconds();
