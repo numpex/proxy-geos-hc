@@ -39,15 +39,15 @@ PROXY_HOST_DEVICE ~SEMsolver(){};
                                  SEMmeshinfo &myMeshinfo,
                                  int & i1,
                                  int & i2,
-                                 arrayReal & myRHSTerm,
-                                 arrayReal & myPnGlobal,
-                                 vectorInt & myRhsElement);
+                                 const arrayReal & myRHSTerm,
+                                 arrayReal const & myPnGlobal,
+                                 const vectorInt & myRhsElement);
 
   void outputPnValues (  SEMmesh mesh,
 		         const int & indexTimeStep,
                          int & i1, 
                          int & myElementSource, 
-                         arrayReal & pnGlobal);
+                         const arrayReal & pnGlobal);
 
   void initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh );
 

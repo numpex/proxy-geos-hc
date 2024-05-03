@@ -315,26 +315,6 @@ void SEMQkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quad
   }
 }
 
-void SEMQkGL::getBasisFunction2D( const int & order, 
-                               arrayDouble const & a,
-                               arrayDouble const & b,
-                               arrayDouble const & c )const                                      
-{
-  for( int j = 0; j <order+1 ; j++ )
-  {
-    for( int i = 0; i<order+1; i++ )
-    {
-      for( int k = 0; k<order+1 ; k++ )
-      {
-        for( int l=0; l<order+1; l++ )
-        {
-          c(i+(order+1)*j,l+(order+1)*k)=a(i,l)*b(j,k);
-        }
-      }
-    }
-  }
-}
-
 // compute B and M  
 PROXY_HOST_DEVICE void SEMQkGL::computeB(const int & elementNumber,
 		                       const int & order,

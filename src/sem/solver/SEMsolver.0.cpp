@@ -24,12 +24,15 @@ void SEMsolver::computeOneStep(  const int & timeStep,
                                  SEMmeshinfo &myMeshinfo,
                                  int & i1,
                                  int & i2,
-                                 const arrayReal & RHS_Term,
-                                 arrayReal const & PN_Global,
-                                 const vectorInt & RHS_Element)
+                                 arrayReal & myRHSTerm,
+                                 arrayReal & myPnGlobal,
+                                 vectorInt & myRhsElement)
 {
   CREATEVIEWS
-  
+   
+  printf("myPnGlobal(0,0)=%f; i1=%d;  ",myPnGlobal(globalNodesList(2178,0),i1), i1);
+  printf("1. pnGlobal(0,0)=%f  ;",pnGlobal(globalNodesList(2178,0),i1));
+
   // update pressure @ boundaries;
   LOOPHEAD( myMeshinfo.numberOfNodes, i)
     massMatrixGlobal[i]=0;
@@ -41,6 +44,7 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     int nodeRHS=globalNodesList(rhsElement[i],0);
     pnGlobal(nodeRHS,i2)+=myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   LOOPEND
+  printf("2. pnGlobal(0,0)=%f;  ",pnGlobal(globalNodesList(2178,0),i1));
  
   LOOPHEAD( myMeshinfo.numberOfElements, e)
     // start parallel section
@@ -79,6 +83,7 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     int I=listOfInteriorNodes[i];
     pnGlobal(I,i1)=2*pnGlobal(I,i2)-pnGlobal(I,i1)-myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*yGlobal[I]/massMatrixGlobal[I];
   LOOPEND
+  printf("3. pnGlobal(0,0)=%f;  ",pnGlobal(globalNodesList(2178,0),i1));
 
   if (DIMENSION==2) {
   LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i)
@@ -112,6 +117,9 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     pnGlobal(I,i1)=invMpSh*(2*massMatrixGlobal[I]*pnGlobal(I,i2)-MmSh*pnGlobal(I,i1)-myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*yGlobal[I]);
   LOOPEND
   }
+  //printf("4. pnGlobal(0,0)=%f\n",pnGlobal(globalNodesList(2178,0),i1));
+  myPnGlobal=pnGlobal;
+  printf("4. myPnGlobal(0,0)=%f\n",myPnGlobal(globalNodesList(2178,0),i1));
   FENCE
 }
 
@@ -120,12 +128,16 @@ void SEMsolver::outputPnValues(  SEMmesh mesh,
 		                 const int & indexTimeStep,
                                  int & i1,
                                  int & myElementSource, 
-                                 const arrayReal & pnGlobal)
+                                 arrayReal & pnGlobal)
 {
     //writes debugging ascii file.
+    if( indexTimeStep%50==0 )
+    {   
+      cout<<"TimeStep="<<indexTimeStep<<endl;
+    }   
     if( indexTimeStep%100==0 )
     {   
-      cout<<"TimeStep="<<indexTimeStep<<";  pnGlobal @ elementSource location "<<myElementSource
+      cout<<" pnGlobal @ elementSource location "<<myElementSource
           <<" after computeOneStep = "<< pnGlobal(globalNodesList(myElementSource,0),i1)<<endl;
       //mesh.saveSnapShot( indexTimeStep, i1, pnGlobal );
     }  
@@ -157,20 +169,20 @@ void SEMsolver::initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
 void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
 {
   //interior elements
-  globalNodesList=allocateArray2D<arrayInt>(myMeshinfo.numberOfElements,myMeshinfo.numberOfPointsPerElement,"globalNodesList");
-  listOfInteriorNodes=allocateVector<vectorInt>(myMeshinfo.numberOfInteriorNodes,"listOfInteriorNodes");
-  globalNodesCoords=allocateArray2D<arrayReal>(myMeshinfo.numberOfNodes,3,"globalNodesCoords");
-  listOfBoundaryNodes=allocateVector<vectorInt>(myMeshinfo.numberOfBoundaryNodes,"listOfBoundaryNodes");
-  faceInfos=allocateArray2D<arrayInt>(myMeshinfo.numberOfBoundaryFaces,2+(order+1),"faceInfos");
-  localFaceNodeToGlobalFaceNode=allocateArray2D<arrayInt>(myMeshinfo.numberOfBoundaryFaces, order+1, "localFaceNodeToGlobalFaceNode");
-  model=allocateVector<vectorReal>(myMeshinfo.numberOfElements,"model");
-  quadraturePoints=allocateVector<vectorDouble>(order+1,"quadraturePoints");
-  weights=allocateVector<vectorDouble>(order+1,"weights");
-  basisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1,"basisFunction1D");
-  derivativeBasisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1,"derivativeBasisFunction1D");
+  globalNodesList=allocateArray2D<arrayInt>(myMeshinfo.numberOfElements,myMeshinfo.numberOfPointsPerElement);
+  listOfInteriorNodes=allocateVector<vectorInt>(myMeshinfo.numberOfInteriorNodes);
+  globalNodesCoords=allocateArray2D<arrayReal>(myMeshinfo.numberOfNodes,3);
+  listOfBoundaryNodes=allocateVector<vectorInt>(myMeshinfo.numberOfBoundaryNodes);
+  faceInfos=allocateArray2D<arrayInt>(myMeshinfo.numberOfBoundaryFaces,2+(order+1));
+  localFaceNodeToGlobalFaceNode=allocateArray2D<arrayInt>(myMeshinfo.numberOfBoundaryFaces, order+1 );
+  model=allocateVector<vectorReal>(myMeshinfo.numberOfElements);
+  quadraturePoints=allocateVector<vectorDouble>(order+1);
+  weights=allocateVector<vectorDouble>(order+1);
+  basisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1);
+  derivativeBasisFunction1D=allocateArray2D<arrayDouble>(order+1,order+1);
   //shared arrays
-  massMatrixGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes,"massMatrixGlobal");
-  yGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes,"yGlobal");
-  ShGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfBoundaryNodes,"ShGlobal");
+  massMatrixGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes );
+  yGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfNodes );
+  ShGlobal=allocateVector<vectorReal>( myMeshinfo.numberOfBoundaryNodes );
 }
 

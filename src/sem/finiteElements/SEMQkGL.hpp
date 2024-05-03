@@ -2,7 +2,7 @@
 #define SEMQKGL_HPP_
 
 #include "dataType.hpp"
-#include "SEMmacro.hpp"
+#include "SEMmacros.hpp"
 using namespace std;
 
 /**
@@ -32,13 +32,6 @@ class SEMQkGL
   void  getBasisFunction1D( int order, vectorDouble const & quadraturePoints ,arrayDouble const & basisFunction1D) const;
   void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints, 
                                                 arrayDouble const & derivativeBasisFunction1D ) const;
-
-  // get  2d shape Functions  for all quadrature points
-  void getBasisFunction2D( const int & order,
-                           arrayDouble const & a,
-                           arrayDouble const & b,
-                           arrayDouble const & c) const;
-
   // compute B and M
   PROXY_HOST_DEVICE void computeB(  const int & elementNumber,
                                     const int & order,
