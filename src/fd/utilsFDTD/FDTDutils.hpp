@@ -173,7 +173,6 @@ struct FDTDUtils
       FILE *snapshot_file = fopen(filename_buf, "wb");
       //printf("write snapshot for: x=[%d %d], y=[%d %d], z=[%d %d]\n",x0,x1,y0,y1,z0,z1);
      
-      #pragma omp parallel for collapse(3) 
       for (int k = z0; k < z1; ++k) {
           for (int j = y0; j < y1+1; ++j) {
               for (int i = x0; i < x1; ++i) {
