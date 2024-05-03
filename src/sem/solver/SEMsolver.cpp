@@ -157,6 +157,7 @@ void SEMsolver::initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh )
 void SEMsolver::allocateFEarrays( SEMmeshinfo &myMeshinfo )
 {
   //interior elements
+  cout<<"Allocate host memory for arrays in the solver:"<<endl;
   globalNodesList=allocateArray2D<arrayInt>(myMeshinfo.numberOfElements,myMeshinfo.numberOfPointsPerElement,"globalNodesList");
   listOfInteriorNodes=allocateVector<vectorInt>(myMeshinfo.numberOfInteriorNodes,"listOfInteriorNodes");
   globalNodesCoords=allocateArray2D<arrayReal>(myMeshinfo.numberOfNodes,3,"globalNodesCoords");

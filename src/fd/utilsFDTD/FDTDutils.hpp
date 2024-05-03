@@ -123,17 +123,17 @@ struct FDTDUtils
 
     // etax 
     float param = dt_sch * 3.f * vmax * logf(1000.f)/(2.f*ndampx*dx);
-    printf("param=%f\n",param);
+    //printf("param=%f\n",param);
     pml_profile_init(etax, 0, nx+1, ndampx, ndampx, param);
 
     // etay 
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampy*dy);
-    printf("param=%f\n",param);
+    //printf("param=%f\n",param);
     pml_profile_init(etay, 0, ny+1, ndampy, ndampy, param);
 
     // etaz 
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampz*dz);
-    printf("param=%f\n",param);
+    //printf("param=%f\n",param);
     pml_profile_init(etaz, 0, nz+1, ndampz, ndampz, param);
 
     (void)pml_profile_extend_all(nx, ny, nz,
@@ -154,7 +154,8 @@ struct FDTDUtils
         RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,myGrids.nx), [pn] ( int i){});
         #endif
 
-        printf("result0 %f\n",pn[IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs)]);
+        printf("the pressure value at source location [%d %d %d] = %f\n",
+               myGrids.xs, myGrids.ys, myGrids.zs, pn[IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs)]);
         write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pn, itSample);
 
       } 
@@ -170,7 +171,7 @@ struct FDTDUtils
       char filename_buf[32];
       snprintf(filename_buf, sizeof(filename_buf), "snapshot_it_%d.H@", istep);
       FILE *snapshot_file = fopen(filename_buf, "wb");
-      printf(" %d %d %d %d %d %d\n",x0,x1,y0,y1,z0,z1);
+      //printf("write snapshot for: x=[%d %d], y=[%d %d], z=[%d %d]\n",x0,x1,y0,y1,z0,z1);
      
       #pragma omp parallel for collapse(3) 
       for (int k = z0; k < z1; ++k) {
