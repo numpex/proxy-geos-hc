@@ -59,9 +59,9 @@ int main( int argc, char *argv[] )
 {
   Kokkos::initialize(argc,argv);
   {
-    const int n1=100;
-    const int n2=100;
-    const int n3=100;
+    const int n1=600;
+    const int n2=600;
+    const int n3=600;
     const int ncoefs=4;
     float dt=0.001;
 
