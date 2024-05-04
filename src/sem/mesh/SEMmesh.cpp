@@ -214,7 +214,7 @@ std::vector<std::vector<float>> SEMmesh::projectToGrid( const int numberOfNodes,
 {
   std::vector<vector<float>> grid( nx,std::vector<float> (nz) );
   int i, j;
-  cout<< " In projecToGrid numberOfNodes="<<numberOfNodes<<endl;
+  //cout<< " In projecToGrid numberOfNodes="<<numberOfNodes<<endl;
   for( int node=0; node<numberOfNodes; node++ )
   {
      Itoij( node, i, j );
@@ -594,7 +594,7 @@ void SEMmesh::saveSnapShot( const int indexTimeStep, const int i1, arrayReal con
   int numberOfNodes=nx*nz;
   std::vector<float> inputVector( numberOfNodes );
   int offset=(ny==1?offset=0:offset=nx*nz*(ny/2-1));
-  printf(" nx, ny/2-1, nz %d %d %d offset=%d\n",nx,ny/2-1,nz, offset);
+  //printf(" nx, ny/2-1, nz %d %d %d offset=%d\n",nx,ny/2-1,nz, offset);
   for( int i = offset; i< offset+numberOfNodes; i++ )
   {
     inputVector[i-offset]=u(i,i1);
@@ -603,7 +603,7 @@ void SEMmesh::saveSnapShot( const int indexTimeStep, const int i1, arrayReal con
   fstream snapFile;
   string snapNumber = "snapshot"+to_string( indexTimeStep );
   snapFile.open( snapNumber, ios::out| ios::trunc );
-  std::cout<<"nx="<<nx<<" ny="<<ny<<std::endl;
+  //std::cout<<"nx="<<nx<<" ny="<<ny<<std::endl;
   for( int i=0; i<nx; i++ )
   {
     for( int j=0; j<nz; j++ )
