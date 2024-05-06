@@ -23,6 +23,9 @@ struct FDTDInit
   float vmin=1500;
   float vmax=4500;
 
+  int i1=0;
+  int i2=1;
+
   vectorReal RHSTerm;
 
   void init_geometry(int argc, char *argv[], FDTDGRIDS &myGrids)

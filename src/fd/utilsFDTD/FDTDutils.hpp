@@ -144,20 +144,17 @@ struct FDTDUtils
                 z1+1, z2, z3+1, z4, z5+1, z6);
   }
       
-  void output(FDTDGRIDS &myGrids, vectorReal &pn, int itSample)
+  void output(FDTDGRIDS &myGrids, arrayReal const&pnGlobal, int itSample, const int &i1)
   {
 
       if(itSample%50==0)
       {   
 
-        #ifdef USE_RAJA
-        vectorRealView pnView = pn.toView();
-        RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,myGrids.nx), [pnView] ( int i){});
-        #endif
+        FDFENCE
 
         printf("TimeStep=%d\t; Pressure value at source [%d %d %d] = %f\n", itSample,
-               myGrids.xs, myGrids.ys, myGrids.zs, pn[IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs)]);
-        write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pn, itSample);
+               myGrids.xs, myGrids.ys, myGrids.zs, pnGlobal(IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs),i1));
+        write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pnGlobal, itSample, i1);
 
       } 
 
@@ -167,7 +164,7 @@ struct FDTDUtils
 		 int x0, int x1, 
 		 int y0, int y1, 
 		 int z0, int z1, 
-                 vectorReal &u, int istep)
+                 arrayReal const&pnGlobal, int istep, const int &i1)
   {
       char filename_buf[32];
       snprintf(filename_buf, sizeof(filename_buf), "snapshot_it_%d.H@", istep);
@@ -177,7 +174,7 @@ struct FDTDUtils
       for (int k = z0; k < z1; ++k) {
           for (int j = y0; j < y1+1; ++j) {
               for (int i = x0; i < x1; ++i) {
-		  fwrite(&u[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
+		  fwrite(&pnGlobal(IDX3_l(i,j,k),i1), sizeof(float),1, snapshot_file);
               }
           }
       }

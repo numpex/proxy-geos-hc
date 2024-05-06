@@ -1,0 +1,42 @@
+Kokkos::OpenMP::initialize WARNING: OMP_PROC_BIND environment variable not set
+  In general, for best performance with OpenMP 4.0 or better set OMP_PROC_BIND=spread and OMP_PLACES=threads
+  For best performance with OpenMP 3.1 set OMP_PROC_BIND=true
+  For unit testing set OMP_PROC_BIND=false
+
+allocate vector: coefx of size: 5
+allocate vector: coefy of size: 5
+allocate vector: coefz of size: 5
+allocate vector: RHSTerm of size: 1242
+allocate vector: vp of size: 3375000
+allocate vector: pnp1 of size: 3944312
+allocate vector: pn of size: 3944312
+allocate vector: pnm1 of size: 3944312
+allocate vector: phi of size: 3375000
+allocate vector: eta of size: 3511808
+the pressure value at source location [75 75 75] = 0.022335
+the pressure value at source location [75 75 75] = 437.705170
+the pressure value at source location [75 75 75] = -803.087219
+the pressure value at source location [75 75 75] = -10.512157
+the pressure value at source location [75 75 75] = -0.001010
+the pressure value at source location [75 75 75] = 0.000573
+the pressure value at source location [75 75 75] = -0.000311
+the pressure value at source location [75 75 75] = 0.000240
+the pressure value at source location [75 75 75] = -0.000167
+the pressure value at source location [75 75 75] = 0.000054
+the pressure value at source location [75 75 75] = -0.000005
+the pressure value at source location [75 75 75] = -0.000058
+the pressure value at source location [75 75 75] = 0.000059
+the pressure value at source location [75 75 75] = -0.000049
+the pressure value at source location [75 75 75] = 0.000060
+the pressure value at source location [75 75 75] = -0.000086
+the pressure value at source location [75 75 75] = 0.000075
+the pressure value at source location [75 75 75] = -0.000046
+the pressure value at source location [75 75 75] = 0.000029
+the pressure value at source location [75 75 75] = -0.000020
+the pressure value at source location [75 75 75] = 0.000019
+the pressure value at source location [75 75 75] = 0.000033
+the pressure value at source location [75 75 75] = 0.046138
+the pressure value at source location [75 75 75] = 0.097330
+the pressure value at source location [75 75 75] = 0.210602
+Elapsed Time : 0.957727 seconds.
+

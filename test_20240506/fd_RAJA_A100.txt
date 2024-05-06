@@ -1,0 +1,36 @@
+allocate vector: coefx of size: 5
+allocate vector: coefy of size: 5
+allocate vector: coefz of size: 5
+allocate vector: RHSTerm of size: 1242
+allocate vector: vp of size: 3375000
+allocate vector: pnp1 of size: 3944312
+allocate vector: pn of size: 3944312
+allocate vector: phi of size: 3375000
+allocate vector: eta of size: 3511808
+allocate array : pnGlobal of size: (3944312, 2)
+TimeStep=0	; Pressure value at source [75 75 75] = 0.041887
+TimeStep=50	; Pressure value at source [75 75 75] = 431.375793
+TimeStep=100	; Pressure value at source [75 75 75] = -760.125122
+TimeStep=150	; Pressure value at source [75 75 75] = -8.384164
+TimeStep=200	; Pressure value at source [75 75 75] = -0.001208
+TimeStep=250	; Pressure value at source [75 75 75] = 0.000680
+TimeStep=300	; Pressure value at source [75 75 75] = -0.000398
+TimeStep=350	; Pressure value at source [75 75 75] = 0.000336
+TimeStep=400	; Pressure value at source [75 75 75] = -0.000204
+TimeStep=450	; Pressure value at source [75 75 75] = 0.000142
+TimeStep=500	; Pressure value at source [75 75 75] = -0.000064
+TimeStep=550	; Pressure value at source [75 75 75] = 0.000033
+TimeStep=600	; Pressure value at source [75 75 75] = 0.000038
+TimeStep=650	; Pressure value at source [75 75 75] = -0.000033
+TimeStep=700	; Pressure value at source [75 75 75] = 0.000049
+TimeStep=750	; Pressure value at source [75 75 75] = -0.000068
+TimeStep=800	; Pressure value at source [75 75 75] = 0.000061
+TimeStep=850	; Pressure value at source [75 75 75] = -0.000044
+TimeStep=900	; Pressure value at source [75 75 75] = 0.000031
+TimeStep=950	; Pressure value at source [75 75 75] = -0.000020
+TimeStep=1000	; Pressure value at source [75 75 75] = 0.000020
+TimeStep=1050	; Pressure value at source [75 75 75] = 0.000032
+TimeStep=1100	; Pressure value at source [75 75 75] = 0.049410
+TimeStep=1150	; Pressure value at source [75 75 75] = 0.095787
+TimeStep=1200	; Pressure value at source [75 75 75] = 0.211021
+Elapsed Time : 0.591048 seconds.

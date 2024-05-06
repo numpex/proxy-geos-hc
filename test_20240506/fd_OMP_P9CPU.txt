@@ -1,0 +1,37 @@
+allocate vector: coefx of size: 5
+allocate vector: coefy of size: 5
+allocate vector: coefz of size: 5
+allocate vector: RHSTerm of size: 1242
+allocate vector: vp of size: 3375000
+allocate vector: pnp1 of size: 3944312
+allocate vector: pn of size: 3944312
+allocate vector: pnm1 of size: 3944312
+allocate vector: phi of size: 3375000
+allocate vector: eta of size: 3511808
+the pressure value at source location [75 75 75] = 0.041887
+the pressure value at source location [75 75 75] = 431.375702
+the pressure value at source location [75 75 75] = -760.124817
+the pressure value at source location [75 75 75] = -8.383929
+the pressure value at source location [75 75 75] = -0.001175
+the pressure value at source location [75 75 75] = 0.000692
+the pressure value at source location [75 75 75] = -0.000476
+the pressure value at source location [75 75 75] = 0.000324
+the pressure value at source location [75 75 75] = -0.000234
+the pressure value at source location [75 75 75] = 0.000160
+the pressure value at source location [75 75 75] = -0.000048
+the pressure value at source location [75 75 75] = -0.000010
+the pressure value at source location [75 75 75] = 0.000026
+the pressure value at source location [75 75 75] = -0.000032
+the pressure value at source location [75 75 75] = 0.000041
+the pressure value at source location [75 75 75] = -0.000057
+the pressure value at source location [75 75 75] = 0.000061
+the pressure value at source location [75 75 75] = -0.000050
+the pressure value at source location [75 75 75] = 0.000029
+the pressure value at source location [75 75 75] = -0.000022
+the pressure value at source location [75 75 75] = 0.000021
+the pressure value at source location [75 75 75] = 0.000035
+the pressure value at source location [75 75 75] = 0.049413
+the pressure value at source location [75 75 75] = 0.095787
+the pressure value at source location [75 75 75] = 0.211022
+Elapsed Time : 10.0564 seconds.
+

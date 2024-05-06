@@ -127,44 +127,46 @@ constexpr size_t greater_of_squarest_factor_pair(size_t n)
 
 #if defined (USE_RAJA)
   #define CREATEVIEWINNER \
+      CREATEVIEWRHS \
       vectorRealView coefx  = myModels.coefx.toView();\
       vectorRealView coefy  = myModels.coefy.toView();\
       vectorRealView coefz  = myModels.coefz.toView();\
-      vectorRealView vp  = myModels.vp.toView();\
-      CREATEVIEWAVEFD\
       double coef0 = myModels.coef0;
   #define CREATEVIEWPML\
       CREATEVIEWINNER\
       vectorRealView phi = myModels.phi.toView();\
       vectorRealView eta = myModels.eta.toView();
-  #define CREATEVIEWAVEFD\
-      vectorRealView pnp1= myModels.pnp1.toView();\
-      vectorRealView pn  = myModels.pn.toView();\
-      arrayRealView pnGlobal = myModels.pnGlobal.toView();
   #define CREATEVIEWRHS\
+    arrayRealView pnGlobal = PN_Global.toView();\
     vectorRealView RHSTerm  = myModels.RHSTerm.toView();\
-    vectorRealView pn  = myModels.pn.toView();\
     vectorRealView vp  = myModels.vp.toView();
 #else
-    #define CREATEVIEWINNER \
+  #define CREATEVIEWINNER \
       vectorReal coefx  = myModels.coefx;\
       vectorReal coefy  = myModels.coefy;\
       vectorReal coefz  = myModels.coefz;\
       vectorReal vp  = myModels.vp;\
-      CREATEVIEWAVEFD\
       double coef0 = myModels.coef0;
   #define CREATEVIEWPML\
       CREATEVIEWINNER\
       vectorReal phi = myModels.phi;\
       vectorReal eta = myModels.eta;
-  #define CREATEVIEWAVEFD\
-      vectorReal pnp1= myModels.pnp1;\
-      vectorReal pn  = myModels.pn;\
-      arrayReal pnGlobal = myModels.pnGlobal;
   #define CREATEVIEWRHS\
     vectorReal RHSTerm  = myModels.RHSTerm;\
     vectorReal pn  = myModels.pn;\
     vectorReal vp  = myModels.vp;
+  #define PN_Global pnGlobal 
+#endif
+
+#ifdef USE_RAJA
+  #define FDFENCE\
+        arrayRealView pnGlobalView = pnGlobal.toView();\
+        RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,myGrids.nx), [pnGlobalView] ( int i){});
+#elif defined (USE_KOKKOS)
+  #define FDFENCE\
+        Kokkos::fence();
+#else
+  #define FDFENCE
 #endif
 
 #endif //FDTDMACROS_HPP
