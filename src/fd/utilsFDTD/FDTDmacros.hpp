@@ -126,9 +126,45 @@ constexpr size_t greater_of_squarest_factor_pair(size_t n)
 #endif
 
 #if defined (USE_RAJA)
-  #define VECTOR_REAL_VIEW vectorRealView 
+  #define CREATEVIEWINNER \
+      vectorRealView coefx  = myModels.coefx.toView();\
+      vectorRealView coefy  = myModels.coefy.toView();\
+      vectorRealView coefz  = myModels.coefz.toView();\
+      vectorRealView vp  = myModels.vp.toView();\
+      CREATEVIEWAVEFD\
+      double coef0 = myModels.coef0;
+  #define CREATEVIEWPML\
+      CREATEVIEWINNER\
+      vectorRealView phi = myModels.phi.toView();\
+      vectorRealView eta = myModels.eta.toView();
+  #define CREATEVIEWAVEFD\
+      vectorRealView pnp1= myModels.pnp1.toView();\
+      vectorRealView pn  = myModels.pn.toView();\
+      arrayRealView pnGlobal = myModels.pnGlobal.toView();
+  #define CREATEVIEWRHS\
+    vectorRealView RHSTerm  = myModels.RHSTerm.toView();\
+    vectorRealView pn  = myModels.pn.toView();\
+    vectorRealView vp  = myModels.vp.toView();
 #else
-  #define VECTOR_REAL_VIEW vectorReal 
+    #define CREATEVIEWINNER \
+      vectorReal coefx  = myModels.coefx;\
+      vectorReal coefy  = myModels.coefy;\
+      vectorReal coefz  = myModels.coefz;\
+      vectorReal vp  = myModels.vp;\
+      CREATEVIEWAVEFD\
+      double coef0 = myModels.coef0;
+  #define CREATEVIEWPML\
+      CREATEVIEWINNER\
+      vectorReal phi = myModels.phi;\
+      vectorReal eta = myModels.eta;
+  #define CREATEVIEWAVEFD\
+      vectorReal pnp1= myModels.pnp1;\
+      vectorReal pn  = myModels.pn;\
+      arrayReal pnGlobal = myModels.pnGlobal;
+  #define CREATEVIEWRHS\
+    vectorReal RHSTerm  = myModels.RHSTerm;\
+    vectorReal pn  = myModels.pn;\
+    vectorReal vp  = myModels.vp;
 #endif
 
 #endif //FDTDMACROS_HPP

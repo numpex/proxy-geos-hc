@@ -22,17 +22,19 @@ struct FDTDGRIDS {
 
 struct FDTDMODELS {
 
-  VECTOR_REAL_VIEW vp; 
-  VECTOR_REAL_VIEW phi;
-  VECTOR_REAL_VIEW eta;
-  VECTOR_REAL_VIEW pnp1;
-  VECTOR_REAL_VIEW pn; 
-  VECTOR_REAL_VIEW pnm1;
+  double coef0;
 
-  VECTOR_REAL_VIEW RHSTerm;
-  VECTOR_REAL_VIEW coefx;
-  VECTOR_REAL_VIEW coefy;
-  VECTOR_REAL_VIEW coefz;
+  vectorReal coefx;
+  vectorReal coefy;
+  vectorReal coefz;
+  vectorReal RHSTerm;
+
+  vectorReal vp;
+  vectorReal phi;
+  vectorReal eta;
+  vectorReal pnp1;
+  vectorReal pn;
+  arrayReal pnGlobal;
 
 };
 

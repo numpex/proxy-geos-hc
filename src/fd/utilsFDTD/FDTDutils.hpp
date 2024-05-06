@@ -144,17 +144,18 @@ struct FDTDUtils
                 z1+1, z2, z3+1, z4, z5+1, z6);
   }
       
-  void output(FDTDGRIDS &myGrids, VECTOR_REAL_VIEW pn, int itSample)
+  void output(FDTDGRIDS &myGrids, vectorReal &pn, int itSample)
   {
 
       if(itSample%50==0)
       {   
 
         #ifdef USE_RAJA
-        RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,myGrids.nx), [pn] ( int i){});
+        vectorRealView pnView = pn.toView();
+        RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,myGrids.nx), [pnView] ( int i){});
         #endif
 
-        printf("the pressure value at source location [%d %d %d] = %f\n",
+        printf("TimeStep=%d\t; Pressure value at source [%d %d %d] = %f\n", itSample,
                myGrids.xs, myGrids.ys, myGrids.zs, pn[IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs)]);
         write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pn, itSample);
 
@@ -166,7 +167,7 @@ struct FDTDUtils
 		 int x0, int x1, 
 		 int y0, int y1, 
 		 int z0, int z1, 
-                 VECTOR_REAL_VIEW u, int istep)
+                 vectorReal &u, int istep)
   {
       char filename_buf[32];
       snprintf(filename_buf, sizeof(filename_buf), "snapshot_it_%d.H@", istep);

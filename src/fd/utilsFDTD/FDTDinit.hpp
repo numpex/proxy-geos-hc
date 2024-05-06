@@ -3,6 +3,7 @@
 
 #include "utils.hpp"
 #include "FDTDutils.hpp"
+#include "FDTDkernels.hpp"
 
 
 struct FDTDInit
@@ -21,19 +22,8 @@ struct FDTDInit
 
   float vmin=1500;
   float vmax=4500;
-  double coef0;
 
   vectorReal RHSTerm;
-  vectorReal coefx;
-  vectorReal coefy;
-  vectorReal coefz;
-
-  vectorReal vp;
-  vectorReal phi;
-  vectorReal eta;
-  vectorReal pnp1;
-  vectorReal pn;
-  vectorReal pnm1;
 
   void init_geometry(int argc, char *argv[], FDTDGRIDS &myGrids)
   {
@@ -91,34 +81,34 @@ struct FDTDInit
 
   }
 
-  void init_coefficients(FDTDGRIDS &myGrids) 
+  void init_coefficients(FDTDGRIDS &myGrids, FDTDMODELS &myModels) 
   {
-   coefx = allocateVector<vectorReal>(ncoefs, "coefx");
-   coefy = allocateVector<vectorReal>(ncoefs, "coefy");
-   coefz = allocateVector<vectorReal>(ncoefs, "coefz");
+   myModels.coefx = allocateVector<vectorReal>(ncoefs, "coefx");
+   myModels.coefy = allocateVector<vectorReal>(ncoefs, "coefy");
+   myModels.coefz = allocateVector<vectorReal>(ncoefs, "coefz");
 
-   myFDTDUtils.init_coef(myGrids.dx, coefx);
-   myFDTDUtils.init_coef(myGrids.dy, coefy);
-   myFDTDUtils.init_coef(myGrids.dz, coefz);
+   myFDTDUtils.init_coef(myGrids.dx, myModels.coefx);
+   myFDTDUtils.init_coef(myGrids.dy, myModels.coefy);
+   myFDTDUtils.init_coef(myGrids.dz, myModels.coefz);
 
-   coef0 = -2.*(coefx[1]+coefx[2]+coefx[3]+coefx[4]);
-   coef0+= -2.*(coefy[1]+coefy[2]+coefy[3]+coefy[4]);
-   coef0+= -2.*(coefz[1]+coefz[2]+coefz[3]+coefz[4]);
+   myModels.coef0 = -2.*(myModels.coefx[1]+myModels.coefx[2]+myModels.coefx[3]+myModels.coefx[4]);
+   myModels.coef0+= -2.*(myModels.coefy[1]+myModels.coefy[2]+myModels.coefy[3]+myModels.coefy[4]);
+   myModels.coef0+= -2.*(myModels.coefz[1]+myModels.coefz[2]+myModels.coefz[3]+myModels.coefz[4]);
 
-   timeStep=myFDTDUtils.compute_dt_sch(vmax,coefx,coefy,coefz);
+   timeStep=myFDTDUtils.compute_dt_sch(vmax,myModels.coefx,myModels.coefy,myModels.coefz);
    nSamples=timeMax/timeStep;
 
   }
 
-  void init_source()
+  void init_source(FDTDMODELS &myModels)
   {
    // compute source term
-   RHSTerm = allocateVector<vectorReal>(nSamples, "RHSTerm");
+   myModels.RHSTerm = allocateVector<vectorReal>(nSamples, "RHSTerm");
 
    std::vector<float> sourceTerm=myUtils.computeSourceTerm(nSamples,timeStep,f0,sourceOrder);
    for(int i=0;i<nSamples;i++)
    {
-     RHSTerm[i]=sourceTerm[i];
+     myModels.RHSTerm[i]=sourceTerm[i];
    }
 
   }
@@ -131,12 +121,12 @@ struct FDTDInit
                         ( myGrids.nz + 2 * myGrids.lz ) ;
    int etaModelVolume = ( myGrids.nx + 2 ) * ( myGrids.ny + 2 ) * ( myGrids.nz + 2 ) ;
 
-   vp   = allocateVector<vectorReal>( modelVolume, "vp");
-   pnp1 = allocateVector<vectorReal>( extModelVolume, "pnp1");
-   pn   = allocateVector<vectorReal>( extModelVolume, "pn");
-   pnm1 = allocateVector<vectorReal>( extModelVolume, "pnm1" );
-   phi  = allocateVector<vectorReal>( modelVolume, "phi");
-   eta  = allocateVector<vectorReal>( etaModelVolume, "eta");
+   myModels.vp   = allocateVector<vectorReal>( modelVolume, "vp");
+   myModels.pnp1 = allocateVector<vectorReal>( extModelVolume, "pnp1");
+   myModels.pn   = allocateVector<vectorReal>( extModelVolume, "pn");
+   myModels.phi  = allocateVector<vectorReal>( modelVolume, "phi");
+   myModels.eta  = allocateVector<vectorReal>( etaModelVolume, "eta");
+   myModels.pnGlobal = allocateArray2D<arrayReal>( extModelVolume, 2 , "pnGlobal");
 
    myFDTDUtils.init_eta( myGrids.nx,  myGrids.ny,  myGrids.nz,
 		         myGrids.ndampx,  myGrids.ndampy, myGrids.ndampz,
@@ -144,7 +134,7 @@ struct FDTDInit
                          myGrids.y1,  myGrids.y2,  myGrids.y3,  myGrids.y4,  myGrids.y5,  myGrids.y6,
                          myGrids.z1,  myGrids.z2,  myGrids.z3,  myGrids.z4,  myGrids.z5,  myGrids.z6,
                          myGrids.dx,  myGrids.dy,  myGrids.dz,  timeStep,
-                         vmax, eta);
+                         vmax, myModels.eta);
 
    float init_vp_value = vmin*vmin*timeStep*timeStep;
 
@@ -156,7 +146,7 @@ struct FDTDInit
       {
          for( int k=0; k<myGrids.nz;k++)
          {
-           vp[IDX3(i,j,k)]=init_vp_value;
+           myModels.vp[IDX3(i,j,k)]=init_vp_value;
          }
       }
    }
@@ -168,37 +158,13 @@ struct FDTDInit
       {
          for( int k=-myGrids.lz; k<myGrids.nz+myGrids.lz;k++)
          {
-           pnp1[IDX3_l(i,j,k)]=0.000001;
-           pnm1[IDX3_l(i,j,k)]=0.000001;
-           pn[IDX3_l(i,j,k)]=0.000001;
+           myModels.pnp1[IDX3_l(i,j,k)]=0.000001;
+           myModels.pn[IDX3_l(i,j,k)]=0.000001;
+           myModels.pnGlobal(IDX3_l(i,j,k), 0)=0.000001;
+           myModels.pnGlobal(IDX3_l(i,j,k), 1)=0.000001;
          }
       }
    }
-
-   #if defined (USE_RAJA)
-   myModels.vp   = vp.toView();
-   myModels.pnp1 = pnp1.toView();
-   myModels.pn   = pn.toView();
-   myModels.pnm1 = pnm1.toView();
-   myModels.phi  = phi.toView();
-   myModels.eta  = eta.toView();
-   myModels.RHSTerm  = RHSTerm.toView();
-   myModels.coefx  = coefx.toView();
-   myModels.coefy  = coefy.toView();
-   myModels.coefz  = coefz.toView();
-   #else
-   myModels.vp   = vp;
-   myModels.pnp1 = pnp1;
-   myModels.pn   = pn;
-   myModels.pnm1 = pnm1;
-   myModels.phi  = phi;
-   myModels.eta  = eta;
-   myModels.RHSTerm  = RHSTerm;
-   myModels.coefx  = coefx;
-   myModels.coefy  = coefy;
-   myModels.coefz  = coefz;
-   #endif
-
  }
 
 };

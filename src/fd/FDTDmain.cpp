@@ -5,7 +5,6 @@
 //************************************************************************
 
 #include"FDTDinit.hpp"
-#include"FDTDkernels.hpp"
 
 int main( int argc, char *argv[] )
 {
@@ -25,10 +24,10 @@ int main( int argc, char *argv[] )
     myInit.init_geometry( argc, argv, myGrids );
 
     // initialize coefficients
-    myInit.init_coefficients( myGrids );
+    myInit.init_coefficients( myGrids, myModels );
 
     // initialize source 
-    myInit.init_source();
+    myInit.init_source( myModels );
 
     // initialize velocity and pressure models, etc
     myInit.init_models( myGrids, myModels );
@@ -37,23 +36,20 @@ int main( int argc, char *argv[] )
     time_point< system_clock > startTime = system_clock::now();
 
     // main loop for wave propagation on each time step
-    for (int itSample=0; itSample<myInit.nSamples;itSample++)
+    for (int itSample=0; itSample<myInit.nSamples; itSample++)
     {
        // add RHS term
-       myKernel.addRHS(myGrids,itSample,myInit.RHSTerm, myModels.vp, myModels.pn);
+       myKernel.addRHS(myGrids, itSample, myModels);
 
        //compute one step
-       myKernel.computeOneStep( myGrids, myInit.coef0,  
-                                myInit.coefx, myInit.coefy, myInit.coefz,
-                                myModels.vp, myModels.phi, myModels.eta, 
-                                myModels.pnp1, myModels.pn, myModels.pnm1);
-
+       myKernel.computeOneStep( myGrids, myModels ); 
 
        // swap wavefields
-       myKernel.swapWavefields(myGrids, myModels.pnp1, myModels.pn, myModels.pnm1);
+       myKernel.swapWavefields( myGrids, myModels );
 
        // print infos and save wavefields
        myFDTDUtils.output(myGrids, myModels.pn, itSample);
+
    }
 
     // print timing information
