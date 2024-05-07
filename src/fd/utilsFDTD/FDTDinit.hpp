@@ -23,17 +23,17 @@ struct FDTDInit
   float vmax=4500;
   double coef0;
 
-  #ifdef USE_RAJA
-  vectorReal h_RHSTerm;
-  vectorReal h_coefx;
-  vectorReal h_coefy;
-  vectorReal h_coefz;
-  #endif
+  vectorReal RHSTerm;
+  vectorReal coefx;
+  vectorReal coefy;
+  vectorReal coefz;
 
-  vectorRealView RHSTerm;
-  vectorRealView coefx;
-  vectorRealView coefy;
-  vectorRealView coefz;
+  vectorReal vp;
+  vectorReal phi;
+  vectorReal eta;
+  vectorReal pnp1;
+  vectorReal pn;
+  vectorReal pnm1;
 
   void init_geometry(int argc, char *argv[], FDTDGRIDS &myGrids)
   {
@@ -91,20 +91,11 @@ struct FDTDInit
 
   }
 
-  void init_coefficients(FDTDGRIDS &myGrids)
+  void init_coefficients(FDTDGRIDS &myGrids) 
   {
-   #ifdef USE_RAJA
-   h_coefx = allocateVector<vectorReal>(ncoefs);
-   h_coefy = allocateVector<vectorReal>(ncoefs);
-   h_coefz = allocateVector<vectorReal>(ncoefs);
-   coefx = h_coefx.toView();
-   coefy = h_coefy.toView();
-   coefz = h_coefz.toView();
-   #else 
-   coefx = allocateVector<vectorRealView>(ncoefs);
-   coefy = allocateVector<vectorRealView>(ncoefs);
-   coefz = allocateVector<vectorRealView>(ncoefs);
-   #endif
+   coefx = allocateVector<vectorReal>(ncoefs, "coefx");
+   coefy = allocateVector<vectorReal>(ncoefs, "coefy");
+   coefz = allocateVector<vectorReal>(ncoefs, "coefz");
 
    myFDTDUtils.init_coef(myGrids.dx, coefx);
    myFDTDUtils.init_coef(myGrids.dy, coefy);
@@ -122,18 +113,14 @@ struct FDTDInit
   void init_source()
   {
    // compute source term
-   #ifdef USE_RAJA
-   h_RHSTerm = allocateVector<vectorReal>(nSamples);
-   RHSTerm = h_RHSTerm.toView();
-   #else
-   RHSTerm = allocateVector<vectorRealView>(nSamples);
-   #endif
+   RHSTerm = allocateVector<vectorReal>(nSamples, "RHSTerm");
 
    std::vector<float> sourceTerm=myUtils.computeSourceTerm(nSamples,timeStep,f0,sourceOrder);
    for(int i=0;i<nSamples;i++)
    {
      RHSTerm[i]=sourceTerm[i];
    }
+
   }
 
   void init_models(FDTDGRIDS &myGrids, FDTDMODELS &myModels)
@@ -144,28 +131,12 @@ struct FDTDInit
                         ( myGrids.nz + 2 * myGrids.lz ) ;
    int etaModelVolume = ( myGrids.nx + 2 ) * ( myGrids.ny + 2 ) * ( myGrids.nz + 2 ) ;
 
-   #ifdef USE_RAJA
-   myModels.h_vp   = allocateVector<vectorReal>( modelVolume );
-   myModels.h_pnp1 = allocateVector<vectorReal>( extModelVolume );
-   myModels.h_pn   = allocateVector<vectorReal>( extModelVolume );
-   myModels.h_pnm1 = allocateVector<vectorReal>( extModelVolume );
-   myModels.h_phi  = allocateVector<vectorReal>( modelVolume );
-   myModels.h_eta  = allocateVector<vectorReal>( etaModelVolume );
-
-   myModels.vp   = myModels.h_vp.toView();
-   myModels.pnp1 = myModels.h_pnp1.toView();
-   myModels.pn   = myModels.h_pn.toView();
-   myModels.pnm1 = myModels.h_pnm1.toView();
-   myModels.phi  = myModels.h_phi.toView();
-   myModels.eta  = myModels.h_eta.toView();
-   #else 
-   myModels.vp   = allocateVector<vectorRealView>( modelVolume );
-   myModels.pnp1 = allocateVector<vectorRealView>( extModelVolume );
-   myModels.pn   = allocateVector<vectorRealView>( extModelVolume );
-   myModels.pnm1 = allocateVector<vectorRealView>( extModelVolume );
-   myModels.phi  = allocateVector<vectorRealView>( modelVolume );
-   myModels.eta  = allocateVector<vectorRealView>( etaModelVolume );
-   #endif
+   vp   = allocateVector<vectorReal>( modelVolume, "vp");
+   pnp1 = allocateVector<vectorReal>( extModelVolume, "pnp1");
+   pn   = allocateVector<vectorReal>( extModelVolume, "pn");
+   pnm1 = allocateVector<vectorReal>( extModelVolume, "pnm1" );
+   phi  = allocateVector<vectorReal>( modelVolume, "phi");
+   eta  = allocateVector<vectorReal>( etaModelVolume, "eta");
 
    myFDTDUtils.init_eta( myGrids.nx,  myGrids.ny,  myGrids.nz,
 		         myGrids.ndampx,  myGrids.ndampy, myGrids.ndampz,
@@ -173,7 +144,7 @@ struct FDTDInit
                          myGrids.y1,  myGrids.y2,  myGrids.y3,  myGrids.y4,  myGrids.y5,  myGrids.y6,
                          myGrids.z1,  myGrids.z2,  myGrids.z3,  myGrids.z4,  myGrids.z5,  myGrids.z6,
                          myGrids.dx,  myGrids.dy,  myGrids.dz,  timeStep,
-                         vmax, myModels.eta);
+                         vmax, eta);
 
    float init_vp_value = vmin*vmin*timeStep*timeStep;
 
@@ -185,7 +156,7 @@ struct FDTDInit
       {
          for( int k=0; k<myGrids.nz;k++)
          {
-           myModels.vp[IDX3(i,j,k)]=init_vp_value;
+           vp[IDX3(i,j,k)]=init_vp_value;
          }
       }
    }
@@ -197,12 +168,37 @@ struct FDTDInit
       {
          for( int k=-myGrids.lz; k<myGrids.nz+myGrids.lz;k++)
          {
-           myModels.pnp1[IDX3_l(i,j,k)]=0.000001;
-           myModels.pnm1[IDX3_l(i,j,k)]=0.000001;
-           myModels.pn[IDX3_l(i,j,k)]=0.000001;
+           pnp1[IDX3_l(i,j,k)]=0.000001;
+           pnm1[IDX3_l(i,j,k)]=0.000001;
+           pn[IDX3_l(i,j,k)]=0.000001;
          }
       }
    }
+
+   #if defined (USE_RAJA)
+   myModels.vp   = vp.toView();
+   myModels.pnp1 = pnp1.toView();
+   myModels.pn   = pn.toView();
+   myModels.pnm1 = pnm1.toView();
+   myModels.phi  = phi.toView();
+   myModels.eta  = eta.toView();
+   myModels.RHSTerm  = RHSTerm.toView();
+   myModels.coefx  = coefx.toView();
+   myModels.coefy  = coefy.toView();
+   myModels.coefz  = coefz.toView();
+   #else
+   myModels.vp   = vp;
+   myModels.pnp1 = pnp1;
+   myModels.pn   = pn;
+   myModels.pnm1 = pnm1;
+   myModels.phi  = phi;
+   myModels.eta  = eta;
+   myModels.RHSTerm  = RHSTerm;
+   myModels.coefx  = coefx;
+   myModels.coefy  = coefy;
+   myModels.coefz  = coefz;
+   #endif
+
  }
 
 };

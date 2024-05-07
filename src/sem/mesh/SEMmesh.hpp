@@ -2,7 +2,7 @@
 #define SEM_MESH_
 
 #include "dataType.hpp"
-#include "SEMmacro.hpp"
+#include "SEMmacros.hpp"
 using namespace std;
 
 class SEMmesh
@@ -61,27 +61,27 @@ public:
   vector<float> getCoordInOneDirection(const int & order,const int & nCoord, const int & h, const int & nElement) const;
 
   // Initialize nodal coordinates.
-  void nodesCoordinates( const int & numberOfNodes, arrayRealView & nodeCoords ) const;
+  void nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const;
 
   //  list of global nodes ( vertices)
-  void globalNodesList(const int & numberOfElements, arrayIntView & nodesList ) const;
+  void globalNodesList(const int & numberOfElements, arrayInt & nodesList ) const;
 
   // compute element e where (x,y,z) belongs to
   int getElementNumberFromPoints( const float & x, const float & y, const float & z ) const;
 
   // get list of interior Elements
-  void getListOfInteriorElements(vectorIntView & listOfInteriorElements) const;
+  void getListOfInteriorElements(vectorInt & listOfInteriorElements) const;
 
   //  get list of global interior nodes
-  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorIntView & listOfInteriorNodes ) const;
+  int getListOfInteriorNodes( const int & numberOfInteriorNodes, vectorInt & listOfInteriorNodes ) const;
 
   // set model
-  void getModel( const int & numberOfNodes, vectorRealView & model ) const;
+  void getModel( const int & numberOfNodes, vectorReal & model ) const;
 
   // sort element by color
   // red=0, green=1, blue=2, yellow=3
   int getNumberOfElementsByColor() const;
-  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayIntView  & listOfElementsByColor) const;
+  void sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt  & listOfElementsByColor) const;
 
   // get number of Boundary Faces
   int getNumberOfBoundaryFaces() const;
@@ -92,13 +92,13 @@ public:
   // provides informations about boundary  faces:
   // element number,
   // orientation of the face
-  void getBoundaryFacesInfos(arrayIntView & faceInfos)const;
+  void getBoundaryFacesInfos(arrayInt & faceInfos)const;
 
   //  get list of global boundary nodes
-  int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorIntView & listOfBoundaryNodes ) const;
+  int getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorInt & listOfBoundaryNodes ) const;
 
   // provides a mapping between local node of a face and global node Face:
-  void getLocalFaceNodeToGlobalFaceNode(arrayIntView &localFaceNodeToGlobalFaceNode) const;
+  void getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFaceNode) const;
 
   // compute global to local node index
   int Itoijk( const int & I, int & i, int & j, int & k ) const;
@@ -110,6 +110,6 @@ public:
   vector<vector<float>> projectToGrid( const int numberOfNodes, const vector<float> inputVector ) const;
 
   // save snapshot
-  void saveSnapShot( const int indexTimeStep, const int i1, arrayRealView const & u ) const;
+  void saveSnapShot( const int indexTimeStep, const int i1, arrayReal const & u ) const;
 };
 #endif //SEM_MESH_

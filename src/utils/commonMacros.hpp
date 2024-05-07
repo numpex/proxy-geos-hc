@@ -3,33 +3,12 @@
 // define Macros for function type
 #if defined (USE_RAJA)
   #define PROXY_HOST_DEVICE LVARRAY_HOST_DEVICE
-  #define SOLVER solverRaja
 #elif defined (USE_KOKKOS)
   #define PROXY_HOST_DEVICE KOKKOS_FUNCTION 
-  #define SOLVER solverKokkos
-#elif defined (USE_OMP)
-  #define PROXY_HOST_DEVICE
-  #define SOLVER solverOMP
 #else
   #define PROXY_HOST_DEVICE
-  #define SOLVER solverSEQUENTIAL
 #endif
 
-// define Macros test SEM proxy 2D case 
-#if defined (SEM2D)
-  #define DIMENSION  2
-  #define ROW 36
-  #define COL 4
-  #define ZEROED2D 0
-// test SEM proxy 3D case
-#else
-  #define DIMENSION  3
-  #define ROW 64
-  #define COL 6
-  #define ZEROED2D 1
-#endif
-
-// define Macros for loops
 #if defined (USE_RAJA)
   #define LOOPHEAD(Range, Iterator)\
     RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, Range),  [=] LVARRAY_HOST_DEVICE  ( int Iterator ) {
@@ -63,21 +42,22 @@
   #define FENCE 
 #endif
 
-// create views only for RAJA
 #if defined (USE_RAJA)
-  #define CREATEVIEWS \
-  vectorRealView massMatrixGlobal=h_massMatrixGlobal.toView(); \
-  vectorRealView yGlobal=h_yGlobal.toView(); \
-  vectorRealView ShGlobal=h_ShGlobal.toView(); \
-  arrayIntView globalNodesList=h_globalNodesList.toView(); \
-  vectorRealView model=h_model.toView(); \
-  vectorIntView listOfInteriorNodes=h_listOfInteriorNodes.toView(); \
-  vectorIntView listOfBoundaryNodes=h_listOfBoundaryNodes.toView(); \
-  arrayIntView faceInfos=h_faceInfos.toView(); \
-  arrayIntView localFaceNodeToGlobalFaceNode=h_localFaceNodeToGlobalFaceNode.toView(); \
-  vectorDoubleView weights=h_weights.toView(); \
-  arrayRealView globalNodesCoords=h_globalNodesCoords.toView(); \
-  arrayDoubleView derivativeBasisFunction1D=h_derivativeBasisFunction1D.toView(); 
+  #define ARRAY_DOUBLE_VIEW arrayDoubleView 
+  #define ARRAY_REAL_VIEW arrayRealView
+  #define ARRAY_INT_VIEW arrayIntView
+  #define VECTOR_DOUBLE_VIEW vectorDoubleView
+  #define VECTOR_INT_VIEW vectorIntView
 #else
-  #define CREATEVIEWS
+  #define ARRAY_DOUBLE_VIEW arrayDouble
+  #define ARRAY_REAL_VIEW arrayReal
+  #define ARRAY_INT_VIEW arrayInt
+  #define VECTOR_DOUBLE_VIEW vectorDouble
+  #define VECTOR_INT_VIEW vectorInt
+#endif
+
+#if defined (USE_KOKKOS)
+  #define KOKKOSNAME "v",
+#else
+  #define KOKKOSNAME 
 #endif

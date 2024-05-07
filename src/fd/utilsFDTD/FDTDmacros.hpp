@@ -121,10 +121,14 @@ constexpr size_t greater_of_squarest_factor_pair(size_t n)
 
 #if defined(USE_RAJA) || defined(USE_KOKKOS)
   #define LOOP3DEND   });
-  #define VECTORVIEW vectorRealView const &
 #else
   #define LOOP3DEND }}}
-  #define VECTORVIEW vectorRealView &
+#endif
+
+#if defined (USE_RAJA)
+  #define VECTOR_REAL_VIEW vectorRealView 
+#else
+  #define VECTOR_REAL_VIEW vectorReal 
 #endif
 
 #endif //FDTDMACROS_HPP
