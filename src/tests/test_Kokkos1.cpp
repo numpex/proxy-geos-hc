@@ -54,25 +54,32 @@ template<class T>
     return array;
   }
 
-
+struct model{
+             vectorReal coef;
+             array3DReal pnp1;
+             array3DReal pn;
+             array3DReal pnm1;
+            };
 int main( int argc, char *argv[] )
 {
   Kokkos::initialize(argc,argv);
   {
-    const int n1=600;
-    const int n2=600;
-    const int n3=600;
+    const int n1=400;
+    const int n2=400;
+    const int n3=400;
     const int ncoefs=4;
     float dt=0.001;
 
-    vectorReal coef;
-    coef=allocateVector<vectorReal>(ncoefs);
-    array3DReal pnp1;
-    pnp1=allocateArray3D<array3DReal>(n1,n2,n3);
-    array3DReal pn;
-    pn=allocateArray3D<array3DReal>(n1,n2,n3);
-    array3DReal pnm1;
-    pnm1=allocateArray3D<array3DReal>(n1,n2,n3);
+    model m;
+
+    //vectorReal coef;
+    m.coef=allocateVector<vectorReal>(ncoefs);
+    //array3DReal pnp1;
+    m.pnp1=allocateArray3D<array3DReal>(n1,n2,n3);
+    //array3DReal pn;
+    m.pn=allocateArray3D<array3DReal>(n1,n2,n3);
+    //array3DReal pnm1;
+    m.pnm1=allocateArray3D<array3DReal>(n1,n2,n3);
     
 
  #pragma omp parallel for
@@ -82,17 +89,17 @@ int main( int argc, char *argv[] )
       {
         for ( int i=0; i<n1;i++)
         {
-          pnp1(i,j,k)=1;
-          pn(i,j,k)=1;
-          pnm1(i,j,k)=1;
+          m.pnp1(i,j,k)=1;
+          m.pn(i,j,k)=1;
+          m.pnm1(i,j,k)=1;
 	}
       }
     }
 
-    coef(0)=4*dt*dt;
-    coef(1)=1*dt*dt;
-    coef(2)=1*dt*dt;
-    coef(3)=1*dt*dt;
+    m.coef(0)=4*dt*dt;
+    m.coef(1)=1*dt*dt;
+    m.coef(2)=1*dt*dt;
+    m.coef(3)=1*dt*dt;
 
     Kokkos::Timer timer1;
     for (int k=3; k<n3-3;k++)
@@ -101,15 +108,15 @@ int main( int argc, char *argv[] )
       {
         for ( int i=3; i<n1-3;i++)
         {
-		pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)+coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
-                                                     +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
-                                                     +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
-						     -pnm1(i,j,k);
+		m.pnp1(i,j,k)=(2. +8*m.coef(0))*m.pn(i,j,k)+m.coef(1)*(m.pn(i+1,j,k)+m.pn(i-1,j,k)+m.pn(i,j+1,k)+m.pn(i,j-1,k)+m.pn(i,j,k+1)+m.pn(i,j,k-1))
+                             +m.coef(2)*(m.pn(i+2,j,k)+m.pn(i-2,j,k)+m.pn(i,j+2,k)+m.pn(i,j-2,k)+m.pn(i,j,k+2)+m.pn(i,j,k-2))
+                             +m.coef(3)*(m.pn(i+3,j,k)+m.pn(i-3,j,k)+m.pn(i,j+3,k)+m.pn(i,j-3,k)+m.pn(i,j,k+3)+m.pn(i,j,k-3))
+			     -m.pnm1(i,j,k);
         }
       }
     }
     double time1=timer1.seconds();
-    printf("result 1 %f\n",pnp1(n1/2,n2/2,n3/2));
+    printf("result 1 %f\n",m.pnp1(n1/2,n2/2,n3/2));
     std::cout << "Elapsed Time sequential  loop : "<<time1 <<" seconds.\n\n";
     Kokkos::fence();
 
@@ -120,9 +127,9 @@ int main( int argc, char *argv[] )
       {
         for ( int i=0; i<n1;i++)
         {
-          pnp1(i,j,k)=1;
-          pn(i,j,k)=1;
-          pnm1(i,j,k)=1;
+          m.pnp1(i,j,k)=1;
+          m.pn(i,j,k)=1;
+          m.pnm1(i,j,k)=1;
 	}
       }
     }
@@ -135,15 +142,15 @@ int main( int argc, char *argv[] )
       {
         for ( int i=3; i<n1-3;i++)
         {
-		pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)+coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
-                                                        +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
-                                                        +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
-							-pnm1(i,j,k);
+		m.pnp1(i,j,k)=(2. +8*m.coef(0))*m.pn(i,j,k)+m.coef(1)*(m.pn(i+1,j,k)+m.pn(i-1,j,k)+m.pn(i,j+1,k)+m.pn(i,j-1,k)+m.pn(i,j,k+1)+m.pn(i,j,k-1))
+                             +m.coef(2)*(m.pn(i+2,j,k)+m.pn(i-2,j,k)+m.pn(i,j+2,k)+m.pn(i,j-2,k)+m.pn(i,j,k+2)+m.pn(i,j,k-2))
+                             +m.coef(3)*(m.pn(i+3,j,k)+m.pn(i-3,j,k)+m.pn(i,j+3,k)+m.pn(i,j-3,k)+m.pn(i,j,k+3)+m.pn(i,j,k-3))
+			     -m.pnm1(i,j,k);
         }
       }
     }
     double time2=timer2.seconds();
-    printf("result 2 %f\n",pnp1(n1/2,n2/2,n3/2));
+    printf("result 2 %f\n",m.pnp1(n1/2,n2/2,n3/2));
     std::cout << "Elapsed Time omp  loop : "<<time2 <<" seconds.\n\n";
     Kokkos::fence();
 
@@ -154,9 +161,9 @@ int main( int argc, char *argv[] )
       {
         for ( int i=0; i<n1;i++)
         {
-          pnp1(i,j,k)=1;
-          pn(i,j,k)=1;
-          pnm1(i,j,k)=1;
+          m.pnp1(i,j,k)=1;
+          m.pn(i,j,k)=1;
+          m.pnm1(i,j,k)=1;
 	}
       }
     }
@@ -168,23 +175,23 @@ int main( int argc, char *argv[] )
       {
         for ( int i=3; i<n1-3;i++)
         {
-		pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)+coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
-                                                        +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
-                                                        +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
-							-pnm1(i,j,k);
+		m.pnp1(i,j,k)=(2. +8*m.coef(0))*m.pn(i,j,k)+m.coef(1)*(m.pn(i+1,j,k)+m.pn(i-1,j,k)+m.pn(i,j+1,k)+m.pn(i,j-1,k)+m.pn(i,j,k+1)+m.pn(i,j,k-1))
+                             +m.coef(2)*(m.pn(i+2,j,k)+m.pn(i-2,j,k)+m.pn(i,j+2,k)+m.pn(i,j-2,k)+m.pn(i,j,k+2)+m.pn(i,j,k-2))
+                             +m.coef(3)*(m.pn(i+3,j,k)+m.pn(i-3,j,k)+m.pn(i,j+3,k)+m.pn(i,j-3,k)+m.pn(i,j,k+3)+m.pn(i,j,k-3))
+			     -m.pnm1(i,j,k);
         }
       }
     }
     double time3=timer3.seconds();
-    printf("result 3 %f\n",pnp1(n1/2,n2/2,n3/2));
+    printf("result 3 %f\n",m.pnp1(n1/2,n2/2,n3/2));
     std::cout << "Elapsed Time omp collapse  loop : "<<time3 <<" seconds.\n\n";
     Kokkos::fence();
 
     Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>> ({3,3,3},{n1,n2,n3}) , KOKKOS_LAMBDA ( int i,int j, int k)
         {
-          pnp1(i,j,k)=1;
-          pn(i,j,k)=1;
-          pnm1(i,j,k)=1;
+          m.pnp1(i,j,k)=1;
+          m.pn(i,j,k)=1;
+          m.pnm1(i,j,k)=1;
 	});
 
     Kokkos::Timer timer4;
@@ -194,36 +201,36 @@ int main( int argc, char *argv[] )
       {
         for ( int k=3; k<n3-3;k++)
         {
-		pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)+coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
-                                                        +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
-                                                        +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
-							-pnm1(i,j,k);
+		m.pnp1(i,j,k)=(2. +8*m.coef(0))*m.pn(i,j,k)+m.coef(1)*(m.pn(i+1,j,k)+m.pn(i-1,j,k)+m.pn(i,j+1,k)+m.pn(i,j-1,k)+m.pn(i,j,k+1)+m.pn(i,j,k-1))
+                             +m.coef(2)*(m.pn(i+2,j,k)+m.pn(i-2,j,k)+m.pn(i,j+2,k)+m.pn(i,j-2,k)+m.pn(i,j,k+2)+m.pn(i,j,k-2))
+                             +m.coef(3)*(m.pn(i+3,j,k)+m.pn(i-3,j,k)+m.pn(i,j+3,k)+m.pn(i,j-3,k)+m.pn(i,j,k+3)+m.pn(i,j,k-3))
+			     -m.pnm1(i,j,k);
         }
       }
     });
     Kokkos::fence();
     double time4=timer4.seconds();
-    printf("result 4 %f\n",pnp1(n1/2,n2/2,n3/2));
+    printf("result 4 %f\n",m.pnp1(n1/2,n2/2,n3/2));
     std::cout << "Elapsed Time parallel_for kokkos  loop : "<<time4 <<" seconds.\n\n";
     
     Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>> ({0,0,0},{n1,n2,n3}) , KOKKOS_LAMBDA ( int i,int j, int k)
         {
-          pnp1(i,j,k)=1;
-          pn(i,j,k)=1;
-          pnm1(i,j,k)=1;
+          m.pnp1(i,j,k)=1;
+          m.pn(i,j,k)=1;
+          m.pnm1(i,j,k)=1;
 	});
 
     Kokkos::Timer timer5;
     Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>> ({3,3,3},{n1-3,n2-3,n3-3}) , KOKKOS_LAMBDA ( int i,int j, int k)
     {
-		pnp1(i,j,k)=(2. +8*coef(0))*pn(i,j,k)+coef(1)*(pn(i+1,j,k)+pn(i-1,j,k)+pn(i,j+1,k)+pn(i,j-1,k)+pn(i,j,k+1)+pn(i,j,k-1))
-                                                        +coef(2)*(pn(i+2,j,k)+pn(i-2,j,k)+pn(i,j+2,k)+pn(i,j-2,k)+pn(i,j,k+2)+pn(i,j,k-2))
-                                                        +coef(3)*(pn(i+3,j,k)+pn(i-3,j,k)+pn(i,j+3,k)+pn(i,j-3,k)+pn(i,j,k+3)+pn(i,j,k-3))
-							-pnm1(i,j,k);
+		m.pnp1(i,j,k)=(2. +8*m.coef(0))*m.pn(i,j,k)+m.coef(1)*(m.pn(i+1,j,k)+m.pn(i-1,j,k)+m.pn(i,j+1,k)+m.pn(i,j-1,k)+m.pn(i,j,k+1)+m.pn(i,j,k-1))
+                             +m.coef(2)*(m.pn(i+2,j,k)+m.pn(i-2,j,k)+m.pn(i,j+2,k)+m.pn(i,j-2,k)+m.pn(i,j,k+2)+m.pn(i,j,k-2))
+                             +m.coef(3)*(m.pn(i+3,j,k)+m.pn(i-3,j,k)+m.pn(i,j+3,k)+m.pn(i,j-3,k)+m.pn(i,j,k+3)+m.pn(i,j,k-3))
+			     -m.pnm1(i,j,k);
     });
     Kokkos::fence();
     double time5=timer5.seconds();
-    printf("result 5 %f\n",pnp1(n1/2,n2/2,n3/2));
+    printf("result 5 %f\n",m.pnp1(n1/2,n2/2,n3/2));
     std::cout << "Elapsed Time parallel_for MDRANGE kokkos  loop : "<<time5 <<" seconds.\n\n";
 
   }
