@@ -1,0 +1,71 @@
+SEMmesh initiliazed
+ex, ey, ez=65, 0, 65
+nx, ny, nz=196, 1, 196
+
++================================= 
+| Initializing SEM Application ... 
++================================= 
+
+Number of nodes: 38416
+Number of elements: 4225
+Allocate host memory for source and pressure values:
+allocate array : RHSTerm of size: (1, 999)
+allocate vector: rhsElement of size: 1
+allocate array : pnGlobal of size: (38416, 2)
+allocate array : RHSLocation of size: (1, 3)
+
+Source location: 1001, 1001, 1001
+Sample 0	: sourceTerm = 0.0102097
+Sample 100	: sourceTerm = -0
+Sample 200	: sourceTerm = -0.0102097
+Sample 300	: sourceTerm = 0
+Sample 400	: sourceTerm = 0
+Sample 500	: sourceTerm = 0
+Sample 600	: sourceTerm = 0
+Sample 700	: sourceTerm = 0
+Sample 800	: sourceTerm = 0
+Sample 900	: sourceTerm = 0
+Element number for the source location: 2178
+
+Allocate host memory for arrays in the solver:
+allocate array : globalNodesList of size: (4225, 16)
+allocate vector: listOfInteriorNodes of size: 37636
+allocate array : globalNodesCoords of size: (38416, 3)
+allocate vector: listOfBoundaryNodes of size: 780
+allocate array : faceInfos of size: (260, 6)
+allocate array : localFaceNodeToGlobalFaceNode of size: (260, 4)
+allocate vector: model of size: 4225
+allocate vector: quadraturePoints of size: 4
+allocate vector: weights of size: 4
+allocate array : basisFunction1D of size: (4, 4)
+allocate array : derivativeBasisFunction1D of size: (4, 4)
+allocate vector: massMatrixGlobal of size: 38416
+allocate vector: yGlobal of size: 38416
+allocate vector: ShGlobal of size: 780
+
++================================= 
+| Running SEM Application ...      
++================================= 
+
+TimeStep=0;  pnGlobal @ elementSource location 2178 after computeOneStep = 0.0399712
+TimeStep=100;  pnGlobal @ elementSource location 2178 after computeOneStep = 169.033
+TimeStep=200;  pnGlobal @ elementSource location 2178 after computeOneStep = -26.147
+TimeStep=300;  pnGlobal @ elementSource location 2178 after computeOneStep = -5.67195
+TimeStep=400;  pnGlobal @ elementSource location 2178 after computeOneStep = -2.54447
+TimeStep=500;  pnGlobal @ elementSource location 2178 after computeOneStep = -1.36859
+TimeStep=600;  pnGlobal @ elementSource location 2178 after computeOneStep = -0.923485
+TimeStep=700;  pnGlobal @ elementSource location 2178 after computeOneStep = -0.598779
+TimeStep=800;  pnGlobal @ elementSource location 2178 after computeOneStep = -0.477704
+TimeStep=900;  pnGlobal @ elementSource location 2178 after computeOneStep = -0.334413
+
+---- Elapsed Kernel Compute  Time : 7.26818 seconds.
+---- Elapsed Output Snapshot Time : 0.66912 seconds.
+
++================================= 
+| SEM Application Finished.       
++================================= 
+
+Elapsed Initialization Time : 0.00311059 seconds.
+Elapsed ComputeLoop RunTime : 7.93738 seconds.
+Elapsed TotalExecution Time : 7.9405 seconds.
+

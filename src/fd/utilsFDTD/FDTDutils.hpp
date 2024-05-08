@@ -3,13 +3,14 @@
 
 #include "dataType.hpp"
 #include "FDTDdata.hpp"
-#include "FDTDmacros.hpp"
+
+using namespace std;
 
 using namespace std;
 
 struct FDTDUtils
 {
-  void init_coef(float dx, vectorRealView &coef)
+  void init_coef(float dx, vectorReal &coef)
   {
       float dx2 = dx*dx;
       coef[0] = -205.f/72.f/dx2;
@@ -18,7 +19,7 @@ struct FDTDUtils
       coef[3] = 8.f/315.f/dx2;
       coef[4] = -1.f/560.f/dx2;
   }
-  float compute_dt_sch(const float vmax, vectorRealView const &coefx, vectorRealView const &coefy, vectorRealView const &coefz) 
+  float compute_dt_sch(const float vmax, vectorReal const &coefx, vectorReal const &coefy, vectorReal const &coefz) 
   {
 
       float ftmp = 0.;
@@ -60,7 +61,7 @@ struct FDTDUtils
   }
 
   void pml_profile_extend( int nx, int ny, int nz,
-                           vectorRealView &eta, const vector<float> &etax, const vector<float> &etay, const vector<float>& etaz,
+                           vectorReal &eta, const vector<float> &etax, const vector<float> &etay, const vector<float>& etaz,
                            int xbeg, int xend, int ybeg, int yend, int zbeg, int zend)
   {
     const int n_ghost = 1;
@@ -75,7 +76,7 @@ struct FDTDUtils
   }
 
   void pml_profile_extend_all(int nx, int ny, int nz,
-                              vectorRealView &eta, const vector<float> &etax, const vector<float> &etay, const vector<float>& etaz,
+                              vectorReal &eta, const vector<float> &etax, const vector<float> &etay, const vector<float>& etaz,
                               int xmin, int xmax, int ymin, int ymax,
                               int x1, int x2, int x5, int x6,
                               int y1, int y2, int y3, int y4, int y5, int y6,
@@ -107,7 +108,7 @@ struct FDTDUtils
                 int y1, int y2, int y3, int y4, int y5, int y6,
                 int z1, int z2, int z3, int z4, int z5, int z6,
                 float dx, float dy, float dz, float dt_sch,
-                float vmax, vectorRealView & eta)
+                float vmax, vectorReal & eta)
   {
     #pragma omp parallel for collapse(3)    
     for (int i = -1; i < nx+1; ++i) {
@@ -124,17 +125,17 @@ struct FDTDUtils
 
     // etax 
     float param = dt_sch * 3.f * vmax * logf(1000.f)/(2.f*ndampx*dx);
-    printf("param=%f\n",param);
+    //printf("param=%f\n",param);
     pml_profile_init(etax, 0, nx+1, ndampx, ndampx, param);
 
     // etay 
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampy*dy);
-    printf("param=%f\n",param);
+    //printf("param=%f\n",param);
     pml_profile_init(etay, 0, ny+1, ndampy, ndampy, param);
 
     // etaz 
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampz*dz);
-    printf("param=%f\n",param);
+    //printf("param=%f\n",param);
     pml_profile_init(etaz, 0, nz+1, ndampz, ndampz, param);
 
     (void)pml_profile_extend_all(nx, ny, nz,
@@ -145,18 +146,17 @@ struct FDTDUtils
                 z1+1, z2, z3+1, z4, z5+1, z6);
   }
       
-  void output(FDTDGRIDS &myGrids, vectorRealView const & pn, int itSample)
+  void output(FDTDGRIDS &myGrids, arrayReal const&pnGlobal, int itSample, const int &i1)
   {
 
       if(itSample%50==0)
       {   
 
-        #ifdef USE_RAJA
-        RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,myGrids.nx), [pn] ( int i){});
-        #endif
+        FDFENCE
 
-        printf("result0 %f\n",pn[IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs)]);
-        write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pn, itSample);
+        printf("TimeStep=%d\t; Pressure value at source [%d %d %d] = %f\n", itSample,
+               myGrids.xs, myGrids.ys, myGrids.zs, pnGlobal(IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs),i1));
+        write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pnGlobal, itSample, i1);
 
       } 
 
@@ -166,18 +166,17 @@ struct FDTDUtils
 		 int x0, int x1, 
 		 int y0, int y1, 
 		 int z0, int z1, 
-                 vectorRealView const &u, int istep)
+                 arrayReal const&pnGlobal, int istep, const int &i1)
   {
       char filename_buf[32];
       snprintf(filename_buf, sizeof(filename_buf), "snapshot_it_%d.H@", istep);
       FILE *snapshot_file = fopen(filename_buf, "wb");
-      printf(" %d %d %d %d %d %d\n",x0,x1,y0,y1,z0,z1);
+      //printf("write snapshot for: x=[%d %d], y=[%d %d], z=[%d %d]\n",x0,x1,y0,y1,z0,z1);
      
-      #pragma omp parallel for collapse(3) 
       for (int k = z0; k < z1; ++k) {
           for (int j = y0; j < y1+1; ++j) {
               for (int i = x0; i < x1; ++i) {
-		  fwrite(&u[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
+		  fwrite(&pnGlobal(IDX3_l(i,j,k),i1), sizeof(float),1, snapshot_file);
               }
           }
       }

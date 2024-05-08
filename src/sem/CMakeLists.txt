@@ -16,11 +16,10 @@ message ( "---------------------------------------------------------------------
 #-------------------------------------------------------
 
 set (sem_sources
-     finiteElements/QkGL.cpp
-     mesh/simpleMesh.cpp
-     solver/solverBase.cpp
-     solver/solver${SOLVER}.cpp
-     main/semproxy.cpp
+     finiteElements/SEMQkGL.cpp
+     mesh/SEMmesh.cpp
+     solver/SEMsolver.cpp
+     main/SEMproxy.cpp
      main/main.cpp)
 
 blt_add_executable( NAME ${SEM_EXECUTABLE}

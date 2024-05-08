@@ -106,9 +106,14 @@ constexpr size_t greater_of_squarest_factor_pair(size_t n)
   #define LOOP3DHEAD(x3,y3,z3,x4,y4,z4) RAJANestedLoop(x3,y3,z3,x4,y4,z4) {
 #elif defined (USE_KOKKOS)
   #define LOOP3DHEAD(x3,y3,z3,x4,y4,z4) Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>>({z3,x3,y3},{z4,x4,y4}),KOKKOS_LAMBDA(int k,int i,int j) {
-#else
+#elif defined (USE_OMP)
    #define LOOP3DHEAD(x3,y3,z3,x4,y4,z4)\
    _Pragma("omp parallel for collapse(3)")\
+      for (int i = x3; i < x4; ++i){\
+          for (int j = y3; j < y4; ++j){\
+              for (int k = z3; k < z4; ++k){
+#else
+   #define LOOP3DHEAD(x3,y3,z3,x4,y4,z4)\
       for (int i = x3; i < x4; ++i){\
           for (int j = y3; j < y4; ++j){\
               for (int k = z3; k < z4; ++k){
@@ -116,10 +121,52 @@ constexpr size_t greater_of_squarest_factor_pair(size_t n)
 
 #if defined(USE_RAJA) || defined(USE_KOKKOS)
   #define LOOP3DEND   });
-  #define VECTORVIEW vectorRealView const &
 #else
   #define LOOP3DEND }}}
-  #define VECTORVIEW vectorRealView &
+#endif
+
+#if defined (USE_RAJA)
+  #define CREATEVIEWINNER \
+      CREATEVIEWRHS \
+      vectorRealView coefx  = myModels.coefx.toView();\
+      vectorRealView coefy  = myModels.coefy.toView();\
+      vectorRealView coefz  = myModels.coefz.toView();\
+      double coef0 = myModels.coef0;
+  #define CREATEVIEWPML\
+      CREATEVIEWINNER\
+      vectorRealView phi = myModels.phi.toView();\
+      vectorRealView eta = myModels.eta.toView();
+  #define CREATEVIEWRHS\
+    arrayRealView pnGlobal = PN_Global.toView();\
+    vectorRealView RHSTerm  = myModels.RHSTerm.toView();\
+    vectorRealView vp  = myModels.vp.toView();
+#else
+  #define CREATEVIEWINNER \
+      vectorReal coefx  = myModels.coefx;\
+      vectorReal coefy  = myModels.coefy;\
+      vectorReal coefz  = myModels.coefz;\
+      vectorReal vp  = myModels.vp;\
+      double coef0 = myModels.coef0;
+  #define CREATEVIEWPML\
+      CREATEVIEWINNER\
+      vectorReal phi = myModels.phi;\
+      vectorReal eta = myModels.eta;
+  #define CREATEVIEWRHS\
+    vectorReal RHSTerm  = myModels.RHSTerm;\
+    vectorReal pn  = myModels.pn;\
+    vectorReal vp  = myModels.vp;
+  #define PN_Global pnGlobal 
+#endif
+
+#ifdef USE_RAJA
+  #define FDFENCE\
+        arrayRealView pnGlobalView = pnGlobal.toView();\
+        RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,myGrids.nx), [pnGlobalView] ( int i){});
+#elif defined (USE_KOKKOS)
+  #define FDFENCE\
+        Kokkos::fence();
+#else
+  #define FDFENCE
 #endif
 
 #endif //FDTDMACROS_HPP

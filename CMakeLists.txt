@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.22.1 )
 
-project( proxyapp)
+project( proxyapp )
 
 #-----------------------------------------------------
 # Setup Flags for Building and Installation
@@ -13,7 +13,7 @@ set (CMAKE_VERBOSE_MAKEFILE ON )
 #-----------------------------------------------------
 option (X86_laptop "X86 architecture  default" OFF)
 option (X86_cypress "Compilation on Cypress Cluster" ON)
-option (P9 "Power9 architecture  " OFF)
+option (Power9_pangea3 "Power9 architecture  " OFF)
 option (ARM "ARM aarch64 architecture: e.g. grace CPU" OFF)
 
 #-----------------------------------------------------
@@ -38,9 +38,13 @@ option (USE_CALIPER "Use CALIPER for profiling" OFF)
 # Tests directory to perform differen tests before 
 # integration into proxy apps
 #---------------------------------------------------
-option (addTests " add Tests directory" OFF)
-option (addFD " add finite difference proxy directory" OFF)
+option (addTests "add Tests directory" OFF)
+option (addFD "add finite difference proxy directory" OFF)
 
+#---------------------------------------------------
+# Option to test SEM-proxy 2D case (default is 3D)
+#---------------------------------------------------
+option (SEM2D "test SEM-proxy 2D case" ON)
 
 add_subdirectory(src)
 

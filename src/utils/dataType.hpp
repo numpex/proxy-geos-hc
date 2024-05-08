@@ -1,12 +1,13 @@
 #ifndef DATATYPE_HPP_
 #define DATATYPE_HPP_
 
-#include "commonConfig.hpp"
 #include <fstream>
 #include <cmath>
 #include <chrono>
 #include <iostream> 
 #include <vector> 
+
+#include "commonMacros.hpp"
 
 #ifdef USE_VECTOR
 
@@ -29,7 +30,8 @@
     {
         return const_cast<T &> (data[index]);
     }
-
+    T & operator=( const T& data)
+    { return *this; };
 
     int size(){return this->size();}
 
@@ -45,6 +47,8 @@
 
     std::vector< T > & operator[]( int index ){return data[index];}
     T& operator()(int row, int col) {return data[row][col];}
+    T& operator()(int row, int col) const {return const_cast<T &> (data[row][col]);}
+    T& operator=( const T& data) { return *this; };
 
   private:
     std::vector< std::vector< T > > data;
@@ -63,39 +67,17 @@
     std::vector<std::vector<std::vector<T> > > data;
   };
 
-  using vectorRealView=Vector< float >;
-  using vectorIntView=Vector< int >;
-  using vectorDoubleView=Vector< double >;
+  using vectorReal=Vector< float >;
+  using vectorInt=Vector< int >;
+  using vectorDouble=Vector< double >;
 
-  using arrayIntView=Array2D< int >;
-  using arrayRealView=Array2D< float >;
-  using arrayDoubleView=Array2D< double >;
+  using arrayInt=Array2D< int >;
+  using arrayReal=Array2D< float >;
+  using arrayDouble=Array2D< double >;
 
-  using array3DIntView=Array3D< int >;
-  using array3DRealView=Array3D< float >;
-  using array3DDoubleView=Array3D< double >;
-
-  template<class T>
-  T allocateVector(int n1)
-  {
-     std::cout<<"allocate vector of size "<<n1<<std::endl;
-     T vect(n1);
-    return vect;
-  }
-  template<class T>
-  T allocateArray2D(int n1, int n2)
-  {
-    std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
-    T array(n1, n2);
-    return array;
-  }
-  template<class T>
-  T allocateArray3D(int n1, int n2, int n3)
-  {
-    std::cout<<"allocate array of size "<<n1<<", "<<n2<<", "<<n3<<std::endl;
-    T array(n1, n2, n3);
-    return array;
-  }
+  using array3DInt=Array3D< int >;
+  using array3DReal=Array3D< float >;
+  using array3DDouble=Array3D< double >;
 
 #endif //USE_VECTOR
 
@@ -207,28 +189,6 @@
                                               std::ptrdiff_t,
                                               LvArray::ChaiBuffer >;
   
-
-  template<class T>
-  T allocateVector(int n1)
-  {
-     std::cout<<"allocate vector of size "<<n1<<std::endl;
-     T vect(n1);
-    return vect;
-  }
-  template<class T>
-  T allocateArray2D(int n1, int n2)
-  {
-    std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
-    T array(n1, n2);
-    return array;
-  }
-  template<class T>
-  T allocateArray3D(int n1, int n2, int n3)
-  {
-    std::cout<<"allocate array of size "<<n1<<", "<<n2<<", "<<n3<<std::endl;
-    T array(n1, n2, n3);
-    return array;
-  }
 #endif //USE_LVARRAY
 
 #ifdef USE_KOKKOS
@@ -239,29 +199,24 @@
 
   #include <Kokkos_Core.hpp>
   #define MemSpace Kokkos::SharedSpace
-  //#define MemSpace Kokkos::HostSpace
-  //using DeviceMemorySpace = typename Kokkos::DefaultExecutionSpace::memory_space;
-  using ExecSpace = MemSpace::execution_space;
-  using range_policy = Kokkos::RangePolicy<>;
-  using Layout=Kokkos::LayoutLeft;
 
-  //#ifdef ENABLE_CUDA
-  //  using Layout=Kokkos::LayoutLeft;
-  //#else
-  //  using Layout=Kokkos::LayoutRight;
-  //#endif
+  #ifdef ENABLE_CUDA
+    using Layout=Kokkos::LayoutLeft;
+  #else
+    using Layout=Kokkos::LayoutRight;
+  #endif
 
-  typedef Kokkos::View<int*,     Layout, MemSpace> vectorIntView;
-  typedef Kokkos::View<float*,   Layout,  MemSpace> vectorRealView;
-  typedef Kokkos::View<double*,  Layout, MemSpace> vectorDoubleView;
+  typedef Kokkos::View<int*,     Layout, MemSpace> vectorInt;
+  typedef Kokkos::View<float*,   Layout, MemSpace> vectorReal;
+  typedef Kokkos::View<double*,  Layout, MemSpace> vectorDouble;
 
-  typedef Kokkos::View<int**,    Layout, MemSpace> arrayIntView;
-  typedef Kokkos::View<float**,  Layout, MemSpace> arrayRealView;
-  typedef Kokkos::View<double**, Layout, MemSpace> arrayDoubleView;
+  typedef Kokkos::View<int**,    Layout, MemSpace> arrayInt;
+  typedef Kokkos::View<float**,  Layout, MemSpace> arrayReal;
+  typedef Kokkos::View<double**, Layout, MemSpace> arrayDouble;
 
-  typedef Kokkos::View<int***,    Layout, MemSpace> array3DIntView;
-  typedef Kokkos::View<float***,  Layout, MemSpace> array3DRealView;
-  typedef Kokkos::View<double***, Layout, MemSpace> array3DDoubleView;
+  typedef Kokkos::View<int***,    Layout, MemSpace> array3DInt;
+  typedef Kokkos::View<float***,  Layout, MemSpace> array3DReal;
+  typedef Kokkos::View<double***, Layout, MemSpace> array3DDouble;
 
   /*
   typedef Kokkos::View<int*,     Layout, DeviceMemorySpace> vectorIntViewView;
@@ -277,27 +232,43 @@
   typedef Kokkos::View<double***, Layout, DeviceMemorySpace> array3DDoubleView;
  */
 
+#endif //USE_KOKKOS
+
   template<class T>
   T allocateVector(int n1)
   {
      std::cout<<"allocate vector of size "<<n1<<std::endl;
-     T vect("v",n1);
+     T vect(KOKKOSNAME n1);
+    return vect;
+  }
+  template<class T>
+  T allocateVector(int n1, const char* name)
+  {
+     std::cout<<"allocate vector: "<<name<<" of size: "<<n1<<std::endl;
+     T vect(KOKKOSNAME n1);
     return vect;
   }
   template<class T>
   T allocateArray2D(int n1, int n2)
   {
     std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
-    T array("a",n1, n2);
+    T array(KOKKOSNAME n1, n2);
+    return array;
+  }
+  template<class T>
+  T allocateArray2D(int n1, int n2, const char* name)
+  {
+    std::cout<<"allocate array : "<<name<<" of size: ("<<n1<<", "<<n2<<")"<<std::endl;
+    T array(KOKKOSNAME n1, n2);
     return array;
   }
   template<class T>
   T allocateArray3D(int n1, int n2, int n3)
   {
     std::cout<<"allocate array of size "<<n1<<", "<<n2<<", "<<n3<<std::endl;
-    T array("a",n1, n2, n3);
+    T array(KOKKOSNAME n1, n2, n3);
     return array;
   }
-#endif //USE_KOKKOS
+
 
 #endif //DATATYPE_HPP_
