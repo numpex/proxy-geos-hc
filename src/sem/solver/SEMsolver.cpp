@@ -42,7 +42,7 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     pnGlobal(nodeRHS,i2)+=myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm(i,timeStep);
   LOOPEND
  
-  LOOPHEAD( myMeshinfo.numberOfElements, e)
+  LOOPHEAD( myMeshinfo.numberOfElements, elementNumber)
     // start parallel section
     float B[ROW][COL];
     float R[ROW];
@@ -50,24 +50,124 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     float pnLocal[ROW];
     float Y[ROW];
 
+    int order = myMeshinfo.myOrderNumber;
+    int nPointsPerElement = pow((order+1), DIMENSION );
+
     // get pnGlobal to pnLocal
-    for( int i=0; i<pow((myMeshinfo.myOrderNumber+1),DIMENSION); i++ )
+    for( int i=0; i<nPointsPerElement; i++ )
     {
-      int localToGlobal=globalNodesList(e,i);
+      int localToGlobal=globalNodesList(elementNumber,i);
       pnLocal[i]=pnGlobal(localToGlobal,i2);
     }
 
     // compute Jacobian, massMatrix and B
-    myQk.computeB( e,myMeshinfo.myOrderNumber,DIMENSION, weights, globalNodesList,globalNodesCoords,derivativeBasisFunction1D,massMatrixLocal,B );
-
+    for (int i2=0;i2<order+1;i2++)
+    {   
+       for (int i1=0;i1<order+1;i1++)
+       {   
+          // compute jacobian matrix
+          double jac0=0;
+          double jac1=0;
+          double jac2=0;
+          double jac3=0;
+          int i=i1+i2*(order+1);
+          for (int j1=0;j1<order+1;j1++)
+          {   
+              int j=j1+i2*(order+1);
+              int localToGlobal=globalNodesList(elementNumber,j);
+              double X=globalNodesCoords(localToGlobal,0);
+              double Y=globalNodesCoords(localToGlobal,1);
+              jac0+=X*derivativeBasisFunction1D(j1,i1);
+              jac2+=Y*derivativeBasisFunction1D(j1,i1);
+          }   
+          for (int j2=0; j2<order+1;j2++)
+          {   
+              int j=i1+j2*(order+1);
+              int localToGlobal=globalNodesList(elementNumber,j);
+              double X=globalNodesCoords(localToGlobal,0);
+              double Y=globalNodesCoords(localToGlobal,1);
+              jac1+=X*derivativeBasisFunction1D(j2,i2);
+              jac3+=Y*derivativeBasisFunction1D(j2,i2);
+          }   
+          // detJ
+          double detJ=abs(jac0*jac3-jac2*jac1);
+          double invJac0=jac3;
+          double invJac1=-jac1;
+          double invJac2=-jac2;
+          double invJac3=jac0;
+          double transpInvJac0=jac3;
+          double transpInvJac1=-jac2;
+          double transpInvJac2=-jac1;
+          double transpInvJac3=jac0;
+          double detJM1=1./detJ;
+          // B
+          B[i][0]=(invJac0*transpInvJac0+invJac1*transpInvJac2)*detJM1;
+          B[i][1]=(invJac0*transpInvJac1+invJac1*transpInvJac3)*detJM1;
+          B[i][2]=(invJac2*transpInvJac0+invJac3*transpInvJac2)*detJM1;
+          B[i][3]=(invJac2*transpInvJac1+invJac3*transpInvJac3)*detJM1;
+          //M 
+          massMatrixLocal[i]=weights[i1]*weights[i2]*detJ;
+       } 
+    }
     // compute stifness  matrix ( durufle's optimization)
-    myQk.gradPhiGradPhi( pow((myMeshinfo.myOrderNumber+1),DIMENSION), myMeshinfo.myOrderNumber, DIMENSION,weights,derivativeBasisFunction1D, B, pnLocal, R, Y );
+
+    for( int i2=0; i2<order+1; i2++ )
+    {                                       
+    for( int i1=0; i1<order+1; i1++ )     
+    {                                     
+      for (int j=0; j<nPointsPerElement;j++)
+      {                                   
+        R[j]=0;                           
+      }                                   
+      for( int j1=0; j1<order+1; j1++ )
+      {
+        int j=j1+i2*(order+1);
+        for( int m=0; m<order+1; m++ )
+        {
+          R[j]+=weights[m]*weights[i2]*(B[m+i2*(order+1)][0]*derivativeBasisFunction1D(i1,m)*derivativeBasisFunction1D(j1,m));
+        }
+      }
+      // B21
+      for( int j1=0; j1<order+1; j1++ )
+      {
+        for( int j2=0; j2<order+1; j2++ )
+        {
+          int j=j1+j2*(order+1);
+          R[j]+=weights[i1]*weights[j2]*(B[i1+j2*(order+1)][1]*derivativeBasisFunction1D(i2,j2)*derivativeBasisFunction1D(j1,i1));
+        }
+      }
+      // B12
+      for( int j1=0; j1<order+1; j1++ )
+      {
+        for( int j2=0; j2<order+1; j2++ )
+        {
+          int j=j1+j2*(order+1);
+          R[j]+=weights[i2]*weights[j1]*(B[i2+j1*(order+1)][2]*derivativeBasisFunction1D(i1,j1)*derivativeBasisFunction1D(j2,i2));
+        }
+      }
+      // B22
+      for( int j2=0; j2<order+1; j2++ )
+      {
+        int j=i1+j2*(order+1);
+        for( int n=0; n<order+1; n++ )
+        {
+          R[j]+=weights[i1]*weights[n]*(B[i1+n*(order+1)][3]*derivativeBasisFunction1D(i2,n)*derivativeBasisFunction1D(j2,n));
+        }
+      }
+      int i=i1+i2*(order+1);
+      Y[i]=0;
+      for( int j=0; j<nPointsPerElement; j++ )
+      {
+         Y[i]+=R[j]*pnLocal[j];
+      }
+    }
+    }
 
     //compute gloval mass Matrix and global stiffness vector
-    for( int i=0; i<pow((myMeshinfo.myOrderNumber+1),DIMENSION); i++ )
+    for( int i=0; i<nPointsPerElement; i++ )
     {
-      int gIndex=globalNodesList(e,i);
-      massMatrixLocal[i]/=(model[e]*model[e]);
+      int gIndex=globalNodesList(elementNumber,i);
+      massMatrixLocal[i]/=(model[elementNumber]*model[elementNumber]);
       ATOMICADD( massMatrixGlobal[gIndex], massMatrixLocal[i] );
       ATOMICADD( yGlobal[gIndex], Y[i]);
     } 
@@ -89,15 +189,34 @@ void SEMsolver::computeOneStep(  const int & timeStep,
     //get ds
     float ds[6];
     float Sh[6];
-    int numOfBasisFunctionOnFace[6];
     float Js[2][6];
 
-    int i=myQk.computeDs( iFace, myMeshinfo.myOrderNumber, faceInfos,numOfBasisFunctionOnFace,
-                  Js, globalNodesCoords, derivativeBasisFunction1D,
-                  ds );
+  // compute ds
+  int face=faceInfos(iFace,1);
+  for( int j=0; j<order+1; j++ )
+  {
+    Js[0][j]=0;    // x
+    Js[1][j]=0;    // y
+    for( int i=0; i<order+1; i++ )
+    {   
+      float xi=globalNodesCoords(faceInfos(iFace,2+i),0);
+      float yi=globalNodesCoords(faceInfos(iFace,2+i),1);
+      if( face==0 || face==2 )
+      {   
+        Js[0][j]+=derivativeBasisFunction1D(i,j)*xi;
+        Js[1][j]+=derivativeBasisFunction1D(i,j)*yi;
+      }   
+      if( face==1 || face==3 )
+      {   
+        Js[0][j]+=derivativeBasisFunction1D(i,j)*xi;
+        Js[1][j]+=derivativeBasisFunction1D(i,j)*yi;
+      }   
+    }   
+    ds[j]=sqrt( Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j] );
+  }
 
     //compute Sh and ShGlobal
-    for( int i=0; i<myMeshinfo.myOrderNumber+1; i++ )
+    for( int i=0; i<order+1; i++ )
     {
       int gIndexFaceNode=localFaceNodeToGlobalFaceNode(iFace,i);
       Sh[i]=weights[i]*ds[i]/(model[faceInfos(iFace,0)]);
