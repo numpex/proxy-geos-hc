@@ -274,6 +274,8 @@ elseif (EXISTS $ENV{KOKKOS_DIR}/KokkosConfig.cmake)
     set (dependencyList ${dependencyList} Kokkos::kokkos)
     message (STATUS "KOKKOS DEPENDENCY LIST= ${dependencyList}")
     include_directories("/opt/rocm-6.0.0/include")
+  elseif ( ENABLE_CUDA )
+    set (dependencyList "${dependencyList} -lcuda")
   endif()
 
 elseif (NOT DEFINED $ENV{KOKKOS_DIR})
