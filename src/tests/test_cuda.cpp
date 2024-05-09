@@ -17,17 +17,15 @@ const char STR_LENGTH = 12;
 
 __global__ void hello()
 {
-  printf("%c\n", STR[threadIdx.x % STR_LENGTH]);
+  printf( "%c\n", STR[threadIdx.x % STR_LENGTH] );
 }
 
 int main()
 {
   int num_threads = STR_LENGTH;
   int num_blocks = 1;
-  hello<<<num_blocks,num_threads>>>();
+  hello<<<num_blocks, num_threads>>>();
   cudaDeviceSynchronize();
 
   return 0;
 }
-
-

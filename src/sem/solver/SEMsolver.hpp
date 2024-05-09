@@ -20,47 +20,47 @@ class SEMsolver
 {
 public:
 
-PROXY_HOST_DEVICE SEMsolver(){};
-PROXY_HOST_DEVICE ~SEMsolver(){};
+  PROXY_HOST_DEVICE SEMsolver(){};
+  PROXY_HOST_DEVICE ~SEMsolver(){};
 
 
   /**
    * @brief computeFEInit function:
    * init all FE components for computing mass and stiffness matrices
    */
-  void computeFEInit ( SEMmeshinfo &myMeshinfo, 
-                       SEMmesh mesh);
+  void computeFEInit ( SEMmeshinfo & myMeshinfo,
+                       SEMmesh mesh );
 
-   /**
+  /**
    * @brief computeOneStep function:
    * init all FE components for computing mass and stiffness matrices
    */
-  void computeOneStep(  const int & timeStep,
-                                 SEMmeshinfo &myMeshinfo,
-                                 int & i1,
-                                 int & i2,
-                                 const arrayReal & myRHSTerm,
-                                 arrayReal const & myPnGlobal,
-                                 const vectorInt & myRhsElement);
+  void computeOneStep( const int & timeStep,
+                       SEMmeshinfo & myMeshinfo,
+                       int & i1,
+                       int & i2,
+                       const arrayReal & myRHSTerm,
+                       arrayReal const & myPnGlobal,
+                       const vectorInt & myRhsElement );
 
-  void outputPnValues (  SEMmesh mesh,
-		         const int & indexTimeStep,
-                         int & i1, 
-                         int & myElementSource, 
-                         const arrayReal & pnGlobal);
+  void outputPnValues ( SEMmesh mesh,
+                        const int & indexTimeStep,
+                        int & i1,
+                        int & myElementSource,
+                        const arrayReal & pnGlobal );
 
-  void initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh );
+  void initFEarrays( SEMmeshinfo & myMeshinfo, SEMmesh mesh );
 
-  void allocateFEarrays( SEMmeshinfo &myMeshinfo );
+  void allocateFEarrays( SEMmeshinfo & myMeshinfo );
 
 private:
 
-  int order; 
+  int order;
   float tmp;
   int numberOfPointsPerElement;
 
   SEMQkGL myQk;
-  
+
   //shared arrays
   arrayInt globalNodesList;
   arrayReal globalNodesCoords;
@@ -69,7 +69,7 @@ private:
   vectorInt listOfBoundaryNodes;
   arrayInt faceInfos;
   arrayInt localFaceNodeToGlobalFaceNode;
-  
+
   // get model
   vectorReal model;
 

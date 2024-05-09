@@ -24,7 +24,7 @@ int main( int argc, char *argv[] )
   int * const devicePointer = array.data();
 
   RAJA::forall< RAJA::cuda_exec< 32 > >(
-    RAJA::TypedRangeSegment< std::ptrdiff_t >( 0, array.size() ),
+    RAJA::TypedRangeSegment< std::ptrdiff_t >( 0, array.size()),
     [devicePointer] __device__ ( std::ptrdiff_t const i )
   {
     devicePointer[ i ] = i;
@@ -39,7 +39,7 @@ int main( int argc, char *argv[] )
 
   // Capture the view in a host kernel which moves the data back to the host.
   RAJA::forall< RAJA::loop_exec >(
-    RAJA::TypedRangeSegment< std::ptrdiff_t >( 0, view.size() ),
+    RAJA::TypedRangeSegment< std::ptrdiff_t >( 0, view.size()),
     [view] ( std::ptrdiff_t const i )
   {
     //EXPECT_EQ( view.data()[ i ], i );

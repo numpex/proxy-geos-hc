@@ -23,9 +23,9 @@
 
 #include <Kokkos_Core.hpp>
 
-void checkSizes( int &N, int &M, int &S, int &nrepeat );
+void checkSizes( int & N, int & M, int & S, int & nrepeat );
 
-int main( int argc, char* argv[] )
+int main( int argc, char * argv[] )
 {
   int N = -1;         // number of rows 2^12
   int M = -1;         // number of columns 2^10
@@ -33,23 +33,29 @@ int main( int argc, char* argv[] )
   int nrepeat = 100;  // number of repeats of the test
 
   // Read command line arguments.
-  for ( int i = 0; i < argc; i++ ) {
-    if ( ( strcmp( argv[ i ], "-N" ) == 0 ) || ( strcmp( argv[ i ], "-Rows" ) == 0 ) ) {
-      N = pow( 2, atoi( argv[ ++i ] ) );
+  for( int i = 0; i < argc; i++ )
+  {
+    if(( strcmp( argv[ i ], "-N" ) == 0 ) || ( strcmp( argv[ i ], "-Rows" ) == 0 ))
+    {
+      N = pow( 2, atoi( argv[ ++i ] ));
       printf( "  User N is %d\n", N );
     }
-    else if ( ( strcmp( argv[ i ], "-M" ) == 0 ) || ( strcmp( argv[ i ], "-Columns" ) == 0 ) ) {
-      M = pow( 2, atof( argv[ ++i ] ) );
+    else if(( strcmp( argv[ i ], "-M" ) == 0 ) || ( strcmp( argv[ i ], "-Columns" ) == 0 ))
+    {
+      M = pow( 2, atof( argv[ ++i ] ));
       printf( "  User M is %d\n", M );
     }
-    else if ( ( strcmp( argv[ i ], "-S" ) == 0 ) || ( strcmp( argv[ i ], "-Size" ) == 0 ) ) {
-      S = pow( 2, atof( argv[ ++i ] ) );
+    else if(( strcmp( argv[ i ], "-S" ) == 0 ) || ( strcmp( argv[ i ], "-Size" ) == 0 ))
+    {
+      S = pow( 2, atof( argv[ ++i ] ));
       printf( "  User S is %d\n", S );
     }
-    else if ( strcmp( argv[ i ], "-nrepeat" ) == 0 ) {
+    else if( strcmp( argv[ i ], "-nrepeat" ) == 0 )
+    {
       nrepeat = atoi( argv[ ++i ] );
     }
-    else if ( ( strcmp( argv[ i ], "-h" ) == 0 ) || ( strcmp( argv[ i ], "-help" ) == 0 ) ) {
+    else if(( strcmp( argv[ i ], "-h" ) == 0 ) || ( strcmp( argv[ i ], "-help" ) == 0 ))
+    {
       printf( "  y^T*A*x Options:\n" );
       printf( "  -Rows (-N) <int>:      exponent num, determines number of rows 2^num (default: 2^12 = 4096)\n" );
       printf( "  -Columns (-M) <int>:   exponent num, determines number of columns 2^num (default: 2^10 = 1024)\n" );
@@ -66,82 +72,91 @@ int main( int argc, char* argv[] )
   Kokkos::initialize( argc, argv );
   {
 
-  // Allocate y, x vectors and Matrix A on device.
-  typedef Kokkos::View<double*>   ViewVectorType;
-  typedef Kokkos::View<double**>  ViewMatrixType;
-  ViewVectorType y( "y", N );
-  ViewVectorType x( "x", M );
-  ViewMatrixType A( "A", N, M );
+    // Allocate y, x vectors and Matrix A on device.
+    typedef Kokkos::View< double * >   ViewVectorType;
+    typedef Kokkos::View< double * * >  ViewMatrixType;
+    ViewVectorType y( "y", N );
+    ViewVectorType x( "x", M );
+    ViewMatrixType A( "A", N, M );
 
-  // Create host mirrors of device views.
-  ViewVectorType::HostMirror h_y = Kokkos::create_mirror_view( y );
-  ViewVectorType::HostMirror h_x = Kokkos::create_mirror_view( x );
-  ViewMatrixType::HostMirror h_A = Kokkos::create_mirror_view( A );
+    // Create host mirrors of device views.
+    ViewVectorType::HostMirror h_y = Kokkos::create_mirror_view( y );
+    ViewVectorType::HostMirror h_x = Kokkos::create_mirror_view( x );
+    ViewMatrixType::HostMirror h_A = Kokkos::create_mirror_view( A );
 
-  // Initialize y vector on host.
-  for ( int i = 0; i < N; ++i ) {
-    h_y( i ) = 1;
-  }
-
-  // Initialize x vector on host.
-  for ( int i = 0; i < M; ++i ) {
-    h_x( i ) = 1;
-  }
-
-  // Initialize A matrix on host.
-  for ( int j = 0; j < N; ++j ) {
-    for ( int i = 0; i < M; ++i ) {
-      h_A( j, i ) = 1;
+    // Initialize y vector on host.
+    for( int i = 0; i < N; ++i )
+    {
+      h_y( i ) = 1;
     }
-  }
 
-  // Deep copy host views to device views.
-  Kokkos::deep_copy( y, h_y );
-  Kokkos::deep_copy( x, h_x );
-  Kokkos::deep_copy( A, h_A );
+    // Initialize x vector on host.
+    for( int i = 0; i < M; ++i )
+    {
+      h_x( i ) = 1;
+    }
 
-  // Timer products.
-  Kokkos::Timer timer;
+    // Initialize A matrix on host.
+    for( int j = 0; j < N; ++j )
+    {
+      for( int i = 0; i < M; ++i )
+      {
+        h_A( j, i ) = 1;
+      }
+    }
 
-  for ( int repeat = 0; repeat < nrepeat; repeat++ ) {
-    // Application: <y,Ax> = y^T*A*x
-    double result = 0;
+    // Deep copy host views to device views.
+    Kokkos::deep_copy( y, h_y );
+    Kokkos::deep_copy( x, h_x );
+    Kokkos::deep_copy( A, h_A );
 
-    Kokkos::parallel_reduce( "yAx", N, KOKKOS_LAMBDA ( int j, double &update ) {
-      double temp2 = 0;
+    // Timer products.
+    Kokkos::Timer timer;
 
-      for ( int i = 0; i < M; ++i ) {
-        temp2 += A( j, i ) * x( i );
+    for( int repeat = 0; repeat < nrepeat; repeat++ )
+    {
+      // Application: <y,Ax> = y^T*A*x
+      double result = 0;
+
+      Kokkos::parallel_reduce( "yAx", N, KOKKOS_LAMBDA ( int j, double & update )
+      {
+        double temp2 = 0;
+
+        for( int i = 0; i < M; ++i )
+        {
+          temp2 += A( j, i ) * x( i );
+        }
+
+        update += y( j ) * temp2;
+      }, result );
+
+      // Output result.
+      if( repeat == ( nrepeat - 1 ))
+      {
+        printf( "  Computed result for %d x %d is %lf\n", N, M, result );
       }
 
-      update += y( j ) * temp2;
-    }, result );
+      const double solution = (double) N * (double) M;
 
-    // Output result.
-    if ( repeat == ( nrepeat - 1 ) ) {
-      printf( "  Computed result for %d x %d is %lf\n", N, M, result );
+      if( result != solution )
+      {
+        printf( "  Error: result( %lf ) != solution( %lf )\n", result, solution );
+      }
     }
 
-    const double solution = (double) N * (double) M;
+    // Calculate time.
+    double time = timer.seconds();
 
-    if ( result != solution ) {
-      printf( "  Error: result( %lf ) != solution( %lf )\n", result, solution );
-    }
-  }
+    // Calculate bandwidth.
+    // Each matrix A row (each of length M) is read once.
+    // The x vector (of length M) is read N times.
+    // The y vector (of length N) is read once.
+    // double Gbytes = 1.0e-9 * double( sizeof(double) * ( 2 * M * N + N ) );
+    double Gbytes = 1.0e-9 * double( sizeof(double) * ( M + M * N + N ));
 
-  // Calculate time.
-  double time = timer.seconds();
-
-  // Calculate bandwidth.
-  // Each matrix A row (each of length M) is read once.
-  // The x vector (of length M) is read N times.
-  // The y vector (of length N) is read once.
-  // double Gbytes = 1.0e-9 * double( sizeof(double) * ( 2 * M * N + N ) );
-  double Gbytes = 1.0e-9 * double( sizeof(double) * ( M + M * N + N ) );
-
-  // Print results (problem size, time and bandwidth in GB/s).
-  printf( "  N( %d ) M( %d ) nrepeat ( %d ) problem( %g MB ) time( %g s ) bandwidth( %g GB/s )\n",
-          N, M, nrepeat, Gbytes * 1000, time, Gbytes * nrepeat / time );
+    // Print results (problem size, time and bandwidth in GB/s).
+    printf( "  N( %d ) M( %d ) nrepeat ( %d ) problem( %g MB ) time( %g s ) bandwidth( %g GB/s )\n",
+            N, M, nrepeat, Gbytes * 1000, time, Gbytes * nrepeat / time );
 
   }
   Kokkos::finalize();
@@ -149,44 +164,56 @@ int main( int argc, char* argv[] )
   return 0;
 }
 
-void checkSizes( int &N, int &M, int &S, int &nrepeat ) {
+void checkSizes( int & N, int & M, int & S, int & nrepeat )
+{
   // If S is undefined and N or M is undefined, set S to 2^22 or the bigger of N and M.
-  if ( S == -1 && ( N == -1 || M == -1 ) ) {
+  if( S == -1 && ( N == -1 || M == -1 ))
+  {
     //S = pow( 2, 22 );
     S = pow( 2, 24 );
-    if ( S < N ) S = N;
-    if ( S < M ) S = M;
+    if( S < N )
+      S = N;
+    if( S < M )
+      S = M;
   }
 
   // If S is undefined and both N and M are defined, set S = N * M.
-  if ( S == -1 ) S = N * M;
+  if( S == -1 )
+    S = N * M;
 
   // If both N and M are undefined, fix row length to the smaller of S and 2^10 = 1024.
-  if ( N == -1 && M == -1 ) {
-    if ( S > 1024 ) {
+  if( N == -1 && M == -1 )
+  {
+    if( S > 1024 )
+    {
       //M = 1024;
       M = 1024*4;
     }
-    else {
+    else
+    {
       M = S;
     }
   }
 
   // If only M is undefined, set it.
-  if ( M == -1 ) M = S / N;
+  if( M == -1 )
+    M = S / N;
 
   // If N is undefined, set it.
-  if ( N == -1 ) N = S / M;
+  if( N == -1 )
+    N = S / M;
 
   printf( "  Total size S = %d N = %d M = %d\n", S, N, M );
 
   // Check sizes.
-  if ( ( S < 0 ) || ( N < 0 ) || ( M < 0 ) || ( nrepeat < 0 ) ) {
+  if(( S < 0 ) || ( N < 0 ) || ( M < 0 ) || ( nrepeat < 0 ))
+  {
     printf( "  Sizes must be greater than 0.\n" );
     exit( 1 );
   }
 
-  if ( ( N * M ) != S ) {
+  if(( N * M ) != S )
+  {
     printf( "  N * M != S\n" );
     exit( 1 );
   }
