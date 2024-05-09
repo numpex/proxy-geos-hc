@@ -156,7 +156,9 @@ struct FDTDUtils
 
         printf("TimeStep=%d\t; Pressure value at source [%d %d %d] = %f\n", itSample,
                myGrids.xs, myGrids.ys, myGrids.zs, pnGlobal(IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs),i1));
+        #ifdef FD_SAVE_SNAPSHOTS
         write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pnGlobal, itSample, i1);
+        #endif
 
       } 
 

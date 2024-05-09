@@ -46,6 +46,17 @@ option (addFD "add finite difference proxy directory" OFF)
 #---------------------------------------------------
 option (SEM2D "test SEM-proxy 2D case" ON)
 
+#--------------------------------------------------------
+# Option to save snapshots of wavefields (for debugging)
+#--------------------------------------------------------
+option (SEM_SAVE_SNAPSHOTS "save snapshots for SEM-proxy" OFF)
+option (FD_SAVE_SNAPSHOTS "save snapshots for FD-proxy" OFF)
+
+#------------------------------------------------------
+# Option to printout memory allocation info of arrays
+#------------------------------------------------------
+option (PRINT_ALLOC_INFO "printout memory allocation info" OFF)
+
 add_subdirectory(src)
 
 

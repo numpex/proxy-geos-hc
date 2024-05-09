@@ -38,6 +38,9 @@ struct FDTDInit
     myGrids.ys = myGrids.ny/2;
     myGrids.zs = myGrids.nz/2;
 
+    printf( "Number of grids: nx=%d, ny=%d, nz=%d\n", myGrids.nx, myGrids.ny, myGrids.nz);
+    printf( "Source location: xs=%d, xy=%d, xz=%d\n", myGrids.xs, myGrids.ys, myGrids.zs);
+
     myGrids.lx=4;
     myGrids.ly=4;
     myGrids.lz=4;
@@ -112,6 +115,7 @@ struct FDTDInit
     for( int i=0; i<nSamples; i++ )
     {
       myModels.RHSTerm[i]=sourceTerm[i];
+      //cout<<"sample "<<i<<"\t: sourceTerm = "<<sourceTerm[i]<< endl;
     }
 
   }

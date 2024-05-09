@@ -247,7 +247,9 @@ void SEMsolver::outputPnValues( SEMmesh mesh,
   {
     cout<<"TimeStep="<<indexTimeStep<<";  pnGlobal @ elementSource location "<<myElementSource
         <<" after computeOneStep = "<< pnGlobal( globalNodesList( myElementSource, 0 ), i1 )<<endl;
+    #ifdef SEM_SAVE_SNAPSHOTS
     mesh.saveSnapShot( indexTimeStep, i1, pnGlobal );
+    #endif
   }
 }
 
@@ -277,7 +279,7 @@ void SEMsolver::initFEarrays( SEMmeshinfo & myMeshinfo, SEMmesh mesh )
 void SEMsolver::allocateFEarrays( SEMmeshinfo & myMeshinfo )
 {
   //interior elements
-  cout<<"Allocate host memory for arrays in the solver:"<<endl;
+  cout<<"Allocate host memory for arrays in the solver ..."<<endl;
   globalNodesList=allocateArray2D< arrayInt >( myMeshinfo.numberOfElements, myMeshinfo.numberOfPointsPerElement, "globalNodesList" );
   listOfInteriorNodes=allocateVector< vectorInt >( myMeshinfo.numberOfInteriorNodes, "listOfInteriorNodes" );
   globalNodesCoords=allocateArray2D< arrayReal >( myMeshinfo.numberOfNodes, 3, "globalNodesCoords" );
