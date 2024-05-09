@@ -91,8 +91,8 @@ int main( int argc, char *argv[] )
   cout << "------------------------------------------------ "<< endl;
 
   #ifdef USE_KOKKOS
-}
-Kokkos::finalize();
+  }
+  Kokkos::finalize();
   #endif
 
   cout << "Elapsed TotalExecution Time : "<<( system_clock::now()-startInitTime).count()/1E9 <<" seconds.\n"<< endl;

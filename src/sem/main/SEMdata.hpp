@@ -11,5 +11,5 @@ struct SEMmeshinfo
   const int myNumberOfRHS=1;
   const int myOrderNumber=3;
   const float myTimeStep=0.001;
-  const int nBasisFunctions=(myOrderNumber+1)*(myOrderNumber+1);
+  const int nPointsPerElement = pow((myOrderNumber+1), DIMENSION );
 };

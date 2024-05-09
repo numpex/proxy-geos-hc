@@ -20,10 +20,12 @@ void SEMsolver::computeFEInit( SEMmeshinfo & myMeshinfo, SEMmesh mesh )
 }
 
 // compute one step of the time dynamic wave equation solver
-void SEMsolver::computeOneStep( const int & timeStep,
+void SEMsolver::computeOneStep( const int & timeSample,
+                                const int & order,
+                                const int & nPointsPerElement,
+                                const int & i1,
+                                const int & i2,
                                 SEMmeshinfo & myMeshinfo,
-                                int & i1,
-                                int & i2,
                                 const arrayReal & RHS_Term,
                                 arrayReal const & PN_Global,
                                 const vectorInt & RHS_Element )
@@ -31,27 +33,24 @@ void SEMsolver::computeOneStep( const int & timeStep,
   CREATEVIEWS
 
   // update pressure @ boundaries;
-    LOOPHEAD( myMeshinfo.numberOfNodes, i )
+  LOOPHEAD( myMeshinfo.numberOfNodes, i )
   massMatrixGlobal[i]=0;
   yGlobal[i]=0;
   LOOPEND
 
   // update pnGLobal with right hade side
-    LOOPHEAD( myMeshinfo.myNumberOfRHS, i )
+  LOOPHEAD( myMeshinfo.myNumberOfRHS, i )
   int nodeRHS=globalNodesList( rhsElement[i], 0 );
-  pnGlobal( nodeRHS, i2 )+=myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm( i, timeStep );
+  pnGlobal( nodeRHS, i2 )+=myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm( i, timeSample );
   LOOPEND
 
-    LOOPHEAD( myMeshinfo.numberOfElements, elementNumber )
+  LOOPHEAD( myMeshinfo.numberOfElements, elementNumber )
   // start parallel section
   float B[ROW][COL];
   float R[ROW];
   float massMatrixLocal[ROW];
   float pnLocal[ROW];
   float Y[ROW];
-
-  int order = myMeshinfo.myOrderNumber;
-  int nPointsPerElement = pow((order+1), DIMENSION );
 
   // get pnGlobal to pnLocal
   for( int i=0; i<nPointsPerElement; i++ )

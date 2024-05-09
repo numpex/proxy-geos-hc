@@ -28,21 +28,6 @@
   #define LOOPEND   }
 #endif
 
-// define atomic add operation
-#if defined (USE_RAJA)
-  #define ATOMICADD(ADD1,ADD2) RAJA::atomicAdd< deviceAtomicPolicy >(&ADD1,ADD2);
-  #define FENCE\
-  if(timeStep%50==0)\
-     RAJA::forall< RAJA::seq_exec>( RAJA::RangeSegment( 0, myMeshinfo.numberOfNodes ), [pnGlobal] LVARRAY_HOST_DEVICE ( int i ){});
-#elif defined (USE_KOKKOS)
-  #define ATOMICADD(ADD1,ADD2) Kokkos::atomic_add(&ADD1,ADD2)
-  #define FENCE\
-  if(timeStep%50==0) Kokkos::fence();
-#else
-  #define ATOMICADD(ADD1,ADD2) ADD1+=ADD2
-  #define FENCE 
-#endif
-
 #if defined (USE_RAJA)
   #define ARRAY_DOUBLE_VIEW arrayDoubleView 
   #define ARRAY_REAL_VIEW arrayRealView

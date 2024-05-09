@@ -14,8 +14,6 @@
 #include "SEMmesh.hpp"
 #include "SEMdata.hpp"
 
-
-
 class SEMsolver
 {
 public:
@@ -35,13 +33,15 @@ public:
    * @brief computeOneStep function:
    * init all FE components for computing mass and stiffness matrices
    */
-  void computeOneStep( const int & timeStep,
-                       SEMmeshinfo & myMeshinfo,
-                       int & i1,
-                       int & i2,
-                       const arrayReal & myRHSTerm,
-                       arrayReal const & myPnGlobal,
-                       const vectorInt & myRhsElement );
+  void computeOneStep ( const int & timeSample,
+                        const int & order,
+                        const int & nPointsPerElement,
+                        const int & i1,
+                        const int & i2,
+                        SEMmeshinfo & myMeshinfo,
+                        const arrayReal & myRHSTerm,
+                        arrayReal const & myPnGlobal,
+                        const vectorInt & myRhsElement );
 
   void outputPnValues ( SEMmesh mesh,
                         const int & indexTimeStep,
