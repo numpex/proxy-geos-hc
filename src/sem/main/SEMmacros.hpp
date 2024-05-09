@@ -54,4 +54,8 @@
   #define FENCE 
 #endif
 
-
+#if defined (USE_SEM_INLINE)
+   #define computeOneStep computeOneStepInline
+#else
+   #define computeOneStep computeOneStepNoInline
+#endif

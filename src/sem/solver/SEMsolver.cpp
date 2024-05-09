@@ -19,8 +19,112 @@ void SEMsolver::computeFEInit( SEMmeshinfo & myMeshinfo, SEMmesh mesh )
 
 }
 
+
 // compute one step of the time dynamic wave equation solver
-void SEMsolver::computeOneStep( const int & timeSample,
+#ifndef USE_SEM_INLINE
+void SEMsolver::computeOneStepNoInline( 
+                                const int & timeSample,
+                                const int & order,
+                                const int & nPointsPerElement,
+                                const int & i1,
+                                const int & i2,
+                                SEMmeshinfo & myMeshinfo,
+                                const arrayReal & RHS_Term,
+                                arrayReal const & PN_Global,
+                                const vectorInt & RHS_Element )
+{
+  CREATEVIEWS
+
+  // update pressure @ boundaries;
+  LOOPHEAD( myMeshinfo.numberOfNodes, i )
+  massMatrixGlobal[i]=0;
+  yGlobal[i]=0;
+  LOOPEND
+
+  // update pnGLobal with right hade side
+  LOOPHEAD( myMeshinfo.myNumberOfRHS, i )
+  int nodeRHS=globalNodesList( rhsElement[i], 0 );
+  pnGlobal( nodeRHS, i2 )+=myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm( i, timeSample );
+  LOOPEND
+
+  LOOPHEAD( myMeshinfo.numberOfElements, elementNumber )
+  // start parallel section
+  float B[ROW][COL];
+  float R[ROW];
+  float massMatrixLocal[ROW];
+  float pnLocal[ROW];
+  float Y[ROW];
+
+  // get pnGlobal to pnLocal
+  for( int i=0; i<nPointsPerElement; i++ )
+  {
+    int localToGlobal=globalNodesList( elementNumber, i );
+    pnLocal[i]=pnGlobal( localToGlobal, i2 );
+  }
+
+  // compute Jacobian, massMatrix and B
+  myQk.computeB( elementNumber, order, DIMENSION, weights, globalNodesList, globalNodesCoords, derivativeBasisFunction1D, massMatrixLocal, B );
+
+  // compute stifness  matrix ( durufle's optimization)
+  myQk.gradPhiGradPhi( nPointsPerElement, order, DIMENSION, weights, derivativeBasisFunction1D, B, pnLocal, R, Y );
+
+
+  //compute gloval mass Matrix and global stiffness vector
+  for( int i=0; i<nPointsPerElement; i++ )
+  {
+    int gIndex=globalNodesList( elementNumber, i );
+    massMatrixLocal[i]/=(model[elementNumber]*model[elementNumber]);
+    ATOMICADD( massMatrixGlobal[gIndex], massMatrixLocal[i] );
+    ATOMICADD( yGlobal[gIndex], Y[i] );
+  }
+
+  LOOPEND
+
+  // update pressure
+  LOOPHEAD( myMeshinfo.numberOfInteriorNodes, i )
+  int I=listOfInteriorNodes[i];
+  pnGlobal( I, i1 )=2*pnGlobal( I, i2 )-pnGlobal( I, i1 )-myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*yGlobal[I]/massMatrixGlobal[I];
+  LOOPEND
+
+  if( DIMENSION==2 )
+  {
+    LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i )
+    ShGlobal[i]=0;
+    LOOPEND
+
+    LOOPHEAD( myMeshinfo.numberOfBoundaryFaces, iFace )
+    //get ds
+    float ds[6];
+    float Sh[6];
+    float Js[2][6];
+
+    // compute ds
+    myQk.computeDs( iFace, order, faceInfos, (order+1)*(order+1), Js, globalNodesCoords, derivativeBasisFunction1D, ds );
+
+    //compute Sh and ShGlobal
+    for( int i=0; i<order+1; i++ )
+    {
+      int gIndexFaceNode=localFaceNodeToGlobalFaceNode( iFace, i );
+      Sh[i]=weights[i]*ds[i]/(model[faceInfos( iFace, 0 )]);
+      ATOMICADD( ShGlobal[gIndexFaceNode], Sh[i] );
+    }
+    LOOPEND
+
+    LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i )
+    int I=listOfBoundaryNodes[i];
+    float invMpSh=1/(massMatrixGlobal[I]+myMeshinfo.myTimeStep*ShGlobal[i]*0.5);
+    float MmSh=massMatrixGlobal[I]-myMeshinfo.myTimeStep*ShGlobal[i]*0.5;
+    pnGlobal( I, i1 )=invMpSh*(2*massMatrixGlobal[I]*pnGlobal( I, i2 )-MmSh*pnGlobal( I, i1 )-myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*yGlobal[I]);
+    LOOPEND
+  }
+  FENCE
+}
+#endif
+
+
+// compute one step of the time dynamic wave equation solver
+void SEMsolver::computeOneStepInline( 
+                                const int & timeSample,
                                 const int & order,
                                 const int & nPointsPerElement,
                                 const int & i1,
@@ -174,7 +278,7 @@ void SEMsolver::computeOneStep( const int & timeSample,
   LOOPEND
 
   // update pressure
-    LOOPHEAD( myMeshinfo.numberOfInteriorNodes, i )
+  LOOPHEAD( myMeshinfo.numberOfInteriorNodes, i )
   int I=listOfInteriorNodes[i];
   pnGlobal( I, i1 )=2*pnGlobal( I, i2 )-pnGlobal( I, i1 )-myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*yGlobal[I]/massMatrixGlobal[I];
   LOOPEND
@@ -185,7 +289,7 @@ void SEMsolver::computeOneStep( const int & timeSample,
     ShGlobal[i]=0;
     LOOPEND
 
-      LOOPHEAD( myMeshinfo.numberOfBoundaryFaces, iFace )
+    LOOPHEAD( myMeshinfo.numberOfBoundaryFaces, iFace )
     //get ds
     float ds[6];
     float Sh[6];
@@ -224,7 +328,7 @@ void SEMsolver::computeOneStep( const int & timeSample,
     }
     LOOPEND
 
-      LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i )
+    LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i )
     int I=listOfBoundaryNodes[i];
     float invMpSh=1/(massMatrixGlobal[I]+myMeshinfo.myTimeStep*ShGlobal[i]*0.5);
     float MmSh=massMatrixGlobal[I]-myMeshinfo.myTimeStep*ShGlobal[i]*0.5;

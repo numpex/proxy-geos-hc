@@ -40,6 +40,9 @@
 // Enable printout memory allocation info for arrays
 #cmakedefine PRINT_ALLOC_INFO
 
+// Enable selection of inline or noninline for SEM-proxy
+#cmakedefine USE_SEM_INLINE
+
 #endif
 
 

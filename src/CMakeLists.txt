@@ -39,6 +39,7 @@ if(ENABLE_HIP)
   set(HIP_PATH "/opt/rocm-${COMP_VER}/bin")
   set(GPU_TARGETS "${COMP_ARCH}")
   message(STATUS "======== ROCM_ROOT_DIR=${ROCM_ROOT_DIR}")
+  set(USE_SEM_INLINE ON CACHE BOOL "" FORCE) #clang doesn't support -fgpu-rdc yet
 else()
   # CC options
   set(CMAKE_C_COMPILER gcc CACHE PATH "")

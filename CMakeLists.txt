@@ -54,8 +54,12 @@ option (FD_SAVE_SNAPSHOTS "save snapshots for FD-proxy" OFF)
 
 #------------------------------------------------------
 # Option to printout memory allocation info of arrays
-#------------------------------------------------------
 option (PRINT_ALLOC_INFO "printout memory allocation info" OFF)
+
+#------------------------------------------------------
+# Enable selection of inline or noninline for SEM-proxy
+#------------------------------------------------------
+option (USE_SEM_INLINE "selection of inline or noninline for SEM-proxy" OFF)
 
 add_subdirectory(src)
 

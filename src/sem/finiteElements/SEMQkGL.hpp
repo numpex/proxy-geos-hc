@@ -54,10 +54,10 @@ public:
                                          float R[],
                                          float Y[] ) const;
   //computeDs
-  PROXY_HOST_DEVICE int computeDs( const int & iFace,
+  PROXY_HOST_DEVICE void computeDs( const int & iFace,
                                    const int & order,
                                    ARRAY_INT_VIEW const & faceInfos,
-                                   int numOfBasisFunctionOnFace[],
+                                   int numOfBasisFunctionOnFace,
                                    float Js[][6],
                                    ARRAY_REAL_VIEW const & globalNodesCoords,
                                    ARRAY_DOUBLE_VIEW const & dPhi,
