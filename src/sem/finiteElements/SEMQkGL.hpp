@@ -34,7 +34,6 @@ public:
   // compute B and M
   PROXY_HOST_DEVICE void computeB( const int & elementNumber,
                                    const int & order,
-                                   const int & dimension,
                                    VECTOR_DOUBLE_VIEW const & weights,
                                    ARRAY_INT_VIEW const & nodesList,
                                    ARRAY_REAL_VIEW const & nodesCoords,
@@ -46,7 +45,6 @@ public:
   // Marc Durufle Formulae
   PROXY_HOST_DEVICE void gradPhiGradPhi( const int & nPointsPerElement,
                                          const int & order,
-                                         const int & dimension,
                                          VECTOR_DOUBLE_VIEW const & weights,
                                          ARRAY_DOUBLE_VIEW const & dPhi,
                                          float const B[][COL],

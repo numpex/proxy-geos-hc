@@ -318,7 +318,6 @@ void SEMQkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quad
 // compute B and M
 PROXY_HOST_DEVICE void SEMQkGL::computeB( const int & elementNumber,
                                           const int & order,
-                                          const int & dimension,
                                           VECTOR_DOUBLE_VIEW const & weights,
                                           ARRAY_INT_VIEW const & nodesList,
                                           ARRAY_REAL_VIEW const & nodesCoords,
@@ -326,7 +325,7 @@ PROXY_HOST_DEVICE void SEMQkGL::computeB( const int & elementNumber,
                                           float massMatrixLocal[],
                                           float B[][COL] ) const
 {
-  if( dimension==2 )
+  #ifdef SEM2D
   {
     for( int i2=0; i2<order+1; i2++ )
     {
@@ -377,7 +376,7 @@ PROXY_HOST_DEVICE void SEMQkGL::computeB( const int & elementNumber,
       }
     }
   }
-  else   //3D case
+  #else   //3D case
   {
     for( int i3=0; i3<order+1; i3++ )
     {
@@ -472,13 +471,13 @@ PROXY_HOST_DEVICE void SEMQkGL::computeB( const int & elementNumber,
       }
     }
   }
+  #endif
 }
 
 // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
 // Marc Durufle Formulae
 PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                                 const int & order,
-                                                const int & dimension,
                                                 VECTOR_DOUBLE_VIEW const & weights,
                                                 ARRAY_DOUBLE_VIEW const & dPhi,
                                                 float const B[][COL],
@@ -486,7 +485,7 @@ PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                                 float R[],
                                                 float Y[] ) const
 {
-  if( dimension==2 )
+  #ifdef SEM2D
   {
     // B11
     for( int i2=0; i2<order+1; i2++ )
@@ -541,7 +540,7 @@ PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
       }
     }
   }
-  else
+  #else
   {
     int orderPow2=(order+1)*(order+1);
     for( int i3=0; i3<order+1; i3++ )
@@ -633,6 +632,7 @@ PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
       }
     }
   }
+  #endif
 }
 
 //computeDs

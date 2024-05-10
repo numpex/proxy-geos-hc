@@ -70,9 +70,6 @@ public:
 private:
 
   int order;
-  float tmp;
-  int numberOfPointsPerElement;
-
   SEMQkGL myQk;
 
   //shared arrays

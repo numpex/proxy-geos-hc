@@ -1,9 +1,6 @@
 #ifndef COMMON_CONFIG_HPP
 #define COMMON_CONFIG_HPP
 
-// Enables use of Caliper (CMake option)
-#cmakedefine USE_CALIPER
-
 // Enable use of Vector (CMake option)
 #cmakedefine USE_VECTOR
 

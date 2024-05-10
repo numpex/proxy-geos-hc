@@ -29,22 +29,11 @@ option (USE_RAJA "Use RAJA to parallelise loops" OFF)
 # use KOKOS to expose parallelism loop
 option (USE_KOKKOS "Use KOKKOS to parallelise loops" OFF)
 
-#-----------------------------------------------------
-# Setup the flags for profiling using caliper
-#-----------------------------------------------------
-option (USE_CALIPER "Use CALIPER for profiling" OFF)
-
 #---------------------------------------------------
 # Tests directory to perform differen tests before 
 # integration into proxy apps
 #---------------------------------------------------
 option (addTests "add Tests directory" OFF)
-option (addFD "add finite difference proxy directory" OFF)
-
-#---------------------------------------------------
-# Option to test SEM-proxy 2D case (default is 3D)
-#---------------------------------------------------
-option (SEM2D "test SEM-proxy 2D case" ON)
 
 #--------------------------------------------------------
 # Option to save snapshots of wavefields (for debugging)
@@ -54,12 +43,19 @@ option (FD_SAVE_SNAPSHOTS "save snapshots for FD-proxy" OFF)
 
 #------------------------------------------------------
 # Option to printout memory allocation info of arrays
+#------------------------------------------------------
 option (PRINT_ALLOC_INFO "printout memory allocation info" OFF)
 
 #------------------------------------------------------
 # Enable selection of inline or noninline for SEM-proxy
 #------------------------------------------------------
 option (USE_SEM_INLINE "selection of inline or noninline for SEM-proxy" OFF)
+
+#---------------------------------------------------
+# Option to test SEM-proxy 2D case (default is 3D)
+#---------------------------------------------------
+option (SEM2D "test SEM-proxy 2D case" ON)
+
 
 add_subdirectory(src)
 
