@@ -12,7 +12,6 @@
 
 #include "SEMQkGL.hpp"
 #include "SEMmesh.hpp"
-#include "SEMdata.hpp"
 
 class SEMsolver
 {
@@ -21,12 +20,11 @@ public:
   PROXY_HOST_DEVICE SEMsolver(){};
   PROXY_HOST_DEVICE ~SEMsolver(){};
 
-
   /**
    * @brief computeFEInit function:
    * init all FE components for computing mass and stiffness matrices
    */
-  void computeFEInit ( SEMmeshinfo & myMeshinfo,
+  void computeFEInit ( SEMinfo & myInfo,
                        SEMmesh mesh );
 
   /**
@@ -40,7 +38,7 @@ public:
                         const int & nPointsPerElement,
                         const int & i1,
                         const int & i2,
-                        SEMmeshinfo & myMeshinfo,
+                        SEMinfo & myInfo,
                         const arrayReal & myRHSTerm,
                         arrayReal const & myPnGlobal,
                         const vectorInt & myRhsElement );
@@ -51,7 +49,7 @@ public:
                         const int & nPointsPerElement,
                         const int & i1,
                         const int & i2,
-                        SEMmeshinfo & myMeshinfo,
+                        SEMinfo & myInfo,
                         const arrayReal & myRHSTerm,
                         arrayReal const & myPnGlobal,
                         const vectorInt & myRhsElement );
@@ -63,9 +61,9 @@ public:
                         int & myElementSource,
                         const arrayReal & pnGlobal );
 
-  void initFEarrays( SEMmeshinfo & myMeshinfo, SEMmesh mesh );
+  void initFEarrays( SEMinfo & myInfo, SEMmesh mesh );
 
-  void allocateFEarrays( SEMmeshinfo & myMeshinfo );
+  void allocateFEarrays( SEMinfo & myInfo );
 
 private:
 

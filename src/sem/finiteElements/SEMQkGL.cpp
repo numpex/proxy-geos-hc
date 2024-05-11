@@ -670,3 +670,69 @@ PROXY_HOST_DEVICE void SEMQkGL::computeDs( const int & iFace,
     //cout<<"j="<<j<<", ds="<<ds[j]<<", "<<Js[0][j]<<", "<<Js[1][j]<<endl;
   }
 }
+
+
+// compute mass matrix and stiffness matrices and then
+// compute global mass Matrix and global stiffness vector
+void SEMQkGL::computeMassAndStiffnessMatrices(
+                                          const int & i1,
+                                          const int & i2,
+                                          SEMinfo & myInfo,
+                                          ARRAY_INT_VIEW const & listOfElementsByColor,
+                                          VECTOR_DOUBLE_VIEW const & weights,
+                                          ARRAY_DOUBLE_VIEW const & derivativeBasisFunction1D,
+                                          ARRAY_INT_VIEW const & globalNodesList,
+                                          ARRAY_REAL_VIEW const & globalNodesCoords,
+                                          VECTOR_REAL_VIEW const & massMatrixGlobal,
+                                          VECTOR_REAL_VIEW const & yGlobal,
+                                          VECTOR_REAL_VIEW const & model,
+                                          ARRAY_REAL_VIEW const & pnGlobal) const
+{
+
+  int order = myInfo.myOrderNumber;
+  int nPointsPerElement = myInfo.nPointsPerElement;
+
+  #ifdef SEM_MESHCOLOR
+  for (int color=0; color<myInfo.numberOfColors;color++)
+  {
+  LOOPHEAD( myInfo.numberOfElementsByColor[color], eColor)
+  int elementNumber=listOfElementsByColor(color,eColor);
+  #else
+  LOOPHEAD( myInfo.numberOfElements, elementNumber )
+  #endif
+
+  // start parallel section
+  float B[ROW][COL];
+  float R[ROW];
+  float massMatrixLocal[ROW];
+  float pnLocal[ROW];
+  float Y[ROW];
+
+  // get pnGlobal to pnLocal
+  for( int i=0; i<nPointsPerElement; i++ )
+  {
+    int localToGlobal=globalNodesList( elementNumber, i );
+    pnLocal[i]=pnGlobal( localToGlobal, i2 );
+  }
+
+  // compute Jacobian, massMatrix and B
+  computeB( elementNumber, order, weights, globalNodesList, globalNodesCoords, derivativeBasisFunction1D, massMatrixLocal, B );
+
+  // compute stifness  matrix ( durufle's optimization)
+  gradPhiGradPhi( nPointsPerElement, order, weights, derivativeBasisFunction1D, B, pnLocal, R, Y );
+
+  //compute gloval mass Matrix and global stiffness vector
+  for( int i=0; i<nPointsPerElement; i++ )
+  {
+    int gIndex=globalNodesList( elementNumber, i );
+    massMatrixLocal[i]/=(model[elementNumber]*model[elementNumber]);
+    ATOMICADD( massMatrixGlobal[gIndex], massMatrixLocal[i] );
+    ATOMICADD( yGlobal[gIndex], Y[i] );
+  }
+
+  LOOPEND
+  #ifdef SEM_MESHCOLOR
+  }
+  #endif
+}
+

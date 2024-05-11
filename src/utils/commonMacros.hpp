@@ -33,12 +33,14 @@
   #define ARRAY_REAL_VIEW arrayRealView
   #define ARRAY_INT_VIEW arrayIntView
   #define VECTOR_DOUBLE_VIEW vectorDoubleView
+  #define VECTOR_REAL_VIEW vectorRealView
   #define VECTOR_INT_VIEW vectorIntView
 #else
   #define ARRAY_DOUBLE_VIEW arrayDouble
   #define ARRAY_REAL_VIEW arrayReal
   #define ARRAY_INT_VIEW arrayInt
   #define VECTOR_DOUBLE_VIEW vectorDouble
+  #define VECTOR_REAL_VIEW vectorReal
   #define VECTOR_INT_VIEW vectorInt
 #endif
 

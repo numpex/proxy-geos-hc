@@ -3,6 +3,7 @@
 
 #include "dataType.hpp"
 #include "SEMmacros.hpp"
+#include "SEMdata.hpp"
 using namespace std;
 
 /**
@@ -21,8 +22,7 @@ public:
   void gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const;
 
   // get Gauss Lobatto quadrature weights
-  void  gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const;
-
+  void  gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const; 
   // compute  1d shape Functions and derivatives
   vector< double >  shapeFunction1D( int order, double xi ) const;
   vector< double >  derivativeShapeFunction1D( int order, double xi ) const;
@@ -60,5 +60,21 @@ public:
                                    ARRAY_REAL_VIEW const & globalNodesCoords,
                                    ARRAY_DOUBLE_VIEW const & dPhi,
                                    float ds[] ) const;
+
+  // compute mass matrix and stiffness matrices and then
+  // compute global mass Matrix and global stiffness vector
+  void computeMassAndStiffnessMatrices(
+                                          const int & i1,
+                                          const int & i2,
+                                          SEMinfo & myInfo,
+                                          ARRAY_INT_VIEW const & listOfElementsByColor,
+                                          VECTOR_DOUBLE_VIEW const & weights,
+                                          ARRAY_DOUBLE_VIEW const & derivativeBasisFunction1D,
+                                          ARRAY_INT_VIEW const & globalNodesList,
+                                          ARRAY_REAL_VIEW const & globalNodesCoords,
+                                          VECTOR_REAL_VIEW const & massMatrixGlobal,
+                                          VECTOR_REAL_VIEW const & yGlobal,
+                                          VECTOR_REAL_VIEW const & model,
+                                          ARRAY_REAL_VIEW const & pnGlobal) const;
 };
 #endif //SEMQKGL_HPP_

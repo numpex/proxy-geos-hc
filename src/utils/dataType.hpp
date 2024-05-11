@@ -83,19 +83,19 @@ using array3DDouble=Array3D< double >;
 
 #ifdef USE_LVARRAY
 
-  #include "RAJA/RAJA.hpp"
-  #include "Array.hpp"
-  #include "ChaiBuffer.hpp"
+#include "RAJA/RAJA.hpp"
+#include "Array.hpp"
+#include "ChaiBuffer.hpp"
 using hostExecPolicy=RAJA::omp_parallel_for_exec;
 using hostAtomicPolicy=RAJA::omp_atomic;
-  #ifdef ENABLE_CUDA
+#ifdef ENABLE_CUDA
 using deviceAtomicPolicy=RAJA::cuda_atomic;
 using deviceExecPolicy=RAJA::cuda_exec< 32 >;
-  #endif
-  #ifdef ENABLE_HIP
+#endif
+#ifdef ENABLE_HIP
 using deviceAtomicPolicy=RAJA::hip_atomic;
 using deviceExecPolicy=RAJA::hip_exec< 32 >;
-  #endif
+#endif
 // define vectors and  arrays.
 using vectorInt=LvArray::Array< int,
                                 1,
@@ -193,18 +193,18 @@ using array3DDoubleView=LvArray::ArrayView< double,
 
 #ifdef USE_KOKKOS
 
-  #ifdef ENABLE_HIP
+#ifdef ENABLE_HIP
 #define __HIP_PLATFORM_AMD__ 1
-  #endif
+#endif
 
-  #include <Kokkos_Core.hpp>
+#include <Kokkos_Core.hpp>
 #define MemSpace Kokkos::SharedSpace
 
-  #ifdef ENABLE_CUDA
+#ifdef ENABLE_CUDA
 using Layout=Kokkos::LayoutLeft;
-  #else
+#else
 using Layout=Kokkos::LayoutRight;
-  #endif
+#endif
 
 typedef Kokkos::View< int *, Layout, MemSpace > vectorInt;
 typedef Kokkos::View< float *, Layout, MemSpace > vectorReal;
@@ -237,45 +237,45 @@ typedef Kokkos::View< double * * *, Layout, MemSpace > array3DDouble;
 template< class T >
 T allocateVector( int n1 )
 {
-     #ifdef PRINT_ALLOC_INFO
+  #ifdef PRINT_ALLOC_INFO
   std::cout<<"allocate vector of size "<<n1<<std::endl;
-     #endif
+  #endif
   T vect( KOKKOSNAME n1 );
   return vect;
 }
 template< class T >
 T allocateVector( int n1, const char * name )
 {
-     #ifdef PRINT_ALLOC_INFO
+  #ifdef PRINT_ALLOC_INFO
   std::cout<<"allocate vector: "<<name<<" of size: "<<n1<<std::endl;
-     #endif
+  #endif
   T vect( KOKKOSNAME n1 );
   return vect;
 }
 template< class T >
 T allocateArray2D( int n1, int n2 )
 {
-     #ifdef PRINT_ALLOC_INFO
+  #ifdef PRINT_ALLOC_INFO
   std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
-     #endif
+  #endif
   T array( KOKKOSNAME n1, n2 );
   return array;
 }
 template< class T >
 T allocateArray2D( int n1, int n2, const char * name )
 {
-     #ifdef PRINT_ALLOC_INFO
+  #ifdef PRINT_ALLOC_INFO
   std::cout<<"allocate array : "<<name<<" of size: ("<<n1<<", "<<n2<<")"<<std::endl;
-     #endif
+  #endif
   T array( KOKKOSNAME n1, n2 );
   return array;
 }
 template< class T >
 T allocateArray3D( int n1, int n2, int n3 )
 {
-     #ifdef PRINT_ALLOC_INFO
+  #ifdef PRINT_ALLOC_INFO
   std::cout<<"allocate array of size "<<n1<<", "<<n2<<", "<<n3<<std::endl;
-     #endif
+  #endif
   T array( KOKKOSNAME n1, n2, n3 );
   return array;
 }

@@ -9,12 +9,11 @@
 
 #include "SEMsolver.hpp"
 
-void SEMsolver::computeFEInit( SEMmeshinfo & myMeshinfo, SEMmesh mesh )
+void SEMsolver::computeFEInit( SEMinfo & myInfo, SEMmesh mesh )
 {
-  order = myMeshinfo.myOrderNumber;
-  allocateFEarrays( myMeshinfo );
-  initFEarrays( myMeshinfo, mesh );
-
+  order = myInfo.myOrderNumber;
+  allocateFEarrays( myInfo );
+  initFEarrays( myInfo, mesh );
 }
 
 
@@ -26,32 +25,26 @@ void SEMsolver::computeOneStepNoInline(
                                 const int & nPointsPerElement,
                                 const int & i1,
                                 const int & i2,
-                                SEMmeshinfo & myMeshinfo,
+                                SEMinfo & myInfo,
                                 const arrayReal & RHS_Term,
                                 arrayReal const & PN_Global,
                                 const vectorInt & RHS_Element )
 {
   CREATEVIEWS
 
-  // update pressure @ boundaries;
-  LOOPHEAD( myMeshinfo.numberOfNodes, i )
-  massMatrixGlobal[i]=0;
-  yGlobal[i]=0;
-  LOOPEND
-
   // update pnGLobal with right hade side
-  LOOPHEAD( myMeshinfo.myNumberOfRHS, i )
+  LOOPHEAD( myInfo.myNumberOfRHS, i )
   int nodeRHS=globalNodesList( rhsElement[i], 0 );
-  pnGlobal( nodeRHS, i2 )+=myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm( i, timeSample );
+  pnGlobal( nodeRHS, i2 )+=myInfo.myTimeStep*myInfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm( i, timeSample );
   LOOPEND
 
   #ifdef SEM_MESHCOLOR
-  for (int color=0; color<myMeshinfo.numberOfColors;color++)
+  for (int color=0; color<myInfo.numberOfColors;color++)
   {
-  LOOPHEAD( myMeshinfo.numberOfElementsByColor[color], eColor)
+  LOOPHEAD( myInfo.numberOfElementsByColor[color], eColor)
   int elementNumber=listOfElementsByColor(color,eColor);
   #else
-  LOOPHEAD( myMeshinfo.numberOfElements, elementNumber )
+  LOOPHEAD( myInfo.numberOfElements, elementNumber )
   #endif
 
   // start parallel section
@@ -90,18 +83,14 @@ void SEMsolver::computeOneStepNoInline(
   #endif
 
   // update pressure
-  LOOPHEAD( myMeshinfo.numberOfInteriorNodes, i )
+  LOOPHEAD( myInfo.numberOfInteriorNodes, i )
   int I=listOfInteriorNodes[i];
-  pnGlobal( I, i1 )=2*pnGlobal( I, i2 )-pnGlobal( I, i1 )-myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*yGlobal[I]/massMatrixGlobal[I];
+  pnGlobal( I, i1 )=2*pnGlobal( I, i2 )-pnGlobal( I, i1 )-myInfo.myTimeStep*myInfo.myTimeStep*yGlobal[I]/massMatrixGlobal[I];
   LOOPEND
 
   #ifdef SEM2D
   {
-    LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i )
-    ShGlobal[i]=0;
-    LOOPEND
-
-    LOOPHEAD( myMeshinfo.numberOfBoundaryFaces, iFace )
+    LOOPHEAD( myInfo.numberOfBoundaryFaces, iFace )
     //get ds
     float ds[6];
     float Sh[6];
@@ -119,11 +108,11 @@ void SEMsolver::computeOneStepNoInline(
     }
     LOOPEND
 
-    LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i )
+    LOOPHEAD( myInfo.numberOfBoundaryNodes, i )
     int I=listOfBoundaryNodes[i];
-    float invMpSh=1/(massMatrixGlobal[I]+myMeshinfo.myTimeStep*ShGlobal[i]*0.5);
-    float MmSh=massMatrixGlobal[I]-myMeshinfo.myTimeStep*ShGlobal[i]*0.5;
-    pnGlobal( I, i1 )=invMpSh*(2*massMatrixGlobal[I]*pnGlobal( I, i2 )-MmSh*pnGlobal( I, i1 )-myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*yGlobal[I]);
+    float invMpSh=1/(massMatrixGlobal[I]+myInfo.myTimeStep*ShGlobal[i]*0.5);
+    float MmSh=massMatrixGlobal[I]-myInfo.myTimeStep*ShGlobal[i]*0.5;
+    pnGlobal( I, i1 )=invMpSh*(2*massMatrixGlobal[I]*pnGlobal( I, i2 )-MmSh*pnGlobal( I, i1 )-myInfo.myTimeStep*myInfo.myTimeStep*yGlobal[I]);
     LOOPEND
   }
   #endif
@@ -139,7 +128,7 @@ void SEMsolver::computeOneStepInline(
                                 const int & nPointsPerElement,
                                 const int & i1,
                                 const int & i2,
-                                SEMmeshinfo & myMeshinfo,
+                                SEMinfo & myInfo,
                                 const arrayReal & RHS_Term,
                                 arrayReal const & PN_Global,
                                 const vectorInt & RHS_Element )
@@ -147,24 +136,24 @@ void SEMsolver::computeOneStepInline(
   CREATEVIEWS
 
   // update pressure @ boundaries;
-  LOOPHEAD( myMeshinfo.numberOfNodes, i )
+  LOOPHEAD( myInfo.numberOfNodes, i )
   massMatrixGlobal[i]=0;
   yGlobal[i]=0;
   LOOPEND
 
   // update pnGLobal with right hade side
-  LOOPHEAD( myMeshinfo.myNumberOfRHS, i )
+  LOOPHEAD( myInfo.myNumberOfRHS, i )
   int nodeRHS=globalNodesList( rhsElement[i], 0 );
-  pnGlobal( nodeRHS, i2 )+=myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm( i, timeSample );
+  pnGlobal( nodeRHS, i2 )+=myInfo.myTimeStep*myInfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm( i, timeSample );
   LOOPEND
 
   #ifdef SEM_MESHCOLOR
-  for (int color=0; color<myMeshinfo.numberOfColors;color++)
+  for (int color=0; color<myInfo.numberOfColors;color++)
   {
-  LOOPHEAD( myMeshinfo.numberOfElementsByColor[color], eColor)
+  LOOPHEAD( myInfo.numberOfElementsByColor[color], eColor)
   int elementNumber=listOfElementsByColor(color,eColor);
   #else
-  LOOPHEAD( myMeshinfo.numberOfElements, elementNumber )
+  LOOPHEAD( myInfo.numberOfElements, elementNumber )
   #endif
 
   // start parallel section
@@ -491,18 +480,18 @@ void SEMsolver::computeOneStepInline(
   #endif
 
   // update pressure
-  LOOPHEAD( myMeshinfo.numberOfInteriorNodes, i )
+  LOOPHEAD( myInfo.numberOfInteriorNodes, i )
   int I=listOfInteriorNodes[i];
-  pnGlobal( I, i1 )=2*pnGlobal( I, i2 )-pnGlobal( I, i1 )-myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*yGlobal[I]/massMatrixGlobal[I];
+  pnGlobal( I, i1 )=2*pnGlobal( I, i2 )-pnGlobal( I, i1 )-myInfo.myTimeStep*myInfo.myTimeStep*yGlobal[I]/massMatrixGlobal[I];
   LOOPEND
 
   #ifdef SEM2D
   {
-    LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i )
+    LOOPHEAD( myInfo.numberOfBoundaryNodes, i )
     ShGlobal[i]=0;
     LOOPEND
 
-    LOOPHEAD( myMeshinfo.numberOfBoundaryFaces, iFace )
+    LOOPHEAD( myInfo.numberOfBoundaryFaces, iFace )
     //get ds
     float ds[6];
     float Sh[6];
@@ -541,11 +530,11 @@ void SEMsolver::computeOneStepInline(
     }
     LOOPEND
 
-    LOOPHEAD( myMeshinfo.numberOfBoundaryNodes, i )
+    LOOPHEAD( myInfo.numberOfBoundaryNodes, i )
     int I=listOfBoundaryNodes[i];
-    float invMpSh=1/(massMatrixGlobal[I]+myMeshinfo.myTimeStep*ShGlobal[i]*0.5);
-    float MmSh=massMatrixGlobal[I]-myMeshinfo.myTimeStep*ShGlobal[i]*0.5;
-    pnGlobal( I, i1 )=invMpSh*(2*massMatrixGlobal[I]*pnGlobal( I, i2 )-MmSh*pnGlobal( I, i1 )-myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*yGlobal[I]);
+    float invMpSh=1/(massMatrixGlobal[I]+myInfo.myTimeStep*ShGlobal[i]*0.5);
+    float MmSh=massMatrixGlobal[I]-myInfo.myTimeStep*ShGlobal[i]*0.5;
+    pnGlobal( I, i1 )=invMpSh*(2*massMatrixGlobal[I]*pnGlobal( I, i2 )-MmSh*pnGlobal( I, i1 )-myInfo.myTimeStep*myInfo.myTimeStep*yGlobal[I]);
     LOOPEND
   }
   #endif
@@ -572,18 +561,18 @@ void SEMsolver::outputPnValues( SEMmesh mesh,
 }
 
 
-void SEMsolver::initFEarrays( SEMmeshinfo & myMeshinfo, SEMmesh mesh )
+void SEMsolver::initFEarrays( SEMinfo & myInfo, SEMmesh mesh )
 {
   //interior elements
-  mesh.globalNodesList( myMeshinfo.numberOfElements, globalNodesList );
-  mesh.getListOfInteriorNodes( myMeshinfo.numberOfInteriorNodes, listOfInteriorNodes );
-  mesh.nodesCoordinates( myMeshinfo.numberOfNodes, globalNodesCoords );
+  mesh.globalNodesList( myInfo.numberOfElements, globalNodesList );
+  mesh.getListOfInteriorNodes( myInfo.numberOfInteriorNodes, listOfInteriorNodes );
+  mesh.nodesCoordinates( myInfo.numberOfNodes, globalNodesCoords );
   // boundary elements
-  mesh.getListOfBoundaryNodes( myMeshinfo.numberOfBoundaryNodes, listOfBoundaryNodes );
+  mesh.getListOfBoundaryNodes( myInfo.numberOfBoundaryNodes, listOfBoundaryNodes );
   mesh.getBoundaryFacesInfos( faceInfos );
   mesh.getLocalFaceNodeToGlobalFaceNode( localFaceNodeToGlobalFaceNode );
   // get model
-  mesh.getModel( myMeshinfo.numberOfElements, model );
+  mesh.getModel( myInfo.numberOfElements, model );
   // get quadrature points
   myQk.gaussLobattoQuadraturePoints( order, quadraturePoints );
   // get gauss-lobatto weights
@@ -594,35 +583,35 @@ void SEMsolver::initFEarrays( SEMmeshinfo & myMeshinfo, SEMmesh mesh )
  
   // sort element by color
   #ifdef SEM_MESHCOLOR
-  mesh.sortElementsByColor(myMeshinfo.numberOfElementsByColor,listOfElementsByColor);
-  printf("number of elements color red %d\n", myMeshinfo.numberOfElementsByColor[0]);
-  printf("number of elements color green %d\n", myMeshinfo.numberOfElementsByColor[1]);
-  printf("number of elements color blue %d\n", myMeshinfo.numberOfElementsByColor[2]);
-  printf("number of elements color yellow %d\n", myMeshinfo.numberOfElementsByColor[3]);
+  mesh.sortElementsByColor(myInfo.numberOfElementsByColor,listOfElementsByColor);
+  printf("number of elements color red %d\n", myInfo.numberOfElementsByColor[0]);
+  printf("number of elements color green %d\n", myInfo.numberOfElementsByColor[1]);
+  printf("number of elements color blue %d\n", myInfo.numberOfElementsByColor[2]);
+  printf("number of elements color yellow %d\n", myInfo.numberOfElementsByColor[3]);
   #endif
 
 }
 
-void SEMsolver::allocateFEarrays( SEMmeshinfo & myMeshinfo )
+void SEMsolver::allocateFEarrays( SEMinfo & myInfo )
 {
   //interior elements
   cout<<"Allocate host memory for arrays in the solver ..."<<endl;
-  globalNodesList=allocateArray2D< arrayInt >( myMeshinfo.numberOfElements, myMeshinfo.numberOfPointsPerElement, "globalNodesList" );
-  listOfInteriorNodes=allocateVector< vectorInt >( myMeshinfo.numberOfInteriorNodes, "listOfInteriorNodes" );
-  globalNodesCoords=allocateArray2D< arrayReal >( myMeshinfo.numberOfNodes, 3, "globalNodesCoords" );
-  listOfBoundaryNodes=allocateVector< vectorInt >( myMeshinfo.numberOfBoundaryNodes, "listOfBoundaryNodes" );
-  faceInfos=allocateArray2D< arrayInt >( myMeshinfo.numberOfBoundaryFaces, 2+(order+1), "faceInfos" );
-  localFaceNodeToGlobalFaceNode=allocateArray2D< arrayInt >( myMeshinfo.numberOfBoundaryFaces, order+1, "localFaceNodeToGlobalFaceNode" );
-  model=allocateVector< vectorReal >( myMeshinfo.numberOfElements, "model" );
+  globalNodesList=allocateArray2D< arrayInt >( myInfo.numberOfElements, myInfo.numberOfPointsPerElement, "globalNodesList" );
+  listOfInteriorNodes=allocateVector< vectorInt >( myInfo.numberOfInteriorNodes, "listOfInteriorNodes" );
+  globalNodesCoords=allocateArray2D< arrayReal >( myInfo.numberOfNodes, 3, "globalNodesCoords" );
+  listOfBoundaryNodes=allocateVector< vectorInt >( myInfo.numberOfBoundaryNodes, "listOfBoundaryNodes" );
+  faceInfos=allocateArray2D< arrayInt >( myInfo.numberOfBoundaryFaces, 2+(order+1), "faceInfos" );
+  localFaceNodeToGlobalFaceNode=allocateArray2D< arrayInt >( myInfo.numberOfBoundaryFaces, order+1, "localFaceNodeToGlobalFaceNode" );
+  model=allocateVector< vectorReal >( myInfo.numberOfElements, "model" );
   quadraturePoints=allocateVector< vectorDouble >( order+1, "quadraturePoints" );
   weights=allocateVector< vectorDouble >( order+1, "weights" );
   basisFunction1D=allocateArray2D< arrayDouble >( order+1, order+1, "basisFunction1D" );
   derivativeBasisFunction1D=allocateArray2D< arrayDouble >( order+1, order+1, "derivativeBasisFunction1D" );
   //shared arrays
-  massMatrixGlobal=allocateVector< vectorReal >( myMeshinfo.numberOfNodes, "massMatrixGlobal" );
-  yGlobal=allocateVector< vectorReal >( myMeshinfo.numberOfNodes, "yGlobal" );
-  ShGlobal=allocateVector< vectorReal >( myMeshinfo.numberOfBoundaryNodes, "ShGlobal" );
+  massMatrixGlobal=allocateVector< vectorReal >( myInfo.numberOfNodes, "massMatrixGlobal" );
+  yGlobal=allocateVector< vectorReal >( myInfo.numberOfNodes, "yGlobal" );
+  ShGlobal=allocateVector< vectorReal >( myInfo.numberOfBoundaryNodes, "ShGlobal" );
 
   //allocate list of elements by color
-  listOfElementsByColor=allocateArray2D<arrayInt>(myMeshinfo.numberOfColors, myMeshinfo.numberMaxOfElementsByColor, "listOfElemByColor");
+  listOfElementsByColor=allocateArray2D<arrayInt>(myInfo.numberOfColors, myInfo.numberMaxOfElementsByColor, "listOfElemByColor");
 }

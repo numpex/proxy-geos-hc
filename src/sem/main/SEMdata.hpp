@@ -1,4 +1,4 @@
-struct SEMmeshinfo
+struct SEMinfo
 {
   // get infos from mesh
   int numberOfNodes;
@@ -13,6 +13,14 @@ struct SEMmeshinfo
   const int myOrderNumber=3;
   const float myTimeStep=0.001;
   const int nPointsPerElement = pow((myOrderNumber+1), DIMENSION );
+
+  const float f0=10.;
+  const float myTimeMax=1.;
+  const int sourceOrder=1;
+
+  int myNumSamples=myTimeMax/myTimeStep;
+  int myElementSource;
+
   const int numberOfColors=4;
   int numberOfElementsByColor[4];
 };

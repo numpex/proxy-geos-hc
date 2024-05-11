@@ -49,7 +49,7 @@ option (PRINT_ALLOC_INFO "printout memory allocation info" OFF)
 #------------------------------------------------------
 # Enable selection of inline or noninline for SEM-proxy
 #------------------------------------------------------
-option (USE_SEM_INLINE "selection of inline or noninline for SEM-proxy" OFF)
+option (USE_SEM_INLINE "selection of inline or noninline for SEM-proxy" ON)
 
 #---------------------------------------------------
 # Option to test SEM-proxy 2D case (default is 3D)

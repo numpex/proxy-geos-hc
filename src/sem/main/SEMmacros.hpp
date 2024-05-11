@@ -53,7 +53,7 @@
 #if defined (USE_RAJA)
   #define FENCE\
   if(timeSample%50==0)\
-     RAJA::forall< RAJA::seq_exec>( RAJA::RangeSegment( 0, myMeshinfo.numberOfNodes ), [pnGlobal] LVARRAY_HOST_DEVICE ( int i ){});
+     RAJA::forall< RAJA::seq_exec>( RAJA::RangeSegment( 0, myInfo.numberOfNodes ), [pnGlobal] LVARRAY_HOST_DEVICE ( int i ){});
 #elif defined (USE_KOKKOS)
   #define FENCE\
   if(timeSample%50==0) Kokkos::fence();
