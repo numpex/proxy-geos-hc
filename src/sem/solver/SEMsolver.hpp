@@ -96,5 +96,7 @@ private:
   vectorReal massMatrixGlobal;
   vectorReal yGlobal;
   vectorReal ShGlobal;
+
+  arrayInt listOfElementsByColor;
 };
 #endif //SEM_SOLVER_HPP_

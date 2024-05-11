@@ -45,7 +45,15 @@ void SEMsolver::computeOneStepNoInline(
   pnGlobal( nodeRHS, i2 )+=myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm( i, timeSample );
   LOOPEND
 
+  #ifdef SEM_MESHCOLOR
+  for (int color=0; color<myMeshinfo.numberOfColors;color++)
+  {
+  LOOPHEAD( myMeshinfo.numberOfElementsByColor[color], eColor)
+  int elementNumber=listOfElementsByColor(color,eColor);
+  #else
   LOOPHEAD( myMeshinfo.numberOfElements, elementNumber )
+  #endif
+
   // start parallel section
   float B[ROW][COL];
   float R[ROW];
@@ -77,6 +85,9 @@ void SEMsolver::computeOneStepNoInline(
   }
 
   LOOPEND
+  #ifdef SEM_MESHCOLOR
+  }
+  #endif
 
   // update pressure
   LOOPHEAD( myMeshinfo.numberOfInteriorNodes, i )
@@ -147,7 +158,15 @@ void SEMsolver::computeOneStepInline(
   pnGlobal( nodeRHS, i2 )+=myMeshinfo.myTimeStep*myMeshinfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm( i, timeSample );
   LOOPEND
 
+  #ifdef SEM_MESHCOLOR
+  for (int color=0; color<myMeshinfo.numberOfColors;color++)
+  {
+  LOOPHEAD( myMeshinfo.numberOfElementsByColor[color], eColor)
+  int elementNumber=listOfElementsByColor(color,eColor);
+  #else
   LOOPHEAD( myMeshinfo.numberOfElements, elementNumber )
+  #endif
+
   // start parallel section
   float B[ROW][COL];
   float R[ROW];
@@ -467,6 +486,9 @@ void SEMsolver::computeOneStepInline(
   }
 
   LOOPEND
+  #ifdef SEM_MESHCOLOR
+  }
+  #endif
 
   // update pressure
   LOOPHEAD( myMeshinfo.numberOfInteriorNodes, i )
@@ -569,6 +591,15 @@ void SEMsolver::initFEarrays( SEMmeshinfo & myMeshinfo, SEMmesh mesh )
   // get basis function and corresponding derivatives
   myQk.getBasisFunction1D( order, quadraturePoints, basisFunction1D );
   myQk.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
+ 
+  // sort element by color
+  #ifdef SEM_MESHCOLOR
+  mesh.sortElementsByColor(myMeshinfo.numberOfElementsByColor,listOfElementsByColor);
+  printf("number of elements color red %d\n", myMeshinfo.numberOfElementsByColor[0]);
+  printf("number of elements color green %d\n", myMeshinfo.numberOfElementsByColor[1]);
+  printf("number of elements color blue %d\n", myMeshinfo.numberOfElementsByColor[2]);
+  printf("number of elements color yellow %d\n", myMeshinfo.numberOfElementsByColor[3]);
+  #endif
 
 }
 
@@ -591,4 +622,7 @@ void SEMsolver::allocateFEarrays( SEMmeshinfo & myMeshinfo )
   massMatrixGlobal=allocateVector< vectorReal >( myMeshinfo.numberOfNodes, "massMatrixGlobal" );
   yGlobal=allocateVector< vectorReal >( myMeshinfo.numberOfNodes, "yGlobal" );
   ShGlobal=allocateVector< vectorReal >( myMeshinfo.numberOfBoundaryNodes, "ShGlobal" );
+
+  //allocate list of elements by color
+  listOfElementsByColor=allocateArray2D<arrayInt>(myMeshinfo.numberOfColors, myMeshinfo.numberMaxOfElementsByColor, "listOfElemByColor");
 }

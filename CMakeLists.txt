@@ -54,8 +54,12 @@ option (USE_SEM_INLINE "selection of inline or noninline for SEM-proxy" OFF)
 #---------------------------------------------------
 # Option to test SEM-proxy 2D case (default is 3D)
 #---------------------------------------------------
-option (SEM2D "test SEM-proxy 2D case" ON)
+option (SEM2D "SEM-proxy 2D or 3D case" ON)
 
+#---------------------------------------------------------
+# Option to use coloring scheme to avoid atomic operations
+#---------------------------------------------------------
+option (SEM_MESHCOLOR "use coloring scheme" OFF)
 
 add_subdirectory(src)
 

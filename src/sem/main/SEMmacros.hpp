@@ -31,7 +31,8 @@
         arrayIntView localFaceNodeToGlobalFaceNode=this->localFaceNodeToGlobalFaceNode.toView(); \
         vectorDoubleView weights=this->weights.toView(); \
         arrayRealView globalNodesCoords=this->globalNodesCoords.toView(); \
-        arrayDoubleView derivativeBasisFunction1D=this->derivativeBasisFunction1D.toView();
+        arrayDoubleView derivativeBasisFunction1D=this->derivativeBasisFunction1D.toView(); \
+        arrayIntView listOfElementsByColor=this->listOfElementsByColor.toView();
 #else
 #define CREATEVIEWS
 #define RHS_Term rhsTerm
@@ -40,19 +41,27 @@
 #endif
 
 // define atomic add operation
-#if defined (USE_RAJA)
+#if defined(USE_RAJA) && !defined(SEM_MESHCOLOR)
   #define ATOMICADD(ADD1,ADD2) RAJA::atomicAdd< deviceAtomicPolicy >(&ADD1,ADD2);
+#elif defined (USE_KOKKOS) && !defined(SEM_MESHCOLOR)
+  #define ATOMICADD(ADD1,ADD2) Kokkos::atomic_add(&ADD1,ADD2)
+#else
+  #define ATOMICADD(ADD1,ADD2) ADD1+=ADD2
+#endif
+
+// define fence
+#if defined (USE_RAJA)
   #define FENCE\
   if(timeSample%50==0)\
      RAJA::forall< RAJA::seq_exec>( RAJA::RangeSegment( 0, myMeshinfo.numberOfNodes ), [pnGlobal] LVARRAY_HOST_DEVICE ( int i ){});
 #elif defined (USE_KOKKOS)
-  #define ATOMICADD(ADD1,ADD2) Kokkos::atomic_add(&ADD1,ADD2)
   #define FENCE\
   if(timeSample%50==0) Kokkos::fence();
 #else
-  #define ATOMICADD(ADD1,ADD2) ADD1+=ADD2
   #define FENCE 
 #endif
+
+
 
 #if defined (USE_SEM_INLINE)
    #define computeOneStep computeOneStepInline
