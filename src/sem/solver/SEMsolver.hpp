@@ -74,7 +74,6 @@ private:
   arrayInt globalNodesList;
   arrayReal globalNodesCoords;
   vectorInt listOfInteriorNodes;
-  vectorInt listOfIntVieweriorNodes;
   vectorInt listOfBoundaryNodes;
   arrayInt faceInfos;
   arrayInt localFaceNodeToGlobalFaceNode;
@@ -87,7 +86,6 @@ private:
   vectorDouble weights;
 
   // get basis function and corresponding derivatives
-  arrayDouble basisFunction1D;
   arrayDouble derivativeBasisFunction1D;
 
   //shared arrays

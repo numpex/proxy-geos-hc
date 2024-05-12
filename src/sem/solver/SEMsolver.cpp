@@ -32,6 +32,11 @@ void SEMsolver::computeOneStepNoInline(
 {
   CREATEVIEWS
 
+  LOOPHEAD( myInfo.numberOfNodes, i )
+  massMatrixGlobal[i]=0;
+  yGlobal[i]=0;
+  LOOPEND
+
   // update pnGLobal with right hade side
   LOOPHEAD( myInfo.myNumberOfRHS, i )
   int nodeRHS=globalNodesList( rhsElement[i], 0 );
@@ -90,6 +95,10 @@ void SEMsolver::computeOneStepNoInline(
 
   #ifdef SEM2D
   {
+    LOOPHEAD( myInfo.numberOfBoundaryNodes, i )
+    ShGlobal[i]=0;
+    LOOPEND
+
     LOOPHEAD( myInfo.numberOfBoundaryFaces, iFace )
     //get ds
     float ds[6];
@@ -578,7 +587,6 @@ void SEMsolver::initFEarrays( SEMinfo & myInfo, SEMmesh mesh )
   // get gauss-lobatto weights
   myQk.gaussLobattoQuadratureWeights( order, weights );
   // get basis function and corresponding derivatives
-  myQk.getBasisFunction1D( order, quadraturePoints, basisFunction1D );
   myQk.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
  
   // sort element by color
@@ -605,13 +613,14 @@ void SEMsolver::allocateFEarrays( SEMinfo & myInfo )
   model=allocateVector< vectorReal >( myInfo.numberOfElements, "model" );
   quadraturePoints=allocateVector< vectorDouble >( order+1, "quadraturePoints" );
   weights=allocateVector< vectorDouble >( order+1, "weights" );
-  basisFunction1D=allocateArray2D< arrayDouble >( order+1, order+1, "basisFunction1D" );
   derivativeBasisFunction1D=allocateArray2D< arrayDouble >( order+1, order+1, "derivativeBasisFunction1D" );
   //shared arrays
   massMatrixGlobal=allocateVector< vectorReal >( myInfo.numberOfNodes, "massMatrixGlobal" );
   yGlobal=allocateVector< vectorReal >( myInfo.numberOfNodes, "yGlobal" );
   ShGlobal=allocateVector< vectorReal >( myInfo.numberOfBoundaryNodes, "ShGlobal" );
 
+  #ifdef SEM_MESHCOLOR
   //allocate list of elements by color
   listOfElementsByColor=allocateArray2D<arrayInt>(myInfo.numberOfColors, myInfo.numberMaxOfElementsByColor, "listOfElemByColor");
+  #endif
 }

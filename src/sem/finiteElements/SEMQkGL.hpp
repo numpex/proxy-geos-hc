@@ -28,7 +28,6 @@ public:
   vector< double >  derivativeShapeFunction1D( int order, double xi ) const;
 
   // get  1d shape Functions and derivatives for all quadrature points
-  void  getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble const & basisFunction1D ) const;
   void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints,
                                      arrayDouble const & derivativeBasisFunction1D ) const;
   // compute B and M

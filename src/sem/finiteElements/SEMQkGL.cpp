@@ -284,21 +284,6 @@ vector< double > SEMQkGL::derivativeShapeFunction1D( int order, double xi ) cons
   return derivativeShapeFunction;
 }
 
-void SEMQkGL::getBasisFunction1D( int order, vectorDouble const & quadraturePoints, arrayDouble const & basisFunction1D ) const
-{
-  // loop over quadrature points
-  for( int i = 0; i < order+1; i++ )
-  {
-    std::vector< double > tmp( order+1 );
-    //extract all basis functions  for current quadrature point
-    tmp=shapeFunction1D( order, quadraturePoints[i] );
-    for( int j=0; j<order+1; j++ )
-    {
-      basisFunction1D( j, i )=tmp[j];
-    }
-  }
-}
-
 void SEMQkGL::getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints,
                                             arrayDouble const & derivativeBasisFunction1D ) const
 {
