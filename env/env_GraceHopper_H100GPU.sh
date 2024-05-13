@@ -10,6 +10,8 @@ export KOKKOS_DIR=${SEM_TPL_ROOT_DIR}/kokkos/lib64/cmake/Kokkos
 export KOKKOS_INCLUDE_DIR=${SEM_TPL_ROOT_DIR}/kokkos/include
 export CUDA_ROOT=/usr/local/cuda-12.4
 
+export OMP_PROC_BIND=spread; export OMP_PLACES=threads
+
 # for kokkos: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON -DARM=ON .. ; make 
 # for raja: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON -DARM=ON .. ; make 
 # for omp on CPU:  cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON -DARM=ON .. ; make

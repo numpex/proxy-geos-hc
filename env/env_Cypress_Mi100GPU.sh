@@ -9,6 +9,9 @@ export UMPIRE_DIR=${SEM_TPL_ROOT_DIR}/chai/lib64/cmake/umpire/
 export KOKKOS_DIR=${SEM_TPL_ROOT_DIR}/kokkos/lib64/cmake/Kokkos
 export KOKKOS_INCLUDE_DIR=${SEM_TPL_ROOT_DIR}/kokkos/include
 
+export OMP_PROC_BIND=spread; export OMP_PLACES=threads
+export HSA_XNACK=1;
+
 # for kokkos: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_HIP=ON .. ; make 
 # for raja: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_HIP=ON .. ; make 
 # for omp on CPU:  cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON .. ; make

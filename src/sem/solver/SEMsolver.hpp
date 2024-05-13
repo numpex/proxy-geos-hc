@@ -32,8 +32,7 @@ public:
    * init all FE components for computing mass and stiffness matrices
    */
 
-  void computeOneStepNoInline ( 
-                       const int & timeSample,
+  void computeOneStep ( const int & timeSample,
                         const int & order,
                         const int & nPointsPerElement,
                         const int & i1,
@@ -43,18 +42,6 @@ public:
                         arrayReal const & myPnGlobal,
                         const vectorInt & myRhsElement );
 
-  void computeOneStepInline ( 
-                        const int & timeSample,
-                        const int & order,
-                        const int & nPointsPerElement,
-                        const int & i1,
-                        const int & i2,
-                        SEMinfo & myInfo,
-                        const arrayReal & myRHSTerm,
-                        arrayReal const & myPnGlobal,
-                        const vectorInt & myRhsElement );
-
- 
   void outputPnValues ( SEMmesh mesh,
                         const int & indexTimeStep,
                         int & i1,

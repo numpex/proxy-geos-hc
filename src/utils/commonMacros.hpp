@@ -2,11 +2,11 @@
 
 // define Macros for function type
 #if defined (USE_RAJA)
-  #define PROXY_HOST_DEVICE LVARRAY_HOST_DEVICE
+  #define PROXY_HOST_DEVICE LVARRAY_HOST_DEVICE LVARRAY_FORCE_INLINE
 #elif defined (USE_KOKKOS)
-  #define PROXY_HOST_DEVICE KOKKOS_FUNCTION 
+  #define PROXY_HOST_DEVICE KOKKOS_INLINE_FUNCTION 
 #else
-  #define PROXY_HOST_DEVICE
+  #define PROXY_HOST_DEVICE 
 #endif
 
 #if defined (USE_RAJA)

@@ -14,4 +14,6 @@ export OMP_PROC_BIND=spread; export OMP_PLACES=threads
 
 # for kokkos: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON .. ; make install
 # for raja: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON .. ; make install
+# for omp on CPU:  cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON .. ; make
+# for sequential mode on CPU:  cmake -DCMAKE_INSTALL_PREFIX=../install .. ; make
 
