@@ -7,10 +7,10 @@ source env/env_{system}.sh
 mkdir build; cd build
 
 # sem
-rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_VECTOR=ON .. ; make 
-rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_VECTOR=ON .. -DCMAKE_BUILD_TYPE=RelWithDebInfo .. ; make 
+rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install .. ; make 
+rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install .. -DCMAKE_BUILD_TYPE=RelWithDebInfo .. ; make 
 
-rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON -DUSE_VECTOR=ON .. ; make 
+rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON .. ; make 
 rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON .. ; make sem_Raja.exe
 rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON .. ; make sem_Kokkos.exe
 
@@ -19,7 +19,7 @@ rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DEN
 
 # fd
 
-rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON -DUSE_VECTOR=ON .. ; make 
+rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON .. ; make 
 rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON .. ; make fd_Raja.exe
 rm -rf ../build/* ; cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON .. ; make fd_Kokkos.exe
 
