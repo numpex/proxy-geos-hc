@@ -16,43 +16,43 @@
 
 #define MemSpace Kokkos::SharedSpace
 using ExecSpace = MemSpace::execution_space;
-using range_policy = Kokkos::RangePolicy<ExecSpace>;
+using range_policy = Kokkos::RangePolicy< ExecSpace >;
 
 //#define h_MemSpace Kokkos::HostSpace
 //using h_ExecSpace = h_MemSpace::execution_space;
 //using h_range_policy = Kokkos::RangePolicy<h_ExecSpace>;
 
 typedef Kokkos::LayoutLeft layout;
-typedef Kokkos::View<int*, layout, MemSpace>   vectorInt;
-typedef Kokkos::View<float*, layout, MemSpace>   vectorReal;
-typedef Kokkos::View<int**, layout, MemSpace>   arrayInt;
-typedef Kokkos::View<float**, layout, MemSpace>   arrayReal;
-typedef Kokkos::View<double***, layout, MemSpace>   array3DReal;
-typedef Kokkos::View<double**, layout, MemSpace>   arrayDouble;
-typedef Kokkos::View<double***, layout, MemSpace>   array3DDouble;
+typedef Kokkos::View< int *, layout, MemSpace >   vectorInt;
+typedef Kokkos::View< float *, layout, MemSpace >   vectorReal;
+typedef Kokkos::View< int * *, layout, MemSpace >   arrayInt;
+typedef Kokkos::View< float * *, layout, MemSpace >   arrayReal;
+typedef Kokkos::View< double * * *, layout, MemSpace >   array3DReal;
+typedef Kokkos::View< double * *, layout, MemSpace >   arrayDouble;
+typedef Kokkos::View< double * * *, layout, MemSpace >   array3DDouble;
 
 
-template<class T>
-  T allocateVector(int n1)
-  {
-     std::cout<<"allocate vector of size "<<n1<<std::endl;
-     T vect("v",n1);
-    return vect;
-  }
-template<class T>
-  T allocateArray2D(int n1, int n2)
-  {
-    std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
-    T array("a",n1, n2);
-    return array;
-  }
-template<class T>
-  T allocateArray3D(int n1, int n2, int n3)
-  {
-    std::cout<<"allocate array of size "<<n1<<" ,"<<n2<<" ,"<<n3<<std::endl;
-    T array("a",n1, n2, n3);
-    return array;
-  }
+template< class T >
+T allocateVector( int n1 )
+{
+  std::cout<<"allocate vector of size "<<n1<<std::endl;
+  T vect( "v", n1 );
+  return vect;
+}
+template< class T >
+T allocateArray2D( int n1, int n2 )
+{
+  std::cout<<"allocate array of size "<<n1<<", "<<n2<<std::endl;
+  T array( "a", n1, n2 );
+  return array;
+}
+template< class T >
+T allocateArray3D( int n1, int n2, int n3 )
+{
+  std::cout<<"allocate array of size "<<n1<<" ,"<<n2<<" ,"<<n3<<std::endl;
+  T array( "a", n1, n2, n3 );
+  return array;
+}
 
 struct model{
              vectorReal coef;
@@ -62,7 +62,7 @@ struct model{
             };
 int main( int argc, char *argv[] )
 {
-  Kokkos::initialize(argc,argv);
+  Kokkos::initialize( argc, argv );
   {
     const int n1=400;
     const int n2=400;
@@ -83,11 +83,11 @@ int main( int argc, char *argv[] )
     
 
  #pragma omp parallel for
-    for (int k=0; k<n3;k++)
+    for( int k=0; k<n3; k++ )
     {
-      for ( int j=0; j<n2;j++)
+      for( int j=0; j<n2; j++ )
       {
-        for ( int i=0; i<n1;i++)
+        for( int i=0; i<n1; i++ )
         {
           m.pnp1(i,j,k)=1;
           m.pn(i,j,k)=1;
@@ -102,11 +102,11 @@ int main( int argc, char *argv[] )
     m.coef(3)=1*dt*dt;
 
     Kokkos::Timer timer1;
-    for (int k=3; k<n3-3;k++)
+    for( int k=3; k<n3-3; k++ )
     {
-      for ( int j=3; j<n2-3;j++)
+      for( int j=3; j<n2-3; j++ )
       {
-        for ( int i=3; i<n1-3;i++)
+        for( int i=3; i<n1-3; i++ )
         {
 		m.pnp1(i,j,k)=(2. +8*m.coef(0))*m.pn(i,j,k)+m.coef(1)*(m.pn(i+1,j,k)+m.pn(i-1,j,k)+m.pn(i,j+1,k)+m.pn(i,j-1,k)+m.pn(i,j,k+1)+m.pn(i,j,k-1))
                              +m.coef(2)*(m.pn(i+2,j,k)+m.pn(i-2,j,k)+m.pn(i,j+2,k)+m.pn(i,j-2,k)+m.pn(i,j,k+2)+m.pn(i,j,k-2))
@@ -121,11 +121,11 @@ int main( int argc, char *argv[] )
     Kokkos::fence();
 
  #pragma omp parallel for
-    for (int k=0; k<n3;k++)
+    for( int k=0; k<n3; k++ )
     {
-      for ( int j=0; j<n2;j++)
+      for( int j=0; j<n2; j++ )
       {
-        for ( int i=0; i<n1;i++)
+        for( int i=0; i<n1; i++ )
         {
           m.pnp1(i,j,k)=1;
           m.pn(i,j,k)=1;
@@ -136,11 +136,11 @@ int main( int argc, char *argv[] )
 
     Kokkos::Timer timer2;
  #pragma omp parallel for
-    for (int k=3; k<n3-3;k++)
+    for( int k=3; k<n3-3; k++ )
     {
-      for ( int j=3; j<n2-3;j++)
+      for( int j=3; j<n2-3; j++ )
       {
-        for ( int i=3; i<n1-3;i++)
+        for( int i=3; i<n1-3; i++ )
         {
 		m.pnp1(i,j,k)=(2. +8*m.coef(0))*m.pn(i,j,k)+m.coef(1)*(m.pn(i+1,j,k)+m.pn(i-1,j,k)+m.pn(i,j+1,k)+m.pn(i,j-1,k)+m.pn(i,j,k+1)+m.pn(i,j,k-1))
                              +m.coef(2)*(m.pn(i+2,j,k)+m.pn(i-2,j,k)+m.pn(i,j+2,k)+m.pn(i,j-2,k)+m.pn(i,j,k+2)+m.pn(i,j,k-2))
@@ -155,11 +155,11 @@ int main( int argc, char *argv[] )
     Kokkos::fence();
 
  #pragma omp parallel for
-    for (int k=0; k<n3;k++)
+    for( int k=0; k<n3; k++ )
     {
-      for ( int j=0; j<n2;j++)
+      for( int j=0; j<n2; j++ )
       {
-        for ( int i=0; i<n1;i++)
+        for( int i=0; i<n1; i++ )
         {
           m.pnp1(i,j,k)=1;
           m.pn(i,j,k)=1;
@@ -169,20 +169,16 @@ int main( int argc, char *argv[] )
     }
     Kokkos::Timer timer3;
  #pragma omp parallel for collapse(3)
-    for (int k=3; k<n3-3;k++)
+    for( int k=3; k<n3-3; k++ )
     {
-      for ( int j=3; j<n2-3;j++)
+      for( int j=3; j<n2-3; j++ )
       {
-        for ( int i=3; i<n1-3;i++)
+        for( int i=3; i<n1-3; i++ )
         {
 		m.pnp1(i,j,k)=(2. +8*m.coef(0))*m.pn(i,j,k)+m.coef(1)*(m.pn(i+1,j,k)+m.pn(i-1,j,k)+m.pn(i,j+1,k)+m.pn(i,j-1,k)+m.pn(i,j,k+1)+m.pn(i,j,k-1))
                              +m.coef(2)*(m.pn(i+2,j,k)+m.pn(i-2,j,k)+m.pn(i,j+2,k)+m.pn(i,j-2,k)+m.pn(i,j,k+2)+m.pn(i,j,k-2))
                              +m.coef(3)*(m.pn(i+3,j,k)+m.pn(i-3,j,k)+m.pn(i,j+3,k)+m.pn(i,j-3,k)+m.pn(i,j,k+3)+m.pn(i,j,k-3))
 			     -m.pnm1(i,j,k);
-        }
-      }
-    }
-    double time3=timer3.seconds();
     printf("result 3 %f\n",m.pnp1(n1/2,n2/2,n3/2));
     std::cout << "Elapsed Time omp collapse  loop : "<<time3 <<" seconds.\n\n";
     Kokkos::fence();
@@ -195,11 +191,11 @@ int main( int argc, char *argv[] )
 	});
 
     Kokkos::Timer timer4;
-    Kokkos::parallel_for( n1 , KOKKOS_LAMBDA ( int i)
+    Kokkos::parallel_for( n1, KOKKOS_LAMBDA ( int i )
     {
-      for ( int j=3; j<n2-3;j++)
+      for( int j=3; j<n2-3; j++ )
       {
-        for ( int k=3; k<n3-3;k++)
+        for( int k=3; k<n3-3; k++ )
         {
 		m.pnp1(i,j,k)=(2. +8*m.coef(0))*m.pn(i,j,k)+m.coef(1)*(m.pn(i+1,j,k)+m.pn(i-1,j,k)+m.pn(i,j+1,k)+m.pn(i,j-1,k)+m.pn(i,j,k+1)+m.pn(i,j,k-1))
                              +m.coef(2)*(m.pn(i+2,j,k)+m.pn(i-2,j,k)+m.pn(i,j+2,k)+m.pn(i,j-2,k)+m.pn(i,j,k+2)+m.pn(i,j,k-2))
@@ -207,7 +203,7 @@ int main( int argc, char *argv[] )
 			     -m.pnm1(i,j,k);
         }
       }
-    });
+    } );
     Kokkos::fence();
     double time4=timer4.seconds();
     printf("result 4 %f\n",m.pnp1(n1/2,n2/2,n3/2));
@@ -221,7 +217,7 @@ int main( int argc, char *argv[] )
 	});
 
     Kokkos::Timer timer5;
-    Kokkos::parallel_for(Kokkos::MDRangePolicy<Kokkos::Rank<3>> ({3,3,3},{n1-3,n2-3,n3-3}) , KOKKOS_LAMBDA ( int i,int j, int k)
+    Kokkos::parallel_for( Kokkos::MDRangePolicy< Kokkos::Rank< 3 > >( {3, 3, 3}, {n1-3, n2-3, n3-3} ), KOKKOS_LAMBDA ( int i, int j, int k )
     {
 		m.pnp1(i,j,k)=(2. +8*m.coef(0))*m.pn(i,j,k)+m.coef(1)*(m.pn(i+1,j,k)+m.pn(i-1,j,k)+m.pn(i,j+1,k)+m.pn(i,j-1,k)+m.pn(i,j,k+1)+m.pn(i,j,k-1))
                              +m.coef(2)*(m.pn(i+2,j,k)+m.pn(i-2,j,k)+m.pn(i,j+2,k)+m.pn(i,j-2,k)+m.pn(i,j,k+2)+m.pn(i,j,k-2))

@@ -2,7 +2,11 @@
 # Setup for SEM_EXECUTABLE
 ################################
 
-set (SEM_EXECUTABLE "sem_${SOLVER}.exe" CACHE PATH "" FORCE)
+if(NOT DEFINED DEVICE)
+  set (SEM_EXECUTABLE "sem_${SOLVER}.exe" CACHE PATH "" FORCE)
+else()
+  set (SEM_EXECUTABLE "sem_${SOLVER}_${DEVICE}.exe" CACHE PATH "" FORCE)
+endif()
 
 message ( "\n---------------------------------------------------------------------------------" )
 message ( "-- The Current Program Model Used is: ${SOLVER}")

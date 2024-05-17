@@ -10,9 +10,10 @@ export KOKKOS_DIR=${SEM_TPL_ROOT_DIR}/kokkos/lib64/cmake/Kokkos
 export KOKKOS_INCLUDE_DIR=${SEM_TPL_ROOT_DIR}/kokkos/include
 export CUDA_ROOT=/hrtc/apps/cuda/12.0.76/x86_64/centos8
 
-# don't forget to change CMakeLists.txt 
-# option (X86_cypress "Compilation on Cypress Cluster" ON)
+export OMP_PROC_BIND=spread; export OMP_PLACES=threads
 
 # for kokkos: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON .. ; make install
 # for raja: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON .. ; make install
+# for omp on CPU:  cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON .. ; make
+# for sequential mode on CPU:  cmake -DCMAKE_INSTALL_PREFIX=../install .. ; make
 

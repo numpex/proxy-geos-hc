@@ -1,8 +1,8 @@
 #include "SEMmesh.hpp"
 
-SEMmesh::SEMmesh( const int & ex_in, const int & ey_in, const int & ez_in,  
-		        const float & lx_in, const float & ly_in,const float & lz_in,
-                        const int & order_in)
+SEMmesh::SEMmesh( const int & ex_in, const int & ey_in, const int & ez_in,
+                  const float & lx_in, const float & ly_in, const float & lz_in,
+                  const int & order_in )
 {
   orderx=order_in;
   ordery=order_in;
@@ -28,14 +28,14 @@ SEMmesh::SEMmesh( const int & ex_in, const int & ey_in, const int & ez_in,
 int SEMmesh::getNumberOfNodes() const
 {
   int numberOfNodes=(ex*orderx+1)*(ey*ordery+1)*(ez*orderz+1);
-  printf("number of nodes %d\n",numberOfNodes);
+  printf( "Number of nodes: %d\n", numberOfNodes );
   return numberOfNodes;
 }
 
 int SEMmesh::getNumberOfElements() const
 {
   int numberOfElements=((ey==0)?ex*ez:ex*ey*ez);
-  printf("number of element %d\n",numberOfElements);
+  printf( "Number of elements: %d\n", numberOfElements );
   return numberOfElements;
 }
 
@@ -78,10 +78,10 @@ int SEMmesh::getDz() const
 {return hz;}
 
 //get coord in one direction
-std::vector<float> SEMmesh::getCoordInOneDirection(const int & order,const int & nCoord, const int & h, const int & nElement) const
+std::vector< float > SEMmesh::getCoordInOneDirection( const int & order, const int & nCoord, const int & h, const int & nElement ) const
 {
-  std::vector<float> coord( nCoord );
-  std::vector<float> xi( order+1 );
+  std::vector< float > coord( nCoord );
+  std::vector< float > xi( order+1 );
   switch( order )
   {
     case 1:
@@ -139,13 +139,13 @@ std::vector<float> SEMmesh::getCoordInOneDirection(const int & order,const int &
 // Initialize nodal coordinates.
 void SEMmesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const
 {
-  std::vector<float> coordX( nx );
-  std::vector<float> coordY( ny );
-  std::vector<float> coordZ( nz );
-  
-  coordX=getCoordInOneDirection(order,nx,hx,ex);
-  coordY=getCoordInOneDirection(order,ny,hy,ey);
-  coordZ=getCoordInOneDirection(order,nz,hz,ez);
+  std::vector< float > coordX( nx );
+  std::vector< float > coordY( ny );
+  std::vector< float > coordZ( nz );
+
+  coordX=getCoordInOneDirection( order, nx, hx, ex );
+  coordY=getCoordInOneDirection( order, ny, hy, ey );
+  coordZ=getCoordInOneDirection( order, nz, hz, ez );
 
   for( int k=0; k<ny; k++ )
   {
@@ -153,10 +153,10 @@ void SEMmesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoord
     {
       for( int i=0; i<nx; i++ )
       {
-        nodeCoords(i+nx*j+k*nx*nz,0)=coordX[i];
-        nodeCoords(i+nx*j+k*nx*nz,1)=coordZ[j];
-        nodeCoords(i+nx*j+k*nx*nz,2)=coordY[k];
-	//printf("i=%d,j=%d,k=%d, n=%d, X %lf,Z %lf,Y %lf\n",i,j,k,i+nx*j+k*nx*nz,coordX[i],coordZ[j],coordY[k]);
+        nodeCoords( i+nx*j+k*nx*nz, 0 )=coordX[i];
+        nodeCoords( i+nx*j+k*nx*nz, 1 )=coordZ[j];
+        nodeCoords( i+nx*j+k*nx*nz, 2 )=coordY[k];
+        //printf("i=%d,j=%d,k=%d, n=%d, X %lf,Z %lf,Y %lf\n",i,j,k,i+nx*j+k*nx*nz,coordX[i],coordZ[j],coordY[k]);
       }
     }
   }
@@ -165,30 +165,30 @@ void SEMmesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoord
 //  list of global nodes ( vertices) for each element
 void SEMmesh::globalNodesList( const int & numberOfElements, arrayInt & nodesList ) const
 {
-   for( int j=0; j<((ey==0)?1:ey); j++ )
-   {
-     for( int k=0; k<ez; k++ )
-     {
-       for( int i=0; i<ex; i++ )
-       {
-          int n0=i+k*ex+j*ex*ez;
-          int offset=i*order+k*order*nx+j*order*nx*nz;
-          for( int m=0; m<((ey==0)?1:order+1); m++ )
+  for( int j=0; j<((ey==0)?1:ey); j++ )
+  {
+    for( int k=0; k<ez; k++ )
+    {
+      for( int i=0; i<ex; i++ )
+      {
+        int n0=i+k*ex+j*ex*ez;
+        int offset=i*order+k*order*nx+j*order*nx*nz;
+        for( int m=0; m<((ey==0)?1:order+1); m++ )
+        {
+          for( int n=0; n<order+1; n++ )
           {
-             for( int n=0; n<order+1; n++ )
-             {
-               for( int l=0; l<order+1; l++ )
-               {
-                 int dofLocal=l+n*(order+1)+m*(order+1)*(order+1);
-                 int dofGlobal=offset+l+n*nx+m*nx*nz;
-                 nodesList(n0,dofLocal)=dofGlobal;
-		 //if(n0==7)printf("offset=%d dofLocal=%d dofGlobal=%d\n",offset,dofLocal,dofGlobal);
-               }
-             }
+            for( int l=0; l<order+1; l++ )
+            {
+              int dofLocal=l+n*(order+1)+m*(order+1)*(order+1);
+              int dofGlobal=offset+l+n*nx+m*nx*nz;
+              nodesList( n0, dofLocal )=dofGlobal;
+              //if(n0==7)printf("offset=%d dofLocal=%d dofGlobal=%d\n",offset,dofLocal,dofGlobal);
+            }
           }
         }
       }
-   }
+    }
+  }
 }
 
 
@@ -210,15 +210,15 @@ int SEMmesh::Itoij( const int & I, int & i, int & j ) const
 }
 
 // project vector node to grid
-std::vector<std::vector<float>> SEMmesh::projectToGrid( const int numberOfNodes, const std::vector<float> inputVector ) const
+std::vector< std::vector< float > > SEMmesh::projectToGrid( const int numberOfNodes, const std::vector< float > inputVector ) const
 {
-  std::vector<vector<float>> grid( nx,std::vector<float> (nz) );
+  std::vector< vector< float > > grid( nx, std::vector< float >( nz ));
   int i, j;
-  cout<< " In projecToGrid numberOfNodes="<<numberOfNodes<<endl;
+  //cout<< " In projecToGrid numberOfNodes="<<numberOfNodes<<endl;
   for( int node=0; node<numberOfNodes; node++ )
   {
-     Itoij( node, i, j );
-     grid[i][j]=inputVector[node];
+    Itoij( node, i, j );
+    grid[i][j]=inputVector[node];
   }
   return grid;
 }
@@ -249,34 +249,34 @@ int SEMmesh::getElementNumberFromPoints( const float & x, const float & y, const
 void SEMmesh::getModel( const int & numberOfElements, vectorReal & model ) const
 {
 
-   for( int j=0; j<((ey==0)?1:ey); j++ )
-   {
-     for( int k=0; k<ez; k++ )
-     {
+  for( int j=0; j<((ey==0)?1:ey); j++ )
+  {
+    for( int k=0; k<ez; k++ )
+    {
+      for( int i=0; i<ex; i++ )
+      {
+        int e=i+k*ex+j*ex*ez;
+        model[e]=1500;
+      }
+    }
+    /*
+       for( int k=ez/2; k<ez; k++ )
+       {
        for( int i=0; i<ex; i++ )
        {
-          int e=i+k*ex+j*ex*ez;
-          model[e]=1500;
+         int e=i+k*ex+j*ex*ez;
+         model[e]=3500;
        }
-     }
-     /*
-     for( int k=ez/2; k<ez; k++ )
-     {
-       for( int i=0; i<ex; i++ )
-       {
-          int e=i+k*ex+j*ex*ez;
-          model[e]=3500;
        }
-     }
      */
-   }
+  }
 }
 //  get list of global interior nodes
 int SEMmesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
-                                         vectorInt & listOfInteriorNodes ) const
+                                     vectorInt & listOfInteriorNodes ) const
 {
   int m=0;
-  if(ny==1)
+  if( ny==1 )
   {
     for( int j=1; j<nz-1; j++ )
     {
@@ -305,10 +305,10 @@ int SEMmesh::getListOfInteriorNodes( const int & numberOfInteriorNodes,
 }
 
 // get list of interior Elements
-void SEMmesh::getListOfInteriorElements(vectorInt & listOfInteriorElements) const
+void SEMmesh::getListOfInteriorElements( vectorInt & listOfInteriorElements ) const
 {
   int m=0;
-  if(ey==0)
+  if( ey==0 )
   {
     for( int j=1; j<ez-1; j++ )
     {
@@ -341,50 +341,50 @@ void SEMmesh::getListOfInteriorElements(vectorInt & listOfInteriorElements) cons
 int SEMmesh::getNumberOfElementsByColor() const
 {return ((ey==0)?(ex/2+ex%2)*(ez/2+ez%2):(ex/2+ex%2)*(ey/2+ey%2)*(ez/2+ez%2));}
 //sort
-void SEMmesh::sortElementsByColor(int  numberOfElementsByColor[] ,arrayInt  & listOfElementsByColor) const
+void SEMmesh::sortElementsByColor( int numberOfElementsByColor[], arrayInt & listOfElementsByColor ) const
 {
   // red
   int k=0;
-  for ( int j=0;j<ez; j=j+2)
+  for( int j=0; j<ez; j=j+2 )
   {
-      for ( int i=0;i<ex; i=i+2)
-      {
-          listOfElementsByColor(0,k)=i+j*ex;
-          k=k+1;
-      }
+    for( int i=0; i<ex; i=i+2 )
+    {
+      listOfElementsByColor( 0, k )=i+j*ex;
+      k=k+1;
+    }
   }
   numberOfElementsByColor[0]=k;
   // green
   k=0;
-  for ( int j=0;j<ez; j=j+2)
+  for( int j=0; j<ez; j=j+2 )
   {
-      for ( int i=1;i<ex; i=i+2)
-      {
-          listOfElementsByColor(1,k)=i+j*ex;
-          k=k+1;
-      }
+    for( int i=1; i<ex; i=i+2 )
+    {
+      listOfElementsByColor( 1, k )=i+j*ex;
+      k=k+1;
+    }
   }
   numberOfElementsByColor[1]=k;
   // blue
   k=0;
-  for ( int j=1;j<ez; j=j+2)
+  for( int j=1; j<ez; j=j+2 )
   {
-      for ( int i=0;i<ex; i=i+2)
-      {
-          listOfElementsByColor(2,k)=i+j*ex;
-          k=k+1;
-      }
+    for( int i=0; i<ex; i=i+2 )
+    {
+      listOfElementsByColor( 2, k )=i+j*ex;
+      k=k+1;
+    }
   }
   numberOfElementsByColor[2]=k;
   // yellow
   k=0;
-  for ( int j=1;j<ez; j=j+2)
+  for( int j=1; j<ez; j=j+2 )
   {
-      for ( int i=1;i<ex; i=i+2)
-      {
-          listOfElementsByColor(3,k)=i+j*ex;
-          k=k+1;
-      }
+    for( int i=1; i<ex; i=i+2 )
+    {
+      listOfElementsByColor( 3, k )=i+j*ex;
+      k=k+1;
+    }
   }
   numberOfElementsByColor[3]=k;
 }
@@ -400,19 +400,19 @@ int SEMmesh::getNumberOfBoundaryNodes() const
 
 // list of global indexes
 // this method is sequential only for omp !!!
-void  SEMmesh::getBoundaryFacesInfos(arrayInt & faceInfos) const
+void SEMmesh::getBoundaryFacesInfos( arrayInt & faceInfos ) const
 {
   int numFace=0;
   // bottom, j=0, l=0
   for( int i=0; i<ex; i++ )
   {
     numFace=i;
-    faceInfos(numFace,0)=i;
-    faceInfos(numFace,1)=1;
+    faceInfos( numFace, 0 )=i;
+    faceInfos( numFace, 1 )=1;
     int offset=i*order;
     for( int j=0; j<order+1; j++ )
     {
-      faceInfos(numFace,2+j)=offset+j;
+      faceInfos( numFace, 2+j )=offset+j;
     }
   }
   // right i=ex-1 l=order
@@ -421,11 +421,11 @@ void  SEMmesh::getBoundaryFacesInfos(arrayInt & faceInfos) const
     int e=ex-1+j*ex;
     numFace=ex+j;
     int offset=(ex-1)*order+j*order*nx;
-    faceInfos(numFace,0)=e;
-    faceInfos(numFace,1)=2;
+    faceInfos( numFace, 0 )=e;
+    faceInfos( numFace, 1 )=2;
     for( int k=0; k<order+1; k++ )
     {
-      faceInfos(numFace,2+k)=offset+order+k*nx;
+      faceInfos( numFace, 2+k )=offset+order+k*nx;
     }
   }
   // top j=ez-1, k=order
@@ -433,13 +433,13 @@ void  SEMmesh::getBoundaryFacesInfos(arrayInt & faceInfos) const
   {
     int e=i+(ez-1)*ex;
     numFace=ez+ex+i;
-    faceInfos(numFace,0)=e;
-    faceInfos(numFace,1)=3;
+    faceInfos( numFace, 0 )=e;
+    faceInfos( numFace, 1 )=3;
     int offset=i*order+(ez-1)*order*nx;
     int k=order;
     for( int l=0; l<order+1; l++ )
     {
-      faceInfos(numFace,2+l)=offset+l+k*nx;
+      faceInfos( numFace, 2+l )=offset+l+k*nx;
     }
   }
   // left, i=0 and l=0
@@ -448,11 +448,11 @@ void  SEMmesh::getBoundaryFacesInfos(arrayInt & faceInfos) const
     int e=j*ex;
     numFace=2*ex+ez+j;
     int offset=j*order*nx;
-    faceInfos(numFace,0)=e;
-    faceInfos(numFace,1)=0;
+    faceInfos( numFace, 0 )=e;
+    faceInfos( numFace, 1 ) = 0;
     for( int k=0; k<order+1; k++ )
     {
-      faceInfos(numFace,2+k)=offset+k*nx;
+      faceInfos( numFace, 2+k )=offset+k*nx;
     }
   }
 }
@@ -491,7 +491,7 @@ int SEMmesh::getListOfBoundaryNodes( const int & numberOfBoundaryNodes, vectorIn
   return 0;
 }
 // provides a mapping between local node of a face and global node Face:
-void SEMmesh::getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFaceNode) const
+void SEMmesh::getLocalFaceNodeToGlobalFaceNode( arrayInt & localFaceNodeToGlobalFaceNode ) const
 {
   int numFace=0;
   int offset;
@@ -502,7 +502,7 @@ void SEMmesh::getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFa
     offset=i*order;
     for( int j=0; j<order+1; j++ )
     {
-      localFaceNodeToGlobalFaceNode(numFace,j)=offset+j;
+      localFaceNodeToGlobalFaceNode( numFace, j )=offset+j;
     }
   }
   // right i=ex-1 l=order
@@ -510,10 +510,10 @@ void SEMmesh::getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFa
   {
     //int e=ex-1+j*ex;
     numFace=ex+j;
-    int offset=localFaceNodeToGlobalFaceNode(numFace-1,order);
+    int offset=localFaceNodeToGlobalFaceNode( numFace-1, order );
     for( int k=0; k<order+1; k++ )
     {
-      localFaceNodeToGlobalFaceNode(numFace,k)=offset+k;
+      localFaceNodeToGlobalFaceNode( numFace, k )=offset+k;
     }
   }
   // top j=ez-1, k=order
@@ -524,25 +524,25 @@ void SEMmesh::getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFa
     {
       if( i==0 )
       {
-        offset=localFaceNodeToGlobalFaceNode(numFace-1,order)+1;
+        offset=localFaceNodeToGlobalFaceNode( numFace-1, order )+1;
       }
       else
       {
-        offset=localFaceNodeToGlobalFaceNode(numFace-1,order);
+        offset=localFaceNodeToGlobalFaceNode( numFace-1, order );
       }
       for( int l=0; l<order+1; l++ )
       {
-        localFaceNodeToGlobalFaceNode(numFace,l)=offset+l;
+        localFaceNodeToGlobalFaceNode( numFace, l )=offset+l;
       }
     }
     else if( i==ex-1 )
     {
-      offset=localFaceNodeToGlobalFaceNode(numFace-1,order);
+      offset=localFaceNodeToGlobalFaceNode( numFace-1, order );
       for( int l=0; l<order; l++ )
       {
-        localFaceNodeToGlobalFaceNode(numFace,l)=offset+l;
+        localFaceNodeToGlobalFaceNode( numFace, l )=offset+l;
       }
-      localFaceNodeToGlobalFaceNode(numFace,order)=localFaceNodeToGlobalFaceNode(ex+ez-1,order);
+      localFaceNodeToGlobalFaceNode( numFace, order )=localFaceNodeToGlobalFaceNode( ex+ez-1, order );
     }
 
   }
@@ -552,37 +552,37 @@ void SEMmesh::getLocalFaceNodeToGlobalFaceNode(arrayInt &localFaceNodeToGlobalFa
     numFace=2*ex+ez+j;
     if( j==0 )
     {
-      localFaceNodeToGlobalFaceNode(numFace,0)=0;
+      localFaceNodeToGlobalFaceNode( numFace, 0 ) = 0;
       for( int k=1; k<order+1; k++ )
       {
-        offset=localFaceNodeToGlobalFaceNode(numFace-1,order-1);
-        localFaceNodeToGlobalFaceNode(numFace,k)=offset+k;
+        offset=localFaceNodeToGlobalFaceNode( numFace-1, order-1 );
+        localFaceNodeToGlobalFaceNode( numFace, k )=offset+k;
       }
     }
     else if( j>0 && j<ez-1 )
     {
       for( int k=0; k<order+1; k++ )
       {
-        offset=localFaceNodeToGlobalFaceNode(numFace-1,order);
-        localFaceNodeToGlobalFaceNode(numFace,k)=offset+k;
+        offset=localFaceNodeToGlobalFaceNode( numFace-1, order );
+        localFaceNodeToGlobalFaceNode( numFace, k )=offset+k;
       }
     }
     else if( j==ez-1 )
     {
       for( int k=0; k<order; k++ )
       {
-        offset=localFaceNodeToGlobalFaceNode(numFace-1,order);
-        localFaceNodeToGlobalFaceNode(numFace,k)=offset+k;
+        offset=localFaceNodeToGlobalFaceNode( numFace-1, order );
+        localFaceNodeToGlobalFaceNode( numFace, k )=offset+k;
       }
-      offset=localFaceNodeToGlobalFaceNode(ex+ez,0);
-      localFaceNodeToGlobalFaceNode(numFace,order)=offset;
+      offset=localFaceNodeToGlobalFaceNode( ex+ez, 0 );
+      localFaceNodeToGlobalFaceNode( numFace, order )=offset;
     }
 
   }
 
 }
 // save snapshot
-void SEMmesh::saveSnapShot( const int indexTimeStep, const int i1, arrayReal const & u) const
+void SEMmesh::saveSnapShot( const int indexTimeStep, const int i1, arrayReal const & u ) const
 {
 
   int nx=getNx();
@@ -592,18 +592,18 @@ void SEMmesh::saveSnapShot( const int indexTimeStep, const int i1, arrayReal con
   float dy=getDy();
   float dz=getDz();
   int numberOfNodes=nx*nz;
-  std::vector<float> inputVector( numberOfNodes );
+  std::vector< float > inputVector( numberOfNodes );
   int offset=(ny==1?offset=0:offset=nx*nz*(ny/2-1));
-  printf(" nx, ny/2-1, nz %d %d %d offset=%d\n",nx,ny/2-1,nz, offset);
+  //printf(" nx, ny/2-1, nz %d %d %d offset=%d\n",nx,ny/2-1,nz, offset);
   for( int i = offset; i< offset+numberOfNodes; i++ )
   {
-    inputVector[i-offset]=u(i,i1);
+    inputVector[i-offset]=u( i, i1 );
   }
-  std::vector<std::vector<float>> grid=projectToGrid( numberOfNodes, inputVector );
+  std::vector< std::vector< float > > grid=projectToGrid( numberOfNodes, inputVector );
   fstream snapFile;
   string snapNumber = "snapshot"+to_string( indexTimeStep );
   snapFile.open( snapNumber, ios::out| ios::trunc );
-  std::cout<<"nx="<<nx<<" ny="<<ny<<std::endl;
+  //std::cout<<"nx="<<nx<<" ny="<<ny<<std::endl;
   for( int i=0; i<nx; i++ )
   {
     for( int j=0; j<nz; j++ )
@@ -613,5 +613,3 @@ void SEMmesh::saveSnapShot( const int indexTimeStep, const int i1, arrayReal con
   }
   snapFile.close();
 }
-
-

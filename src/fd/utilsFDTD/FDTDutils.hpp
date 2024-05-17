@@ -6,6 +6,8 @@
 
 using namespace std;
 
+using namespace std;
+
 struct FDTDUtils
 {
   void init_coef(float dx, vectorReal &coef)
@@ -123,17 +125,17 @@ struct FDTDUtils
 
     // etax 
     float param = dt_sch * 3.f * vmax * logf(1000.f)/(2.f*ndampx*dx);
-    printf("param=%f\n",param);
+    //printf("param=%f\n",param);
     pml_profile_init(etax, 0, nx+1, ndampx, ndampx, param);
 
     // etay 
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampy*dy);
-    printf("param=%f\n",param);
+    //printf("param=%f\n",param);
     pml_profile_init(etay, 0, ny+1, ndampy, ndampy, param);
 
     // etaz 
     param = dt_sch*3.f*vmax*logf(1000.f)/(2.f*ndampz*dz);
-    printf("param=%f\n",param);
+    //printf("param=%f\n",param);
     pml_profile_init(etaz, 0, nz+1, ndampz, ndampz, param);
 
     (void)pml_profile_extend_all(nx, ny, nz,
@@ -144,18 +146,19 @@ struct FDTDUtils
                 z1+1, z2, z3+1, z4, z5+1, z6);
   }
       
-  void output(FDTDGRIDS &myGrids, VECTOR_REAL_VIEW pn, int itSample)
+  void output(FDTDGRIDS &myGrids, arrayReal const&pnGlobal, int itSample, const int &i1)
   {
 
       if(itSample%50==0)
       {   
 
-        #ifdef USE_RAJA
-        RAJA::forall<RAJA::omp_parallel_for_exec>(RAJA::RangeSegment(0,myGrids.nx), [pn] ( int i){});
-        #endif
+        FDFENCE
 
-        printf("result0 %f\n",pn[IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs)]);
-        write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pn, itSample);
+        printf("TimeStep=%d\t; Pressure value at source [%d %d %d] = %f\n", itSample,
+               myGrids.xs, myGrids.ys, myGrids.zs, pnGlobal(IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs),i1));
+        #ifdef FD_SAVE_SNAPSHOTS
+        write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pnGlobal, itSample, i1);
+        #endif
 
       } 
 
@@ -165,17 +168,17 @@ struct FDTDUtils
 		 int x0, int x1, 
 		 int y0, int y1, 
 		 int z0, int z1, 
-                 VECTOR_REAL_VIEW u, int istep)
+                 arrayReal const&pnGlobal, int istep, const int &i1)
   {
       char filename_buf[32];
       snprintf(filename_buf, sizeof(filename_buf), "snapshot_it_%d.H@", istep);
       FILE *snapshot_file = fopen(filename_buf, "wb");
-      printf(" %d %d %d %d %d %d\n",x0,x1,y0,y1,z0,z1);
+      //printf("write snapshot for: x=[%d %d], y=[%d %d], z=[%d %d]\n",x0,x1,y0,y1,z0,z1);
      
       for (int k = z0; k < z1; ++k) {
           for (int j = y0; j < y1+1; ++j) {
               for (int i = x0; i < x1; ++i) {
-		  fwrite(&u[IDX3_l(i,j,k)], sizeof(float),1, snapshot_file);
+		  fwrite(&pnGlobal(IDX3_l(i,j,k),i1), sizeof(float),1, snapshot_file);
               }
           }
       }

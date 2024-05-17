@@ -22,7 +22,7 @@ public:
   /**
    * @brief Constructor of the SEMproxy class
    */
-  SEMproxy(){};
+  SEMproxy(int argc, char *argv[]);
 
   /**
    * @brief Destructor of the SEMproxy class
@@ -44,7 +44,7 @@ public:
 
   // initialize source and RHS
   void init_source();
- 
+
   // allocate arrays and vectors
   void init_arrays();
 
@@ -54,24 +54,16 @@ public:
 
 private:
 
-  SEMsolver mySolver;
-  SolverUtils myUtils;
-
   int i1=0;
   int i2=1;
 
-  const float f0=10.;
-  const float myTimeMax=1.;
-  const int sourceOrder=1;
+  SEMinfo myInfo;
+  SEMmesh myMesh;
 
-  SEMmeshinfo myMeshinfo;
-  int myNumSamples=myTimeMax/myMeshinfo.myTimeStep;
-  int myElementSource;
+  SEMsolver mySolver;
+  SolverUtils myUtils;
 
-
-  SEMmesh  myMesh {65, 65 ,65, 1950, 1950, 1950, myMeshinfo.myOrderNumber};
- 
-   // arrays
+  // arrays
   arrayReal myRHSTerm;
   arrayReal pnGlobal;
   vectorInt rhsElement;

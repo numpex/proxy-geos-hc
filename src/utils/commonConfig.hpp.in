@@ -1,15 +1,6 @@
 #ifndef COMMON_CONFIG_HPP
 #define COMMON_CONFIG_HPP
 
-// Enables use of Caliper (CMake option)
-#cmakedefine USE_CALIPER
-
-// Enable use of Vector (CMake option)
-#cmakedefine USE_VECTOR
-
-// Enable use of LvArray (CMake option)
-#cmakedefine USE_LVARRAY
-
 // Enable use of RAJA (CMake option)
 #cmakedefine USE_RAJA
 
@@ -19,9 +10,6 @@
 // Enables use of KOKOS (CMake option)
 #cmakedefine USE_KOKKOS
 
-// add Tests directory (CMake option)
-#cmakedefine addTests 
-
 // Enables use of ENABLE_HIP (CMake option)
 #cmakedefine ENABLE_HIP
 
@@ -30,6 +18,21 @@
 
 // Enables use of SEM2D (CMake option)
 #cmakedefine SEM2D 
+
+// Enable save snapshots of wavefields in SEM-proxy (for debugging)
+#cmakedefine SEM_SAVE_SNAPSHOTS
+
+// Enable save snapshots of wavefields in FD-proxy (for debugging)
+#cmakedefine FD_SAVE_SNAPSHOTS
+
+// Enable printout memory allocation info for arrays
+#cmakedefine PRINT_ALLOC_INFO
+
+// Enable coloring scheme to avoid atomic operations
+#cmakedefine SEM_MESHCOLOR 
+
+// Add Tests directory (CMake option)
+#cmakedefine addTests 
 
 #endif
 

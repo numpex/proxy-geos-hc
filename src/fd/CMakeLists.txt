@@ -2,7 +2,11 @@
 # Setup for FD_EXECUTABLE
 ################################
 
-set (FD_EXECUTABLE "fd_${SOLVER}.exe" CACHE PATH "" FORCE)
+if(NOT DEFINED DEVICE)
+  set (FD_EXECUTABLE "fd_${SOLVER}.exe" CACHE PATH "" FORCE)
+else()
+  set (FD_EXECUTABLE "fd_${SOLVER}_${DEVICE}.exe" CACHE PATH "" FORCE)
+endif()
 
 message ( "\n---------------------------------------------------------------------------------" )
 message ( "-- The Current Program Model Used is: ${SOLVER}")

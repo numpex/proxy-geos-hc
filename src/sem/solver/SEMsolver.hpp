@@ -12,64 +12,59 @@
 
 #include "SEMQkGL.hpp"
 #include "SEMmesh.hpp"
-#include "SEMdata.hpp"
-
-
 
 class SEMsolver
 {
 public:
 
-PROXY_HOST_DEVICE SEMsolver(){};
-PROXY_HOST_DEVICE ~SEMsolver(){};
-
+  PROXY_HOST_DEVICE SEMsolver(){};
+  PROXY_HOST_DEVICE ~SEMsolver(){};
 
   /**
    * @brief computeFEInit function:
    * init all FE components for computing mass and stiffness matrices
    */
-  void computeFEInit ( SEMmeshinfo &myMeshinfo, 
-                       SEMmesh mesh);
+  void computeFEInit ( SEMinfo & myInfo,
+                       SEMmesh mesh );
 
-   /**
+  /**
    * @brief computeOneStep function:
    * init all FE components for computing mass and stiffness matrices
    */
-  void computeOneStep(  const int & timeStep,
-                                 SEMmeshinfo &myMeshinfo,
-                                 int & i1,
-                                 int & i2,
-                                 const arrayReal & myRHSTerm,
-                                 arrayReal const & myPnGlobal,
-                                 const vectorInt & myRhsElement);
 
-  void outputPnValues (  SEMmesh mesh,
-		         const int & indexTimeStep,
-                         int & i1, 
-                         int & myElementSource, 
-                         const arrayReal & pnGlobal);
+  void computeOneStep ( const int & timeSample,
+                        const int & order,
+                        const int & nPointsPerElement,
+                        const int & i1,
+                        const int & i2,
+                        SEMinfo & myInfo,
+                        const arrayReal & myRHSTerm,
+                        arrayReal const & myPnGlobal,
+                        const vectorInt & myRhsElement );
 
-  void initFEarrays( SEMmeshinfo &myMeshinfo, SEMmesh mesh );
+  void outputPnValues ( SEMmesh mesh,
+                        const int & indexTimeStep,
+                        int & i1,
+                        int & myElementSource,
+                        const arrayReal & pnGlobal );
 
-  void allocateFEarrays( SEMmeshinfo &myMeshinfo );
+  void initFEarrays( SEMinfo & myInfo, SEMmesh mesh );
+
+  void allocateFEarrays( SEMinfo & myInfo );
 
 private:
 
-  int order; 
-  float tmp;
-  int numberOfPointsPerElement;
-
+  int order;
   SEMQkGL myQk;
-  
+
   //shared arrays
   arrayInt globalNodesList;
   arrayReal globalNodesCoords;
   vectorInt listOfInteriorNodes;
-  vectorInt listOfIntVieweriorNodes;
   vectorInt listOfBoundaryNodes;
   arrayInt faceInfos;
   arrayInt localFaceNodeToGlobalFaceNode;
-  
+
   // get model
   vectorReal model;
 
@@ -78,12 +73,13 @@ private:
   vectorDouble weights;
 
   // get basis function and corresponding derivatives
-  arrayDouble basisFunction1D;
   arrayDouble derivativeBasisFunction1D;
 
   //shared arrays
   vectorReal massMatrixGlobal;
   vectorReal yGlobal;
   vectorReal ShGlobal;
+
+  arrayInt listOfElementsByColor;
 };
 #endif //SEM_SOLVER_HPP_

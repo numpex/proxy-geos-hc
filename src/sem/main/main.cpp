@@ -8,37 +8,43 @@
 
 int main( int argc, char *argv[] )
 {
+
+  time_point< system_clock > startInitTime = system_clock::now();
+
   #ifdef USE_KOKKOS
   Kokkos::initialize( argc, argv );
-  { 
+  {
   #endif
 
-  SEMproxy semsim;
+  cout << "\n+================================= "<< endl;
+  cout << "| Initializing SEM Application ... "<< endl;
+  cout << "+================================= \n"<< endl;
 
-  cout << "\n+================================= "<<endl;
-  cout << "| Initializing SEM Application ... "<<endl;
-  cout << "+================================= "<<endl;
+  SEMproxy semsim( argc, argv );
+
   semsim.initFiniteElem();
 
-  cout << "\n+================================= "<<endl;
-  cout << "| Running SEM Application ...      "<<endl;
-  cout << "+================================= "<<endl;
+  cout << "\n+================================= "<< endl;
+  cout << "| Running SEM Application ...      "<< endl;
+  cout << "+================================= \n"<< endl;
 
   // start timer
-  time_point< system_clock > startTime = system_clock::now();
-
+  time_point< system_clock > startRunTime = system_clock::now();
   semsim.run();
 
-  cout << "\n+================================= "<<endl;
-  cout << "| SEM Application Finished.       "<<endl;
-  cout << "+================================= \n"<<endl;
+  cout << "\n+================================= "<< endl;
+  cout << "| SEM Application Finished.       "<< endl;
+  cout << "+================================= \n"<< endl;
 
   // print timing information
-  cout << "Elapsed Time : "<<( system_clock::now()-startTime ).count()/1E9 <<" seconds.\n"<<endl;
+  cout << "Elapsed Initial Time : "<<( startRunTime - startInitTime ).count()/1E9 <<" seconds."<< endl;
+  cout << "Elapsed Compute Time : "<<( system_clock::now()-startRunTime ).count()/1E9 <<" seconds."<< endl;
 
   #ifdef USE_KOKKOS
   }
   Kokkos::finalize();
   #endif
+
+  cout << "Elapsed TotalExe Time : "<<( system_clock::now()-startInitTime).count()/1E9 <<" seconds.\n"<< endl;
   return (0);
 }
