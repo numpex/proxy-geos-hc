@@ -9,13 +9,19 @@
   #define PROXY_HOST_DEVICE 
 #endif
 
-#if defined (USE_RAJA)
+#define LaunchMaxThreadsPerBlock 64
+#define LaunchMinBlocksPerSM 1
+
+#if defined (USE_KOKKOS)
+  #define LOOPHEAD(Range, Iterator)\
+    Kokkos::parallel_for( Kokkos::RangePolicy<Kokkos::LaunchBounds<LaunchMaxThreadsPerBlock, LaunchMinBlocksPerSM>>(0, Range), \
+                          KOKKOS_CLASS_LAMBDA ( const int Iterator ){
+  #define LOOPEND   });
+#elif defined (USE_RAJA)
   #define LOOPHEAD(Range, Iterator)\
     RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, Range),  [=] LVARRAY_HOST_DEVICE  ( int Iterator ) {
   #define LOOPEND   });
-#elif defined (USE_KOKKOS)
-  #define LOOPHEAD(Range, Iterator) Kokkos::parallel_for( Range, KOKKOS_CLASS_LAMBDA ( const int Iterator ){
-  #define LOOPEND   });
+
 #elif defined (USE_OMP)
   #define LOOPHEAD(Range, Iterator)\
     _Pragma("omp parallel for")\
