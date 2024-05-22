@@ -1,3 +1,6 @@
+#ifndef SEM_MACROS_HPP_
+#define SEM_MACROS_HPP_
+
 #include "commonConfig.hpp"
 
 // define Macros test SEM proxy 2D case
@@ -62,3 +65,4 @@
 #endif
 
 
+#endif //SEM_MACROS_HPP_
