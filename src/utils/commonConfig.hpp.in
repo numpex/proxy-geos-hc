@@ -1,11 +1,17 @@
 #ifndef COMMON_CONFIG_HPP
 #define COMMON_CONFIG_HPP
 
-// Enable use of RAJA (CMake option)
-#cmakedefine USE_RAJA
+// Enable use of Vector (CMake option)
+#cmakedefine USE_VECTOR
 
 // Enables use of OMP (CMake option)
 #cmakedefine USE_OMP
+
+// Enable use of RAJA (CMake option)
+#cmakedefine USE_RAJA
+
+// Enable use of LvArray (CMake option)
+#cmakedefine USE_LVARRAY
 
 // Enables use of KOKOS (CMake option)
 #cmakedefine USE_KOKKOS
