@@ -56,6 +56,11 @@ option (SEM2D "SEM-proxy 2D or 3D case" ON)
 #---------------------------------------------------------
 option (SEM_MESHCOLOR "use coloring scheme" OFF)
 
+#---------------------------------------------------------
+# Option to use hierarchical parallelism in Kokkos
+#---------------------------------------------------------
+option (USE_KOKKOS_TEAMS "use hierarchical parallelism in Kokkos" OFF)
+
 add_subdirectory(src)
 
 

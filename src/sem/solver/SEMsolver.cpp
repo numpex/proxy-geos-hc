@@ -41,16 +41,9 @@ void SEMsolver::computeOneStep( const int & timeSample,
   pnGlobal( nodeRHS, i2 )+=myInfo.myTimeStep*myInfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm( i, timeSample );
   LOOPEND
 
-  #ifdef SEM_MESHCOLOR
-  for (int color=0; color<myInfo.numberOfColors;color++)
-  {
-  LOOPHEAD( myInfo.numberOfElementsByColor[color], eColor)
-  int elementNumber=listOfElementsByColor(color,eColor);
-  #else
-  LOOPHEAD( myInfo.numberOfElements, elementNumber )
-  #endif
+  // start main parallel section
+  MAINLOOPHEAD( myInfo.numberOfElements, elementNumber )
 
-  // start parallel section
   float B[ROW][COL];
   float R[ROW];
   float massMatrixLocal[ROW];
@@ -71,7 +64,7 @@ void SEMsolver::computeOneStep( const int & timeSample,
   myQk.gradPhiGradPhi( nPointsPerElement, order, weights, derivativeBasisFunction1D, B, pnLocal, R, Y );
 
 
-  //compute gloval mass Matrix and global stiffness vector
+  //compute global mass Matrix and global stiffness vector
   for( int i=0; i<nPointsPerElement; i++ )
   {
     int gIndex=globalNodesList( elementNumber, i );
@@ -80,10 +73,7 @@ void SEMsolver::computeOneStep( const int & timeSample,
     ATOMICADD( yGlobal[gIndex], Y[i] );
   }
 
-  LOOPEND
-  #ifdef SEM_MESHCOLOR
-  }
-  #endif
+  MAINLOOPEND
 
   // update pressure
   LOOPHEAD( myInfo.numberOfInteriorNodes, i )

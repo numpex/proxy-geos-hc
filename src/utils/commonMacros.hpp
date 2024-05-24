@@ -9,14 +9,11 @@
   #define PROXY_HOST_DEVICE 
 #endif
 
-#define LaunchMaxThreadsPerBlock 64
-#define LaunchMinBlocksPerSM 1
-
 #if defined (USE_KOKKOS)
   #define LOOPHEAD(Range, Iterator)\
-    Kokkos::parallel_for( Kokkos::RangePolicy<Kokkos::LaunchBounds<LaunchMaxThreadsPerBlock, LaunchMinBlocksPerSM>>(0, Range), \
-                          KOKKOS_CLASS_LAMBDA ( const int Iterator ){
+    Kokkos::parallel_for( Range, KOKKOS_CLASS_LAMBDA ( const int Iterator ){
   #define LOOPEND   });
+
 #elif defined (USE_RAJA)
   #define LOOPHEAD(Range, Iterator)\
     RAJA::forall< deviceExecPolicy >( RAJA::RangeSegment( 0, Range),  [=] LVARRAY_HOST_DEVICE  ( int Iterator ) {
@@ -27,12 +24,47 @@
     _Pragma("omp parallel for")\
     for( int Iterator=0; Iterator<Range; Iterator++ ){
   #define LOOPEND   }
-// sequential case
+
 #else 
+  // the sequential case
   #define LOOPHEAD(Range, Iterator)\
     for( int Iterator=0; Iterator<Range; Iterator++ ){
   #define LOOPEND   }
 #endif
+
+
+#if defined (USE_KOKKOS) && defined (USE_KOKKOS_TEAMS)
+  #define LaunchMaxThreadsPerBlock 64 
+  #define LaunchMinBlocksPerSM 1
+  #define nthreads 64
+  #define MAINLOOPHEAD(Range, Iterator)\
+    const int leagueSize=(Range-1)/nthreads; \
+    const Kokkos::TeamPolicy<Kokkos::LaunchBounds<LaunchMaxThreadsPerBlock, LaunchMinBlocksPerSM>> teamPolicy(leagueSize, nthreads); \
+    Kokkos::parallel_for("Loop", teamPolicy, KOKKOS_CLASS_LAMBDA ( const Kokkos::TeamPolicy<>::member_type & thread ) { \
+      Kokkos::parallel_for(Kokkos::TeamThreadRange(thread, nthreads), [=] (const int index) { \
+        int Iterator = thread.league_rank()*nthreads+index;
+  #define MAINLOOPEND }); });
+
+#elif defined (USE_KOKKOS) && !defined(SEM_MESHCOLOR)
+  #define LaunchMaxThreadsPerBlock 64
+  #define LaunchMinBlocksPerSM 1
+  #define MAINLOOPHEAD(Range, Iterator)\
+    Kokkos::parallel_for( Kokkos::RangePolicy<Kokkos::LaunchBounds<LaunchMaxThreadsPerBlock, LaunchMinBlocksPerSM>>(0, Range), \
+                          KOKKOS_CLASS_LAMBDA ( const int Iterator ){
+  #define MAINLOOPEND   });
+
+#elif defined (SEM_MESHCOLOR)
+  #define MAINLOOPHEAD(Range, Iterator)\
+    for (int color=0; color<myInfo.numberOfColors;color++) {\
+    LOOPHEAD( myInfo.numberOfElementsByColor[color], eColor) \
+    int Iterator=listOfElementsByColor(color,eColor);
+  #define MAINLOOPEND   }); }
+
+#else
+  #define MAINLOOPHEAD LOOPHEAD
+  #define MAINLOOPEND LOOPEND
+#endif
+
 
 #if defined (USE_RAJA)
   #define ARRAY_DOUBLE_VIEW arrayDoubleView 
