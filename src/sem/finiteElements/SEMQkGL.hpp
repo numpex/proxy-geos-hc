@@ -38,8 +38,40 @@ public:
                                    ARRAY_REAL_VIEW const & nodesCoords,
                                    ARRAY_DOUBLE_VIEW const & dPhi,
                                    float massMatrixLocal[],
+                                   float B[][COL] ) const;
+
+  // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
+  // Marc Durufle Formulae
+  PROXY_HOST_DEVICE void gradPhiGradPhi( const int & nPointsPerElement,
+                                         const int & order,
+                                         VECTOR_DOUBLE_VIEW const & weights,
+                                         ARRAY_DOUBLE_VIEW const & dPhi,
+                                         float const B[][COL],
+                                         float const pnLocal[],
+                                         float R[],
+                                         float Y[] ) const;
+  //computeDs
+  PROXY_HOST_DEVICE void computeDs( const int & iFace,
+                                   const int & order,
+                                   ARRAY_INT_VIEW const & faceInfos,
+                                   int numOfBasisFunctionOnFace,
+                                   float Js[][6],
+                                   ARRAY_REAL_VIEW const & globalNodesCoords,
+                                   ARRAY_DOUBLE_VIEW const & dPhi,
+                                   float ds[] ) const;
+ };
+
+
+  // compute B and M
+PROXY_HOST_DEVICE void SEMQkGL::computeB( const int & elementNumber,
+                                   const int & order,
+                                   VECTOR_DOUBLE_VIEW const & weights,
+                                   ARRAY_INT_VIEW const & nodesList,
+                                   ARRAY_REAL_VIEW const & nodesCoords,
+                                   ARRAY_DOUBLE_VIEW const & dPhi,
+                                   float massMatrixLocal[],
                                    float B[][COL] ) const
-  {
+{
     #ifdef SEM2D
     {
       for( int i2=0; i2<order+1; i2++ )
@@ -187,11 +219,11 @@ public:
       }
     }
     #endif
-  }
+}
   
-  // compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
-  // Marc Durufle Formulae
-  PROXY_HOST_DEVICE void gradPhiGradPhi( const int & nPointsPerElement,
+// compute the matrix $R_{i,j}=\int_{K}{\nabla{\phi_i}.\nabla{\phi_j}dx}$
+// Marc Durufle Formulae
+PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
                                          const int & order,
                                          VECTOR_DOUBLE_VIEW const & weights,
                                          ARRAY_DOUBLE_VIEW const & dPhi,
@@ -199,7 +231,7 @@ public:
                                          float const pnLocal[],
                                          float R[],
                                          float Y[] ) const
-  {
+{
     #ifdef SEM2D
     {
       // B11
@@ -348,10 +380,10 @@ public:
       }
     }
     #endif
-  }
+}
 
-  //computeDs
-  PROXY_HOST_DEVICE void computeDs( const int & iFace,
+//computeDs
+PROXY_HOST_DEVICE void SEMQkGL::computeDs( const int & iFace,
                                    const int & order,
                                    ARRAY_INT_VIEW const & faceInfos,
                                    int numOfBasisFunctionOnFace,
@@ -359,7 +391,7 @@ public:
                                    ARRAY_REAL_VIEW const & globalNodesCoords,
                                    ARRAY_DOUBLE_VIEW const & dPhi,
                                    float ds[] ) const
-  {
+{
     int face=faceInfos( iFace, 1 );
     for( int j=0; j<order+1; j++ )
     {
@@ -382,7 +414,6 @@ public:
       }
       ds[j]=sqrt( Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j] );
     }
-  }
+}
 
-};
 #endif //SEMQKGL_HPP_
