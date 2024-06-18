@@ -12,7 +12,9 @@ struct FDTDInit
   SolverUtils myUtils;
 
   int sourceOrder=1;
-  int ncoefs=5;
+  int ncoefsX=5;
+  int ncoefsY=5;
+  int ncoefsZ=5;
 
   float f0=15.;
   float fmax=2.5*f0;
@@ -89,17 +91,35 @@ struct FDTDInit
 
   void init_coefficients( FDTDGRIDS & myGrids, FDTDMODELS & myModels )
   {
-    myModels.coefx = allocateVector< vectorReal >( ncoefs, "coefx" );
-    myModels.coefy = allocateVector< vectorReal >( ncoefs, "coefy" );
-    myModels.coefz = allocateVector< vectorReal >( ncoefs, "coefz" );
+    myModels.coefx = allocateVector< vectorReal >( ncoefsX, "coefx" );
+    myModels.coefy = allocateVector< vectorReal >( ncoefsY, "coefy" );
+    myModels.coefz = allocateVector< vectorReal >( ncoefsZ, "coefz" );
 
-    myFDTDUtils.init_coef( myGrids.dx, myModels.coefx );
-    myFDTDUtils.init_coef( myGrids.dy, myModels.coefy );
-    myFDTDUtils.init_coef( myGrids.dz, myModels.coefz );
+    myFDTDUtils.init_coef( ncoefsX, myGrids.dx, myModels.coefx );
+    myFDTDUtils.init_coef( ncoefsY, myGrids.dy, myModels.coefy );
+    myFDTDUtils.init_coef( ncoefsZ, myGrids.dz, myModels.coefz );
 
+    float tmpX=0;
+    for( int i=1;i<ncoefsX;i++ )
+    {
+       tmpX+=myModels.coefx[i];
+    }
+    float tmpY=0;
+    for( int i=1;i<ncoefsY;i++ )
+    {
+       tmpY+=myModels.coefy[i];
+    }
+    float tmpZ=0;
+    for( int i=1;i<ncoefsZ;i++ )
+    {
+       tmpZ+=myModels.coefz[i];
+    }
+    myModels.coef0 = -2.*(tmpX+tmpY+tmpZ);
+    /*
     myModels.coef0 = -2.*(myModels.coefx[1]+myModels.coefx[2]+myModels.coefx[3]+myModels.coefx[4]);
     myModels.coef0+= -2.*(myModels.coefy[1]+myModels.coefy[2]+myModels.coefy[3]+myModels.coefy[4]);
     myModels.coef0+= -2.*(myModels.coefz[1]+myModels.coefz[2]+myModels.coefz[3]+myModels.coefz[4]);
+    */
 
     timeStep=myFDTDUtils.compute_dt_sch( vmax, myModels.coefx, myModels.coefy, myModels.coefz );
     nSamples=timeMax/timeStep;

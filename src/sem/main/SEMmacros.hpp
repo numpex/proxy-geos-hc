@@ -12,7 +12,7 @@
 // test SEM proxy 3D case
 #else
 #define DIMENSION  3
-#define ROW 64
+#define ROW 27
 #define COL 6
 #define ZEROED2D 1
 #endif

@@ -12,6 +12,7 @@ struct FDTDKernel
   {
       CREATEVIEWINNER
       LOOP3DHEAD (x3,y3,z3,x4,y4,z4)
+      /*
       float lapx=(coefx[1]*(pnGlobal(IDX3_l(i+1,j,k),cb)+pnGlobal(IDX3_l(i-1,j,k),cb))
                  +coefx[2]*(pnGlobal(IDX3_l(i+2,j,k),cb)+pnGlobal(IDX3_l(i-2,j,k),cb))
                  +coefx[3]*(pnGlobal(IDX3_l(i+3,j,k),cb)+pnGlobal(IDX3_l(i-3,j,k),cb))
@@ -24,6 +25,22 @@ struct FDTDKernel
                  +coefz[2]*(pnGlobal(IDX3_l(i,j,k+2),cb)+pnGlobal(IDX3_l(i,j,k-2),cb))
                  +coefz[3]*(pnGlobal(IDX3_l(i,j,k+3),cb)+pnGlobal(IDX3_l(i,j,k-3),cb))
                  +coefz[4]*(pnGlobal(IDX3_l(i,j,k+4),cb)+pnGlobal(IDX3_l(i,j,k-4),cb)));
+      */
+      float lapx=0;
+      for (int l=1; l<coefx.size();l++)
+      {
+         lapx+=coefx[l]*(pnGlobal(IDX3_l(i+l,j,k),cb)+pnGlobal(IDX3_l(i-l,j,k),cb));
+      }
+      float lapy=0;
+      for (int l=1; l<coefy.size();l++)
+      {
+         lapy+=coefy[l]*(pnGlobal(IDX3_l(i,j+l,k),cb)+pnGlobal(IDX3_l(i,j-l,k),cb));
+      }
+      float lapz=0;
+      for (int l=1; l<coefy.size();l++)
+      {
+         lapz+=coefz[l]*(pnGlobal(IDX3_l(i,j,k+l),cb)+pnGlobal(IDX3_l(i,j,k-l),cb));
+      }
       pnGlobal(IDX3_l(i,j,k),ca)=2.*pnGlobal(IDX3_l(i,j,k),cb)-pnGlobal(IDX3_l(i,j,k),ca)
                          +vp[IDX3(i,j,k)]*(coef0*pnGlobal(IDX3_l(i,j,k),cb)+lapx+lapy+lapz);
       LOOP3DEND
@@ -37,18 +54,35 @@ struct FDTDKernel
   {
        CREATEVIEWPML
        LOOP3DHEAD (x3,y3,z3,x4,y4,z4)
+       /*
        float lapx=(coefx[1]*(pnGlobal(IDX3_l(i+1,j,k),cb)+pnGlobal(IDX3_l(i-1,j,k),cb))
                  +coefx[2]*(pnGlobal(IDX3_l(i+2,j,k),cb)+pnGlobal(IDX3_l(i-2,j,k),cb))
                  +coefx[3]*(pnGlobal(IDX3_l(i+3,j,k),cb)+pnGlobal(IDX3_l(i-3,j,k),cb))
                  +coefx[4]*(pnGlobal(IDX3_l(i+4,j,k),cb)+pnGlobal(IDX3_l(i-4,j,k),cb)));
-      float lapy=(coefy[1]*(pnGlobal(IDX3_l(i,j+1,k),cb)+pnGlobal(IDX3_l(i,j-1,k),cb))
+       float lapy=(coefy[1]*(pnGlobal(IDX3_l(i,j+1,k),cb)+pnGlobal(IDX3_l(i,j-1,k),cb))
                  +coefy[2]*(pnGlobal(IDX3_l(i,j+2,k),cb)+pnGlobal(IDX3_l(i,j-2,k),cb))
                  +coefy[3]*(pnGlobal(IDX3_l(i,j+3,k),cb)+pnGlobal(IDX3_l(i,j-3,k),cb))
                  +coefy[4]*(pnGlobal(IDX3_l(i,j+4,k),cb)+pnGlobal(IDX3_l(i,j-4,k),cb)));
-      float lapz=(coefz[1]*(pnGlobal(IDX3_l(i,j,k+1),cb)+pnGlobal(IDX3_l(i,j,k-1),cb))
+       float lapz=(coefz[1]*(pnGlobal(IDX3_l(i,j,k+1),cb)+pnGlobal(IDX3_l(i,j,k-1),cb))
                  +coefz[2]*(pnGlobal(IDX3_l(i,j,k+2),cb)+pnGlobal(IDX3_l(i,j,k-2),cb))
                  +coefz[3]*(pnGlobal(IDX3_l(i,j,k+3),cb)+pnGlobal(IDX3_l(i,j,k-3),cb))
                  +coefz[4]*(pnGlobal(IDX3_l(i,j,k+4),cb)+pnGlobal(IDX3_l(i,j,k-4),cb)));
+       */
+       float lapx=0;
+       for (int l=1; l<coefx.size();l++)
+       {
+          lapx+=coefx[l]*(pnGlobal(IDX3_l(i+l,j,k),cb)+pnGlobal(IDX3_l(i-l,j,k),cb));
+       }
+       float lapy=0;
+       for (int l=1; l<coefy.size();l++)
+       {
+          lapy+=coefy[l]*(pnGlobal(IDX3_l(i,j+l,k),cb)+pnGlobal(IDX3_l(i,j-l,k),cb));
+       }
+       float lapz=0;
+       for (int l=1; l<coefy.size();l++)
+       {
+          lapz+=coefz[l]*(pnGlobal(IDX3_l(i,j,k+l),cb)+pnGlobal(IDX3_l(i,j,k-l),cb));
+       }
 
        float lap=coef0*pnGlobal(IDX3_l(i,j,k),cb)+lapx+lapy+lapz;
 

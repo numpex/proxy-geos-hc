@@ -10,24 +10,66 @@ using namespace std;
 
 struct FDTDUtils
 {
-  void init_coef(float dx, vectorReal &coef)
+  void init_coef(int L,float dx, vectorReal &coef)
   {
       float dx2 = dx*dx;
-      coef[0] = -205.f/72.f/dx2;
-      coef[1] = 8.f/5.f/dx2;
-      coef[2] = -1.f/5.f/dx2;
-      coef[3] = 8.f/315.f/dx2;
-      coef[4] = -1.f/560.f/dx2;
+      switch(L)
+      {
+        case 1:
+          coef[0]=-2./dx2;
+          coef[1]=1./dx2;
+          break;
+        case 2:
+          coef[0]=-5./2./dx2;
+          coef[1]=4./3./dx2;
+          coef[2]=-1./12/dx2;
+          break;
+        case 3:
+          coef[0]=-49./18./dx2;
+          coef[1]=3./2.s/dx2;
+          coef[2]=-3./20./dx2;
+          coef[3]=1./90./dx2;
+          break;
+        case 4:
+          coef[0] = -205.f/72.f/dx2;
+          coef[1] = 8.f/5.f/dx2;
+          coef[2] = -1.f/5.f/dx2;
+          coef[3] = 8.f/315.f/dx2;
+          coef[4] = -1.f/560.f/dx2;
+          break;
+        case 5:
+          coef[0]=-5269./1800./dx2;
+          coef[1]=5./3./dx2;
+          coef[2]=-5./21./dx2;
+          coef[3]=5./126./dx2;
+          coef[4]=-5./1008./dx2;
+          coef[5]=1./3150./dx2;
+          break;
+        case 6:
+          coef[0]=-5369./1800./dx2;
+          coef[1]=12./7./dx2;
+          coef[2]=-15./56./dx2;
+          coef[3]=10./189./dx2;                 &
+          coef[4]=-1./112./dx2;
+          coef[5]=2./1925./dx2;
+          coef[6]=1./16632./dx2;
+          break;
+      }
   }
-  float compute_dt_sch(const float vmax, vectorReal const &coefx, vectorReal const &coefy, vectorReal const &coefz) 
+  float compute_dt_sch(const int Lx, const int Ly, const int Lz, const float vmax, 
+                       vectorReal const &coefx, vectorReal const &coefy, vectorReal const &coefz) 
   {
 
       float ftmp = 0.;
       float cfl=0.8;
       ftmp += fabsf(coefx[0]) + fabsf(coefy[0]) + fabsf(coefz[0]);
-      for (int i = 1; i < 5; i++) {
+      for (int i = 1; i < (Lx+1); i++) {
           ftmp += 2.f*fabsf(coefx[i]);
+      }
+      for (int i = 1; i < (Ly+1); i++) {
           ftmp += 2.f*fabsf(coefy[i]);
+      }
+      for (int i = 1; i < (Lz+1); i++) {
           ftmp += 2.f*fabsf(coefz[i]);
       }
       return 2*cfl/(sqrtf(ftmp)*vmax);
