@@ -12,12 +12,9 @@ struct FDTDInit
   SolverUtils myUtils;
 
   int sourceOrder=1;
-  int Lx=2;
-  int Ly=2;
-  int Lz=4;
-  int ncoefsX=Lx+1;
-  int ncoefsY=Ly+1;
-  int ncoefsZ=Lz+1;
+  int ncoefsX;
+  int ncoefsY;
+  int ncoefsZ;
 
   float f0=15.;
   float fmax=2.5*f0;
@@ -35,25 +32,78 @@ struct FDTDInit
 
   void init_geometry( int argc, char *argv[], FDTDGRIDS & myGrids )
   {
-    myGrids.nx = (argc > 1)? std::stoi( argv[1] ) : 150;
+    myGrids.nx = 150;
     myGrids.ny = myGrids.nx;
     myGrids.nz = myGrids.nx;
 
     myGrids.xs = myGrids.nx/2;
     myGrids.ys = myGrids.ny/2;
     myGrids.zs = myGrids.nz/2;
-
-    printf( "Number of grids: nx=%d, ny=%d, nz=%d\n", myGrids.nx, myGrids.ny, myGrids.nz);
-    printf( "Source location: xs=%d, xy=%d, xz=%d\n", myGrids.xs, myGrids.ys, myGrids.zs);
-
-    myGrids.lx=Lx;
-    myGrids.ly=Ly;
-    myGrids.lz=Lz;
+    myGrids.lx=4;
+    myGrids.ly=4;
+    myGrids.lz=4;
+    ncoefsX=5;
+    ncoefsY=5;
+    ncoefsZ=5;
 
     myGrids.dx=10;
     myGrids.dy=10;
-    myGrids.dz=20;
+    myGrids.dz=10;
+    if(argc>1)
+    {
+        for (int i=1; i<argc; i=i+2)
+        {
+            // dimensions nx,ny,nz
+            printf("arg %s %s  \n",argv[i],argv[i+1]);
+            std::string arg=argv[i];
+            if (arg=="-nx") 
+            {
+            printf("arg in %s %s  \n",argv[i],argv[i+1]);
+                myGrids.nx=atoi(argv[i+1]);
+                myGrids.ny=myGrids.nx;
+                myGrids.nz=myGrids.nx; 
+            }
+            if (arg=="-ny") myGrids.ny=atoi(argv[i+1]);
+            if (arg=="-nz") myGrids.nz=atoi(argv[i+1]);
+           
+            // spatial sampling dx dy dz
+            if (arg=="-dx") 
+            {
+                myGrids.dx=atoi(argv[i+1]) ;
+                myGrids.dy=myGrids.dx;
+                myGrids.dz=myGrids.dx;
+            }
+            if (arg=="-dy") myGrids.dy=atoi(argv[i+1]) ;
+            if (arg=="-dz") myGrids.dz=atoi(argv[i+1]) ;
 
+            // half stencil length lx ly lz
+            if (arg=="-lx") 
+            {
+                myGrids.lx=atoi(argv[i+1]);
+                myGrids.ly=myGrids.lx;
+                myGrids.lz=myGrids.lx; 
+            }
+            if (arg=="-ly") myGrids.ly=atoi(argv[i+1]);
+            if (arg=="-lz") myGrids.lz=atoi(argv[i+1]);
+            ncoefsX=myGrids.lx+1;
+            ncoefsY=myGrids.ly+1;
+            ncoefsZ=myGrids.lz+1;
+
+            // source location xs ys zs
+            if (arg=="-xs") 
+            {
+                myGrids.xs=atoi(argv[i+1]) ;
+                myGrids.ys=myGrids.xs;
+                myGrids.zs=myGrids.zs;
+            }
+            if (arg=="-ys") myGrids.ys=atoi(argv[i+1]) ;
+            if (arg=="-zs") myGrids.ys=atoi(argv[i+1]) ;
+
+        }
+    }
+
+    printf( "Number of grids: nx=%d, ny=%d, nz=%d\n", myGrids.nx, myGrids.ny, myGrids.nz);
+    printf( "Source location: xs=%d, xy=%d, xz=%d\n", myGrids.xs, myGrids.ys, myGrids.zs);
     float lambdamax=vmin/fmax;
 
     // init pml limits
@@ -98,9 +148,9 @@ struct FDTDInit
     myModels.coefy = allocateVector< vectorReal >( ncoefsY, "coefy" );
     myModels.coefz = allocateVector< vectorReal >( ncoefsZ, "coefz" );
 
-    myFDTDUtils.init_coef( Lx, myGrids.dx, myModels.coefx );
-    myFDTDUtils.init_coef( Ly, myGrids.dy, myModels.coefy );
-    myFDTDUtils.init_coef( Lz, myGrids.dz, myModels.coefz );
+    myFDTDUtils.init_coef( myGrids.lx, myGrids.dx, myModels.coefx );
+    myFDTDUtils.init_coef( myGrids.ly, myGrids.dy, myModels.coefy );
+    myFDTDUtils.init_coef( myGrids.lz, myGrids.dz, myModels.coefz );
 
     float tmpX=0;
     for( int i=1;i<ncoefsX;i++ )
