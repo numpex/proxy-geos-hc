@@ -37,7 +37,7 @@ struct FDTDKernel
          lapy+=coefy[l]*(pnGlobal(IDX3_l(i,j+l,k),cb)+pnGlobal(IDX3_l(i,j-l,k),cb));
       }
       float lapz=0;
-      for (int l=1; l<coefy.size();l++)
+      for (int l=1; l<coefz.size();l++)
       {
          lapz+=coefz[l]*(pnGlobal(IDX3_l(i,j,k+l),cb)+pnGlobal(IDX3_l(i,j,k-l),cb));
       }
@@ -79,7 +79,7 @@ struct FDTDKernel
           lapy+=coefy[l]*(pnGlobal(IDX3_l(i,j+l,k),cb)+pnGlobal(IDX3_l(i,j-l,k),cb));
        }
        float lapz=0;
-       for (int l=1; l<coefy.size();l++)
+       for (int l=1; l<coefz.size();l++)
        {
           lapz+=coefz[l]*(pnGlobal(IDX3_l(i,j,k+l),cb)+pnGlobal(IDX3_l(i,j,k-l),cb));
        }
@@ -88,14 +88,13 @@ struct FDTDKernel
 
        pnGlobal(IDX3_l(i,j,k),ca)=((2.-eta[IDX3_eta1(i,j,k)]*eta[IDX3_eta1(i,j,k)]+2.*eta[IDX3_eta1(i,j,k)])
                                      *pnGlobal(IDX3_l(i,j,k),cb)-pnGlobal(IDX3_l(i,j,k),ca)
-                                     +vp[IDX3(i,j,k)]*(lap+phi[IDX3(i,j,k)]))/(1.+2.*eta[IDX3_eta1(i,j,k)]);
+                                     +vp[IDX3(i,j,k)]*(phi[IDX3(i,j,k)]+lap))/(1.+2.*eta[IDX3_eta1(i,j,k)]);
 
        phi[IDX3(i,j,k)]=(phi[IDX3(i,j,k)]
          -((eta[IDX3_eta1(i+1,j,k)]-eta[IDX3_eta1(i-1,j,k)])*(pnGlobal(IDX3_l(i+1,j,k),cb)-pnGlobal(IDX3_l(i-1,j,k),cb))*myGrids.hdx_2
           +(eta[IDX3_eta1(i,j+1,k)]-eta[IDX3_eta1(i,j-1,k)])*(pnGlobal(IDX3_l(i,j+1,k),cb)-pnGlobal(IDX3_l(i,j-1,k),cb))*myGrids.hdy_2
           +(eta[IDX3_eta1(i,j,k+1)]-eta[IDX3_eta1(i,j,k-1)])*(pnGlobal(IDX3_l(i,j,k+1),cb)-pnGlobal(IDX3_l(i,j,k-1),cb))*myGrids.hdz_2))
          /(1.+eta[IDX3_eta1(i,j,k)]);
-
      LOOP3DEND
      return(0);
   }

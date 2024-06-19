@@ -50,7 +50,6 @@ int main( int argc, char *argv[] )
 
   // main loop for wave propagation on each time step
   for( int itSample=0; itSample<myInit.nSamples; itSample++ )
-  //for (int itSample=0; itSample<10; itSample++)
   {
     // add RHS term
     startAddRHS = system_clock::now();

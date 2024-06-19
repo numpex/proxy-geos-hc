@@ -12,9 +12,12 @@ struct FDTDInit
   SolverUtils myUtils;
 
   int sourceOrder=1;
-  int ncoefsX=5;
-  int ncoefsY=5;
-  int ncoefsZ=5;
+  int Lx=2;
+  int Ly=2;
+  int Lz=4;
+  int ncoefsX=Lx+1;
+  int ncoefsY=Ly+1;
+  int ncoefsZ=Lz+1;
 
   float f0=15.;
   float fmax=2.5*f0;
@@ -22,7 +25,7 @@ struct FDTDInit
   float timeStep;
   int nSamples;
 
-  float vmin=1500;
+  float vmin=2500;
   float vmax=4500;
 
   int i1=0;
@@ -43,20 +46,20 @@ struct FDTDInit
     printf( "Number of grids: nx=%d, ny=%d, nz=%d\n", myGrids.nx, myGrids.ny, myGrids.nz);
     printf( "Source location: xs=%d, xy=%d, xz=%d\n", myGrids.xs, myGrids.ys, myGrids.zs);
 
-    myGrids.lx=4;
-    myGrids.ly=4;
-    myGrids.lz=4;
+    myGrids.lx=Lx;
+    myGrids.ly=Ly;
+    myGrids.lz=Lz;
 
     myGrids.dx=10;
     myGrids.dy=10;
-    myGrids.dz=10;
+    myGrids.dz=20;
 
     float lambdamax=vmin/fmax;
 
     // init pml limits
-    myGrids.ntaperx=3;
-    myGrids.ntapery=3;
-    myGrids.ntaperz=3;
+    myGrids.ntaperx=4;
+    myGrids.ntapery=4;
+    myGrids.ntaperz=4;
 
     myGrids.hdx_2=1./(4. * myGrids.dx * myGrids.dx);
     myGrids.hdy_2=1./(4. * myGrids.dy * myGrids.dy);
@@ -95,9 +98,9 @@ struct FDTDInit
     myModels.coefy = allocateVector< vectorReal >( ncoefsY, "coefy" );
     myModels.coefz = allocateVector< vectorReal >( ncoefsZ, "coefz" );
 
-    myFDTDUtils.init_coef( ncoefsX, myGrids.dx, myModels.coefx );
-    myFDTDUtils.init_coef( ncoefsY, myGrids.dy, myModels.coefy );
-    myFDTDUtils.init_coef( ncoefsZ, myGrids.dz, myModels.coefz );
+    myFDTDUtils.init_coef( Lx, myGrids.dx, myModels.coefx );
+    myFDTDUtils.init_coef( Ly, myGrids.dy, myModels.coefy );
+    myFDTDUtils.init_coef( Lz, myGrids.dz, myModels.coefz );
 
     float tmpX=0;
     for( int i=1;i<ncoefsX;i++ )
@@ -121,8 +124,9 @@ struct FDTDInit
     myModels.coef0+= -2.*(myModels.coefz[1]+myModels.coefz[2]+myModels.coefz[3]+myModels.coefz[4]);
     */
 
-    timeStep=myFDTDUtils.compute_dt_sch( vmax, myModels.coefx, myModels.coefy, myModels.coefz );
+    timeStep=myFDTDUtils.compute_dt_sch(vmax, myModels.coefx, myModels.coefy, myModels.coefz );
     nSamples=timeMax/timeStep;
+    printf("init coefs done\n");
 
   }
 
