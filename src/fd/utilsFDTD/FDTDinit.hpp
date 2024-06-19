@@ -97,7 +97,7 @@ struct FDTDInit
                 myGrids.zs=myGrids.zs;
             }
             if (arg=="-ys") myGrids.ys=atoi(argv[i+1]) ;
-            if (arg=="-zs") myGrids.ys=atoi(argv[i+1]) ;
+            if (arg=="-zs") myGrids.zs=atoi(argv[i+1]) ;
 
         }
     }
