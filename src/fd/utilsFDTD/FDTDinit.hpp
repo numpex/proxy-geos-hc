@@ -28,6 +28,8 @@ struct FDTDInit
   int i1=0;
   int i2=1;
 
+  bool saveSnapShots=false;
+
   vectorReal RHSTerm;
 
   void init_geometry( int argc, char *argv[], FDTDGRIDS & myGrids )
@@ -94,16 +96,24 @@ struct FDTDInit
             {
                 myGrids.xs=atoi(argv[i+1]) ;
                 myGrids.ys=myGrids.xs;
-                myGrids.zs=myGrids.zs;
+                myGrids.zs=myGrids.xs;
             }
             if (arg=="-ys") myGrids.ys=atoi(argv[i+1]) ;
             if (arg=="-zs") myGrids.zs=atoi(argv[i+1]) ;
 
+            // save snapshots
+            if (arg=="-savesnapshots")saveSnapShots=true;
         }
+    }
+    else
+    {
+        printf( "usage fd_exe -nx XXX -ny YYY -nz ZZZZ -lx LX -ly LY -lz LZ -dx DX -dy DY -dz DZ  " );
+        printf( "-xs XS -ys YS -zs ZS -savesnapshots \n " );
+        printf( "if no argument running with default values\n" );
     }
 
     printf( "Number of grids: nx=%d, ny=%d, nz=%d\n", myGrids.nx, myGrids.ny, myGrids.nz);
-    printf( "Source location: xs=%d, xy=%d, xz=%d\n", myGrids.xs, myGrids.ys, myGrids.zs);
+    printf( "Source location: xs=%d, ys=%d, zs=%d\n", myGrids.xs, myGrids.ys, myGrids.zs);
     float lambdamax=vmin/fmax;
 
     // init pml limits
@@ -168,11 +178,6 @@ struct FDTDInit
        tmpZ+=myModels.coefz[i];
     }
     myModels.coef0 = -2.*(tmpX+tmpY+tmpZ);
-    /*
-    myModels.coef0 = -2.*(myModels.coefx[1]+myModels.coefx[2]+myModels.coefx[3]+myModels.coefx[4]);
-    myModels.coef0+= -2.*(myModels.coefy[1]+myModels.coefy[2]+myModels.coefy[3]+myModels.coefy[4]);
-    myModels.coef0+= -2.*(myModels.coefz[1]+myModels.coefz[2]+myModels.coefz[3]+myModels.coefz[4]);
-    */
 
     timeStep=myFDTDUtils.compute_dt_sch(vmax, myModels.coefx, myModels.coefy, myModels.coefz );
     nSamples=timeMax/timeStep;

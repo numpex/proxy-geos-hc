@@ -65,7 +65,7 @@ int main( int argc, char *argv[] )
     startOutputTime = system_clock::now();
     swap( myInit.i1, myInit.i2 );
     // print infos and save wavefields
-    myFDTDUtils.output( myGrids, myModels.pnGlobal, itSample, myInit.i2 );
+    myFDTDUtils.output( myGrids, myModels.pnGlobal, itSample, myInit.i2, myInit.saveSnapShots );
     totalOutputTime += system_clock::now() - startOutputTime;
 
   }

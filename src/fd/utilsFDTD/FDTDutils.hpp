@@ -188,7 +188,7 @@ struct FDTDUtils
                 z1+1, z2, z3+1, z4, z5+1, z6);
   }
       
-  void output(FDTDGRIDS &myGrids, arrayReal const&pnGlobal, int itSample, const int &i1)
+  void output(FDTDGRIDS &myGrids, arrayReal const&pnGlobal, int itSample, const int &i1,const bool saveSnapShots)
   {
 
       if(itSample%50==0)
@@ -198,9 +198,10 @@ struct FDTDUtils
 
         printf("TimeStep=%d\t; Pressure value at source [%d %d %d] = %f\n", itSample,
                myGrids.xs, myGrids.ys, myGrids.zs, pnGlobal(IDX3_l(myGrids.xs,myGrids.ys,myGrids.zs),i1));
-        #ifdef FD_SAVE_SNAPSHOTS
-        write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pnGlobal, itSample, i1);
-        #endif
+        //#ifdef FD_SAVE_SNAPSHOTS
+        if(saveSnapShots)
+            write_io( myGrids, 0, myGrids.nx, myGrids.ny/2, myGrids.ny/2, 0, myGrids.nz, pnGlobal, itSample, i1);
+        //#endif
 
       } 
 
@@ -227,6 +228,7 @@ struct FDTDUtils
       // Clean up 
       fclose(snapshot_file);
   }
+
 
 };
 
