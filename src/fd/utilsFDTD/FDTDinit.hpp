@@ -22,7 +22,7 @@ struct FDTDInit
   float timeStep;
   int nSamples;
 
-  float vmin=2500;
+  float vmin=1500;
   float vmax=4500;
 
   int i1=0;
