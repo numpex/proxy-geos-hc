@@ -155,6 +155,8 @@ constexpr size_t greater_of_squarest_factor_pair(size_t n)
     vectorReal RHSTerm  = myModels.RHSTerm;\
     vectorReal pn  = myModels.pn;\
     vectorReal vp  = myModels.vp;
+  #define CREATEVIEWSPONGE\
+    vectorReal spongeArray=myModels.spongeArray;
   #define PN_Global pnGlobal 
 #endif
 

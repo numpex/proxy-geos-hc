@@ -30,6 +30,7 @@ struct FDTDMODELS
   vectorReal coefy;
   vectorReal coefz;
   vectorReal RHSTerm;
+  vectorReal spongeArray;
 
   vectorReal vp;
   vectorReal phi;

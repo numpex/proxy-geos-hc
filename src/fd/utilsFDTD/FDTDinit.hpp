@@ -125,9 +125,9 @@ struct FDTDInit
     myGrids.hdy_2=1./(4. * myGrids.dy * myGrids.dy);
     myGrids.hdz_2=1./(4. * myGrids.dz * myGrids.dz);
 
-    myGrids.ndampx=myGrids.ntaperx * lambdamax / myGrids.dx;
-    myGrids.ndampy=myGrids.ntapery * lambdamax / myGrids.dy;
-    myGrids.ndampz=myGrids.ntaperz * lambdamax / myGrids.dz;
+    myGrids.ndampx=0;//myGrids.ntaperx * lambdamax / myGrids.dx;
+    myGrids.ndampy=0;//myGrids.ntapery * lambdamax / myGrids.dy;
+    myGrids.ndampz=0;//myGrids.ntaperz * lambdamax / myGrids.dz;
 
     myGrids.x1=0;
     myGrids.x2=myGrids.ndampx;
@@ -205,22 +205,14 @@ struct FDTDInit
     int extModelVolume = ( myGrids.nx + 2 * myGrids.lx ) *
                          ( myGrids.ny + 2 * myGrids.ly ) *
                          ( myGrids.nz + 2 * myGrids.lz );
-    int etaModelVolume = ( myGrids.nx + 2 ) * ( myGrids.ny + 2 ) * ( myGrids.nz + 2 );
 
+    myModels.spongeArray=allocateVector<vectorReal>(modelVolume,"spongeArray");
     myModels.vp   = allocateVector< vectorReal >( modelVolume, "vp" );
     myModels.pnp1 = allocateVector< vectorReal >( extModelVolume, "pnp1" );
     myModels.pn   = allocateVector< vectorReal >( extModelVolume, "pn" );
     myModels.phi  = allocateVector< vectorReal >( modelVolume, "phi" );
-    myModels.eta  = allocateVector< vectorReal >( etaModelVolume, "eta" );
     myModels.pnGlobal = allocateArray2D< arrayReal >( extModelVolume, 2, "pnGlobal" );
 
-    myFDTDUtils.init_eta( myGrids.nx, myGrids.ny, myGrids.nz,
-                          myGrids.ndampx, myGrids.ndampy, myGrids.ndampz,
-                          myGrids.x1, myGrids.x2, myGrids.x3, myGrids.x4, myGrids.x5, myGrids.x6,
-                          myGrids.y1, myGrids.y2, myGrids.y3, myGrids.y4, myGrids.y5, myGrids.y6,
-                          myGrids.z1, myGrids.z2, myGrids.z3, myGrids.z4, myGrids.z5, myGrids.z6,
-                          myGrids.dx, myGrids.dy, myGrids.dz, timeStep,
-                          vmax, myModels.eta );
 
     float init_vp_value = vmin*vmin*timeStep*timeStep;
 
@@ -253,6 +245,84 @@ struct FDTDInit
     }
   }
 
+  void defineSpongeBoundary(FDTDGRIDS &myGrids, vectorReal & spongeArray )
+  {
+     const int L=20;
+     const int nx=myGrids.nx;
+     const int ny=myGrids.ny;
+     const int nz=myGrids.nz;
+     const float dx=myGrids.dx;
+     const float dy=myGrids.dy;
+     const float dz=myGrids.dz;
+     const float alpha=-0.00015;
+
+     // compute sponge boundary terms
+     // intailize to 1
+     for ( int k=0; k<nz;k++ )
+     {
+         for (int j=0;j<ny;j++)
+         {
+             for (int i=0; i<nx; i++)
+             {
+                 spongeArray(IDX3(i,j,k))=1;
+             }
+         }
+     }
+
+     // X boundary
+     for ( int k=L; k<nz-L;k++ )
+     {
+         for (int j=L;j<ny-L;j++)
+         {
+             for (int i=0; i<L; i++)
+             {
+                 //spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-i)*dx,2));
+                 spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-i),2));
+             }
+             for (int i=nx-L; i<nx; i++)
+             {
+                 //spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-(nx-i))*dx,2));
+                 spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-(nx-i)),2));
+             }
+         }
+     }
+
+     // Y boundary
+     for ( int k=L; k<nz-L;k++ )
+     {
+         for (int i=L;i<nx-L;i++)
+         {
+             for (int j=0; j<L; j++)
+             {
+                 //spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-j)*dy,2));
+                 spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-j),2));
+             }
+             for (int j=ny-L; j<ny; j++)
+             {
+                 //spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-(ny-j))*dy,2));
+                 spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-(ny-j)),2));
+             }
+         }
+     }
+
+     // Z boundary
+     for ( int j=L; j<ny-L;j++ )
+     {
+         for (int i=L;i<nx-L;i++)
+         {
+             for (int k=0; k<L; k++)
+             {
+                 //spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-k))*dz,2));
+                 spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-k),2));
+             }
+             for (int k=nz-L; k<nz; k++)
+             {
+                 //spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-(nz-k))*dz,2));
+                 spongeArray(IDX3(i,j,k))= exp(alpha*pow((L-(nz-k)),2));
+             }
+         }
+     }
+  }
 };
 
 #endif  //FDTDINIT_HPP

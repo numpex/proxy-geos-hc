@@ -39,6 +39,9 @@ int main( int argc, char *argv[] )
   // initialize velocity and pressure models, etc
   myInit.init_models( myGrids, myModels );
 
+  // initialize sponge boundary
+  myInit.defineSpongeBoundary(myGrids,myModels.spongeArray);
+
   cout << "\n+================================= "<< endl;
   cout << "|  Running FDTD Application ...       "<< endl;
   cout << "+================================= \n"<< endl;
@@ -69,7 +72,6 @@ int main( int argc, char *argv[] )
     totalOutputTime += system_clock::now() - startOutputTime;
 
   }
-
 
   cout << "\n+================================= "<< endl;
   cout << "|  FDTD Application Finished.       "<< endl;
