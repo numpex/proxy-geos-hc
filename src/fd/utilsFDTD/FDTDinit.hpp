@@ -81,6 +81,7 @@ struct FDTDInit
                 myGrids.dx=atoi(argv[i+1]) ;
                 myGrids.dy=myGrids.dx;
                 myGrids.dz=myGrids.dx;
+                i=i+2;
             }
             if (arg=="-dy") {
                 myGrids.dy=atoi(argv[i+1]);
@@ -97,6 +98,7 @@ struct FDTDInit
                 myGrids.lx=atoi(argv[i+1]);
                 myGrids.ly=myGrids.lx;
                 myGrids.lz=myGrids.lx; 
+                i=i+2;
             }
             if (arg=="-ly") {
                 myGrids.ly=atoi(argv[i+1]);
@@ -116,6 +118,7 @@ struct FDTDInit
                 myGrids.xs=atoi(argv[i+1]) ;
                 myGrids.ys=myGrids.xs;
                 myGrids.zs=myGrids.xs;
+                i=i+2;
             }
             if (arg=="-ys") {
                 myGrids.ys=atoi(argv[i+1]);
@@ -308,9 +311,9 @@ struct FDTDInit
      const int nx=myGrids.nx;
      const int ny=myGrids.ny;
      const int nz=myGrids.nz;
-     const float dx=myGrids.dx;
-     const float dy=myGrids.dy;
-     const float dz=myGrids.dz;
+     //const float dx=myGrids.dx;
+     //const float dy=myGrids.dy;
+     //const float dz=myGrids.dz;
      const float alpha=-0.00015;
 
      // compute sponge boundary terms
