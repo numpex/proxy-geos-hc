@@ -29,6 +29,7 @@ struct FDTDInit
   int i2=1;
 
   bool saveSnapShots=false;
+  bool usePML=false;
 
   vectorReal RHSTerm;
 
@@ -53,20 +54,26 @@ struct FDTDInit
     myGrids.dz=10;
     if(argc>1)
     {
-        for (int i=1; i<argc; i=i+2)
+        int i=1;
+        while (i<argc)
         {
             // dimensions nx,ny,nz
-            printf("arg %s %s  \n",argv[i],argv[i+1]);
             std::string arg=argv[i];
             if (arg=="-nx") 
             {
-            printf("arg in %s %s  \n",argv[i],argv[i+1]);
                 myGrids.nx=atoi(argv[i+1]);
                 myGrids.ny=myGrids.nx;
                 myGrids.nz=myGrids.nx; 
+                i=i+2;
             }
-            if (arg=="-ny") myGrids.ny=atoi(argv[i+1]);
-            if (arg=="-nz") myGrids.nz=atoi(argv[i+1]);
+            if (arg=="-ny") {
+                myGrids.ny=atoi(argv[i+1]);
+                i=i+2;
+            }
+            if (arg=="-nz") {
+                myGrids.nz=atoi(argv[i+1]);
+                i=i+2;
+            }
            
             // spatial sampling dx dy dz
             if (arg=="-dx") 
@@ -75,8 +82,14 @@ struct FDTDInit
                 myGrids.dy=myGrids.dx;
                 myGrids.dz=myGrids.dx;
             }
-            if (arg=="-dy") myGrids.dy=atoi(argv[i+1]) ;
-            if (arg=="-dz") myGrids.dz=atoi(argv[i+1]) ;
+            if (arg=="-dy") {
+                myGrids.dy=atoi(argv[i+1]);
+                i=i+2;
+            }
+            if (arg=="-dz") {
+                myGrids.dz=atoi(argv[i+1]);
+                i=i+2;
+            }
 
             // half stencil length lx ly lz
             if (arg=="-lx") 
@@ -85,8 +98,14 @@ struct FDTDInit
                 myGrids.ly=myGrids.lx;
                 myGrids.lz=myGrids.lx; 
             }
-            if (arg=="-ly") myGrids.ly=atoi(argv[i+1]);
-            if (arg=="-lz") myGrids.lz=atoi(argv[i+1]);
+            if (arg=="-ly") {
+                myGrids.ly=atoi(argv[i+1]);
+                i=i+2;
+            }
+            if (arg=="-lz") {
+                myGrids.lz=atoi(argv[i+1]);
+                i=i+2;
+            }
             ncoefsX=myGrids.lx+1;
             ncoefsY=myGrids.ly+1;
             ncoefsZ=myGrids.lz+1;
@@ -98,17 +117,33 @@ struct FDTDInit
                 myGrids.ys=myGrids.xs;
                 myGrids.zs=myGrids.xs;
             }
-            if (arg=="-ys") myGrids.ys=atoi(argv[i+1]) ;
-            if (arg=="-zs") myGrids.zs=atoi(argv[i+1]) ;
+            if (arg=="-ys") {
+                myGrids.ys=atoi(argv[i+1]);
+                i=i+2;
+            }
+            if (arg=="-zs") {
+                myGrids.zs=atoi(argv[i+1]);
+                i=i+2;
+            }
 
             // save snapshots
-            if (arg=="-savesnapshots")saveSnapShots=true;
-        }
+            if (arg=="-savesnapshots"){
+                saveSnapShots=true;
+                i=i+1;
+            }
+            
+            //  use PML
+            if (arg=="-usePML"){
+                usePML=true;
+                i=i+1;
+            
+            }
+       }
     }
     else
     {
         printf( "usage fd_exe -nx XXX -ny YYY -nz ZZZZ -lx LX -ly LY -lz LZ -dx DX -dy DY -dz DZ  " );
-        printf( "-xs XS -ys YS -zs ZS -savesnapshots \n " );
+        printf( "-xs XS -ys YS -zs ZS -savesnapshots (false) -usePML (false) \n " );
         printf( "if no argument running with default values\n" );
     }
 
@@ -125,10 +160,19 @@ struct FDTDInit
     myGrids.hdy_2=1./(4. * myGrids.dy * myGrids.dy);
     myGrids.hdz_2=1./(4. * myGrids.dz * myGrids.dz);
 
-    myGrids.ndampx=0;//myGrids.ntaperx * lambdamax / myGrids.dx;
-    myGrids.ndampy=0;//myGrids.ntapery * lambdamax / myGrids.dy;
-    myGrids.ndampz=0;//myGrids.ntaperz * lambdamax / myGrids.dz;
-
+    printf("usePML=%d\n",usePML);
+    if(usePML)
+    {
+      myGrids.ndampx=myGrids.ntaperx * lambdamax / myGrids.dx;
+      myGrids.ndampy=myGrids.ntapery * lambdamax / myGrids.dy;
+      myGrids.ndampz=myGrids.ntaperz * lambdamax / myGrids.dz;
+    }
+    else
+    {    
+      myGrids.ndampx=0;
+      myGrids.ndampy=0;
+      myGrids.ndampz=0;
+    }
     myGrids.x1=0;
     myGrids.x2=myGrids.ndampx;
     myGrids.x3=myGrids.ndampx;
@@ -205,15 +249,28 @@ struct FDTDInit
     int extModelVolume = ( myGrids.nx + 2 * myGrids.lx ) *
                          ( myGrids.ny + 2 * myGrids.ly ) *
                          ( myGrids.nz + 2 * myGrids.lz );
+    int etaModelVolume = ( myGrids.nx + 2 ) * ( myGrids.ny + 2 ) * ( myGrids.nz + 2 );
 
     myModels.spongeArray=allocateVector<vectorReal>(modelVolume,"spongeArray");
     myModels.vp   = allocateVector< vectorReal >( modelVolume, "vp" );
     myModels.pnp1 = allocateVector< vectorReal >( extModelVolume, "pnp1" );
     myModels.pn   = allocateVector< vectorReal >( extModelVolume, "pn" );
-    myModels.phi  = allocateVector< vectorReal >( modelVolume, "phi" );
     myModels.pnGlobal = allocateArray2D< arrayReal >( extModelVolume, 2, "pnGlobal" );
 
-
+    if(usePML)
+    {
+    printf("ici\n");
+      myModels.phi  = allocateVector< vectorReal >( modelVolume, "phi" );
+      myModels.eta  = allocateVector< vectorReal >( etaModelVolume, "eta" );
+      myFDTDUtils.init_eta( myGrids.nx, myGrids.ny, myGrids.nz,
+                            myGrids.ndampx, myGrids.ndampy, myGrids.ndampz,
+                            myGrids.x1, myGrids.x2, myGrids.x3, myGrids.x4, myGrids.x5, myGrids.x6,
+                            myGrids.y1, myGrids.y2, myGrids.y3, myGrids.y4, myGrids.y5, myGrids.y6,
+                            myGrids.z1, myGrids.z2, myGrids.z3, myGrids.z4, myGrids.z5, myGrids.z6,
+                            myGrids.dx, myGrids.dy, myGrids.dz, timeStep,
+                            vmax, myModels.eta );
+    printf("ici\n");
+    }
     float init_vp_value = vmin*vmin*timeStep*timeStep;
 
     // initialize vp and pressure field

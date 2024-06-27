@@ -61,7 +61,14 @@ int main( int argc, char *argv[] )
 
     //compute one step
     startComputeTime = system_clock::now();
-    myKernel.computeOneStep( myGrids, myModels, myInit.i1, myInit.i2 );
+    if( myInit.usePML )
+    {
+      myKernel.computeOneStepPML( myGrids, myModels, myInit.i1, myInit.i2 );
+    }
+    else
+    {
+        myKernel.computeOneStepSB( myGrids, myModels, myInit.i1, myInit.i2 );
+    }
     totalComputeTime += system_clock::now() - startComputeTime;
 
     // swap wavefields
