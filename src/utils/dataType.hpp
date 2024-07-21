@@ -33,7 +33,7 @@ public:
   T & operator=( const T & data )
   { return *this; };
 
-  int size(){return this->size();}
+  int size(){return this->size();};
 
 private:
   std::vector< T > data;

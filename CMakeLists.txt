@@ -11,8 +11,8 @@ set (CMAKE_VERBOSE_MAKEFILE ON )
 #-----------------------------------------------------
 # Setup the computing resources for running proxyapp
 #-----------------------------------------------------
-option (X86_laptop "X86 architecture  default" OFF)
-option (X86_cypress "Compilation on Cypress Cluster" ON)
+option (X86_laptop "X86 architecture  default" ON)
+option (X86_cypress "Compilation on Cypress Cluster" OFF)
 option (Power9_pangea3 "Power9 architecture  " OFF)
 option (ARM "ARM aarch64 architecture: e.g. grace CPU" OFF)
 
@@ -30,7 +30,7 @@ option (USE_RAJA "Use RAJA to parallelise loops" OFF)
 option (USE_KOKKOS "Use KOKKOS to parallelise loops" OFF)
 
 #---------------------------------------------------
-# Tests directory to perform differen tests before 
+# Tests directory to perform differen tests before
 # integration into proxy apps
 #---------------------------------------------------
 option (addTests "add Tests directory" OFF)
@@ -49,7 +49,7 @@ option (PRINT_ALLOC_INFO "printout memory allocation info" OFF)
 #---------------------------------------------------
 # Option to test SEM-proxy 2D case (default is 3D)
 #---------------------------------------------------
-option (SEM2D "SEM-proxy 2D or 3D case" ON)
+option (SEM2D "SEM-proxy 2D or 3D case" OFF)
 
 #---------------------------------------------------------
 # Option to use coloring scheme to avoid atomic operations

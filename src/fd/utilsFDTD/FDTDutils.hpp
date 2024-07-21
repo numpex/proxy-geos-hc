@@ -56,7 +56,7 @@ struct FDTDUtils
           break;
       }
   }
-  float compute_dt_sch(const float vmax, vectorReal const &coefx, vectorReal const &coefy, vectorReal const &coefz) 
+  float compute_dt_sch(const float vmax, vectorReal  &coefx, vectorReal  &coefy, vectorReal  &coefz) 
   {
 
       float ftmp = 0.;

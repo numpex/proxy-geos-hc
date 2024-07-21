@@ -288,6 +288,17 @@ struct FDTDInit
         }
       }
     }
+   #pragma omp parallel for collapse(3)
+    for( int i=0; i<myGrids.nx; i++ )
+    {
+      for( int j=0; j<myGrids.ny; j++ )
+      {
+        for( int k=myGrids.nz/2; k<myGrids.nz; k++ )
+        {
+          myModels.vp[IDX3( i, j, k )]=2*init_vp_value;
+        }
+      }
+    }
 
    #pragma omp parallel for collapse(3)
     for( int i=-myGrids.lx; i<myGrids.nx+myGrids.lx; i++ )
