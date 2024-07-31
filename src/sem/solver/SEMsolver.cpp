@@ -44,8 +44,8 @@ void SEMsolver::computeOneStep( const int & timeSample,
   // start main parallel section
   MAINLOOPHEAD( myInfo.numberOfElements, elementNumber )
 
-  float B[ROW][COL];
-  float R[ROW];
+  //float B[ROW][COL];
+  //float R[ROW];
   float massMatrixLocal[ROW];
   float pnLocal[ROW];
   float Y[ROW];
@@ -57,12 +57,8 @@ void SEMsolver::computeOneStep( const int & timeSample,
     pnLocal[i]=pnGlobal( localToGlobal, i2 );
   }
 
-  // compute Jacobian, massMatrix and B
-  myQk.computeB( elementNumber, order, weights, globalNodesList, globalNodesCoords, derivativeBasisFunction1D, massMatrixLocal, B );
-
-  // compute stifness  matrix ( durufle's optimization)
-  myQk.gradPhiGradPhi( nPointsPerElement, order, weights, derivativeBasisFunction1D, B, pnLocal, R, Y );
-
+  myQk.computeStiffnessVector(elementNumber,order,nPointsPerElement,globalNodesList,globalNodesCoords,
+                              weights,derivativeBasisFunction1D,massMatrixLocal,pnLocal,Y);
 
   //compute global mass Matrix and global stiffness vector
   for( int i=0; i<nPointsPerElement; i++ )

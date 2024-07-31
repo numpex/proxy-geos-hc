@@ -95,6 +95,19 @@ public:
                                          float const pnLocal[],
                                          float R[],
                                          float Y[] ) const;
+  // compute stiffnessVector.
+  // returns mass matrix and stiffness vector local to an element
+  PROXY_HOST_DEVICE void computeStiffnessVector(const int & elementNumber,
+                                                const int & order,
+                                                const int & nPointsPerElement,
+                                                ARRAY_INT_VIEW const & nodesList,
+                                                ARRAY_REAL_VIEW const & nodesCoords,
+                                                VECTOR_DOUBLE_VIEW const & weights,
+                                                ARRAY_DOUBLE_VIEW const & dPhi,
+                                                float massMatrixLocal[],
+                                                float const pnLocal[],
+                                                float Y[]) const;
+
   //computeDs
   PROXY_HOST_DEVICE void computeDs( const int & iFace,
                                     const int & order,
@@ -601,6 +614,28 @@ PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
       }
     }
     #endif
+}
+
+  // compute stiffnessVector.
+  // returns mass matrix and stiffness vector local to an element
+PROXY_HOST_DEVICE void SEMQkGL::computeStiffnessVector(const int & elementNumber,
+                                                const int & order,
+                                                const int & nPointsPerElement,
+                                                ARRAY_INT_VIEW const & nodesList,
+                                                ARRAY_REAL_VIEW const & nodesCoords,
+                                                VECTOR_DOUBLE_VIEW const & weights,
+                                                ARRAY_DOUBLE_VIEW const & dPhi,
+                                                float massMatrixLocal[],
+                                                float const pnLocal[],
+                                                float Y[]) const
+{
+    float B[ROW][COL];
+    float R[ROW];
+    // compute Jacobian, massMatrix and B
+     computeB( elementNumber, order, weights, nodesList, nodesCoords, dPhi, massMatrixLocal, B );
+
+     // compute stifness  matrix ( durufle's optimization)
+     gradPhiGradPhi( nPointsPerElement, order, weights, dPhi, B, pnLocal, R, Y );
 }
 
 //computeDs
