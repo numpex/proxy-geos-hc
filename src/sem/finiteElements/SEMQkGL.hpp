@@ -249,6 +249,15 @@ public:
                               double ( & J )[3][3] ) const;
 
   /**
+   * @brief computes the non-zero contributions of the d.o.f. indexd by q to the
+   *   mass matrix M, i.e., the superposition matrix of the shape functions.
+   * @param q The quadrature point index
+   * @param X Array containing the coordinates of the mesh support points.
+   * @return The diagonal mass term associated to q
+  */
+   PROXY_HOST_DEVICE double computeMassTerm( int const r,int const q, double const (&X)[8][3] ) const;
+
+  /**
    * @brief Calculates the isoparametric "geometrical" transformation
    *  matrix/mapping from the parent space to the physical space.
    * @param qa The 1d quadrature point index in xi0 direction (0,1)
@@ -277,6 +286,17 @@ public:
                             double const (&X)[8][3],
                             float *m_p_n,
                             float *stiffnessVector) const;
+
+  // compute stiffnessVector.
+  // returns mass matrix and stiffness vector local to an element
+  PROXY_HOST_DEVICE void computeStiffnessVector(const int & elementNumber,
+                                                          const int & order,
+                                                          const int & nPointsPerElement,
+                                                          ARRAY_INT_VIEW const & nodesList,
+                                                          ARRAY_REAL_VIEW const & nodesCoords,
+                                                          float pnLocal[],
+                                                          float Y[]) const;
+
 };
 
 // get JacobianMatrix at node q=i1+i2*(order+1)
@@ -776,8 +796,8 @@ PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
     #endif
 }
 
-  // compute stiffnessVector.
-  // returns mass matrix and stiffness vector local to an element
+// compute stiffnessVector.
+// returns mass matrix and stiffness vector local to an element
 PROXY_HOST_DEVICE void SEMQkGL::computeStiffnessVector(const int & elementNumber,
                                                        const int & order,
                                                        const int & nPointsPerElement,
@@ -1086,9 +1106,9 @@ PROXY_HOST_DEVICE void SEMQkGL::jacobianTransformation( int const qa, int const 
  * @param B Array to store the  the geometrical symetic matrix=detJ*J^{-1}J^{-T}.
 */
 PROXY_HOST_DEVICE void SEMQkGL::computeBMatrix( int const qa, int const qb, int const qc,
-                      double const (&X)[8][3],
-                      double (& J)[3][3],
-                      double (& B)[6] ) const
+                                                double const (&X)[8][3],
+                                                double (& J)[3][3],
+                                                double (& B)[6] ) const
 {
     jacobianTransformation( qa, qb, qc, X, J );
     double const detJ = determinant( J );
@@ -1154,14 +1174,49 @@ PROXY_HOST_DEVICE void SEMQkGL::computeStiffnessTerm( int r, int const q,
                                                       double const (&X)[8][3],
                                                       float *m_p_n,
                                                       float *stiffnessVector) const
- {
+{
    int qa, qb, qc;
    multiIndex( r,q, qa, qb, qc );
    double B[6] = {0};
    double J[3][3] = {{0}};
    computeBMatrix( qa, qb, qc, X, J, B );
    computeGradPhiBGradPhi( r, qa, qb, qc, B, m_p_n, stiffnessVector);
- }
+}
 
+// compute stiffnessVector.
+// returns mass matrix and stiffness vector local to an element
+PROXY_HOST_DEVICE void SEMQkGL::computeStiffnessVector(const int & elementNumber,
+                                                       const int & order,
+                                                       const int & nPointsPerElement,
+                                                       ARRAY_INT_VIEW const & nodesList,
+                                                       ARRAY_REAL_VIEW const & nodesCoords,
+                                                       float pnLocal[],
+                                                       float Y[]) const
+{
+    double X[8][3];
+    for (int q=0;q<nPointsPerElement;q++)
+    {
+        computeStiffnessTerm(order, q, X, pnLocal, Y);
+    }
+}
+
+
+/**
+ * @brief computes the non-zero contributions of the d.o.f. indexd by q to the
+ *   mass matrix M, i.e., the superposition matrix of the shape functions.
+ * @param q The quadrature point index
+ * @param X Array containing the coordinates of the mesh support points.
+ * @return The diagonal mass term associated to q
+*/
+PROXY_HOST_DEVICE double SEMQkGL::computeMassTerm( int const r,int const q, double const (&X)[8][3] ) const
+{
+   int qa, qb, qc;
+   multiIndex( r,q, qa, qb, qc );
+   const double w3D = weight( qa )*weight( qb )*weight( qc );
+   double J[3][3] = {{0}};
+   jacobianTransformation( qa, qb, qc, X, J );
+   return determinant( J )*w3D;
+
+}
 
 #endif //SEMQKGL_HPP_
