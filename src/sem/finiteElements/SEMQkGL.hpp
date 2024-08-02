@@ -14,7 +14,7 @@ class SEMQkGL
 private:
   int order;
 
-  /////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////
   //  from GEOS implementation
   /////////////////////////////////////////////////////////////////////////////////////
   double sqrt5 = 2.2360679774997897;
@@ -139,7 +139,6 @@ public:
   /////////////////////////////////////////////////////////////////////////////////////
   //  from GEOS implementation
   /////////////////////////////////////////////////////////////////////////////////////
- 
   PROXY_HOST_DEVICE  double parentSupportCoord( const int supportPointIndex ) const;
 
   /**
@@ -227,6 +226,14 @@ public:
   PROXY_HOST_DEVICE void symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6] ) const;
 
   /**
+   * @brief Invert the symmetric matrix @p symMatrix overwritting it.
+   * @param symMatrix The 3x3 symmetric matrix to take the inverse of and overwrite.
+   * @return The determinant.
+   * @note @p symMatrix can contain integers but @p dstMatrix must contain floating point values.
+  */
+  PROXY_HOST_DEVICE void symInvert( double  symMatrix[6] ) const;
+
+  /**
    * @brief Calculates the isoparametric "Jacobian" transformation
    *  matrix/mapping from the parent space to the physical space.
    * @param qa The 1d quadrature point index in xi0 direction (0,1)
@@ -263,14 +270,13 @@ public:
                                int const qb,
                                int const qc,
                                double const (&B)[6],
-                               float *stiffnessVector,
-                               float *m_p_n) const;
+                               float *m_p_n,
+                               float *stiffnessVector) const;
 
-  PROXY_HOST_DEVICE void computeStiffnessTerm( int r,
-                            int const q,
+  PROXY_HOST_DEVICE void computeStiffnessTerm( int r, int const q,
                             double const (&X)[8][3],
-                            float *stiffnessVector,
-                            float *m_p_n) const;
+                            float *m_p_n,
+                            float *stiffnessVector) const;
 };
 
 // get JacobianMatrix at node q=i1+i2*(order+1)
@@ -853,5 +859,309 @@ PROXY_HOST_DEVICE double SEMQkGL::parentSupportCoord( const int supportPointInde
 
    return result;
 }
+
+/**
+ * @brief The gradient of the basis function for a support point evaluated at
+ *   a given support point. By symmetry, p is assumed to be in 0, ..., (N-1)/2
+ * @param q The index of the basis function
+ * @param p The index of the support point
+ * @return The gradient of basis function.
+ */
+PROXY_HOST_DEVICE double SEMQkGL::gradientAt( const int q, const int p ) const
+{
+   switch( q )
+   {
+     case 0:
+       return p == 0 ? -3.0 : -0.80901699437494742410;
+     case 1:
+       return p == 0 ? 4.0450849718747371205 : 0.0;
+     case 2:
+       return p == 0 ? -1.5450849718747371205 : 1.1180339887498948482;
+     case 3:
+       return p == 0 ? 0.5 : -0.30901699437494742410;
+     default:
+       return 0;
+   }
+}
+
+/*
+ * @brief Compute the 1st derivative of the q-th 1D basis function at quadrature point p
+ * @param q the index of the 1D basis funcion
+ * @param p the index of the 1D quadrature point
+ * @return The derivative value
+ */
+PROXY_HOST_DEVICE double SEMQkGL::basisGradientAt( const int q, const int p ) const
+{
+  if( p <= halfNodes )
+  {
+    return gradientAt( q, p );
+  }
+  else
+  {
+    return -gradientAt( numSupportPoints - 1 - q, numSupportPoints - 1 - p );
+  }
+}
+
+/**
+ * @brief The value of the weight for the given support point
+ * @param q The index of the support point
+ * @return The value of the weight
+ */
+PROXY_HOST_DEVICE double SEMQkGL::weight( const int q ) const
+{
+   switch( q )
+   {
+     case 1:
+     case 2:
+       return 5.0/6.0;
+     default:
+      return 1.0/6.0;
+   }
+}
+/**
+ * @brief Calculates the linear index for support/quadrature points from ijk
+ *   coordinates.
+ * @param r order of polynomial approximation
+ * @param i The index in the xi0 direction (0,r)
+ * @param j The index in the xi1 direction (0,r)
+ * @param k The index in the xi2 direction (0,r)
+ * @return The linear index of the support/quadrature point (0-(r+1)^3)
+*/
+PROXY_HOST_DEVICE int SEMQkGL::linearIndex( const int r, const int i, const int j, const int k ) const
+{
+        return i + (r+1) * j + (r+1)*(r+1) * k;
+}
+
+/**
+ * @brief Calculate the Cartesian/TensorProduct index given the linear index
+ *   of a support point.
+ * @param linearIndex The linear index of support point
+ * @param r order of polynomial approximation
+ * @param i0 The Cartesian index of the support point in the xi0 direction.
+ * @param i1 The Cartesian index of the support point in the xi1 direction.
+ * @param i2 The Cartesian index of the support point in the xi2 direction.
+*/
+PROXY_HOST_DEVICE void SEMQkGL::multiIndex( int const linearIndex, int const r, int & i0, int & i1, int & i2 ) const
+{
+     i2 = linearIndex/((r+1)*(r+1));
+     i1 = (linearIndex%((r+1)*(r+1)))/(r+1);
+     i0 = (linearIndex%((r+1)*(r+1)))%(r+1);
+}
+
+/**
+ * @brief Compute the interpolation coefficients of the q-th quadrature point in a given direction
+ * @param q the index of the quadrature point in 1D
+ * @param k the index of the interval endpoint (0 or 1)
+ * @return The interpolation coefficient
+*/
+PROXY_HOST_DEVICE  double SEMQkGL::interpolationCoord( const int q, const int k ) const
+{
+   const double alpha = (parentSupportCoord( q ) + 1.0 ) / 2.0;
+   return k == 0 ? ( 1.0 - alpha ) : alpha;
+}
+
+/**
+ * @brief Compute the 1D factor of the coefficient of the jacobian on the q-th quadrature point,
+ * with respect to the k-th interval endpoint (0 or 1). The computation depends on the position
+ * in the basis tensor product of this term (i, equal to 0, 1 or 2) and on the direction in which
+ * the gradient is being computed (dir, from 0 to 2)
+ * @param q The index of the quadrature point in 1D
+ * @param i The index of the position in the tensor product
+ * @param k The index of the interval endpoint (0 or 1)
+ * @param dir The direction in which the derivatives are being computed
+ * @return The value of the jacobian factor
+*/
+PROXY_HOST_DEVICE  double SEMQkGL::jacobianCoefficient1D( const int q, const int i, const int k, const int dir ) const
+{
+   if( i == dir )
+   {
+     return k== 0 ? -1.0/2.0 : 1.0/2.0;
+   }
+   else
+   {
+     return interpolationCoord( q, k );
+   }
+}
+
+PROXY_HOST_DEVICE double SEMQkGL::determinant(double  m[3][3]) const
+{
+   return abs(m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2])
+             -m[0][1]*(m[1][0]*m[2][2]-m[2][0]*m[1][2])
+             +m[0][2]*(m[1][0]*m[2][1]-m[2][0]*m[1][1]));
+}
+ 
+/**
+ * @brief Invert the symmetric matrix @p srcSymMatrix and store the result in @p dstSymMatrix.
+ * @param dstSymMatrix The 3x3 symmetric matrix to write the inverse to.
+ * @param srcSymMatrix The 3x3 symmetric matrix to take the inverse of.
+ * @return The determinant.
+ * @note @p srcSymMatrix can contain integers but @p dstMatrix must contain floating point values.
+*/
+PROXY_HOST_DEVICE void SEMQkGL::symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6] ) const
+{
+ 
+   using FloatingPoint = std::decay_t< decltype( dstSymMatrix[ 0 ] ) >;
+ 
+   dstSymMatrix[ 0 ] = srcSymMatrix[ 1 ] * srcSymMatrix[ 2 ]
+                     - srcSymMatrix[ 3 ] * srcSymMatrix[ 3 ];
+   dstSymMatrix[ 5 ] = srcSymMatrix[ 4 ] * srcSymMatrix[ 3 ]
+                     - srcSymMatrix[ 5 ] * srcSymMatrix[ 2 ];
+   dstSymMatrix[ 4 ] = srcSymMatrix[ 5 ] * srcSymMatrix[ 3 ]
+                     - srcSymMatrix[ 4 ] * srcSymMatrix[ 1 ];
+ 
+   auto const det = srcSymMatrix[ 0 ] * dstSymMatrix[ 0 ] +
+                    srcSymMatrix[ 5 ] * dstSymMatrix[ 5 ] +
+                    srcSymMatrix[ 4 ] * dstSymMatrix[ 4 ];
+   FloatingPoint const invDet = FloatingPoint( 1 ) / det;
+ 
+   dstSymMatrix[ 0 ] *= invDet;
+   dstSymMatrix[ 5 ] *= invDet;
+   dstSymMatrix[ 4 ] *= invDet;
+   dstSymMatrix[ 1 ] = ( srcSymMatrix[ 0 ] * srcSymMatrix[ 2 ]
+                       - srcSymMatrix[ 4 ] * srcSymMatrix[ 4 ] ) * invDet;
+   dstSymMatrix[ 3 ] = ( srcSymMatrix[ 5 ] * srcSymMatrix[ 4 ]
+                       - srcSymMatrix[ 0 ] * srcSymMatrix[ 3 ] ) * invDet;
+   dstSymMatrix[ 2 ] = ( srcSymMatrix[ 0 ] * srcSymMatrix[ 1 ]
+                       - srcSymMatrix[ 5 ] * srcSymMatrix[ 5 ] ) * invDet;
+ 
+}
+
+/**
+ * @brief Invert the symmetric matrix @p symMatrix overwritting it.
+ * @param symMatrix The 3x3 symmetric matrix to take the inverse of and overwrite.
+ * @return The determinant.
+ * @note @p symMatrix can contain integers but @p dstMatrix must contain floating point values.
+ */
+PROXY_HOST_DEVICE void SEMQkGL::symInvert( double  symMatrix[6] ) const
+{
+    std::remove_reference_t< decltype( symMatrix[ 0 ] ) > temp[ 6 ];
+    symInvert( temp, symMatrix );
+    symMatrix[0]=temp[0];
+    symMatrix[1]=temp[1];
+    symMatrix[2]=temp[2];
+    symMatrix[3]=temp[3];
+    symMatrix[4]=temp[4];
+    symMatrix[5]=temp[5];
+}
+
+/**
+ * @brief Calculates the isoparametric "Jacobian" transformation
+ *  matrix/mapping from the parent space to the physical space.
+ * @param qa The 1d quadrature point index in xi0 direction (0,1)
+ * @param qb The 1d quadrature point index in xi1 direction (0,1)
+ * @param qc The 1d quadrature point index in xi2 direction (0,1)
+ * @param X Array containing the coordinates of the mesh support points.
+ * @param J Array to store the Jacobian transformation.
+ */
+PROXY_HOST_DEVICE void SEMQkGL::jacobianTransformation( int const qa, int const qb, int const qc,
+                              double const (&X)[8][3],
+                              double ( & J )[3][3] ) const
+{
+   for( int k = 0; k < 8; k++ )
+   {
+     const int ka = k % 2;
+     const int kb = ( k % 4 ) / 2;
+     const int kc = k / 4;
+     for( int j = 0; j < 3; j++ )
+     {
+       double jacCoeff = jacobianCoefficient1D( qa, 0, ka, j ) *
+                         jacobianCoefficient1D( qb, 1, kb, j ) *
+                         jacobianCoefficient1D( qc, 2, kc, j );
+       for( int i = 0; i < 3; i++ )
+       {
+         J[i][j] +=  jacCoeff * X[k][i];
+       }
+     }
+   }
+}
+
+/**
+ * @brief Calculates the isoparametric "geometrical" transformation
+ *  matrix/mapping from the parent space to the physical space.
+ * @param qa The 1d quadrature point index in xi0 direction (0,1)
+ * @param qb The 1d quadrature point index in xi1 direction (0,1)
+ * @param qc The 1d quadrature point index in xi2 direction (0,1)
+ * @param X Array containing the coordinates of the mesh support points.
+ * @param J Array to store the Jacobian transformation.
+ * @param B Array to store the  the geometrical symetic matrix=detJ*J^{-1}J^{-T}.
+*/
+PROXY_HOST_DEVICE void SEMQkGL::computeBMatrix( int const qa, int const qb, int const qc,
+                      double const (&X)[8][3],
+                      double (& J)[3][3],
+                      double (& B)[6] ) const
+{
+    jacobianTransformation( qa, qb, qc, X, J );
+    double const detJ = determinant( J );
+
+    // compute J^T.J/det(J), using Voigt notation for B
+    B[0] = (J[0][0]*J[0][0]+J[1][0]*J[1][0]+J[2][0]*J[2][0])/detJ;
+    B[1] = (J[0][1]*J[0][1]+J[1][1]*J[1][1]+J[2][1]*J[2][1])/detJ;
+    B[2] = (J[0][2]*J[0][2]+J[1][2]*J[1][2]+J[2][2]*J[2][2])/detJ;
+    B[3] = (J[0][1]*J[0][2]+J[1][1]*J[1][2]+J[2][1]*J[2][2])/detJ;
+    B[4] = (J[0][0]*J[0][2]+J[1][0]*J[1][2]+J[2][0]*J[2][2])/detJ;
+    B[5] = (J[0][0]*J[0][1]+J[1][0]*J[1][1]+J[2][0]*J[2][1])/detJ;
+
+    // compute detJ*J^{-1}J^{-T}
+    symInvert( B );
+}
+
+PROXY_HOST_DEVICE void SEMQkGL::computeGradPhiBGradPhi( int const r,
+                               int const qa, int const qb, int const qc,
+                               double const (&B)[6],
+                               float *m_p_n,
+                               float *stiffnessVector) const
+ {
+   const double w = weight( qa )*weight( qb )*weight( qc );
+   for( int i=0; i<num1dNodes; i++ )
+   {
+     const int ibc = linearIndex( r,i, qb, qc );
+     const int aic = linearIndex( r,qa, i, qc );
+     const int abi = linearIndex( r,qa, qb, i );
+     const double gia = basisGradientAt( i, qa );
+     const double gib = basisGradientAt( i, qb );
+     const double gic = basisGradientAt( i, qc );
+     for( int j=0; j<num1dNodes; j++ )
+     {
+       const int jbc = linearIndex( r,j, qb, qc );
+       const int ajc = linearIndex( r,qa, j, qc );
+       const int abj = linearIndex( r,qa, qb, j );
+       const double gja = basisGradientAt( j, qa );
+       const double gjb = basisGradientAt( j, qb );
+       const double gjc = basisGradientAt( j, qc );
+
+       // diagonal terms
+       const double w0 = w * gia * gja;
+       stiffnessVector[ibc]=w0*B[0]*m_p_n[ibc];
+       const double w1 = w * gib * gjb;
+       stiffnessVector[aic]=w1*B[1]*m_p_n[aic];
+       const double w2 = w * gic * gjc;
+       stiffnessVector[abi]=w2*B[2]*m_p_n[abi];
+       // off-diagonal terms
+       const double w3 = w * gib * gjc;
+       stiffnessVector[aic]=w3*B[3]*m_p_n[aic];
+       stiffnessVector[abj]=w3*B[3]*m_p_n[abj];
+       const double w4 = w * gia * gjc;
+       stiffnessVector[ibc]=w4*B[4]*m_p_n[ibc];
+       stiffnessVector[abj]=w4*B[4]*m_p_n[abj];
+       const double w5 = w * gia * gjb;
+       stiffnessVector[ibc]=w5*B[5]*m_p_n[ibc];
+       stiffnessVector[ajc]=w5*B[5]*m_p_n[ajc];
+     }
+   }
+ }
+
+PROXY_HOST_DEVICE void SEMQkGL::computeStiffnessTerm( int r, int const q,
+                                                      double const (&X)[8][3],
+                                                      float *m_p_n,
+                                                      float *stiffnessVector) const
+ {
+   int qa, qb, qc;
+   multiIndex( r,q, qa, qb, qc );
+   double B[6] = {0};
+   double J[3][3] = {{0}};
+   computeBMatrix( qa, qb, qc, X, J, B );
+   computeGradPhiBGradPhi( r, qa, qb, qc, B, m_p_n, stiffnessVector);
+ }
+
 
 #endif //SEMQKGL_HPP_
