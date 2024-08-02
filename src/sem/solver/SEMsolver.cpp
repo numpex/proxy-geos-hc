@@ -57,8 +57,8 @@ void SEMsolver::computeOneStep( const int & timeSample,
     pnLocal[i]=pnGlobal( localToGlobal, i2 );
   }
 
-  myQk.computeStiffnessVector(elementNumber,order,nPointsPerElement,globalNodesList,globalNodesCoords,
-                              weights,derivativeBasisFunction1D,massMatrixLocal,pnLocal,Y);
+  myQk.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,globalNodesList,globalNodesCoords,
+                                           weights,derivativeBasisFunction1D,massMatrixLocal,pnLocal,Y);
 
   //compute global mass Matrix and global stiffness vector
   for( int i=0; i<nPointsPerElement; i++ )

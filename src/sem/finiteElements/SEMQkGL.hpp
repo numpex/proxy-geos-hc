@@ -114,16 +114,16 @@ public:
                                          float Y[] ) const;
   // compute stiffnessVector.
   // returns mass matrix and stiffness vector local to an element
-  PROXY_HOST_DEVICE void computeStiffnessVector(const int & elementNumber,
-                                                const int & order,
-                                                const int & nPointsPerElement,
-                                                ARRAY_INT_VIEW const & nodesList,
-                                                ARRAY_REAL_VIEW const & nodesCoords,
-                                                VECTOR_DOUBLE_VIEW const & weights,
-                                                ARRAY_DOUBLE_VIEW const & dPhi,
-                                                float massMatrixLocal[],
-                                                float const pnLocal[],
-                                                float Y[]) const;
+  PROXY_HOST_DEVICE void computeMassMatrixAndStiffnessVector(const int & elementNumber,
+                                                             const int & order,
+                                                             const int & nPointsPerElement,
+                                                             ARRAY_INT_VIEW const & nodesList,
+                                                             ARRAY_REAL_VIEW const & nodesCoords,
+                                                             VECTOR_DOUBLE_VIEW const & weights,
+                                                             ARRAY_DOUBLE_VIEW const & dPhi,
+                                                             float massMatrixLocal[],
+                                                             float const pnLocal[],
+                                                             float Y[]) const;
 
   //computeDs
   PROXY_HOST_DEVICE void computeDs( const int & iFace,
@@ -289,11 +289,12 @@ public:
 
   // compute stiffnessVector.
   // returns mass matrix and stiffness vector local to an element
-  PROXY_HOST_DEVICE void computeStiffnessVector(const int & elementNumber,
+  PROXY_HOST_DEVICE void computeMassMatrixAndStiffnessVector(const int & elementNumber,
                                                           const int & order,
                                                           const int & nPointsPerElement,
                                                           ARRAY_INT_VIEW const & nodesList,
                                                           ARRAY_REAL_VIEW const & nodesCoords,
+                                                          float massMatrixLocal[],
                                                           float pnLocal[],
                                                           float Y[]) const;
 
@@ -798,16 +799,16 @@ PROXY_HOST_DEVICE void SEMQkGL::gradPhiGradPhi( const int & nPointsPerElement,
 
 // compute stiffnessVector.
 // returns mass matrix and stiffness vector local to an element
-PROXY_HOST_DEVICE void SEMQkGL::computeStiffnessVector(const int & elementNumber,
-                                                       const int & order,
-                                                       const int & nPointsPerElement,
-                                                       ARRAY_INT_VIEW const & nodesList,
-                                                       ARRAY_REAL_VIEW const & nodesCoords,
-                                                       VECTOR_DOUBLE_VIEW const & weights,
-                                                       ARRAY_DOUBLE_VIEW const & dPhi,
-                                                       float massMatrixLocal[],
-                                                       float const pnLocal[],
-                                                       float Y[]) const
+PROXY_HOST_DEVICE void SEMQkGL::computeMassMatrixAndStiffnessVector(const int & elementNumber,
+                                                                    const int & order,
+                                                                    const int & nPointsPerElement,
+                                                                    ARRAY_INT_VIEW const & nodesList,
+                                                                    ARRAY_REAL_VIEW const & nodesCoords,
+                                                                    VECTOR_DOUBLE_VIEW const & weights,
+                                                                    ARRAY_DOUBLE_VIEW const & dPhi,
+                                                                    float massMatrixLocal[],
+                                                                    float const pnLocal[],
+                                                                    float Y[]) const
 {
     float B[ROW][COL];
     float R[ROW];
@@ -1183,24 +1184,6 @@ PROXY_HOST_DEVICE void SEMQkGL::computeStiffnessTerm( int r, int const q,
    computeGradPhiBGradPhi( r, qa, qb, qc, B, m_p_n, stiffnessVector);
 }
 
-// compute stiffnessVector.
-// returns mass matrix and stiffness vector local to an element
-PROXY_HOST_DEVICE void SEMQkGL::computeStiffnessVector(const int & elementNumber,
-                                                       const int & order,
-                                                       const int & nPointsPerElement,
-                                                       ARRAY_INT_VIEW const & nodesList,
-                                                       ARRAY_REAL_VIEW const & nodesCoords,
-                                                       float pnLocal[],
-                                                       float Y[]) const
-{
-    double X[8][3];
-    for (int q=0;q<nPointsPerElement;q++)
-    {
-        computeStiffnessTerm(order, q, X, pnLocal, Y);
-    }
-}
-
-
 /**
  * @brief computes the non-zero contributions of the d.o.f. indexd by q to the
  *   mass matrix M, i.e., the superposition matrix of the shape functions.
@@ -1217,6 +1200,24 @@ PROXY_HOST_DEVICE double SEMQkGL::computeMassTerm( int const r,int const q, doub
    jacobianTransformation( qa, qb, qc, X, J );
    return determinant( J )*w3D;
 
+}
+// compute  mass Martix stiffnessVector.
+// returns mass matrix and stiffness vector local to an element
+PROXY_HOST_DEVICE void SEMQkGL::computeMassMatrixAndStiffnessVector(const int & elementNumber,
+                                                       const int & order,
+                                                       const int & nPointsPerElement,
+                                                       ARRAY_INT_VIEW const & nodesList,
+                                                       ARRAY_REAL_VIEW const & nodesCoords,
+                                                       float massMatrixLocal[],
+                                                       float pnLocal[],
+                                                       float Y[]) const
+{
+    double X[8][3];
+    for (int q=0;q<nPointsPerElement;q++)
+    {
+        massMatrixLocal[q]=computeMassTerm( r,q, X); 
+        computeStiffnessTerm(order, q, X, pnLocal, Y);
+    }
 }
 
 #endif //SEMQKGL_HPP_
