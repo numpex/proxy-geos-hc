@@ -137,28 +137,64 @@ std::vector< float > SEMmesh::getCoordInOneDirection( const int & order, const i
 }
 
 // Initialize nodal coordinates.
-void SEMmesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const
+   void SEMmesh::nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const
+   { 
+     std::vector< float > coordX( nx );
+     std::vector< float > coordY( ny );
+     std::vector< float > coordZ( nz );
+     
+     coordX=getCoordInOneDirection( order, nx, hx, ex );
+     coordY=getCoordInOneDirection( order, ny, hy, ey );
+     coordZ=getCoordInOneDirection( order, nz, hz, ez );
+     
+     for( int k=0; k<ny; k++ ) 
+     { 
+       for( int j=0; j<nz; j++ ) 
+       { 
+         for( int i=0; i<nx; i++ )
+         { 
+           nodeCoords( i+nx*j+k*nx*nz, 0 )=coordX[i];
+           nodeCoords( i+nx*j+k*nx*nz, 1 )=coordZ[j];
+           nodeCoords( i+nx*j+k*nx*nz, 2 )=coordY[k];
+         }
+       }
+     }
+   }
+
+
+// Initialize nodal coordinates.
+void SEMmesh::nodesCoordinates( arrayReal & nodeCoordsX,
+                                arrayReal & nodeCoordsZ,
+                                arrayReal & nodeCoordsY) const
 {
-  std::vector< float > coordX( nx );
-  std::vector< float > coordY( ny );
-  std::vector< float > coordZ( nz );
+  std::vector< float > coordX( order+1 );
+  std::vector< float > coordY( order+1 );
+  std::vector< float > coordZ( order+1 );
 
-  coordX=getCoordInOneDirection( order, nx, hx, ex );
-  coordY=getCoordInOneDirection( order, ny, hy, ey );
-  coordZ=getCoordInOneDirection( order, nz, hz, ez );
-
-  for( int k=0; k<ny; k++ )
+  for(int n=0;n<ey;n++)
   {
-    for( int j=0; j<nz; j++ )
-    {
-      for( int i=0; i<nx; i++ )
-      {
-        nodeCoords( i+nx*j+k*nx*nz, 0 )=coordX[i];
-        nodeCoords( i+nx*j+k*nx*nz, 1 )=coordZ[j];
-        nodeCoords( i+nx*j+k*nx*nz, 2 )=coordY[k];
-        //printf("i=%d,j=%d,k=%d, n=%d, X %lf,Z %lf,Y %lf\n",i,j,k,i+nx*j+k*nx*nz,coordX[i],coordZ[j],coordY[k]);
-      }
-    }
+     coordY=getCoordInOneDirection( order, order+1, hy, n );
+     for(int m=0;m<ez;m++)
+     {
+        coordZ=getCoordInOneDirection( order, order+1, hz, m );
+        for(int l=0;l<ex;l++)
+        {
+           coordX=getCoordInOneDirection( order, order+1, hx, l );
+           int e=l+m*ex+n*ex*ez;
+           for( int k=0; k<order+1; k++ )
+           {
+              for( int j=0; j<order+1; j++ )
+              {
+                 for( int i=0; i<order+1; i++ )
+                 {
+                    nodeCoordsX(e, i+(order+1)*j+k*(order+1)*(order+1))=coordX[i];
+                    nodeCoordsZ(e, i+(order+1)*j+k*(order+1)*(order+1))=coordZ[j];
+                    nodeCoordsY(e, i+(order+1)*j+k*(order+1)*(order+1))=coordY[k];
+                 }
+              }
+           }
+        }
+     }
   }
 }
 

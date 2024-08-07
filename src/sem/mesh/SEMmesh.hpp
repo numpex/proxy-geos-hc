@@ -63,6 +63,9 @@ public:
   // Initialize nodal coordinates.
   void nodesCoordinates( const int & numberOfNodes, arrayReal & nodeCoords ) const;
 
+  // Initialize nodal coordinates.
+  void nodesCoordinates( arrayReal & nodeCoordsX,arrayReal & nodeCoordsZ, arrayReal & nodeCoordsY ) const;
+
   //  list of global nodes ( vertices)
   void globalNodesList( const int & numberOfElements, arrayInt & nodesList ) const;
 

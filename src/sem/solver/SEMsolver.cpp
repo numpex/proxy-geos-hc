@@ -38,7 +38,8 @@ void SEMsolver::computeOneStep( const int & timeSample,
   // update pnGLobal with right hade side
   LOOPHEAD( myInfo.myNumberOfRHS, i )
   int nodeRHS=globalNodesList( rhsElement[i], 0 );
-  pnGlobal( nodeRHS, i2 )+=myInfo.myTimeStep*myInfo.myTimeStep*model[rhsElement[i]]*model[rhsElement[i]]*rhsTerm( i, timeSample );
+  pnGlobal( nodeRHS, i2 )+=myInfo.myTimeStep*myInfo.myTimeStep*model[rhsElement[i]]
+                          *model[rhsElement[i]]*rhsTerm( i, timeSample );
   LOOPEND
 
   // start main parallel section
@@ -57,8 +58,10 @@ void SEMsolver::computeOneStep( const int & timeSample,
     pnLocal[i]=pnGlobal( localToGlobal, i2 );
   }
 
-  myQk.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,globalNodesList,globalNodesCoords,
-                                           weights,derivativeBasisFunction1D,massMatrixLocal,pnLocal,Y);
+  myQk.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,
+                                           globalNodesList,globalNodesCoords,
+                                           weights,derivativeBasisFunction1D,
+                                           massMatrixLocal,pnLocal,Y);
 
   //compute global mass Matrix and global stiffness vector
   for( int i=0; i<nPointsPerElement; i++ )
@@ -74,7 +77,8 @@ void SEMsolver::computeOneStep( const int & timeSample,
   // update pressure
   LOOPHEAD( myInfo.numberOfInteriorNodes, i )
   int I=listOfInteriorNodes[i];
-  pnGlobal( I, i1 )=2*pnGlobal( I, i2 )-pnGlobal( I, i1 )-myInfo.myTimeStep*myInfo.myTimeStep*yGlobal[I]/massMatrixGlobal[I];
+  pnGlobal( I, i1 )=2*pnGlobal( I, i2 )-pnGlobal( I, i1 )
+                   -myInfo.myTimeStep*myInfo.myTimeStep*yGlobal[I]/massMatrixGlobal[I];
   LOOPEND
 
   #ifdef SEM2D
@@ -90,7 +94,8 @@ void SEMsolver::computeOneStep( const int & timeSample,
     float Js[2][6];
 
     // compute ds
-    myQk.computeDs( iFace, order, faceInfos, (order+1)*(order+1), Js, globalNodesCoords, derivativeBasisFunction1D, ds );
+    myQk.computeDs( iFace, order, faceInfos, (order+1)*(order+1), Js,
+                    globalNodesCoords, derivativeBasisFunction1D, ds );
 
     //compute Sh and ShGlobal
     for( int i=0; i<order+1; i++ )
@@ -166,6 +171,10 @@ void SEMsolver::allocateFEarrays( SEMinfo & myInfo )
   globalNodesList=allocateArray2D< arrayInt >( myInfo.numberOfElements, myInfo.numberOfPointsPerElement, "globalNodesList" );
   listOfInteriorNodes=allocateVector< vectorInt >( myInfo.numberOfInteriorNodes, "listOfInteriorNodes" );
   globalNodesCoords=allocateArray2D< arrayReal >( myInfo.numberOfNodes, 3, "globalNodesCoords" );
+  int nbQuadraturePoints=(order+1)*(order+1)*(order+1);
+  globalNodesCoordsX=allocateArray2D< arrayReal >( myInfo.numberOfElements, nbQuadraturePoints, "globalNodesCoordsX");
+  globalNodesCoordsY=allocateArray2D< arrayReal >( myInfo.numberOfElements, nbQuadraturePoints, "globalNodesCoordsY");
+  globalNodesCoordsZ=allocateArray2D< arrayReal >( myInfo.numberOfElements, nbQuadraturePoints, "globalNodesCoordsZ");
   listOfBoundaryNodes=allocateVector< vectorInt >( myInfo.numberOfBoundaryNodes, "listOfBoundaryNodes" );
   faceInfos=allocateArray2D< arrayInt >( myInfo.numberOfBoundaryFaces, 2+(order+1), "faceInfos" );
   localFaceNodeToGlobalFaceNode=allocateArray2D< arrayInt >( myInfo.numberOfBoundaryFaces, order+1, "localFaceNodeToGlobalFaceNode" );
