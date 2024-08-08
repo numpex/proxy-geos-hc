@@ -45,8 +45,6 @@ void SEMsolver::computeOneStep( const int & timeSample,
   // start main parallel section
   MAINLOOPHEAD( myInfo.numberOfElements, elementNumber )
 
-  //float B[ROW][COL];
-  //float R[ROW];
   float massMatrixLocal[ROW];
   float pnLocal[ROW];
   float Y[ROW];
@@ -58,8 +56,12 @@ void SEMsolver::computeOneStep( const int & timeSample,
     pnLocal[i]=pnGlobal( localToGlobal, i2 );
   }
 
-  myQk.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,
+  /*myQk.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,
                                            globalNodesList,globalNodesCoords,
+                                           weights,derivativeBasisFunction1D,
+                                           massMatrixLocal,pnLocal,Y);*/
+  myQk.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,
+                                           globalNodesCoordsX,globalNodesCoordsY,globalNodesCoordsZ,
                                            weights,derivativeBasisFunction1D,
                                            massMatrixLocal,pnLocal,Y);
 
