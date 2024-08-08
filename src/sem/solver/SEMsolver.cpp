@@ -141,7 +141,8 @@ void SEMsolver::initFEarrays( SEMinfo & myInfo, SEMmesh mesh )
   //interior elements
   mesh.globalNodesList( myInfo.numberOfElements, globalNodesList );
   mesh.getListOfInteriorNodes( myInfo.numberOfInteriorNodes, listOfInteriorNodes );
-  mesh.nodesCoordinates( myInfo.numberOfNodes, globalNodesCoords );
+  //mesh.nodesCoordinates( myInfo.numberOfNodes, globalNodesCoords );
+  mesh.nodesCoordinates( globalNodesCoordsX,globalNodesCoordsZ,globalNodesCoordsY);
   // boundary elements
   mesh.getListOfBoundaryNodes( myInfo.numberOfBoundaryNodes, listOfBoundaryNodes );
   mesh.getBoundaryFacesInfos( faceInfos );

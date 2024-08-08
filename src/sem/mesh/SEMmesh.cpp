@@ -122,17 +122,19 @@ std::vector< float > SEMmesh::getCoordInOneDirection( const int & order, const i
     default:
       break;
   }
-  for( int i=0; i<nElement; i++ )
-  {
+  //for( int i=0; i<nElement; i++ )
+  //{
+    int i=nElement;
     float x0=i*h;
     float x1=(i+1)*h;
     float b=(x1+x0)/2.;
     float a=b-x0;
     for( int j=0; j<order+1; j++ )
     {
-      coord[j+i*order]=a*xi[j]+b;
+      //coord[j+i*order]=a*xi[j]+b;
+      coord[j]=a*xi[j]+b;
     }
-  }
+  //}
   return coord;
 }
 
