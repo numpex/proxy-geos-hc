@@ -60,10 +60,14 @@ void SEMsolver::computeOneStep( const int & timeSample,
                                            globalNodesList,globalNodesCoords,
                                            weights,derivativeBasisFunction1D,
                                            massMatrixLocal,pnLocal,Y);*/
-  myQk.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,
+  /*myQk.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,
                                            globalNodesCoordsX,globalNodesCoordsY,globalNodesCoordsZ,
                                            weights,derivativeBasisFunction1D,
-                                           massMatrixLocal,pnLocal,Y);
+                                           massMatrixLocal,pnLocal,Y);*/
+  myQk.computeMassMatrixAndStiffnessVector(elementNumber, order, nPointsPerElement,
+                                           globalNodesCoordsX,globalNodesCoordsY,globalNodesCoordsZ,
+                                           massMatrixLocal, pnLocal, Y);
+
 
   //compute global mass Matrix and global stiffness vector
   for( int i=0; i<nPointsPerElement; i++ )
@@ -141,7 +145,8 @@ void SEMsolver::initFEarrays( SEMinfo & myInfo, SEMmesh mesh )
   //interior elements
   mesh.globalNodesList( myInfo.numberOfElements, globalNodesList );
   mesh.getListOfInteriorNodes( myInfo.numberOfInteriorNodes, listOfInteriorNodes );
-  //mesh.nodesCoordinates( myInfo.numberOfNodes, globalNodesCoords );
+  // mesh coordinates
+  mesh.nodesCoordinates( myInfo.numberOfNodes, globalNodesCoords );
   mesh.nodesCoordinates( globalNodesCoordsX,globalNodesCoordsZ,globalNodesCoordsY);
   // boundary elements
   mesh.getListOfBoundaryNodes( myInfo.numberOfBoundaryNodes, listOfBoundaryNodes );
@@ -169,22 +174,31 @@ void SEMsolver::initFEarrays( SEMinfo & myInfo, SEMmesh mesh )
 
 void SEMsolver::allocateFEarrays( SEMinfo & myInfo )
 {
+  int nbQuadraturePoints=(order+1)*(order+1)*(order+1);
   //interior elements
   cout<<"Allocate host memory for arrays in the solver ..."<<endl;
   globalNodesList=allocateArray2D< arrayInt >( myInfo.numberOfElements, myInfo.numberOfPointsPerElement, "globalNodesList" );
   listOfInteriorNodes=allocateVector< vectorInt >( myInfo.numberOfInteriorNodes, "listOfInteriorNodes" );
+  
+  // global coordinates
   globalNodesCoords=allocateArray2D< arrayReal >( myInfo.numberOfNodes, 3, "globalNodesCoords" );
-  int nbQuadraturePoints=(order+1)*(order+1)*(order+1);
   globalNodesCoordsX=allocateArray2D< arrayReal >( myInfo.numberOfElements, nbQuadraturePoints, "globalNodesCoordsX");
   globalNodesCoordsY=allocateArray2D< arrayReal >( myInfo.numberOfElements, nbQuadraturePoints, "globalNodesCoordsY");
   globalNodesCoordsZ=allocateArray2D< arrayReal >( myInfo.numberOfElements, nbQuadraturePoints, "globalNodesCoordsZ");
+  
   listOfBoundaryNodes=allocateVector< vectorInt >( myInfo.numberOfBoundaryNodes, "listOfBoundaryNodes" );
+
   faceInfos=allocateArray2D< arrayInt >( myInfo.numberOfBoundaryFaces, 2+(order+1), "faceInfos" );
   localFaceNodeToGlobalFaceNode=allocateArray2D< arrayInt >( myInfo.numberOfBoundaryFaces, order+1, "localFaceNodeToGlobalFaceNode" );
+
   model=allocateVector< vectorReal >( myInfo.numberOfElements, "model" );
+
   quadraturePoints=allocateVector< vectorDouble >( order+1, "quadraturePoints" );
+
   weights=allocateVector< vectorDouble >( order+1, "weights" );
+
   derivativeBasisFunction1D=allocateArray2D< arrayDouble >( order+1, order+1, "derivativeBasisFunction1D" );
+
   //shared arrays
   massMatrixGlobal=allocateVector< vectorReal >( myInfo.numberOfNodes, "massMatrixGlobal" );
   yGlobal=allocateVector< vectorReal >( myInfo.numberOfNodes, "yGlobal" );

@@ -192,6 +192,7 @@ void SEMmesh::nodesCoordinates( arrayReal & nodeCoordsX,
                     nodeCoordsX(e, i+(order+1)*j+k*(order+1)*(order+1))=coordX[i];
                     nodeCoordsZ(e, i+(order+1)*j+k*(order+1)*(order+1))=coordZ[j];
                     nodeCoordsY(e, i+(order+1)*j+k*(order+1)*(order+1))=coordY[k];
+                    //if(e==0)printf("l=%d %f %f %f \n",i+(order+1)*j+k*(order+1)*(order+1),coordX[i],coordY[j],coordZ[k]);
                  }
               }
            }
