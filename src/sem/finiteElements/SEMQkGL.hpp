@@ -205,7 +205,7 @@ public:
    * @return The determinant.
    * @note @p srcSymMatrix can contain integers but @p dstMatrix must contain floating point values.
   */
-  PROXY_HOST_DEVICE void symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6], double det ) const;
+  PROXY_HOST_DEVICE void symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6] ) const;
 
   /**
    * @brief Invert the symmetric matrix @p symMatrix overwritting it.
@@ -213,7 +213,7 @@ public:
    * @return The determinant.
    * @note @p symMatrix can contain integers but @p dstMatrix must contain floating point values.
   */
-  PROXY_HOST_DEVICE void symInvert( double  symMatrix[6] ) const;
+  PROXY_HOST_DEVICE void symInvert0( double  symMatrix[6] ) const;
 
   /**
    * @brief Calculates the isoparametric "Jacobian" transformation
@@ -256,17 +256,23 @@ public:
                       double (& J)[3][3],
                       double (& B)[6] ) const;
 
-  PROXY_HOST_DEVICE void computeGradPhiBGradPhi( int const r,
+  template<typename FUNC>
+  PROXY_HOST_DEVICE
+  void computeGradPhiBGradPhi( int const e,
+                               int const r,
                                int const qa,
                                int const qb,
                                int const qc,
                                double const (&B)[6],
-                               float *m_p_n,
-                               float *stiffnessVector) const;
+                               FUNC && func ) const;
 
-  PROXY_HOST_DEVICE void computeStiffnessTerm( int e, int r, int const q, 
-                                               double const (&X)[8][3], float *m_p_n,
-                                              float *stiffnessVector) const;
+  template<typename FUNC>
+  PROXY_HOST_DEVICE 
+  void computeStiffnessTerm( int e,
+                             int r,
+                             int const q,
+                             double const (&X)[8][3],
+                             FUNC && func ) const;
 
   // compute stiffnessVector.
   // returns mass matrix and stiffness vector local to an element
@@ -594,6 +600,13 @@ PROXY_HOST_DEVICE void SEMQkGL::computeB( const int & elementNumber,
   
             //M
             massMatrixLocal[i]=weights[i1]*weights[i2]*weights[i3]*detJ;
+
+            /*if(elementNumber==0)
+            {
+                printf("quadrature point %d\n",i);
+                printf("massMatrixLocal=%f\n",massMatrixLocal[i]);
+                printf("B=%f %f %f %f %f %f\n",B[i][0],B[i][1],B[i][2],B[i][3],B[i][4],B[i][5]);
+            }*/
           }
         }
       }
@@ -805,6 +818,16 @@ PROXY_HOST_DEVICE void SEMQkGL::computeMassMatrixAndStiffnessVector(const int & 
     computeB( elementNumber, order, weights, nodesCoordsX,nodesCoordsY, nodesCoordsZ, dPhi, massMatrixLocal, B );
     // compute stifness  matrix ( durufle's optimization)
     gradPhiGradPhi( nPointsPerElement, order, weights, dPhi, B, pnLocal, R, Y );
+    /*if(elementNumber==505050)
+    {
+      for(int q=0; q<nPointsPerElement;q++)
+      {
+         printf("quadrature point %d \n",q);
+         printf("b= %lf %lf %lf %lf %lf %lf \n",B[q][0],B[q][1],B[q][2],B[q][3],B[q][4],B[q][5]);
+         printf(" m_p_n %f\n",pnLocal[q]);
+         printf(" stiffnessvector %f\n",Y[q]);
+      }    
+    }*/
 }
 
 //computeDs
@@ -1057,7 +1080,7 @@ PROXY_HOST_DEVICE double SEMQkGL::determinant(double  m[3][3]) const
  * @return The determinant.
  * @note @p srcSymMatrix can contain integers but @p dstMatrix must contain floating point values.
 */
-PROXY_HOST_DEVICE void SEMQkGL::symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6], double det ) const
+PROXY_HOST_DEVICE void SEMQkGL::symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6]) const
 {
  
    using FloatingPoint = std::decay_t< decltype( dstSymMatrix[ 0 ] ) >;
@@ -1066,7 +1089,7 @@ PROXY_HOST_DEVICE void SEMQkGL::symInvert( double  dstSymMatrix[6], double  srcS
    dstSymMatrix[ 5 ] = srcSymMatrix[ 4 ] * srcSymMatrix[ 3 ] - srcSymMatrix[ 5 ] * srcSymMatrix[ 2 ];
    dstSymMatrix[ 4 ] = srcSymMatrix[ 5 ] * srcSymMatrix[ 3 ] - srcSymMatrix[ 4 ] * srcSymMatrix[ 1 ];
  
-   det = srcSymMatrix[ 0 ] * dstSymMatrix[ 0 ] + srcSymMatrix[ 5 ] * dstSymMatrix[ 5 ] + srcSymMatrix[ 4 ] * dstSymMatrix[ 4 ];
+   double det = srcSymMatrix[ 0 ] * dstSymMatrix[ 0 ] + srcSymMatrix[ 5 ] * dstSymMatrix[ 5 ] + srcSymMatrix[ 4 ] * dstSymMatrix[ 4 ];
 
    FloatingPoint const invDet = FloatingPoint( 1 ) / det;
  
@@ -1085,17 +1108,17 @@ PROXY_HOST_DEVICE void SEMQkGL::symInvert( double  dstSymMatrix[6], double  srcS
  * @return The determinant.
  * @note @p symMatrix can contain integers but @p dstMatrix must contain floating point values.
 */
-PROXY_HOST_DEVICE void SEMQkGL::symInvert( double  symMatrix[6] ) const
+PROXY_HOST_DEVICE void SEMQkGL::symInvert0( double  symMatrix[6] ) const
 {
     std::remove_reference_t< decltype( symMatrix[ 0 ] ) > temp[ 6 ];
-    double det=0;
-    symInvert( temp, symMatrix ,det);
-    symMatrix[0]=temp[0]*det;
-    symMatrix[1]=temp[1]*det;
-    symMatrix[2]=temp[2]*det;
-    symMatrix[3]=temp[3]*det;
-    symMatrix[4]=temp[4]*det;
-    symMatrix[5]=temp[5]*det;
+    symInvert( temp, symMatrix );
+    
+    symMatrix[0]=temp[0];
+    symMatrix[1]=temp[1];
+    symMatrix[2]=temp[2];
+    symMatrix[3]=temp[3];
+    symMatrix[4]=temp[4];
+    symMatrix[5]=temp[5];
 }
 
 /**
@@ -1130,95 +1153,6 @@ PROXY_HOST_DEVICE void SEMQkGL::jacobianTransformation( int e, int const qa, int
 }
 
 /**
- * @brief Calculates the isoparametric "geometrical" transformation
- *  matrix/mapping from the parent space to the physical space.
- * @param qa The 1d quadrature point index in xi0 direction (0,1)
- * @param qb The 1d quadrature point index in xi1 direction (0,1)
- * @param qc The 1d quadrature point index in xi2 direction (0,1)
- * @param X Array containing the coordinates of the mesh support points.
- * @param J Array to store the Jacobian transformation.
- * @param B Array to store the  the geometrical symetic matrix=detJ*J^{-1}J^{-T}.
-*/
-PROXY_HOST_DEVICE void SEMQkGL::computeBMatrix( int e, int const qa, int const qb, int const qc,
-                                                double const (&X)[8][3],
-                                                double (& J)[3][3],
-                                                double (& B)[6] ) const
-{
-    jacobianTransformation( e,qa, qb, qc, X, J );
-    double const detJ = determinant( J );
-
-    // compute J^T.J/det(J), using Voigt notation for B
-    B[0] = (J[0][0]*J[0][0]+J[1][0]*J[1][0]+J[2][0]*J[2][0])/detJ;
-    B[1] = (J[0][1]*J[0][1]+J[1][1]*J[1][1]+J[2][1]*J[2][1])/detJ;
-    B[2] = (J[0][2]*J[0][2]+J[1][2]*J[1][2]+J[2][2]*J[2][2])/detJ;
-    B[3] = (J[0][1]*J[0][2]+J[1][1]*J[1][2]+J[2][1]*J[2][2])/detJ;
-    B[4] = (J[0][0]*J[0][2]+J[1][0]*J[1][2]+J[2][0]*J[2][2])/detJ;
-    B[5] = (J[0][0]*J[0][1]+J[1][0]*J[1][1]+J[2][0]*J[2][1])/detJ;
-
-    // compute detJ*J^{-1}J^{-T}
-    symInvert( B );
-}
-
-PROXY_HOST_DEVICE void SEMQkGL::computeGradPhiBGradPhi( int const r,
-                               int const qa, int const qb, int const qc,
-                               double const (&B)[6],
-                               float *m_p_n,
-                               float *stiffnessVector) const
- {
-   const double w = weight( qa )*weight( qb )*weight( qc );
-   //printf("num1dNodes %d \n",num1dNodes);
-   for( int i=0; i<num1dNodes; i++ )
-   {
-     const int ibc = linearIndex( r,i, qb, qc );
-     const int aic = linearIndex( r,qa, i, qc );
-     const int abi = linearIndex( r,qa, qb, i );
-     const double gia = basisGradientAt( i, qa );
-     const double gib = basisGradientAt( i, qb );
-     const double gic = basisGradientAt( i, qc );
-     for( int j=0; j<num1dNodes; j++ )
-     {
-       const int jbc = linearIndex( r,j, qb, qc );
-       const int ajc = linearIndex( r,qa, j, qc );
-       const int abj = linearIndex( r,qa, qb, j );
-       const double gja = basisGradientAt( j, qa );
-       const double gjb = basisGradientAt( j, qb );
-       const double gjc = basisGradientAt( j, qc );
-
-       // diagonal terms
-       const double w0 = w * gia * gja;
-       stiffnessVector[ibc]=w0*B[0]*m_p_n[ibc];
-       const double w1 = w * gib * gjb;
-       stiffnessVector[aic]=w1*B[1]*m_p_n[aic];
-       const double w2 = w * gic * gjc;
-       stiffnessVector[abi]=w2*B[2]*m_p_n[abi];
-       // off-diagonal terms
-       const double w3 = w * gib * gjc;
-       stiffnessVector[aic]=w3*B[3]*m_p_n[aic];
-       stiffnessVector[abj]=w3*B[3]*m_p_n[abj];
-       const double w4 = w * gia * gjc;
-       stiffnessVector[ibc]=w4*B[4]*m_p_n[ibc];
-       stiffnessVector[abj]=w4*B[4]*m_p_n[abj];
-       const double w5 = w * gia * gjb;
-       stiffnessVector[ibc]=w5*B[5]*m_p_n[ibc];
-       stiffnessVector[ajc]=w5*B[5]*m_p_n[ajc];
-     }
-   }
- }
-
-PROXY_HOST_DEVICE void SEMQkGL::computeStiffnessTerm( int e, int r, int const q,
-                                                      double const (&X)[8][3],
-                                                      float *m_p_n,
-                                                      float *stiffnessVector) const
-{
-   int qa, qb, qc;
-   multiIndex( r,q, qa, qb, qc );
-   double B[6] = {0};
-   double J[3][3] = {{0}};
-   computeBMatrix( e, qa, qb, qc, X, J, B );
-   computeGradPhiBGradPhi( r, qa, qb, qc, B, m_p_n, stiffnessVector);
-}
-
-/**
  * @brief computes the non-zero contributions of the d.o.f. indexd by q to the
  *   mass matrix M, i.e., the superposition matrix of the shape functions.
  * @param q The quadrature point index
@@ -1247,6 +1181,120 @@ PROXY_HOST_DEVICE double SEMQkGL::computeMassTerm( int e, int const r,int const 
    return determinant( J )*w3D;
 
 }
+/**
+ * @brief Calculates the isoparametric "geometrical" transformation
+ *  matrix/mapping from the parent space to the physical space.
+ * @param qa The 1d quadrature point index in xi0 direction (0,1)
+ * @param qb The 1d quadrature point index in xi1 direction (0,1)
+ * @param qc The 1d quadrature point index in xi2 direction (0,1)
+ * @param X Array containing the coordinates of the mesh support points.
+ * @param J Array to store the Jacobian transformation.
+ * @param B Array to store the  the geometrical symetic matrix=detJ*J^{-1}J^{-T}.
+*/
+PROXY_HOST_DEVICE 
+void SEMQkGL::computeBMatrix( int e, int const qa, int const qb, int const qc,
+                              double const (&X)[8][3],
+                              double (& J)[3][3],
+                              double (& B)[6] ) const
+{
+    jacobianTransformation( e,qa, qb, qc, X, J );
+    double const detJ = determinant( J );
+    /*if(e==505050)
+    {
+        printf("quadrature point %d %d %d\n",qa,qb,qc);
+        printf("det %lf\n",detJ);
+        printf("J %lf %lf %lf\n",J[0][0],J[0][1],J[0][2]);
+        printf("J %lf %lf %lf\n",J[1][0],J[1][1],J[1][2]);
+        printf("J %lf %lf %lf\n",J[2][0],J[2][1],J[2][2]);
+    }*/
+
+    // compute J^T.J/det(J), using Voigt notation for B
+    B[0] = (J[0][0]*J[0][0]+J[1][0]*J[1][0]+J[2][0]*J[2][0])/detJ;
+    B[1] = (J[0][1]*J[0][1]+J[1][1]*J[1][1]+J[2][1]*J[2][1])/detJ;
+    B[2] = (J[0][2]*J[0][2]+J[1][2]*J[1][2]+J[2][2]*J[2][2])/detJ;
+    B[3] = (J[0][1]*J[0][2]+J[1][1]*J[1][2]+J[2][1]*J[2][2])/detJ;
+    B[4] = (J[0][0]*J[0][2]+J[1][0]*J[1][2]+J[2][0]*J[2][2])/detJ;
+    B[5] = (J[0][0]*J[0][1]+J[1][0]*J[1][1]+J[2][0]*J[2][1])/detJ;
+    /*if(e==505050)
+    {
+        printf("quadrature point %d %d %d\n",qa,qb,qc);
+        printf("avant b= %lf %lf %lf %lf %lf %lf \n",B[0],B[1],B[2],B[3],B[4],B[5]);
+    }*/
+
+    // compute detJ*J^{-1}J^{-T}
+    symInvert0( B );
+    /*if(e==505050)
+    {
+        printf("quadrature point %d %d %d\n",qa,qb,qc);
+        printf("b= %lf %lf %lf %lf %lf %lf \n",B[0],B[1],B[2],B[3],B[4],B[5]);
+    }*/
+}
+
+template<typename FUNC>
+PROXY_HOST_DEVICE
+void SEMQkGL::computeGradPhiBGradPhi( int const e,
+                             int const r,
+                             int const qa,
+                             int const qb,
+                             int const qc,
+                             double const (&B)[6],
+                             FUNC && func ) const
+{
+   const double w = weight( qa )*weight( qb )*weight( qc );
+   for( int i=0; i<num1dNodes; i++ )
+   {
+     const int ibc = linearIndex( r,i, qb, qc );
+     const int aic = linearIndex( r,qa, i, qc );
+     const int abi = linearIndex( r,qa, qb, i );
+     const double gia = basisGradientAt( i, qa );
+     const double gib = basisGradientAt( i, qb );
+     const double gic = basisGradientAt( i, qc );
+     for( int j=0; j<num1dNodes; j++ )
+     {
+       const int jbc = linearIndex( r,j, qb, qc );
+       const int ajc = linearIndex( r,qa, j, qc );
+       const int abj = linearIndex( r,qa, qb, j );
+       const double gja = basisGradientAt( j, qa );
+       const double gjb = basisGradientAt( j, qb );
+       const double gjc = basisGradientAt( j, qc );
+       // diagonal terms
+       const double w0 = w * gia * gja;
+       func( ibc, jbc, w0 * B[0] );
+       const double w1 = w * gib * gjb;
+       func( aic, ajc, w1 * B[1] );
+       const double w2 = w * gic * gjc;
+       func( abi, abj, w2 * B[2] );
+       // off-diagonal terms
+       const double w3 = w * gib * gjc;
+       func( aic, abj, w3 * B[3] );
+       func( abj, aic, w3 * B[3] );
+       const double w4 = w * gia * gjc;
+       func( ibc, abj, w4 * B[4] );
+       func( abj, ibc, w4 * B[4] );
+       const double w5 = w * gia * gjb;
+       func( ibc, ajc, w5 * B[5] );
+       func( ajc, ibc, w5 * B[5] );
+     }
+   }
+}
+
+
+template<typename FUNC>
+PROXY_HOST_DEVICE
+void SEMQkGL::computeStiffnessTerm( int e,
+                                    int r,
+                                    int const q,
+                                    double const (&X)[8][3],
+                                    FUNC && func ) const
+    {
+      int qa, qb, qc;
+      multiIndex( r,q, qa, qb, qc );
+      double B[6] = {0};
+      double J[3][3] = {{0}};
+      computeBMatrix( e,qa, qb, qc, X, J, B );
+      computeGradPhiBGradPhi( e,r, qa, qb, qc, B, func );
+    }
+
 
 // compute  mass Matrix stiffnessVector.
 // returns mass matrix and stiffness vector local to an element
@@ -1280,15 +1328,23 @@ void SEMQkGL::computeMassMatrixAndStiffnessVector(const int & elementNumber,
     }
     for (int q=0;q<nPointsPerElement;q++)
     {
+       Y[q]=0;
+    }
+    for (int q=0;q<nPointsPerElement;q++)
+    {
         massMatrixLocal[q]=computeMassTerm( elementNumber,order,q, X); 
-        computeStiffnessTerm(elementNumber,order, q, X, pnLocal, Y);
-        if(elementNumber==505050)
+        computeStiffnessTerm(elementNumber,order, q, X,[&] (const int i, const int j, const double val)
+                {
+                 float localIncrement=val*pnLocal[j];
+                 Y[i]+=localIncrement;
+                });
+        /*if(elementNumber==505050)
         {
           printf("quadrature point %d\n",q );
           printf("massMatrixLocal %f\n",massMatrixLocal[q]);
           printf("Y %f\n",Y[q]);
           printf("------------------\n");
-        }
+        }*/
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////
