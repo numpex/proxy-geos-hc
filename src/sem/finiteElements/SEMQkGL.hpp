@@ -256,6 +256,10 @@ public:
                       double (& J)[3][3],
                       double (& B)[6] ) const;
 
+  /**
+   * @brief compute  gradPhi*B*gradPhi
+   * returns value implemented into func
+   */
   template<typename FUNC>
   PROXY_HOST_DEVICE
   void computeGradPhiBGradPhi( int const e,
@@ -266,6 +270,10 @@ public:
                                double const (&B)[6],
                                FUNC && func ) const;
 
+  /**
+   * @brief compute  stiffnessTerm
+   * returns mass matrix and stiffness vector local to an element
+   */
   template<typename FUNC>
   PROXY_HOST_DEVICE 
   void computeStiffnessTerm( int e,
@@ -274,8 +282,10 @@ public:
                              double const (&X)[8][3],
                              FUNC && func ) const;
 
-  // compute stiffnessVector.
-  // returns mass matrix and stiffness vector local to an element
+  /**
+   * @brief compute  mass Matrix stiffnessVector.
+   * returns mass matrix and stiffness vector local to an element
+   */
   PROXY_HOST_DEVICE void computeMassMatrixAndStiffnessVector(const int & elementNumber,
                                                           const int & order,
                                                           const int & nPointsPerElement,
@@ -1296,8 +1306,9 @@ void SEMQkGL::computeStiffnessTerm( int e,
     }
 
 
-// compute  mass Matrix stiffnessVector.
-// returns mass matrix and stiffness vector local to an element
+/**
+ * @brief compute  mass Matrix stiffnessVector.
+ */
 PROXY_HOST_DEVICE 
 void SEMQkGL::computeMassMatrixAndStiffnessVector(const int & elementNumber,
                                                   const int & order,
