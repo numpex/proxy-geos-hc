@@ -18,16 +18,16 @@ private:
   ////////////////////////////////////////////////////////////////////////////////////
   //  from GEOS implementation
   /////////////////////////////////////////////////////////////////////////////////////
-  double sqrt5 = 2.2360679774997897;
+  constexpr static double sqrt5 = 2.2360679774997897;
   // order of polynomial approximation
-  int r=infos.myOrderNumber;
+  constexpr static int r=2;
   // number of support/quadrature/nodes points in one direction
-  int numSupport1dPoints=r+1;
-  int num1dNodes=numSupport1dPoints;
+  constexpr static int numSupport1dPoints=r+1;
+  constexpr static int num1dNodes=numSupport1dPoints;
   // Half the number of support points, rounded down. Precomputed for efficiency
-  int halfNodes = ( numSupport1dPoints - 1 )/ 2;
+  constexpr static int halfNodes = ( numSupport1dPoints - 1 )/ 2;
   // the number of nodes/support points per element
-  int numSupportPoints=(r+1)*(r+1)*(r+1);
+  constexpr static int numSupportPoints=(r+1)*(r+1)*(r+1);
 
 public:
   PROXY_HOST_DEVICE SEMQkGL(){};
@@ -126,7 +126,50 @@ public:
   /////////////////////////////////////////////////////////////////////////////////////
   //  from GEOS implementation
   /////////////////////////////////////////////////////////////////////////////////////
-  PROXY_HOST_DEVICE  double parentSupportCoord( const int supportPointIndex ) const;
+  PROXY_HOST_DEVICE
+  constexpr static double parentSupportCoord( const int order, const int supportPointIndex ) 
+  {
+      double result=0.0;
+      switch( order )
+      {
+        case 1:
+          return -1.0 + 2.0 * (supportPointIndex & 1);
+        case 2:
+          switch( supportPointIndex )
+          {
+            case 0:
+              return -1.0;
+              break;
+            case 2:
+              return 1.0;
+            case 1:
+            default:
+              return 0.0;
+          }
+        case 3:
+          switch( supportPointIndex )
+          {
+            case 0:
+               result = -1.0;
+               break;
+            case 1:
+              result = -1.0/sqrt5;
+              break;
+            case 2:
+              result = 1.0/sqrt5;
+              break;
+            case 3:
+              result = 1.0;
+              break;
+            default:
+              break;
+          }
+        default:
+           return 0;
+      }
+      return result;
+   }
+
 
   /**
    * @brief The gradient of the basis function for a support point evaluated at
@@ -135,7 +178,44 @@ public:
    * @param p The index of the support point
    * @return The gradient of basis function.
   */
-  PROXY_HOST_DEVICE  double gradientAt( const int q, const int p ) const;
+  PROXY_HOST_DEVICE  
+  constexpr static double gradientAt( const int order, const int q, const int p ) 
+  {
+      switch( order )
+      {
+        case 1:
+          return q == 0 ? -0.5 : 0.5;
+        case 2:
+          switch( q )
+          {
+            case 0:
+              return p == 0 ? -1.5 : -0.5;
+            case 1:
+              return p == 0 ? 2.0 : 0.0;
+            case 2:
+              return p == 0 ? -0.5 : 0.5;
+            default:
+              return 0;
+          }
+        case 3:
+          switch( q )
+          {
+            case 0:
+              return p == 0 ? -3.0 : -0.80901699437494742410;
+            case 1:
+              return p == 0 ? 4.0450849718747371205 : 0.0;
+            case 2:
+              return p == 0 ? -1.5450849718747371205 : 1.1180339887498948482;
+            case 3:
+              return p == 0 ? 0.5 : -0.30901699437494742410;
+            default:
+              return 0;
+          }
+        default:
+           return 0;
+      }
+   }
+
 
   /*
    * @brief Compute the 1st derivative of the q-th 1D basis function at quadrature point p
@@ -143,14 +223,53 @@ public:
    * @param p the index of the 1D quadrature point
    * @return The derivative value
   */
-  PROXY_HOST_DEVICE double basisGradientAt( const int q, const int p ) const;
+  PROXY_HOST_DEVICE 
+  constexpr static double basisGradientAt( const int order, const int q, const int p )
+  {
+     if( p <= halfNodes )
+     {
+       return gradientAt( order, q, p );
+     }
+     else
+     {
+       return -gradientAt( order, numSupport1dPoints - 1 - q, numSupport1dPoints - 1 - p );
+     }
+  }
 
   /**
    * @brief The value of the weight for the given support point
    * @param q The index of the support point
    * @return The value of the weight
   */
-  PROXY_HOST_DEVICE double weight( const int q ) const;
+  PROXY_HOST_DEVICE
+  constexpr static double weight( const int order, const int q )
+  {
+      switch(order)
+      {
+        case 1:
+           return 1;
+        case 2:
+           switch( q )
+           {
+             case 0:
+             case 2:
+               return 1.0/3.0;
+             default:
+               return 4.0/3.0;
+           }
+        case 3:
+           switch( q )
+           {
+             case 1:
+             case 2:
+               return 5.0/6.0;
+             default:
+              return 1.0/6.0;
+           }
+       default:
+           return 0;
+      }
+   }
 
   /**
    * @brief Calculates the linear index for support/quadrature points from ijk
@@ -161,10 +280,14 @@ public:
    * @param k The index in the xi2 direction (0,r)
    * @return The linear index of the support/quadrature point (0-(r+1)^3)
   */
-  PROXY_HOST_DEVICE int linearIndex( const int r,
-                   const int i,
-                   const int j,
-                   const int k ) const;
+  PROXY_HOST_DEVICE 
+  constexpr static int linearIndex( const int r,
+                                    const int i,
+                                    const int j,
+                                    const int k ) 
+  {
+           return i + (r+1) * j + (r+1)*(r+1) * k;
+  }
 
   /**
    * @brief Calculate the Cartesian/TensorProduct index given the linear index
@@ -175,14 +298,26 @@ public:
    * @param i1 The Cartesian index of the support point in the xi1 direction.
    * @param i2 The Cartesian index of the support point in the xi2 direction.
   */
-  PROXY_HOST_DEVICE void multiIndex( int const r,int const linearIndex, int & i0, int & i1, int & i2 ) const;
+  PROXY_HOST_DEVICE 
+  constexpr static void multiIndex( int const r,int const linearIndex, int & i0, int & i1, int & i2 ) 
+  {
+        i2 = linearIndex/((r+1)*(r+1));
+        i1 = (linearIndex%((r+1)*(r+1)))/(r+1);
+        i0 = (linearIndex%((r+1)*(r+1)))%(r+1);
+  }
+
   /**
    * @brief Compute the interpolation coefficients of the q-th quadrature point in a given direction
    * @param q the index of the quadrature point in 1D
    * @param k the index of the interval endpoint (0 or 1)
    * @return The interpolation coefficient
   */
-  PROXY_HOST_DEVICE double interpolationCoord( const int q, const int k ) const;
+  PROXY_HOST_DEVICE 
+  constexpr static double interpolationCoord( const int order, const int q, const int k ) 
+  {
+      const double alpha = (parentSupportCoord( order, q ) + 1.0 ) / 2.0;
+      return k == 0 ? ( 1.0 - alpha ) : alpha;
+   }
 
   /**
    * @brief Compute the 1D factor of the coefficient of the jacobian on the q-th quadrature point,
@@ -195,8 +330,20 @@ public:
    * @param dir The direction in which the derivatives are being computed
    * @return The value of the jacobian factor
   */
-  PROXY_HOST_DEVICE double jacobianCoefficient1D( const int q, const int i, const int k, const int dir ) const;
-  PROXY_HOST_DEVICE double determinant(double  m[3][3]) const;
+  PROXY_HOST_DEVICE 
+  constexpr static double jacobianCoefficient1D( const int order, const int q, const int i, const int k, const int dir )
+  {
+      if( i == dir )
+      {
+        return k== 0 ? -1.0/2.0 : 1.0/2.0;
+      }
+      else
+      {
+        return interpolationCoord( order, q, k );
+      }
+  }
+
+  PROXY_HOST_DEVICE static double determinant(double  m[3][3]); //const;
 
   /**
    * @brief Invert the symmetric matrix @p srcSymMatrix and store the result in @p dstSymMatrix.
@@ -205,7 +352,7 @@ public:
    * @return The determinant.
    * @note @p srcSymMatrix can contain integers but @p dstMatrix must contain floating point values.
   */
-  PROXY_HOST_DEVICE void symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6] ) const;
+  PROXY_HOST_DEVICE static void symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6] );// const;
 
   /**
    * @brief Invert the symmetric matrix @p symMatrix overwritting it.
@@ -213,7 +360,7 @@ public:
    * @return The determinant.
    * @note @p symMatrix can contain integers but @p dstMatrix must contain floating point values.
   */
-  PROXY_HOST_DEVICE void symInvert0( double  symMatrix[6] ) const;
+  PROXY_HOST_DEVICE static void symInvert0( double  symMatrix[6] ); //const;
 
   /**
    * @brief Calculates the isoparametric "Jacobian" transformation
@@ -224,11 +371,12 @@ public:
    * @param X Array containing the coordinates of the mesh support points.
    * @param J Array to store the Jacobian transformation.
   */
-  PROXY_HOST_DEVICE void jacobianTransformation( int e, int const qa,
+  PROXY_HOST_DEVICE static void jacobianTransformation(  int e, int const r,
+                              int const qa,
                               int const qb,
                               int const qc,
                               double const (&X)[8][3],
-                              double ( & J )[3][3] ) const;
+                              double ( & J )[3][3] ); //const;
 
   /**
    * @brief computes the non-zero contributions of the d.o.f. indexd by q to the
@@ -237,7 +385,7 @@ public:
    * @param X Array containing the coordinates of the mesh support points.
    * @return The diagonal mass term associated to q
   */
-   PROXY_HOST_DEVICE double computeMassTerm( int e, int const r,int const q, double const (&X)[8][3] ) const;
+   PROXY_HOST_DEVICE static double computeMassTerm( int e, int const r,int const q, double const (&X)[8][3] ); //const;
 
   /**
    * @brief Calculates the isoparametric "geometrical" transformation
@@ -249,12 +397,13 @@ public:
    * @param J Array to store the Jacobian transformation.
    * @param B Array to store the  the geometrical symetic matrix=detJ*J^{-1}J^{-T}.
   */
-  PROXY_HOST_DEVICE void computeBMatrix( int e, int const qa,
+  PROXY_HOST_DEVICE static void computeBMatrix( int e, int const r,
+                      int const qa,
                       int const qb,
                       int const qc,
                       double const (&X)[8][3],
                       double (& J)[3][3],
-                      double (& B)[6] ) const;
+                      double (& B)[6] ); //const;
 
   /**
    * @brief compute  gradPhi*B*gradPhi
@@ -262,13 +411,13 @@ public:
    */
   template<typename FUNC>
   PROXY_HOST_DEVICE
-  void computeGradPhiBGradPhi( int const e,
+  static void computeGradPhiBGradPhi( int const e,
                                int const r,
                                int const qa,
                                int const qb,
                                int const qc,
                                double const (&B)[6],
-                               FUNC && func ) const;
+                               FUNC && func ); //const;
 
   /**
    * @brief compute  stiffnessTerm
@@ -276,17 +425,17 @@ public:
    */
   template<typename FUNC>
   PROXY_HOST_DEVICE 
-  void computeStiffnessTerm( int e,
+  static void computeStiffnessTerm( int e,
                              int r,
                              int const q,
                              double const (&X)[8][3],
-                             FUNC && func ) const;
+                             FUNC && func ); //const;
 
   /**
    * @brief compute  mass Matrix stiffnessVector.
    * returns mass matrix and stiffness vector local to an element
    */
-  PROXY_HOST_DEVICE void computeMassMatrixAndStiffnessVector(const int & elementNumber,
+  PROXY_HOST_DEVICE static void computeMassMatrixAndStiffnessVector(const int & elementNumber,
                                                           const int & order,
                                                           const int & nPointsPerElement,
                                                           ARRAY_REAL_VIEW const & nodesCoordsX,
@@ -294,7 +443,7 @@ public:
                                                           ARRAY_REAL_VIEW const & nodesCoordsZ,
                                                           float massMatrixLocal[],
                                                           float pnLocal[],
-                                                          float Y[]) const;
+                                                          float Y[]); //const;
 
   ////////////////////////////////////////////////////////////////////////////////////
   // END OF GEOS FUNCTIONS
@@ -611,12 +760,6 @@ PROXY_HOST_DEVICE void SEMQkGL::computeB( const int & elementNumber,
             //M
             massMatrixLocal[i]=weights[i1]*weights[i2]*weights[i3]*detJ;
 
-            /*if(elementNumber==0)
-            {
-                printf("quadrature point %d\n",i);
-                printf("massMatrixLocal=%f\n",massMatrixLocal[i]);
-                printf("B=%f %f %f %f %f %f\n",B[i][0],B[i][1],B[i][2],B[i][3],B[i][4],B[i][5]);
-            }*/
           }
         }
       }
@@ -828,16 +971,6 @@ PROXY_HOST_DEVICE void SEMQkGL::computeMassMatrixAndStiffnessVector(const int & 
     computeB( elementNumber, order, weights, nodesCoordsX,nodesCoordsY, nodesCoordsZ, dPhi, massMatrixLocal, B );
     // compute stifness  matrix ( durufle's optimization)
     gradPhiGradPhi( nPointsPerElement, order, weights, dPhi, B, pnLocal, R, Y );
-    /*if(elementNumber==505050)
-    {
-      for(int q=0; q<nPointsPerElement;q++)
-      {
-         printf("quadrature point %d \n",q);
-         printf("b= %lf %lf %lf %lf %lf %lf \n",B[q][0],B[q][1],B[q][2],B[q][3],B[q][4],B[q][5]);
-         printf(" m_p_n %f\n",pnLocal[q]);
-         printf(" stiffnessvector %f\n",Y[q]);
-      }    
-    }*/
 }
 
 //computeDs
@@ -878,205 +1011,7 @@ PROXY_HOST_DEVICE void SEMQkGL::computeDs( const int & iFace,
 //  from GEOS implementation
 /////////////////////////////////////////////////////////////////////////////////////
 
-PROXY_HOST_DEVICE double SEMQkGL::parentSupportCoord( const int supportPointIndex ) const
-{
-   double result=0.0;
-   switch( numSupport1dPoints )
-   {
-     case 3:
-       switch( supportPointIndex )
-       {
-         case 0:
-           return -1.0;
-           break;
-         case 2:
-           return 1.0;
-         case 1:
-         default:
-           return 0.0;
-       }
-     case 4:
-       switch( supportPointIndex )
-       {
-         case 0:
-            result = -1.0;
-            break;
-         case 1:
-           result = -1.0/sqrt5;
-           break;
-         case 2:
-           result = 1.0/sqrt5;
-           break;
-         case 3:
-           result = 1.0;
-           break;
-         default:
-           break;
-       }
-     default:
-        return 0;
-   }
-   return result;
-}
-
-/**
- * @brief The gradient of the basis function for a support point evaluated at
- *   a given support point. By symmetry, p is assumed to be in 0, ..., (N-1)/2
- * @param q The index of the basis function
- * @param p The index of the support point
- * @return The gradient of basis function.
- */
-PROXY_HOST_DEVICE double SEMQkGL::gradientAt( const int q, const int p ) const
-{
-   //printf("numSupport1dPoints  %d  %d\n",numSupport1dPoints,q);
-   switch( numSupport1dPoints )
-   {
-     case 3:
-       switch( q )
-       {
-         case 0:
-           return p == 0 ? -1.5 : -0.5;
-         case 1:
-           return p == 0 ? 2.0 : 0.0;
-         case 2:
-           return p == 0 ? -0.5 : 0.5;
-         default:
-           return 0;
-       }
-     case 4:
-       switch( q )
-       {
-         case 0:
-           return p == 0 ? -3.0 : -0.80901699437494742410;
-         case 1:
-           return p == 0 ? 4.0450849718747371205 : 0.0;
-         case 2:
-           return p == 0 ? -1.5450849718747371205 : 1.1180339887498948482;
-         case 3:
-           return p == 0 ? 0.5 : -0.30901699437494742410;
-         default:
-           return 0;
-       }
-     default:
-        return 0;
-   }
-}
-
-/*
- * @brief Compute the 1st derivative of the q-th 1D basis function at quadrature point p
- * @param q the index of the 1D basis funcion
- * @param p the index of the 1D quadrature point
- * @return The derivative value
- */
-PROXY_HOST_DEVICE double SEMQkGL::basisGradientAt( const int q, const int p ) const
-{
-  if( p <= halfNodes )
-  {
-    return gradientAt( q, p );
-  }
-  else
-  {
-    return -gradientAt( numSupport1dPoints - 1 - q, numSupport1dPoints - 1 - p );
-  }
-}
-
-/**
- * @brief The value of the weight for the given support point
- * @param q The index of the support point
- * @return The value of the weight
- */
-PROXY_HOST_DEVICE double SEMQkGL::weight( const int q ) const
-{
-   switch(numSupport1dPoints)
-   {
-     case 3:
-        switch( q )
-        {
-          case 0:
-          case 2:
-            return 1.0/3.0;
-          default:
-            return 4.0/3.0;
-        }
-     case 4:
-        switch( q )
-        {
-          case 1:
-          case 2:
-            return 5.0/6.0;
-          default:
-           return 1.0/6.0;
-        }
-    default:
-        return 0;
-   }
-}
-/**
- * @brief Calculates the linear index for support/quadrature points from ijk
- *   coordinates.
- * @param r order of polynomial approximation
- * @param i The index in the xi0 direction (0,r)
- * @param j The index in the xi1 direction (0,r)
- * @param k The index in the xi2 direction (0,r)
- * @return The linear index of the support/quadrature point (0-(r+1)^3)
-*/
-PROXY_HOST_DEVICE int SEMQkGL::linearIndex( const int r, const int i, const int j, const int k ) const
-{
-        return i + (r+1) * j + (r+1)*(r+1) * k;
-}
-
-/**
- * @brief Calculate the Cartesian/TensorProduct index given the linear index
- *   of a support point.
- * @param linearIndex The linear index of support point
- * @param r order of polynomial approximation
- * @param i0 The Cartesian index of the support point in the xi0 direction.
- * @param i1 The Cartesian index of the support point in the xi1 direction.
- * @param i2 The Cartesian index of the support point in the xi2 direction.
-*/
-PROXY_HOST_DEVICE void SEMQkGL::multiIndex( int const r, int const linearIndex, int & i0, int & i1, int & i2 ) const
-{
-     i2 = linearIndex/((r+1)*(r+1));
-     i1 = (linearIndex%((r+1)*(r+1)))/(r+1);
-     i0 = (linearIndex%((r+1)*(r+1)))%(r+1);
-}
-
-/**
- * @brief Compute the interpolation coefficients of the q-th quadrature point in a given direction
- * @param q the index of the quadrature point in 1D
- * @param k the index of the interval endpoint (0 or 1)
- * @return The interpolation coefficient
-*/
-PROXY_HOST_DEVICE  double SEMQkGL::interpolationCoord( const int q, const int k ) const
-{
-   const double alpha = (parentSupportCoord( q ) + 1.0 ) / 2.0;
-   return k == 0 ? ( 1.0 - alpha ) : alpha;
-}
-
-/**
- * @brief Compute the 1D factor of the coefficient of the jacobian on the q-th quadrature point,
- * with respect to the k-th interval endpoint (0 or 1). The computation depends on the position
- * in the basis tensor product of this term (i, equal to 0, 1 or 2) and on the direction in which
- * the gradient is being computed (dir, from 0 to 2)
- * @param q The index of the quadrature point in 1D
- * @param i The index of the position in the tensor product
- * @param k The index of the interval endpoint (0 or 1)
- * @param dir The direction in which the derivatives are being computed
- * @return The value of the jacobian factor
-*/
-PROXY_HOST_DEVICE  double SEMQkGL::jacobianCoefficient1D( const int q, const int i, const int k, const int dir ) const
-{
-   if( i == dir )
-   {
-     return k== 0 ? -1.0/2.0 : 1.0/2.0;
-   }
-   else
-   {
-     return interpolationCoord( q, k );
-   }
-}
-
-PROXY_HOST_DEVICE double SEMQkGL::determinant(double  m[3][3]) const
+PROXY_HOST_DEVICE double SEMQkGL::determinant(double  m[3][3]) //const
 {
    return abs(m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2])
              -m[0][1]*(m[1][0]*m[2][2]-m[2][0]*m[1][2])
@@ -1090,7 +1025,7 @@ PROXY_HOST_DEVICE double SEMQkGL::determinant(double  m[3][3]) const
  * @return The determinant.
  * @note @p srcSymMatrix can contain integers but @p dstMatrix must contain floating point values.
 */
-PROXY_HOST_DEVICE void SEMQkGL::symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6]) const
+PROXY_HOST_DEVICE void SEMQkGL::symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6])// const
 {
  
    using FloatingPoint = std::decay_t< decltype( dstSymMatrix[ 0 ] ) >;
@@ -1118,7 +1053,7 @@ PROXY_HOST_DEVICE void SEMQkGL::symInvert( double  dstSymMatrix[6], double  srcS
  * @return The determinant.
  * @note @p symMatrix can contain integers but @p dstMatrix must contain floating point values.
 */
-PROXY_HOST_DEVICE void SEMQkGL::symInvert0( double  symMatrix[6] ) const
+PROXY_HOST_DEVICE  void SEMQkGL::symInvert0( double  symMatrix[6] )// const
 {
     std::remove_reference_t< decltype( symMatrix[ 0 ] ) > temp[ 6 ];
     symInvert( temp, symMatrix );
@@ -1140,9 +1075,12 @@ PROXY_HOST_DEVICE void SEMQkGL::symInvert0( double  symMatrix[6] ) const
  * @param X Array containing the coordinates of the mesh support points.
  * @param J Array to store the Jacobian transformation.
 */
-PROXY_HOST_DEVICE void SEMQkGL::jacobianTransformation( int e, int const qa, int const qb, int const qc,
+PROXY_HOST_DEVICE void SEMQkGL::jacobianTransformation( int e, int const r, 
+                              int const qa, 
+                              int const qb, 
+                              int const qc,
                               double const (&X)[8][3],
-                              double ( & J )[3][3] ) const
+                              double ( & J )[3][3] ) //const
 {
    for( int k = 0; k < 8; k++ )
    {
@@ -1151,9 +1089,9 @@ PROXY_HOST_DEVICE void SEMQkGL::jacobianTransformation( int e, int const qa, int
      const int kc = k / 4;
      for( int j = 0; j < 3; j++ )
      {
-       double jacCoeff = jacobianCoefficient1D( qa, 0, ka, j ) *
-                         jacobianCoefficient1D( qb, 1, kb, j ) *
-                         jacobianCoefficient1D( qc, 2, kc, j );
+       double jacCoeff = jacobianCoefficient1D( r, qa, 0, ka, j ) *
+                         jacobianCoefficient1D( r, qb, 1, kb, j ) *
+                         jacobianCoefficient1D( r, qc, 2, kc, j );
        for( int i = 0; i < 3; i++ )
        {
          J[i][j] +=  jacCoeff * X[k][i];
@@ -1169,25 +1107,13 @@ PROXY_HOST_DEVICE void SEMQkGL::jacobianTransformation( int e, int const qa, int
  * @param X Array containing the coordinates of the mesh support points.
  * @return The diagonal mass term associated to q
 */
-PROXY_HOST_DEVICE double SEMQkGL::computeMassTerm( int e, int const r,int const q, double const (&X)[8][3] ) const
+PROXY_HOST_DEVICE double SEMQkGL::computeMassTerm( int e, int const r, int const q, double const (&X)[8][3] ) //const
 {
    int qa, qb, qc;
    multiIndex( r,q, qa, qb, qc );
-   const double w3D = weight( qa )*weight( qb )*weight( qc );
+   const double w3D = weight( r, qa )*weight( r, qb )*weight( r, qc );
    double J[3][3] = {{0}};
-   jacobianTransformation(e, qa, qb, qc, X, J );
-   /*if(e==0)
-   {
-     printf("quadrature point %d\n",q );
-     printf("qa qb qc %d %d %d\n",qa,qb,qc);
-     printf("weights %f %f %f\n",weight(qa),weight(qb),weight(qc));
-     printf("jac %lf %lf %lf\n",J[0][0],J[0][1],J[0][2]);
-     printf("jac %lf %lf %lf\n",J[1][0],J[1][1],J[1][2]);
-     printf("jac %lf %lf %lf\n",J[2][0],J[2][1],J[2][2]);
-     printf("determinant %lf \n", determinant(J));
-     printf("determinant*w3D %lf\n ", determinant(J)*w3D);
-     printf("------------------\n");
-   }*/
+   jacobianTransformation(e, r, qa, qb, qc, X, J );
    return determinant( J )*w3D;
 
 }
@@ -1202,21 +1128,13 @@ PROXY_HOST_DEVICE double SEMQkGL::computeMassTerm( int e, int const r,int const 
  * @param B Array to store the  the geometrical symetic matrix=detJ*J^{-1}J^{-T}.
 */
 PROXY_HOST_DEVICE 
-void SEMQkGL::computeBMatrix( int e, int const qa, int const qb, int const qc,
+void SEMQkGL::computeBMatrix( int e, int const r,  int const qa, int const qb, int const qc,
                               double const (&X)[8][3],
                               double (& J)[3][3],
-                              double (& B)[6] ) const
+                              double (& B)[6] ) //const
 {
-    jacobianTransformation( e,qa, qb, qc, X, J );
+    jacobianTransformation( e, r, qa, qb, qc, X, J );
     double const detJ = determinant( J );
-    /*if(e==505050)
-    {
-        printf("quadrature point %d %d %d\n",qa,qb,qc);
-        printf("det %lf\n",detJ);
-        printf("J %lf %lf %lf\n",J[0][0],J[0][1],J[0][2]);
-        printf("J %lf %lf %lf\n",J[1][0],J[1][1],J[1][2]);
-        printf("J %lf %lf %lf\n",J[2][0],J[2][1],J[2][2]);
-    }*/
 
     // compute J^T.J/det(J), using Voigt notation for B
     B[0] = (J[0][0]*J[0][0]+J[1][0]*J[1][0]+J[2][0]*J[2][0])/detJ;
@@ -1225,19 +1143,9 @@ void SEMQkGL::computeBMatrix( int e, int const qa, int const qb, int const qc,
     B[3] = (J[0][1]*J[0][2]+J[1][1]*J[1][2]+J[2][1]*J[2][2])/detJ;
     B[4] = (J[0][0]*J[0][2]+J[1][0]*J[1][2]+J[2][0]*J[2][2])/detJ;
     B[5] = (J[0][0]*J[0][1]+J[1][0]*J[1][1]+J[2][0]*J[2][1])/detJ;
-    /*if(e==505050)
-    {
-        printf("quadrature point %d %d %d\n",qa,qb,qc);
-        printf("avant b= %lf %lf %lf %lf %lf %lf \n",B[0],B[1],B[2],B[3],B[4],B[5]);
-    }*/
 
     // compute detJ*J^{-1}J^{-T}
     symInvert0( B );
-    /*if(e==505050)
-    {
-        printf("quadrature point %d %d %d\n",qa,qb,qc);
-        printf("b= %lf %lf %lf %lf %lf %lf \n",B[0],B[1],B[2],B[3],B[4],B[5]);
-    }*/
 }
 
 template<typename FUNC>
@@ -1248,25 +1156,25 @@ void SEMQkGL::computeGradPhiBGradPhi( int const e,
                              int const qb,
                              int const qc,
                              double const (&B)[6],
-                             FUNC && func ) const
+                             FUNC && func ) //const
 {
-   const double w = weight( qa )*weight( qb )*weight( qc );
+   const double w = weight(r,  qa )*weight(r,  qb )*weight(r,  qc );
    for( int i=0; i<num1dNodes; i++ )
    {
      const int ibc = linearIndex( r,i, qb, qc );
      const int aic = linearIndex( r,qa, i, qc );
      const int abi = linearIndex( r,qa, qb, i );
-     const double gia = basisGradientAt( i, qa );
-     const double gib = basisGradientAt( i, qb );
-     const double gic = basisGradientAt( i, qc );
+     const double gia = basisGradientAt( r,i, qa );
+     const double gib = basisGradientAt( r,i, qb );
+     const double gic = basisGradientAt( r,i, qc );
      for( int j=0; j<num1dNodes; j++ )
      {
        const int jbc = linearIndex( r,j, qb, qc );
        const int ajc = linearIndex( r,qa, j, qc );
        const int abj = linearIndex( r,qa, qb, j );
-       const double gja = basisGradientAt( j, qa );
-       const double gjb = basisGradientAt( j, qb );
-       const double gjc = basisGradientAt( j, qc );
+       const double gja = basisGradientAt( r,j, qa );
+       const double gjb = basisGradientAt( r,j, qb );
+       const double gjc = basisGradientAt( r,j, qc );
        // diagonal terms
        const double w0 = w * gia * gja;
        func( ibc, jbc, w0 * B[0] );
@@ -1295,14 +1203,14 @@ void SEMQkGL::computeStiffnessTerm( int e,
                                     int r,
                                     int const q,
                                     double const (&X)[8][3],
-                                    FUNC && func ) const
+                                    FUNC && func ) //const
     {
       int qa, qb, qc;
       multiIndex( r,q, qa, qb, qc );
       double B[6] = {0};
       double J[3][3] = {{0}};
-      computeBMatrix( e,qa, qb, qc, X, J, B );
-      computeGradPhiBGradPhi( e,r, qa, qb, qc, B, func );
+      computeBMatrix( e, r, qa, qb, qc, X, J, B );
+      computeGradPhiBGradPhi( e, r, qa, qb, qc, B, func );
     }
 
 
@@ -1318,7 +1226,7 @@ void SEMQkGL::computeMassMatrixAndStiffnessVector(const int & elementNumber,
                                                   ARRAY_REAL_VIEW const & nodesCoordsZ,
                                                   float massMatrixLocal[],
                                                   float pnLocal[],
-                                                  float Y[]) const
+                                                  float Y[]) //const
 {
     double X[8][3];
     int I=0;
@@ -1332,7 +1240,6 @@ void SEMQkGL::computeMassMatrixAndStiffnessVector(const int & elementNumber,
                 X[I][0]=nodesCoordsX(elementNumber,l);
                 X[I][1]=nodesCoordsZ(elementNumber,l);
                 X[I][2]=nodesCoordsY(elementNumber,l);
-                //if(elementNumber==0)printf("I=%d  l=%d %f %f %f\n",I,l,X[I][0],X[I][1],X[I][2]);
                 I++;
             }
         }
@@ -1343,19 +1250,12 @@ void SEMQkGL::computeMassMatrixAndStiffnessVector(const int & elementNumber,
     }
     for (int q=0;q<nPointsPerElement;q++)
     {
-        massMatrixLocal[q]=computeMassTerm( elementNumber,order,q, X); 
-        computeStiffnessTerm(elementNumber,order, q, X,[&] (const int i, const int j, const double val)
+        massMatrixLocal[q]=computeMassTerm( elementNumber, order,q, X); 
+        computeStiffnessTerm(elementNumber, order, q, X,[&] (const int i, const int j, const double val)
                 {
                  float localIncrement=val*pnLocal[j];
                  Y[i]+=localIncrement;
                 });
-        /*if(elementNumber==505050)
-        {
-          printf("quadrature point %d\n",q );
-          printf("massMatrixLocal %f\n",massMatrixLocal[q]);
-          printf("Y %f\n",Y[q]);
-          printf("------------------\n");
-        }*/
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////
