@@ -20,7 +20,8 @@ private:
   /////////////////////////////////////////////////////////////////////////////////////
   constexpr static double sqrt5 = 2.2360679774997897;
   // order of polynomial approximation
-  constexpr static int r=2;
+  //constexpr static  int r=2;
+  constexpr static  int r=SEMinfo::myOrderNumber;
   // number of support/quadrature/nodes points in one direction
   constexpr static int numSupport1dPoints=r+1;
   constexpr static int num1dNodes=numSupport1dPoints;
@@ -126,11 +127,13 @@ public:
   /////////////////////////////////////////////////////////////////////////////////////
   //  from GEOS implementation
   /////////////////////////////////////////////////////////////////////////////////////
+  //constexpr static double parentSupportCoord( const int order, const int supportPointIndex ) 
+  template<typename SEMinfo>
   PROXY_HOST_DEVICE
-  constexpr static double parentSupportCoord( const int order, const int supportPointIndex ) 
+  constexpr static double parentSupportCoord(  const int supportPointIndex ) 
   {
       double result=0.0;
-      switch( order )
+      switch( SEMinfo::myOrderNumber )
       {
         case 1:
           return -1.0 + 2.0 * (supportPointIndex & 1);
@@ -178,10 +181,11 @@ public:
    * @param p The index of the support point
    * @return The gradient of basis function.
   */
+  template<typename SEMinfo>
   PROXY_HOST_DEVICE  
-  constexpr static double gradientAt( const int order, const int q, const int p ) 
+  constexpr static double gradientAt( const int q, const int p ) 
   {
-      switch( order )
+      switch( SEMinfo::myOrderNumber )
       {
         case 1:
           return q == 0 ? -0.5 : 0.5;
@@ -228,11 +232,11 @@ public:
   {
      if( p <= halfNodes )
      {
-       return gradientAt( order, q, p );
+       return gradientAt<SEMinfo>( q, p );
      }
      else
      {
-       return -gradientAt( order, numSupport1dPoints - 1 - q, numSupport1dPoints - 1 - p );
+       return -gradientAt<SEMinfo>( numSupport1dPoints - 1 - q, numSupport1dPoints - 1 - p );
      }
   }
 
@@ -241,10 +245,11 @@ public:
    * @param q The index of the support point
    * @return The value of the weight
   */
+  template<typename SEMinfo>
   PROXY_HOST_DEVICE
-  constexpr static double weight( const int order, const int q )
+  constexpr static double weight( const int q )
   {
-      switch(order)
+      switch(SEMinfo::myOrderNumber)
       {
         case 1:
            return 1;
@@ -315,7 +320,7 @@ public:
   PROXY_HOST_DEVICE 
   constexpr static double interpolationCoord( const int order, const int q, const int k ) 
   {
-      const double alpha = (parentSupportCoord( order, q ) + 1.0 ) / 2.0;
+      const double alpha = (parentSupportCoord<SEMinfo>( q ) + 1.0 ) / 2.0;
       return k == 0 ? ( 1.0 - alpha ) : alpha;
    }
 
@@ -1089,9 +1094,9 @@ PROXY_HOST_DEVICE void SEMQkGL::jacobianTransformation( int e, int const r,
      const int kc = k / 4;
      for( int j = 0; j < 3; j++ )
      {
-       double jacCoeff = jacobianCoefficient1D( r, qa, 0, ka, j ) *
-                         jacobianCoefficient1D( r, qb, 1, kb, j ) *
-                         jacobianCoefficient1D( r, qc, 2, kc, j );
+       double jacCoeff = jacobianCoefficient1D(r, qa, 0, ka, j ) *
+                         jacobianCoefficient1D(r, qb, 1, kb, j ) *
+                         jacobianCoefficient1D(r, qc, 2, kc, j );
        for( int i = 0; i < 3; i++ )
        {
          J[i][j] +=  jacCoeff * X[k][i];
@@ -1111,7 +1116,7 @@ PROXY_HOST_DEVICE double SEMQkGL::computeMassTerm( int e, int const r, int const
 {
    int qa, qb, qc;
    multiIndex( r,q, qa, qb, qc );
-   const double w3D = weight( r, qa )*weight( r, qb )*weight( r, qc );
+   const double w3D = weight<SEMinfo>( qa )*weight<SEMinfo>( qb )*weight<SEMinfo>( qc );
    double J[3][3] = {{0}};
    jacobianTransformation(e, r, qa, qb, qc, X, J );
    return determinant( J )*w3D;
@@ -1158,23 +1163,23 @@ void SEMQkGL::computeGradPhiBGradPhi( int const e,
                              double const (&B)[6],
                              FUNC && func ) //const
 {
-   const double w = weight(r,  qa )*weight(r,  qb )*weight(r,  qc );
+   const double w = weight<SEMinfo>(qa )*weight<SEMinfo>(qb )*weight<SEMinfo>(qc );
    for( int i=0; i<num1dNodes; i++ )
    {
      const int ibc = linearIndex( r,i, qb, qc );
      const int aic = linearIndex( r,qa, i, qc );
      const int abi = linearIndex( r,qa, qb, i );
-     const double gia = basisGradientAt( r,i, qa );
-     const double gib = basisGradientAt( r,i, qb );
-     const double gic = basisGradientAt( r,i, qc );
+     const double gia = basisGradientAt(r, i, qa );
+     const double gib = basisGradientAt(r, i, qb );
+     const double gic = basisGradientAt(r, i, qc );
      for( int j=0; j<num1dNodes; j++ )
      {
        const int jbc = linearIndex( r,j, qb, qc );
        const int ajc = linearIndex( r,qa, j, qc );
        const int abj = linearIndex( r,qa, qb, j );
-       const double gja = basisGradientAt( r,j, qa );
-       const double gjb = basisGradientAt( r,j, qb );
-       const double gjc = basisGradientAt( r,j, qc );
+       const double gja = basisGradientAt(r, j, qa );
+       const double gjb = basisGradientAt(r, j, qb );
+       const double gjc = basisGradientAt(r, j, qc );
        // diagonal terms
        const double w0 = w * gia * gja;
        func( ibc, jbc, w0 * B[0] );
