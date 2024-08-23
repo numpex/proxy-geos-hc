@@ -34,6 +34,9 @@
         arrayIntView localFaceNodeToGlobalFaceNode=this->localFaceNodeToGlobalFaceNode.toView(); \
         vectorDoubleView weights=this->weights.toView(); \
         arrayRealView globalNodesCoords=this->globalNodesCoords.toView(); \
+        arrayRealView globalNodesCoordsX=this->globalNodesCoordsX.toView(); \
+        arrayRealView globalNodesCoordsY=this->globalNodesCoordsY.toView(); \
+        arrayRealView globalNodesCoordsZ=this->globalNodesCoordsZ.toView(); \
         arrayDoubleView derivativeBasisFunction1D=this->derivativeBasisFunction1D.toView(); \
         arrayIntView listOfElementsByColor=this->listOfElementsByColor.toView();
 #else

@@ -54,12 +54,6 @@ void SEMsolver::computeOneStep( const int & timeSample,
   {
     int localToGlobal=globalNodesList( elementNumber, i );
     pnLocal[i]=pnGlobal( localToGlobal, i2 );
-    /*if(elementNumber==rhsElement[0])
-    {
-      printf("quadrature point %d \n",i);
-      printf("rhsElement %d\n",rhsElement[0]);
-      printf(" m_p_n %f\n",pnLocal[i]);
-    }*/
   }
 
   /*myQk.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,
