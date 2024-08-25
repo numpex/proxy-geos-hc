@@ -1,3 +1,5 @@
+#ifndef SEMINFO_HPP_
+#define SEMINFO_HPP_
 struct SEMinfo
 {
   // get infos from mesh
@@ -9,7 +11,7 @@ struct SEMinfo
   int numberOfBoundaryFaces;
 
   const int myNumberOfRHS=1;
-  static constexpr int myOrderNumber=2;
+  static constexpr int myOrderNumber=1;
   const float myTimeStep=0.001;
   const int nPointsPerElement = pow((myOrderNumber+1), DIMENSION );
 
@@ -26,3 +28,4 @@ struct SEMinfo
   int numberOfElementsByColor[4];
   #endif
 };
+#endif

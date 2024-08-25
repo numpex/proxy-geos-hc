@@ -10,7 +10,9 @@
 #ifndef SEM_SOLVER_HPP_
 #define SEM_SOLVER_HPP_
 
-#include "SEMQkGL.hpp"
+//#include "SEMQkGL.hpp"
+#include "SEMQkGLBasisFunctions.hpp"
+#include "SEMQkGLIntegrals.hpp"
 #include "SEMmesh.hpp"
 
 class SEMsolver
@@ -55,7 +57,9 @@ public:
 private:
 
   int order;
-  SEMQkGL myQk;
+  //SEMQkGL myQk;
+  SEMQkGLBasisFunctions myQkBasis;
+  SEMQkGLIntegrals myQkIntegrals;
 
   //shared arrays
   arrayInt globalNodesList;

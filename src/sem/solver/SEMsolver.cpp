@@ -56,16 +56,16 @@ void SEMsolver::computeOneStep( const int & timeSample,
     pnLocal[i]=pnGlobal( localToGlobal, i2 );
   }
 
-  /*myQk.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,
+  /*myQkIntegrals.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,
                                            globalNodesList,globalNodesCoords,
                                            weights,derivativeBasisFunction1D,
                                            massMatrixLocal,pnLocal,Y);*/
-  /*myQk.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,
+  /*myQkIntegrals.computeMassMatrixAndStiffnessVector(elementNumber,order,nPointsPerElement,
                                            globalNodesCoordsX,globalNodesCoordsY,globalNodesCoordsZ,
                                            weights,derivativeBasisFunction1D,
                                            massMatrixLocal,pnLocal,Y);*/
 
-  myQk.computeMassMatrixAndStiffnessVector(elementNumber, order, nPointsPerElement,
+  myQkIntegrals.computeMassMatrixAndStiffnessVector(elementNumber, order, nPointsPerElement,
                                            globalNodesCoordsX,globalNodesCoordsY,globalNodesCoordsZ,
                                            massMatrixLocal, pnLocal, Y);
 
@@ -156,11 +156,11 @@ void SEMsolver::initFEarrays( SEMinfo & myInfo, SEMmesh mesh )
   // get model
   mesh.getModel( myInfo.numberOfElements, model );
   // get quadrature points
-  myQk.gaussLobattoQuadraturePoints( order, quadraturePoints );
+  myQkBasis.gaussLobattoQuadraturePoints( order, quadraturePoints );
   // get gauss-lobatto weights
-  myQk.gaussLobattoQuadratureWeights( order, weights );
+  myQkBasis.gaussLobattoQuadratureWeights( order, weights );
   // get basis function and corresponding derivatives
-  myQk.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
+  myQkBasis.getDerivativeBasisFunction1D( order, quadraturePoints, derivativeBasisFunction1D );
  
   // sort element by color
   #ifdef SEM_MESHCOLOR

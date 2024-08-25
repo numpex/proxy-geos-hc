@@ -1,19 +1,21 @@
-#ifndef SEMQKGL_HPP_
-#define SEMQKGL_HPP_
+#ifndef SEMQKGLINTEGRALS_HPP_
+#define SEMQKGLINTEGRALS_HPP_
 
 #include "dataType.hpp"
 #include "SEMmacros.hpp"
 #include "SEMdata.hpp"
+#include "SEMQkGLBasisFunctions.hpp"
 using namespace std;
 
 /**
  * This class is the basis class for the hexahedron finite element cells with shape functions defined on Gauss-Lobatto quadrature points.
  */
-class SEMQkGL
+class SEMQkGLIntegrals
 {
 private:
   int order;
   struct SEMinfo infos;
+  SEMQkGLBasisFunctions GLBasis;
 
   ////////////////////////////////////////////////////////////////////////////////////
   //  from GEOS implementation
@@ -31,535 +33,14 @@ private:
   constexpr static int numSupportPoints=(r+1)*(r+1)*(r+1);
 
 public:
-  PROXY_HOST_DEVICE SEMQkGL(){};
-  PROXY_HOST_DEVICE ~SEMQkGL(){};
+  PROXY_HOST_DEVICE SEMQkGLIntegrals(){};
+  PROXY_HOST_DEVICE ~SEMQkGLIntegrals(){};
 
-  
 
-void gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
-{
-  if( order == 1 )
-  {
-    quadraturePoints[0]=-1.0;
-    quadraturePoints[1]=1.0;
-  }
-  if( order == 2 )
-  {
-    quadraturePoints[0]=-1.0;
-    quadraturePoints[1]=0.0;
-    quadraturePoints[2]=1.0;
-  }
-  if( order == 3 )
-  {
-    quadraturePoints[0]=-1.0;
-    quadraturePoints[1]=-0.4472136;
-    quadraturePoints[2]=0.4472136;
-    quadraturePoints[3]=1.0;
-  }
-  if( order == 4 )
-  {
-    quadraturePoints[0]=-1.0;
-    quadraturePoints[1]=-0.65465367;
-    quadraturePoints[2]=0.0;
-    quadraturePoints[3]=0.65465367;
-    quadraturePoints[4]=1.0;
-  }
-  if( order == 5 )
-  {
-    quadraturePoints[0]=-1.0;
-    quadraturePoints[1]=-0.76505532;
-    quadraturePoints[2]=-0.28523152;
-    quadraturePoints[3]=0.28523152;
-    quadraturePoints[4]=0.76505532;
-    quadraturePoints[5]=1.0;
-  }
-}
-void gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const
-{
-  if( order == 1 )
-  {
-    weights[0]=1.0;
-    weights[1]=1.0;
-  }
-  if( order == 2 )
-  {
-    weights[0]=0.33333333;
-    weights[1]=1.33333333;
-    weights[2]= 0.33333333;
-  }
-  if( order == 3 )
-  {
-    weights[0]=0.16666667;
-    weights[1]=0.83333333;
-    weights[2]=0.83333333;
-    weights[3]=0.16666667;
-  }
-  if( order == 4 )
-  {
-    weights[0]=0.1;
-    weights[1]=0.54444444;
-    weights[2]=0.71111111;
-    weights[3]=0.54444444;
-    weights[4]=0.1;
-  }
-  if( order == 5 )
-  {
-    weights[0]=0.06666667;
-    weights[1]=0.37847496;
-    weights[2]=0.55485838;
-    weights[3]=0.55485838;
-    weights[4]=0.37847496;
-    weights[5]=0.06666667;
-  }
-}
-vector< double > shapeFunction1D( int order, double xi ) const
-{
-  std::vector< double > shapeFunction( order+1 );
-  if( order==1 )
-  {
-    shapeFunction[0]=0.5*(1.0-xi);
 
-    shapeFunction[1]=0.5*(1.0+xi);
-  }
-  if( order==2 )
-  {
-    shapeFunction[0]= -1.0*xi*(0.5 - 0.5*xi);
-
-    shapeFunction[1]=(1.0 - 1.0*xi)*(1.0*xi + 1.0);
-
-    shapeFunction[2]= 1.0*xi*(0.5*xi + 0.5);
-  }
-  if( order==3 )
-  {
-    shapeFunction[0]=(0.309016994374947 - 0.690983005625053*xi)*(0.5 - 0.5*xi)
-                      *(-1.80901699437495*xi - 0.809016994374947);
-
-    shapeFunction[1]=(0.5 - 1.11803398874989*xi)*(0.690983005625053 - 0.690983005625053*xi)
-                      *(1.80901699437495*xi + 1.80901699437495);
-
-    shapeFunction[2]=(1.80901699437495 - 1.80901699437495*xi)
-                      *(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5);
-
-    shapeFunction[3]=(0.5*xi + 0.5)*(0.690983005625053*xi + 0.309016994374947)
-                      *(1.80901699437495*xi - 0.809016994374947);
-  }
-  if( order==4 )
-  {
-    shapeFunction[0]=1.0*xi*(0.39564392373896 - 0.60435607626104*xi)*(0.5 - 0.5*xi)
-                      *(-2.89564392373896*xi - 1.89564392373896);
-
-    shapeFunction[1]=-1.52752523165195*xi*(0.5 - 0.763762615825973*xi)*(0.60435607626104 - 0.60435607626104*xi)
-                      *(2.89564392373896*xi + 2.89564392373896);
-
-    shapeFunction[2]=(1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0);
-
-    shapeFunction[3]= 1.52752523165195*xi*(2.89564392373896 - 2.89564392373896*xi)
-                      *(0.60435607626104*xi + 0.60435607626104)*(0.763762615825973*xi + 0.5);
-
-    shapeFunction[4]= 1.0*xi*(0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)
-                      *(2.89564392373896*xi - 1.89564392373896);
-  }
-  if( order==5 )
-  {
-    shapeFunction[0]=(0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
-                      *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)
-                      *(-1.39905441140358*xi - 0.399054411403579);
-
-    shapeFunction[1]=(0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
-                      *(0.566554479308753 - 0.566554479308753*xi)*(-2.0840983387567*xi - 0.594450529658367)
-                      *(4.25632117622354*xi + 4.25632117622354);
-
-    shapeFunction[2]=(0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
-                      *(0.778069933064125 - 0.778069933064125*xi)*(1.39905441140358*xi + 1.39905441140358)
-                      *(2.0840983387567*xi + 1.59445052965837);
-
-    shapeFunction[3]=(1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
-                      *(0.778069933064125*xi + 0.778069933064125)*(0.952120850728289*xi + 0.728425125873928)
-                      *(1.75296196636787*xi + 0.5);
-
-    shapeFunction[4]=(4.25632117622354 - 4.25632117622354*xi)*(0.566554479308753*xi + 0.566554479308753)
-                      *(0.6535475074298*xi + 0.5)*(0.952120850728289*xi + 0.271574874126072)
-                      *(2.0840983387567*xi - 0.594450529658367);
-
-    shapeFunction[5]=(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
-                      *(0.778069933064125*xi + 0.221930066935875)*(1.39905441140358*xi - 0.399054411403579)
-                      *(4.25632117622354*xi - 3.25632117622354);
-  }
-  return shapeFunction;
-}
-vector< double > derivativeShapeFunction1D( int order, double xi ) const
-{
-  std::vector< double > derivativeShapeFunction( order+1 );
-
-  if( order == 1 )
-  {
-    derivativeShapeFunction[0]=-0.5;
-    derivativeShapeFunction[1]=0.5;
-  }
-  if( order == 2 )
-  {
-    derivativeShapeFunction[0]=1.0*xi - 0.5;
-    derivativeShapeFunction[1]=-2.0*xi;
-    derivativeShapeFunction[2]=1.0*xi + 0.5;
-  }
-  if( order == 3 )
-  {
-    derivativeShapeFunction[0]=-1.80901699437495*(0.309016994374947 - 0.690983005625053*xi)*(0.5 - 0.5*xi)
-                                + (-1.80901699437495*xi - 0.809016994374947)*(0.345491502812526*xi - 0.345491502812526)
-                                + (-1.80901699437495*xi - 0.809016994374947)*(0.345491502812526*xi - 0.154508497187474);
-
-    derivativeShapeFunction[1]=1.80901699437495*(0.5 - 1.11803398874989*xi)*(0.690983005625053 - 0.690983005625053*xi)
-                                + (0.772542485937369*xi - 0.772542485937369)*(1.80901699437495*xi + 1.80901699437495)
-                                + (0.772542485937369*xi - 0.345491502812526)*(1.80901699437495*xi + 1.80901699437495);
-
-    derivativeShapeFunction[2]=(1.80901699437495 - 1.80901699437495*xi)*(0.772542485937369*xi + 0.345491502812526) +
-                                (1.80901699437495 - 1.80901699437495*xi)*(0.772542485937369*xi + 0.772542485937369) -
-                                1.80901699437495*(0.690983005625053*xi + 0.690983005625053)*(1.11803398874989*xi + 0.5);
-
-    derivativeShapeFunction[3]=(0.345491502812526*xi + 0.154508497187474)*(1.80901699437495*xi - 0.809016994374947) +
-                                (0.345491502812526*xi + 0.345491502812526)*(1.80901699437495*xi - 0.809016994374947) +
-                                1.80901699437495*(0.5*xi + 0.5)*(0.690983005625053*xi + 0.309016994374947);
-  }
-  if( order == 4 )
-  {
-    derivativeShapeFunction[0]=2.89564392373896*xi*(0.39564392373896 - 0.60435607626104*xi)*(0.5 - 0.5*xi) +
-                                0.5*xi*(0.39564392373896 - 0.60435607626104*xi)*(-2.89564392373896*xi - 1.89564392373896)
-                                + 0.60435607626104*xi*(0.5 - 0.5*xi)*(-2.89564392373896*xi - 1.89564392373896) +
-                                (0.39564392373896 - 0.60435607626104*xi)*(-2.89564392373896*xi - 1.89564392373896)*(0.5*xi - 0.5);
-
-    derivativeShapeFunction[1]=-4.42316915539091*xi*(0.5 - 0.763762615825973*xi)*(0.60435607626104 - 0.60435607626104*xi)
-                                + 0.923169155390906*xi*(0.5 - 0.763762615825973*xi)*(2.89564392373896*xi + 2.89564392373896)
-                                + 1.16666666666667*xi*(0.60435607626104 - 0.60435607626104*xi)*(2.89564392373896*xi + 2.89564392373896)
-                                + (0.60435607626104 - 0.60435607626104*xi)*(1.16666666666667*xi - 0.763762615825973)
-                                *(2.89564392373896*xi + 2.89564392373896);
-
-    derivativeShapeFunction[2]=(1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.52752523165195*xi + 1.0) +
-                                (1.0 - 1.52752523165195*xi)*(1.0 - 1.0*xi)*(1.52752523165195*xi + 1.52752523165195)
-                                - 1.0*(1.0 - 1.52752523165195*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0)
-                                - 1.52752523165195*(1.0 - 1.0*xi)*(1.0*xi + 1.0)*(1.52752523165195*xi + 1.0);
-
-    derivativeShapeFunction[3]=1.16666666666667*xi*(2.89564392373896 - 2.89564392373896*xi)*(0.60435607626104*xi + 0.60435607626104)
-                                + 0.923169155390906*xi*(2.89564392373896 - 2.89564392373896*xi)*(0.763762615825973*xi + 0.5)
-                                - 4.42316915539091*xi*(0.60435607626104*xi + 0.60435607626104)*(0.763762615825973*xi + 0.5)
-                                + (2.89564392373896 - 2.89564392373896*xi)*(0.60435607626104*xi + 0.60435607626104)
-                                *(1.16666666666667*xi + 0.763762615825973);
-
-    derivativeShapeFunction[4]=2.89564392373896*xi*(0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)
-                                + 0.60435607626104*xi*(0.5*xi + 0.5)*(2.89564392373896*xi - 1.89564392373896)
-                                + 0.5*xi*(0.60435607626104*xi + 0.39564392373896)*(2.89564392373896*xi - 1.89564392373896)
-                                + (0.5*xi + 0.5)*(0.60435607626104*xi + 0.39564392373896)*(2.89564392373896*xi - 1.89564392373896);
-  }
-  if( order == 5 )
-  {
-    derivativeShapeFunction[0]=-1.39905441140358*(0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
-                                *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)
-                                - 4.25632117622354*(0.221930066935875 - 0.778069933064125*xi)*(0.433445520691247 - 0.566554479308753*xi)
-                                *(0.5 - 0.5*xi)*(-1.39905441140358*xi - 0.399054411403579) + (0.221930066935875 - 0.778069933064125*xi)
-                                *(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579)
-                                *(0.283277239654376*xi - 0.283277239654376) + (0.221930066935875 - 0.778069933064125*xi)
-                                *(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579)
-                                *(0.283277239654376*xi - 0.216722760345624) - 0.778069933064125*(0.433445520691247 - 0.566554479308753*xi)
-                                *(0.5 - 0.5*xi)*(-4.25632117622354*xi - 3.25632117622354)*(-1.39905441140358*xi - 0.399054411403579);
-
-    derivativeShapeFunction[1]= -2.0840983387567*(0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
-                                *(0.566554479308753 - 0.566554479308753*xi)*(4.25632117622354*xi + 4.25632117622354)
-                                - 0.566554479308753*(0.271574874126072 - 0.952120850728289*xi)*(0.5 - 0.6535475074298*xi)
-                                *(-2.0840983387567*xi - 0.594450529658367)*(4.25632117622354*xi + 4.25632117622354)
-                                +(0.271574874126072 - 0.952120850728289*xi)*(0.566554479308753 - 0.566554479308753*xi)
-                                *(2.12816058811177 - 2.78170809554157*xi)*(-2.0840983387567*xi - 0.594450529658367)
-                                +(0.271574874126072 - 0.952120850728289*xi)*(0.566554479308753 - 0.566554479308753*xi)
-                                *(-2.78170809554157*xi - 2.78170809554157)*(-2.0840983387567*xi - 0.594450529658367)
-                                - 0.952120850728289*(0.5 - 0.6535475074298*xi)*(0.566554479308753 - 0.566554479308753*xi)
-                                *(-2.0840983387567*xi - 0.594450529658367)*(4.25632117622354*xi + 4.25632117622354);
-
-    derivativeShapeFunction[2]= 2.0840983387567*(0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
-                                *(0.778069933064125 - 0.778069933064125*xi)*(1.39905441140358*xi + 1.39905441140358)
-                                + 1.39905441140358*(0.5 - 1.75296196636787*xi)*(0.728425125873928 - 0.952120850728289*xi)
-                                *(0.778069933064125 - 0.778069933064125*xi)*(2.0840983387567*xi + 1.59445052965837)
-                                - 0.952120850728289*(0.5 - 1.75296196636787*xi)*(0.778069933064125 - 0.778069933064125*xi)
-                                *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837)
-                                + (0.728425125873928 - 0.952120850728289*xi)*(1.3639269998358*xi - 1.3639269998358)
-                                *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837)
-                                + (0.728425125873928 - 0.952120850728289*xi)*(1.3639269998358*xi - 0.389034966532063)
-                                *(1.39905441140358*xi + 1.39905441140358)*(2.0840983387567*xi + 1.59445052965837);
-
-    derivativeShapeFunction[3]=0.952120850728289*(1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
-                                *(0.778069933064125*xi + 0.778069933064125)*(1.75296196636787*xi + 0.5)
-                                + (1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
-                                *(0.952120850728289*xi + 0.728425125873928)*(1.3639269998358*xi + 0.389034966532063)
-                                + (1.39905441140358 - 1.39905441140358*xi)*(1.59445052965837 - 2.0840983387567*xi)
-                                *(0.952120850728289*xi + 0.728425125873928)*(1.3639269998358*xi + 1.3639269998358)
-                                - 2.0840983387567*(1.39905441140358 - 1.39905441140358*xi)*(0.778069933064125*xi + 0.778069933064125)
-                                *(0.952120850728289*xi + 0.728425125873928)*(1.75296196636787*xi + 0.5)
-                                - 1.39905441140358*(1.59445052965837 - 2.0840983387567*xi)*(0.778069933064125*xi + 0.778069933064125)
-                                *(0.952120850728289*xi + 0.728425125873928)*(1.75296196636787*xi + 0.5);
-
-    derivativeShapeFunction[4]=(2.78170809554157 - 2.78170809554157*xi)*(0.566554479308753*xi + 0.566554479308753)
-                                *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367)
-                                + 2.0840983387567*(4.25632117622354 - 4.25632117622354*xi)*(0.566554479308753*xi + 0.566554479308753)
-                                *(0.6535475074298*xi + 0.5)*(0.952120850728289*xi + 0.271574874126072)
-                                + 0.952120850728289*(4.25632117622354 - 4.25632117622354*xi)*(0.566554479308753*xi
-                                                                                              + 0.566554479308753)*(0.6535475074298*xi + 0.5)*(2.0840983387567*xi - 0.594450529658367)
-                                + 0.566554479308753*(4.25632117622354 - 4.25632117622354*xi)*(0.6535475074298*xi + 0.5)
-                                *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367)
-                                + (-2.78170809554157*xi - 2.12816058811177)*(0.566554479308753*xi + 0.566554479308753)
-                                *(0.952120850728289*xi + 0.271574874126072)*(2.0840983387567*xi - 0.594450529658367);
-
-    derivativeShapeFunction[5]=(0.283277239654376*xi + 0.216722760345624)*(0.778069933064125*xi + 0.221930066935875)
-                                *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354)
-                                + (0.283277239654376*xi + 0.283277239654376)*(0.778069933064125*xi + 0.221930066935875)
-                                *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354)
-                                + 4.25632117622354*(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
-                                *(0.778069933064125*xi + 0.221930066935875)*(1.39905441140358*xi - 0.399054411403579)
-                                + 1.39905441140358*(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
-                                *(0.778069933064125*xi + 0.221930066935875)*(4.25632117622354*xi - 3.25632117622354)
-                                + 0.778069933064125*(0.5*xi + 0.5)*(0.566554479308753*xi + 0.433445520691247)
-                                *(1.39905441140358*xi - 0.399054411403579)*(4.25632117622354*xi - 3.25632117622354);
-  }
-  return derivativeShapeFunction;
-}
-
-void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoints,
-                                            arrayDouble const & derivativeBasisFunction1D ) const
-{
-  // loop over quadrature points
-  for( int i = 0; i < order+1; i++ )
-  {
-    std::vector< double > tmp( order+1 );
-    //extract all basis functions  for current quadrature point
-    tmp=derivativeShapeFunction1D( order, quadraturePoints[i] );
-    for( int j=0; j<order+1; j++ )
-    {
-      derivativeBasisFunction1D( j, i )=tmp[j];
-    }
-  }
-}
-
+  ////////////////////////////////////////////////////////////////////////////////////
+  //  from first implementation
   /////////////////////////////////////////////////////////////////////////////////////
-  //  from GEOS implementation
-  /////////////////////////////////////////////////////////////////////////////////////
-  //constexpr static double parentSupportCoord( const int order, const int supportPointIndex ) 
-  template<typename SEMinfo>
-  PROXY_HOST_DEVICE
-  constexpr static double parentSupportCoord(  const int supportPointIndex ) 
-  {
-      double result=0.0;
-      switch( SEMinfo::myOrderNumber )
-      {
-        case 1:
-          return -1.0 + 2.0 * (supportPointIndex & 1);
-        case 2:
-          switch( supportPointIndex )
-          {
-            case 0:
-              return -1.0;
-              break;
-            case 2:
-              return 1.0;
-            case 1:
-            default:
-              return 0.0;
-          }
-        case 3:
-          switch( supportPointIndex )
-          {
-            case 0:
-               result = -1.0;
-               break;
-            case 1:
-              result = -1.0/sqrt5;
-              break;
-            case 2:
-              result = 1.0/sqrt5;
-              break;
-            case 3:
-              result = 1.0;
-              break;
-            default:
-              break;
-          }
-        default:
-           return 0;
-      }
-      return result;
-   }
-
-
-  /**
-   * @brief The gradient of the basis function for a support point evaluated at
-   *  a given support point. By symmetry, p is assumed to be in 0, ..., (N-1)/2
-   * @param q The index of the basis function
-   * @param p The index of the support point
-   * @return The gradient of basis function.
-  */
-  template<typename SEMinfo>
-  PROXY_HOST_DEVICE  
-  constexpr static double gradientAt( const int q, const int p ) 
-  {
-      switch( SEMinfo::myOrderNumber )
-      {
-        case 1:
-          return q == 0 ? -0.5 : 0.5;
-        case 2:
-          switch( q )
-          {
-            case 0:
-              return p == 0 ? -1.5 : -0.5;
-            case 1:
-              return p == 0 ? 2.0 : 0.0;
-            case 2:
-              return p == 0 ? -0.5 : 0.5;
-            default:
-              return 0;
-          }
-        case 3:
-          switch( q )
-          {
-            case 0:
-              return p == 0 ? -3.0 : -0.80901699437494742410;
-            case 1:
-              return p == 0 ? 4.0450849718747371205 : 0.0;
-            case 2:
-              return p == 0 ? -1.5450849718747371205 : 1.1180339887498948482;
-            case 3:
-              return p == 0 ? 0.5 : -0.30901699437494742410;
-            default:
-              return 0;
-          }
-        default:
-           return 0;
-      }
-   }
-
-
-  /*
-   * @brief Compute the 1st derivative of the q-th 1D basis function at quadrature point p
-   * @param q the index of the 1D basis funcion
-   * @param p the index of the 1D quadrature point
-   * @return The derivative value
-  */
-  PROXY_HOST_DEVICE 
-  constexpr static double basisGradientAt( const int order, const int q, const int p )
-  {
-     if( p <= halfNodes )
-     {
-       return gradientAt<SEMinfo>( q, p );
-     }
-     else
-     {
-       return -gradientAt<SEMinfo>( numSupport1dPoints - 1 - q, numSupport1dPoints - 1 - p );
-     }
-  }
-
-  /**
-   * @brief The value of the weight for the given support point
-   * @param q The index of the support point
-   * @return The value of the weight
-  */
-  template<typename SEMinfo>
-  PROXY_HOST_DEVICE
-  constexpr static double weight( const int q )
-  {
-      switch(SEMinfo::myOrderNumber)
-      {
-        case 1:
-           return 1;
-        case 2:
-           switch( q )
-           {
-             case 0:
-             case 2:
-               return 1.0/3.0;
-             default:
-               return 4.0/3.0;
-           }
-        case 3:
-           switch( q )
-           {
-             case 1:
-             case 2:
-               return 5.0/6.0;
-             default:
-              return 1.0/6.0;
-           }
-       default:
-           return 0;
-      }
-   }
-
-  /**
-   * @brief Calculates the linear index for support/quadrature points from ijk
-   *   coordinates.
-   * @param r order of polynomial approximation
-   * @param i The index in the xi0 direction (0,r)
-   * @param j The index in the xi1 direction (0,r)
-   * @param k The index in the xi2 direction (0,r)
-   * @return The linear index of the support/quadrature point (0-(r+1)^3)
-  */
-  PROXY_HOST_DEVICE 
-  constexpr static int linearIndex( const int r,
-                                    const int i,
-                                    const int j,
-                                    const int k ) 
-  {
-           return i + (r+1) * j + (r+1)*(r+1) * k;
-  }
-
-  /**
-   * @brief Calculate the Cartesian/TensorProduct index given the linear index
-   *   of a support point.
-   * @param linearIndex The linear index of support point
-   * @param r order of polynomial approximation
-   * @param i0 The Cartesian index of the support point in the xi0 direction.
-   * @param i1 The Cartesian index of the support point in the xi1 direction.
-   * @param i2 The Cartesian index of the support point in the xi2 direction.
-  */
-  PROXY_HOST_DEVICE 
-  constexpr static void multiIndex( int const r,int const linearIndex, int & i0, int & i1, int & i2 ) 
-  {
-        i2 = linearIndex/((r+1)*(r+1));
-        i1 = (linearIndex%((r+1)*(r+1)))/(r+1);
-        i0 = (linearIndex%((r+1)*(r+1)))%(r+1);
-  }
-
-  /**
-   * @brief Compute the interpolation coefficients of the q-th quadrature point in a given direction
-   * @param q the index of the quadrature point in 1D
-   * @param k the index of the interval endpoint (0 or 1)
-   * @return The interpolation coefficient
-  */
-  PROXY_HOST_DEVICE 
-  constexpr static double interpolationCoord( const int order, const int q, const int k ) 
-  {
-      const double alpha = (parentSupportCoord<SEMinfo>( q ) + 1.0 ) / 2.0;
-      return k == 0 ? ( 1.0 - alpha ) : alpha;
-   }
-
-  /**
-   * @brief Compute the 1D factor of the coefficient of the jacobian on the q-th quadrature point,
-   * with respect to the k-th interval endpoint (0 or 1). The computation depends on the position
-   * in the basis tensor product of this term (i, equal to 0, 1 or 2) and on the direction in which
-   * the gradient is being computed (dir, from 0 to 2)
-   * @param q The index of the quadrature point in 1D
-   * @param i The index of the position in the tensor product
-   * @param k The index of the interval endpoint (0 or 1)
-   * @param dir The direction in which the derivatives are being computed
-   * @return The value of the jacobian factor
-  */
-  PROXY_HOST_DEVICE 
-  constexpr static double jacobianCoefficient1D( const int order, const int q, const int i, const int k, const int dir )
-  {
-      if( i == dir )
-      {
-        return k== 0 ? -1.0/2.0 : 1.0/2.0;
-      }
-      else
-      {
-        return interpolationCoord( order, q, k );
-      }
-  }
-
-
   // V1
   // compute B and M
   PROXY_HOST_DEVICE void computeB( const int & elementNumber,
@@ -1116,12 +597,89 @@ void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoi
         ds[j]=sqrt( Js[0][j]*Js[0][j]+Js[1][j]*Js[1][j] );
       }
   }
+  /////////////////////////////////////////////////////////////////////////////////////
+  //  end from first implementation
+  /////////////////////////////////////////////////////////////////////////////////////
   
   /////////////////////////////////////////////////////////////////////////////////////
   //  from GEOS implementation
   /////////////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * @brief Calculates the linear index for support/quadrature points from ijk
+   *   coordinates.
+   * @param r order of polynomial approximation
+   * @param i The index in the xi0 direction (0,r)
+   * @param j The index in the xi1 direction (0,r)
+   * @param k The index in the xi2 direction (0,r)
+   * @return The linear index of the support/quadrature point (0-(r+1)^3)
+  */
+  PROXY_HOST_DEVICE 
+  constexpr static int linearIndex( const int r,
+                                    const int i,
+                                    const int j,
+                                    const int k ) 
+  {
+           return i + (r+1) * j + (r+1)*(r+1) * k;
+  }
+
+  /**
+   * @brief Calculate the Cartesian/TensorProduct index given the linear index
+   *   of a support point.
+   * @param linearIndex The linear index of support point
+   * @param r order of polynomial approximation
+   * @param i0 The Cartesian index of the support point in the xi0 direction.
+   * @param i1 The Cartesian index of the support point in the xi1 direction.
+   * @param i2 The Cartesian index of the support point in the xi2 direction.
+  */
+  PROXY_HOST_DEVICE 
+  constexpr static void multiIndex( int const r,int const linearIndex, int & i0, int & i1, int & i2 ) 
+  {
+        i2 = linearIndex/((r+1)*(r+1));
+        i1 = (linearIndex%((r+1)*(r+1)))/(r+1);
+        i0 = (linearIndex%((r+1)*(r+1)))%(r+1);
+  }
+
+  /**
+   * @brief Compute the interpolation coefficients of the q-th quadrature point in a given direction
+   * @param q the index of the quadrature point in 1D
+   * @param k the index of the interval endpoint (0 or 1)
+   * @return The interpolation coefficient
+  */
+  PROXY_HOST_DEVICE 
+  constexpr static double interpolationCoord( const int order, const int q, const int k ) 
+  {
+      const double alpha = (SEMQkGLBasisFunctions::parentSupportCoord<SEMinfo>( q ) + 1.0 ) / 2.0;
+      return k == 0 ? ( 1.0 - alpha ) : alpha;
+   }
+
+  /**
+   * @brief Compute the 1D factor of the coefficient of the jacobian on the q-th quadrature point,
+   * with respect to the k-th interval endpoint (0 or 1). The computation depends on the position
+   * in the basis tensor product of this term (i, equal to 0, 1 or 2) and on the direction in which
+   * the gradient is being computed (dir, from 0 to 2)
+   * @param q The index of the quadrature point in 1D
+   * @param i The index of the position in the tensor product
+   * @param k The index of the interval endpoint (0 or 1)
+   * @param dir The direction in which the derivatives are being computed
+   * @return The value of the jacobian factor
+  */
+  PROXY_HOST_DEVICE 
+  constexpr static double jacobianCoefficient1D( const int order, const int q, const int i, const int k, const int dir )
+  {
+      if( i == dir )
+      {
+        return k== 0 ? -1.0/2.0 : 1.0/2.0;
+      }
+      else
+      {
+        return interpolationCoord( order, q, k );
+      }
+  }
+
   
-  PROXY_HOST_DEVICE double determinant(double  m[3][3]) const
+  PROXY_HOST_DEVICE
+  double determinant(double  m[3][3]) const
   {
      return abs(m[0][0]*(m[1][1]*m[2][2]-m[2][1]*m[1][2])
                -m[0][1]*(m[1][0]*m[2][2]-m[2][0]*m[1][2])
@@ -1129,13 +687,68 @@ void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoi
   }
    
   /**
+     * @brief Calculates the isoparametric "Jacobian" transformation
+     *  matrix/mapping from the parent space to the physical space.
+     * @param qa The 1d quadrature point index in xi0 direction (0,1)
+     * @param qb The 1d quadrature point index in xi1 direction (0,1)
+     * @param qc The 1d quadrature point index in xi2 direction (0,1)
+     * @param X Array containing the coordinates of the mesh support points.
+     * @param J Array to store the Jacobian transformation.
+  */
+   PROXY_HOST_DEVICE
+   void jacobianTransformation( int e, int const r,
+                                int const qa,
+                                int const qb,
+                                int const qc,
+                                double const (&X)[8][3],
+                                double ( & J )[3][3] ) const
+   {
+      for( int k = 0; k < 8; k++ )
+      {
+        const int ka = k % 2;
+        const int kb = ( k % 4 ) / 2;
+        const int kc = k / 4;
+        for( int j = 0; j < 3; j++ )
+        {
+          double jacCoeff = jacobianCoefficient1D(r, qa, 0, ka, j ) *
+                            jacobianCoefficient1D(r, qb, 1, kb, j ) *
+                            jacobianCoefficient1D(r, qc, 2, kc, j );
+          for( int i = 0; i < 3; i++ )
+          {
+            J[i][j] +=  jacCoeff * X[k][i];
+          }
+        }
+      }
+   }
+
+   /**
+    * @brief computes the non-zero contributions of the d.o.f. indexd by q to the
+    *   mass matrix M, i.e., the superposition matrix of the shape functions.
+    * @param q The quadrature point index
+    * @param X Array containing the coordinates of the mesh support points.
+    * @return The diagonal mass term associated to q
+   */
+   PROXY_HOST_DEVICE
+   double computeMassTerm( int e, int const r, int const q, double const (&X)[8][3] ) const
+   {
+      int qa, qb, qc;
+      multiIndex( r,q, qa, qb, qc );
+      //const double w3D = GLBasis.weight<SEMinfo>( qa )*GLBasis.weight<SEMinfo>( qb )*GLBasis.weight<SEMinfo>( qc );
+      const double w3D = SEMQkGLBasisFunctions::weight<SEMinfo>( qa )*SEMQkGLBasisFunctions::weight<SEMinfo>( qb )*SEMQkGLBasisFunctions::weight<SEMinfo>( qc );
+      double J[3][3] = {{0}};
+      jacobianTransformation(e, r, qa, qb, qc, X, J );
+      return determinant( J )*w3D;
+   }
+
+  /**
    * @brief Invert the symmetric matrix @p srcSymMatrix and store the result in @p dstSymMatrix.
    * @param dstSymMatrix The 3x3 symmetric matrix to write the inverse to.
    * @param srcSymMatrix The 3x3 symmetric matrix to take the inverse of.
    * @return The determinant.
    * @note @p srcSymMatrix can contain integers but @p dstMatrix must contain floating point values.
   */
-  PROXY_HOST_DEVICE void symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6]) const
+  PROXY_HOST_DEVICE 
+  void symInvert( double  dstSymMatrix[6], double  srcSymMatrix[6]) const
   {
    
      using FloatingPoint = std::decay_t< decltype( dstSymMatrix[ 0 ] ) >;
@@ -1163,7 +776,8 @@ void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoi
    * @return The determinant.
    * @note @p symMatrix can contain integers but @p dstMatrix must contain floating point values.
   */
-  PROXY_HOST_DEVICE  void symInvert0( double  symMatrix[6] ) const
+  PROXY_HOST_DEVICE  
+  void symInvert0( double  symMatrix[6] ) const
   {
       std::remove_reference_t< decltype( symMatrix[ 0 ] ) > temp[ 6 ];
       symInvert( temp, symMatrix );
@@ -1176,57 +790,6 @@ void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoi
       symMatrix[5]=temp[5];
   }
   
-  /**
-   * @brief Calculates the isoparametric "Jacobian" transformation
-   *  matrix/mapping from the parent space to the physical space.
-   * @param qa The 1d quadrature point index in xi0 direction (0,1)
-   * @param qb The 1d quadrature point index in xi1 direction (0,1)
-   * @param qc The 1d quadrature point index in xi2 direction (0,1)
-   * @param X Array containing the coordinates of the mesh support points.
-   * @param J Array to store the Jacobian transformation.
-  */
-  PROXY_HOST_DEVICE void jacobianTransformation( int e, int const r, 
-                                int const qa, 
-                                int const qb, 
-                                int const qc,
-                                double const (&X)[8][3],
-                                double ( & J )[3][3] ) const
-  {
-     for( int k = 0; k < 8; k++ )
-     {
-       const int ka = k % 2;
-       const int kb = ( k % 4 ) / 2;
-       const int kc = k / 4;
-       for( int j = 0; j < 3; j++ )
-       {
-         double jacCoeff = jacobianCoefficient1D(r, qa, 0, ka, j ) *
-                           jacobianCoefficient1D(r, qb, 1, kb, j ) *
-                           jacobianCoefficient1D(r, qc, 2, kc, j );
-         for( int i = 0; i < 3; i++ )
-         {
-           J[i][j] +=  jacCoeff * X[k][i];
-         }
-       }
-     }
-  }
-  
-  /**
-   * @brief computes the non-zero contributions of the d.o.f. indexd by q to the
-   *   mass matrix M, i.e., the superposition matrix of the shape functions.
-   * @param q The quadrature point index
-   * @param X Array containing the coordinates of the mesh support points.
-   * @return The diagonal mass term associated to q
-  */
-  PROXY_HOST_DEVICE double computeMassTerm( int e, int const r, int const q, double const (&X)[8][3] ) const
-  {
-     int qa, qb, qc;
-     multiIndex( r,q, qa, qb, qc );
-     const double w3D = weight<SEMinfo>( qa )*weight<SEMinfo>( qb )*weight<SEMinfo>( qc );
-     double J[3][3] = {{0}};
-     jacobianTransformation(e, r, qa, qb, qc, X, J );
-     return determinant( J )*w3D;
-  
-  }
   /**
    * @brief Calculates the isoparametric "geometrical" transformation
    *  matrix/mapping from the parent space to the physical space.
@@ -1268,23 +831,24 @@ void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoi
                                double const (&B)[6],
                                FUNC && func ) const
   {
-     const double w = weight<SEMinfo>(qa )*weight<SEMinfo>(qb )*weight<SEMinfo>(qc );
+     //const double w = GLBasis.weight<SEMinfo>(qa )*GLBasis.weight<SEMinfo>(qb )*GLBasis.weight<SEMinfo>(qc );
+     const double w = SEMQkGLBasisFunctions::weight<SEMinfo>(qa )*SEMQkGLBasisFunctions::weight<SEMinfo>(qb )*SEMQkGLBasisFunctions::weight<SEMinfo>(qc );
      for( int i=0; i<num1dNodes; i++ )
      {
        const int ibc = linearIndex( r,i, qb, qc );
        const int aic = linearIndex( r,qa, i, qc );
        const int abi = linearIndex( r,qa, qb, i );
-       const double gia = basisGradientAt(r, i, qa );
-       const double gib = basisGradientAt(r, i, qb );
-       const double gic = basisGradientAt(r, i, qc );
+       const double gia = SEMQkGLBasisFunctions::basisGradientAt(r, i, qa );
+       const double gib = SEMQkGLBasisFunctions::basisGradientAt(r, i, qb );
+       const double gic = SEMQkGLBasisFunctions::basisGradientAt(r, i, qc );
        for( int j=0; j<num1dNodes; j++ )
        {
          const int jbc = linearIndex( r,j, qb, qc );
          const int ajc = linearIndex( r,qa, j, qc );
          const int abj = linearIndex( r,qa, qb, j );
-         const double gja = basisGradientAt(r, j, qa );
-         const double gjb = basisGradientAt(r, j, qb );
-         const double gjc = basisGradientAt(r, j, qc );
+         const double gja = SEMQkGLBasisFunctions::basisGradientAt(r, j, qa );
+         const double gjb = SEMQkGLBasisFunctions::basisGradientAt(r, j, qb );
+         const double gjc = SEMQkGLBasisFunctions::basisGradientAt(r, j, qc );
          // diagonal terms
          const double w0 = w * gia * gja;
          func( ibc, jbc, w0 * B[0] );
@@ -1329,14 +893,14 @@ void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoi
    */
   PROXY_HOST_DEVICE 
   void computeMassMatrixAndStiffnessVector(const int & elementNumber,
-                                                    const int & order,
-                                                    const int & nPointsPerElement,
-                                                    ARRAY_REAL_VIEW const & nodesCoordsX,
-                                                    ARRAY_REAL_VIEW const & nodesCoordsY,
-                                                    ARRAY_REAL_VIEW const & nodesCoordsZ,
-                                                    float massMatrixLocal[],
-                                                    float pnLocal[],
-                                                    float Y[]) const
+                                           const int & order,
+                                           const int & nPointsPerElement,
+                                           ARRAY_REAL_VIEW const & nodesCoordsX,
+                                           ARRAY_REAL_VIEW const & nodesCoordsY,
+                                           ARRAY_REAL_VIEW const & nodesCoordsZ,
+                                           float massMatrixLocal[],
+                                           float pnLocal[],
+                                           float Y[]) const
   {
       double X[8][3];
       int I=0;
@@ -1374,4 +938,4 @@ void getDerivativeBasisFunction1D( int order, vectorDouble const & quadraturePoi
   
 };
   
-#endif //SEMQKGL_HPP_
+#endif //SEMQKGLINTEGRALS_HPP_
