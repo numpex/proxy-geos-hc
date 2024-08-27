@@ -33,46 +33,50 @@ public:
   PROXY_HOST_DEVICE SEMQkGLBasisFunctions(){};
   PROXY_HOST_DEVICE ~SEMQkGLBasisFunctions(){};
 
-  
-
-  void gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) const
+  static  void gaussLobattoQuadraturePoints( int order, vectorDouble const & quadraturePoints ) //const
   {
-    if( order == 1 )
-    {
-      quadraturePoints[0]=-1.0;
-      quadraturePoints[1]=1.0;
-    }
-    if( order == 2 )
-    {
-      quadraturePoints[0]=-1.0;
-      quadraturePoints[1]=0.0;
-      quadraturePoints[2]=1.0;
-    }
-    if( order == 3 )
-    {
-      quadraturePoints[0]=-1.0;
-      quadraturePoints[1]=-0.4472136;
-      quadraturePoints[2]=0.4472136;
-      quadraturePoints[3]=1.0;
-    }
-    if( order == 4 )
-    {
-      quadraturePoints[0]=-1.0;
-      quadraturePoints[1]=-0.65465367;
-      quadraturePoints[2]=0.0;
-      quadraturePoints[3]=0.65465367;
-      quadraturePoints[4]=1.0;
-    }
-    if( order == 5 )
-    {
-      quadraturePoints[0]=-1.0;
-      quadraturePoints[1]=-0.76505532;
-      quadraturePoints[2]=-0.28523152;
-      quadraturePoints[3]=0.28523152;
-      quadraturePoints[4]=0.76505532;
-      quadraturePoints[5]=1.0;
-    }
+   switch( order )
+   {
+     case 1:
+       quadraturePoints[0]=-1.;
+       quadraturePoints[1]=1.;
+       break;
+     case 2:
+       quadraturePoints[0]=-1.;
+       quadraturePoints[1]=0.;
+       quadraturePoints[2]=1.;
+       break;
+     case 3:
+       static constexpr double sqrt5 = 2.2360679774997897;
+       quadraturePoints[0] = -1.0;
+       quadraturePoints[1] = -1./sqrt5;
+       quadraturePoints[2] = 1./sqrt5;
+       quadraturePoints[3] = 1.;
+       break;
+     case 4:
+       static constexpr double sqrt3_7 = 0.6546536707079771;
+       quadraturePoints[0] = -1.0;
+       quadraturePoints[1] = -sqrt3_7;
+       quadraturePoints[2] = 0.0;
+       quadraturePoints[3] = sqrt3_7;
+       quadraturePoints[4] = 1.0;
+       break;
+     case 5:
+       static constexpr double sqrt__7_plus_2sqrt7__ = 3.50592393273573196;
+       static constexpr double sqrt__7_mins_2sqrt7__ = 1.30709501485960033;
+       static constexpr double sqrt_inv21 = 0.218217890235992381;
+       quadraturePoints[0] = -1.0;
+       quadraturePoints[1] = -sqrt_inv21*sqrt__7_plus_2sqrt7__;
+       quadraturePoints[2] = -sqrt_inv21*sqrt__7_mins_2sqrt7__;
+       quadraturePoints[3] = sqrt_inv21*sqrt__7_mins_2sqrt7__;
+       quadraturePoints[4] = sqrt_inv21*sqrt__7_plus_2sqrt7__;
+       quadraturePoints[5] = 1.0;
+       break;
+     default:
+       break;
+   }
   }
+
   void gaussLobattoQuadratureWeights( int order, vectorDouble const & weights ) const
   {
     if( order == 1 )

@@ -11,7 +11,7 @@ struct SEMinfo
   int numberOfBoundaryFaces;
 
   const int myNumberOfRHS=1;
-  static constexpr int myOrderNumber=1;
+  static constexpr int myOrderNumber=2;
   const float myTimeStep=0.001;
   const int nPointsPerElement = pow((myOrderNumber+1), DIMENSION );
 
