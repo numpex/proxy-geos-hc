@@ -1,6 +1,6 @@
 module load gcc/12.2.0 cmake cuda/12.4.131
 
-export SEM_TPL_ROOT_DIR=/shared/data1/Users/j0535952/work2024/proxys_2024/tpl4ProxyApp/installTPL_GraceHopper_H100GPU
+export SEM_TPL_ROOT_DIR=/shared/data1/Users/j0535952/work2024/proxys_2024/tpl4ProxyApp_essential/tpl4ProxyApp/installTPL_Maple_GPU
 export RAJA_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/raja
 export CHAI_DIR=${SEM_TPL_ROOT_DIR}/chai/lib/cmake/chai
 export CAMP_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/camp
