@@ -43,6 +43,7 @@ endif()
 # CUDA
 #------------------------------------
 message(STATUS "CUDA Support is ${ENABLE_CUDA}")
+message(STATUS "BLT_ROOT_DIR is ${BLT_ROOT_DIR}")
 if (ENABLE_CUDA)
   include(${BLT_ROOT_DIR}/cmake/thirdparty/SetupCUDA.cmake)
 endif()

@@ -6,7 +6,7 @@
 ################################
 # Sanity Checks
 ################################
-
+message("Check for the compiler " ${CMAKE_CXX_COMPILER})
 # Rare case of two flags being incompatible
 if (DEFINED CMAKE_SKIP_BUILD_RPATH AND DEFINED CUDA_LINK_WITH_NVCC)
     if (NOT CMAKE_SKIP_BUILD_RPATH AND CUDA_LINK_WITH_NVCC)
