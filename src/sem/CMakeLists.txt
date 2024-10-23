@@ -26,20 +26,11 @@ set (sem_sources
      main/main.cpp)
     #finiteElements/SEMQkGL.cpp
 
-    #SET(sem_DEPENDS_ON ${extraComponentsLinkList})
-    #message(STATUS, "sem_DEPENDS_ON is ",${sem_DEPENDS_ON})
-    #STRING(APPEND sem_DEPENDS_ON ${extraComponentsLinkList} ${dependencyList})
-#message(STATUS, "sem_DEPENDS_ON is after append in sem",${sem_DEPENDS_ON}, "dependencylist ",${dependencylist})
-#STRING(STRIP ${sem_DEPENDS_ON} sem_DEPENDS_ON)
-#message(STATUS, "sem_DEPENDS_ON is after append and strip in sem ",${sem_DEPENDS_ON}, "dependencylist ",${dependencylist})
 
 blt_add_executable( NAME ${SEM_EXECUTABLE}
                     SOURCES ${sem_sources}
                     DEPENDS_ON ${extraComponentsLinkList} ${dependencyList} )
 
-#blt_add_executable( NAME ${SEM_EXECUTABLE}
-#                    SOURCES ${sem_sources}
-#		    DEPENDS_ON ${sem_DEPENDS_ON} )
 
 	    target_include_directories( ${SEM_EXECUTABLE} PUBLIC
         ${CMAKE_BINARY_DIR}/src
