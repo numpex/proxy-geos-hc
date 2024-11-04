@@ -1,6 +1,7 @@
 *.swp
 *build*
-*install*
+*install_*
 *bin*
 *snapshot*
 *.vscode*
+readme_folder

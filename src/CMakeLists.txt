@@ -28,7 +28,7 @@
 # the solver is using sequential mode by default
 set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
 set (USE_VECTOR ON CACHE BOOL "" FORCE)
-
+set (CC_VERSION "$ENV{cc_version}")
 if(ENABLE_HIP)
   set(COMP_VER "6.0.0")
   set(COMP_ARCH "gfx908")
@@ -43,15 +43,13 @@ if(ENABLE_HIP)
   set(USE_SEM_INLINE ON CACHE BOOL "" FORCE) #clang doesn't support -fgpu-rdc yet
 else()
   # CC options
-  #set(CMAKE_C_COMPILER  gcc CACHE PATH "")
-  set(CMAKE_C_COMPILER  "$ENV{CC_ROOT}/gcc-11")
+  set(CMAKE_C_COMPILER  "$ENV{CC_ROOT}/gcc${CC_VERSION}")
   set(CMAKE_C_FLAGS_RELEASE "-g -O3 -DNDEBUG" CACHE STRING "")
   set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "")
   set(CMAKE_C_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
 
   # C++ options
-  #set(CMAKE_CXX_COMPILER c++  CACHE PATH "")
-  set(CMAKE_CXX_COMPILER "$ENV{CXX_ROOT}/g++-11")
+  set(CMAKE_CXX_COMPILER "$ENV{CXX_ROOT}/g++${CC_VERSION}")
   message( STATUS, "--------------------------------------- ${CMAKE_CXX_COMPILER} and ROOT = $ENV{CXX_ROOT}")
   set (CMAKE_CXX_FLAGS "-g -O3 -std=c++17  " CACHE STRING "" FORCE)
   set(CMAKE_CXX_FLAGS_RELEASE "-g -O3 -DNDEBUG " CACHE STRING "")
@@ -126,8 +124,8 @@ if(X86_laptop)
   elseif(X86_cypress)
    if (ENABLE_CUDA)
 	  set(CUDA_ROOT $ENV{CUDA_ROOT} CACHE PATH "" FORCE)
-    set(CMAKE_CUDA_ARCHITECTURES 80 CACHE STRING "" FORCE)
-    set(CUDA_ARCH sm_80 CACHE STRING "" FORCE)
+    set(CMAKE_CUDA_ARCHITECTURES 89 CACHE STRING "" FORCE)
+    set(CUDA_ARCH sm_89 CACHE STRING "" FORCE)
     #set(CMAKE_CUDA_FLAGS "-O3 -restrict -arch ${CUDA_ARCH} --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17" CACHE STRING "" FORCE)
     set(CMAKE_CUDA_FLAGS "-restrict --expt-relaxed-constexpr --expt-extended-lambda -Werror cross-execution-space-call,reorder,deprecated-declarations -std=c++17" CACHE STRING "")
     set(CMAKE_CUDA_FLAGS_RELEASE "-Xcompiler -DNDEBUG -Xcompiler -O3" CACHE STRING "")
