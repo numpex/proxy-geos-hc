@@ -89,9 +89,3 @@ For example, create a symbolic link using:
 ```ln -s path/to/original_target path/to/symbolic/link```  
 
 This trick may concern a symbolic link to ```clang-tidy-18```, named ```clang-tidy```. 
-
-
-
-## Markdown Editor 
-
-Report to this  [webpage for choosing a MarkDown editor on Linux system](https://www.bettertechtips.com/linux/markdown-editor-linux/). Relevant choice could include Remarkable or Retext. 
