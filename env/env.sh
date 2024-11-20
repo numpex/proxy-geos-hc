@@ -1,5 +1,5 @@
 
-export _TPL_ROOT_DIR=~/DEV_MINIAPP/installTPL2
+export _TPL_ROOT_DIR=~/DEV_MINIAPP/buildTPL_New/install
 export RAJA_DIR=${_TPL_ROOT_DIR}/raja/lib/cmake/raja
 export CAMP_DIR=${_TPL_ROOT_DIR}/raja/lib/cmake/camp
 export CHAI_DIR=${_TPL_ROOT_DIR}/chai/share/chai/cmake/
