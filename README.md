@@ -31,7 +31,7 @@ The data containers included in the current sem proxy implementations include:
 
 First consider referring to the page on the prerequisites needed for [the general case](./README_prerequisites_general.md); while a specific configuration on a [Ubuntu 24.04 LTS](./README_prerequisites_specific.md) is provided.
 
-## Step 1: [Building the third-party libraries](../proxy-geos-hc_tpl/README.md)
+## Step 1: [Building the third-party libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl)
 
 ## Step 2: Compile and Install ProxyApp
 Continue by exporting the path to the previously compiled TPLs required for linking and making the dependencies. This can be achieved by editing and sourcing the script `env/env.sh` in the `PROXY-GEOSX-HC` repository.  
