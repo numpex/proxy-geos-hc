@@ -1,5 +1,5 @@
 ## Our Objective: Why This README ?
-
+  
 This README aims to provide information with the prerequisites for compiling and running the Proxy-App provided by Henri CALANDRA [Proxy-Geos-HC](https://github.com/proxySem).  This app is derived from [GEOSX](https://geosx-geosx.readthedocs-hosted.com/en/latest/) - an open-source multi-physics simulation code. 
 
 ## Key Aspects and Prerequisites  
