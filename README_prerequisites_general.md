@@ -17,8 +17,7 @@ This README aims to provide information with the prerequisites for compiling and
 
 
 - #### Additionnal prerequisites for Building, Linking and testing based on CMake 
-
->The libraries and executable are built in a cross-pwlatform friendly manner using BLT which provides a  [CMake](https://cmake.org/)-based Foundation for Building, Linking, and Testing Large-Scale HPC Applications. For a broader overview, please refer to the [BLT webpage](https://github.com/LLNL/blt?tab=readme-ov-file).  Referring to the aforementioned [BLT webpage](https://github.com/LLNL/blt?tab=readme-ov-file) will help you  complete the prerequisites setup for smooth compilation and execution. 
+The libraries and executable are built in a cross-pwlatform friendly manner using BLT which provides a  [CMake](https://cmake.org/)-based Foundation for Building, Linking, and Testing Large-Scale HPC Applications. For a broader overview, please refer to the [BLT webpage](https://github.com/LLNL/blt?tab=readme-ov-file).  Referring to the aforementioned [BLT webpage](https://github.com/LLNL/blt?tab=readme-ov-file) will help you  complete the prerequisites setup for smooth compilation and execution. 
 
 ##  Summary of the prerequisites
 
@@ -28,9 +27,9 @@ This README aims to provide information with the prerequisites for compiling and
 |**code quality**  |**Code style**|**XML validation (GEOSX)**|**Documentation**|**Other**|
 |clang-tidy, cppcheck, clang-query|libastyle3,cmake-format, clang-format , uncrustify| tinyxml2, xml2-utils |doxygen, sphinx, bison |flex, libgtk-3-0|
 
-It is worth to mention that some installed binaries could be suffixed with their version number or located in folder not referenced in the PATH environment variable. Therefore some symbolic links might be useful.  
-> The following command creates a symbolic link : 
->```
+It is worth to mention that some installed binaries could be suffixed with their version number or located in folder not referenced in the `PATH` environment variable. Therefore some symbolic links might be useful.   
+ The following command creates a symbolic link : 
+```
 ln -s path/to/original_target path/to/symbolic/link
 ```  
-This trick may concern a symbolic link to `clang-tidy-18`, named `clang-tidy`  and another for `clang-query`. 
+This trick may concern a symbolic link to `clang-tidy-18` with the name `clang-tidy`  and another for `clang-query`. 
