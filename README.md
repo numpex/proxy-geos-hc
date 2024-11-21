@@ -29,12 +29,12 @@ The data containers included in the current sem proxy implementations include:
 
 # Quick Start to compile and install
 
-First consider referring to the page on the prerequisites needed for [the general case](./README_prerequisites_general.md); while a specific configuration on a [Ubuntu 24.04 LTS](./README_prerequisites_specific.md) is provided.
+First consider referring to the page on the [prerequisites](./README_prerequisites_general.md) needed.
 
 ## Step 1: [Building the third-party libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl)
 
 ## Step 2: Compile and Install ProxyApp
-Continue by exporting the path to the previously compiled TPLs required for linking and making the dependencies. This can be achieved by editing and sourcing the script `env/env.sh` in the `PROXY-GEOSX-HC` repository.  
+Continue by exporting the path to the install directories of the TPLs required for linking and making the dependencies. This can be achieved by editing and sourcing the script `env/env.sh` in the `PROXY-GEOSX-HC` repository.  
 Create a build folder `buildProxyApp` from where the executable will be built and installed  
 ```
   cmake -DCMAKE_INSTALL_PREFIX=.  CUDA_KOKKOS_RAJA_SETUP /path/to/PROXY-GEOSX-HC 
@@ -69,4 +69,4 @@ The executable is located in the `buildProxyApp/bin` folder and can be run as fo
 ```
 
 # Reporting issues and things to be improved 
-This ProxyApp will evolves with the aim of easing the deployment and portability on various HPC machines. The specific observations and things to be improved are reported [here](./README_SPECIFIC_and_TODO.md).
+This ProxyApp will evolve with the aim of easing the deployment and portability on various HPC machines. The specific observations and things to be improved are reported [here](./README_SPECIFIC_and_TODO.md).
