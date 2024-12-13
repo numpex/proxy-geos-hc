@@ -57,7 +57,6 @@ This enables abstractions either with respect to the parallel programming model,
 
 #### DEFAULT
 The default compilation (without any specification for `CUDA_KOKKOS_RAJA_SETUP`) is the sequential mode with std::vector implementation. 
-[](So you will get an executable named "sem_SEQUENTIAL.exe" and "fd_SEQUENTIAL.exe" in your installation directory. To enable shared memory or GPU-accelerated parallelization and a given programming model of abstraction, the following options are available.) 
 
 #### OPEN_MP
 In the case of OPENMP std::vector container is used, and  `CUDA_KOKKOS_RAJA_SETUP = -DUSE_OMP=ON`.
