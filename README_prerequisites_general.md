@@ -1,8 +1,8 @@
-## Why This README ?
+## Key Aspects and Prerequisites  for ProxyApp
   
-This README aims to provide information with the prerequisites for compiling and running the [ProxyApp]((https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc)) provided by Henri CALANDRA.  This App is derived from [GEOSX](https://geosx-geosx.readthedocs-hosted.com/en/latest/) - an open-source multi-physics simulation code. 
+We provide below with information on the prerequisites for compiling and running the [ProxyApp]((https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc)).  This ProxyApp is derived from [GEOSX](https://geosx-geosx.readthedocs-hosted.com/en/latest/) - an open-source multi-physics simulation code.  
 
-## Key Aspects and Prerequisites  
+Please consider the aspects below:
 
 - Package Manager: Install your package manager of choice, such as "synaptic", if it's not already installed on the build server. For instance, use the command ```apt install synaptic```. 
 
@@ -11,13 +11,14 @@ This README aims to provide information with the prerequisites for compiling and
     - build tools (GNU make or ninja on Linux, XCode on MacOS) 
     - python3 to run the python script    
     - Compatible C/C++ and Fortran compilers
-    - CUDA toolkit providing nvcc compiler for GPU-accelerated Implementation  
+    - CUDA toolkit providing nvcc compiler for GPU-accelerated implementation  
     - MPI runtime and compilers  (if building with MPI).  
     - Git and Git-lfs. 
 
 
-- #### Additionnal prerequisites for Building, Linking and testing based on CMake 
-The libraries and executable are built in a cross-pwlatform friendly manner using BLT which provides a  [CMake](https://cmake.org/)-based Foundation for Building, Linking, and Testing Large-Scale HPC Applications. For a broader overview, please refer to the [BLT webpage](https://github.com/LLNL/blt?tab=readme-ov-file).  Referring to the aforementioned [BLT webpage](https://github.com/LLNL/blt?tab=readme-ov-file) will help you  complete the prerequisites setup for smooth compilation and execution. 
+- Additionnal prerequisites for Building, Linking and Testing (BLT) -based on CMake    
+> The libraries and executable are built in a cross-platform friendly manner using BLT which provides a  [CMake](https://cmake.org/)-based foundation for building, linking, and testing large-scale HPC applications.  
+> For a broader overview, please refer to the [BLT webpage](https://github.com/LLNL/blt?tab=readme-ov-file).  By doing so, you  will complete the prerequisites setup for smooth compilation and execution. 
 
 ##  Summary of the prerequisites
 

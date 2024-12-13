@@ -1,21 +1,33 @@
-## Why this document
-This document aims to report some specific observations related to the deployment of the ProxyApp and things that can be improved.
+##Reporting issues and observations
 
-### On Grid5000 
+We report below some specific observations related to the deployment of the ProxyApp, suggestions and things that can be improved. It can serve as basis to supply the issue tickets related to the repository. 
 
-It occurs that the CMake version available in the build server can be outdated, as the minimum required version for the Proxy-app is 3.22.1.  This issue has been addressed by installing a recent CMake from a Git repository or using Guix.  
+### Unavailable library
+It occurs that a product or a required specific version can be unavailable. This issue can be addressed by installing the product, either from source or using a package manager (Spack or Guix).   
 
+A commonplace recommandation before any installing  is related to consider using [Environment Modules](https://modules.sourceforge.net/) package. 
+#### Loading module
+Indeed, on some machines, it is possible to modify dynamically the user environment throughout some modulefiles which may be installed by the system administrator. First check if the `<product>`  is available on the machine by running
+```
+module avail <product>
+```
+and then load it
+```
+module load <product>
+```
+#### Installing from source 
+Here is a typical case, on a given Grid5000 frontend machine where the CMake is out-of-date as the minimum required version for building the ProxyApp is 3.22.1. This has been addressed by installing from source.  
 
-### Things to Improve 
+Another case involved the unavailability of CUDA features preventing from [getting installed the third-party libraries]((https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl) ). One way to address this issue involves installing a local CUDA Toolkit on the frontend machine. It proceeds as follows  
 
-We have encountered the issue of the unavailability of CUDA features on the Grid5000 frontend machine. Therefore, one needs to access the compute machine to utilize the CUDA features. The associated drawback is that, for now, the compilation is performed at the expense of compute resources. 
+- downloading the specific CUDA release from the [Cuda-Toolkit-Archive](https://developer.nvidia.com/cuda-toolkit-archive) webpage   
+ - installing by running the ```.run``` executable file with the following options: ```--silent, --toolkit``` while specifying the ```--toolkitpath``` and the ```--defaultroot```.  
  
-> This issue has been adressed by installing a local CUDA toolkit on the frontend machine. It proceeds as follows  
+By doing so, the next issue was related to [KOKKOS](https://kokkos.org/) which had failed to detect automatically the GPU architecture since the CUDA driver is not available. 
+> Using the option `-Dkokkos_ARCH_{VALUE}=ON` in the `CMakeLists.txt` during the building stage has allowed to proceed further without being on a GPU-capable computing machine.   For instance, on a Nvidia Ampere architecture with "compute capability 8.0", the argument must be set as ```VALUE=AMPERE80```.   
+> Refer to [Kokkoss - GPU Architectures](https://kokkos.org/kokkos-core-wiki/keywords.html) for in-depth description for other architectures.  
 
-> > - downloading the ```.run``` file of the specific CUDA from the [Cuda-Toolkit-Archive](https://developer.nvidia.com/cuda-toolkit-archive) webpage   
-
->> - installing by running the ```.run``` executable file with the following options: ```--silent, --toolkit``` while specifying the ```--toolkitpath``` and the ```--defaultroot```.  
-
-> By doing so, the next issue was related to [KOKKOS](https://kokkos.org/) which requires the GPU architecture, detected automatically by default. Using the option ```-Dkokkos_ARCH_{VALUE}=ON``` in the ```CMakeLists.txt``` building the Kokkos third-party libraries allows to proceed further without being on a GPU-capable computing machine. For instance, on a Nvidia Ampere architecture with "compute capability 8.0", the argument ```VALUE=AMPERE80```. Refer to [Kokkoss - GPU Architectures](https://kokkos.org/kokkos-core-wiki/keywords.html) for in-depth description.  
-
+#### Using Guix or Spack
+These multi-platform package managers offer the flexibility to build and install without being root various versions of a given product that can coexist without any conflict or break in the dependencies. To get started with please refer to the following links: [Spack](https://github.com/spack/spack?tab=readme-ov-file) and [Guix](https://gitlab.inria.fr/numpex-pc5/wp3/guix-hpc).   
+### Architecture-target build
 Another issue we observed is related to how to build executables or libraries targeting a specific and possibly different compute machine architecture.  
