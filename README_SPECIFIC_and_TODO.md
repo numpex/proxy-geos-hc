@@ -1,4 +1,4 @@
-##Reporting issues and observations
+## Reporting issues and observations
 
 We report below some specific observations related to the deployment of the ProxyApp, suggestions and things that can be improved. It can serve as basis to supply the issue tickets related to the repository. 
 
