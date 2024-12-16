@@ -19,9 +19,9 @@ One of the key features of the SEM and FD proxy benchmarks are their adaptabilit
     * RAJA [https://raja.readthedocs.io/en/develop/]  
     * KOKKOS [https://kokkos.github.io/kokkos-core-wiki/]  
     
-    RAJA, KOKKOS and other third-party libraries must first be compiled and installed  from the [third-party libraries repository](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl) - described at [**step 1**, below](#Quick Start to compile and install).  
+    RAJA, KOKKOS and other third-party libraries must first be compiled and installed  from the [third-party libraries repository](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl) - described at [**step 1**, below](#quick-start-to-compile-and-install).  
 
-- The data containers availbable in the current ProxyApp implementations include:  
+- The data containers availbable in the current ProxyApp implementations include:   
     * LvArray [https://lvarray.readthedocs.io/en/latest/]  
     * C++ std::vector  
 
