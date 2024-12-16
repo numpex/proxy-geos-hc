@@ -4,7 +4,7 @@ We provide below with information on the prerequisites for compiling and running
 
 Please consider the aspects below:
 
-- Package Manager: Install your package manager of choice, such as "synaptic", if it's not already installed on the build server. For instance, use the command ```apt install synaptic```. 
+- Install your package manager of choice, such as "synaptic", if it's not already installed on the build server. For instance, use the command ```apt install synaptic```. 
 
 - Check and Install the minimal prerequisites. Please refer to the following [GEOSX prerequisites webpage](https://geosx-geosx.readthedocs-hosted.com/en/latest/docs/sphinx/buildGuide/Prerequisites.html#prerequisites)  to have an insight on some related prerequisites. These include, among others  
     - CMake build system generator  
@@ -18,7 +18,7 @@ Please consider the aspects below:
 
 - Additionnal prerequisites for Building, Linking and Testing (BLT) -based on CMake    
 > The libraries and executable are built in a cross-platform friendly manner using BLT which provides a  [CMake](https://cmake.org/)-based foundation for building, linking, and testing large-scale HPC applications.  
-> For a broader overview, please refer to the [BLT webpage](https://github.com/LLNL/blt?tab=readme-ov-file).  By doing so, you  will complete the prerequisites setup for smooth compilation and execution. 
+> For a broader overview, please refer to the [BLT webpage](https://github.com/LLNL/blt?tab=readme-ov-file).  Doing so will help in the completeness of the prerequisites setup needed for a smooth compilation and execution. 
 
 ##  Summary of the prerequisites
 

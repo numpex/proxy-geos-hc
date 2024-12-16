@@ -1,13 +1,13 @@
 ## Reporting issues and observations
 
-We report below some specific observations related to the deployment of the ProxyApp, suggestions and things that can be improved. It can serve as basis to supply the issue tickets related to the repository. 
+We report below some specific observations related to the deployment of the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/) - and the associated [third-party libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl), suggestions and things that can be improved. It can serve as basis to supply the issue tickets related to these repositories. 
 
 ### Unavailable library
 It occurs that a product or a required specific version can be unavailable. This issue can be addressed by installing the product, either from source or using a package manager (Spack or Guix).   
 
 A commonplace recommandation before any installing  is related to consider using [Environment Modules](https://modules.sourceforge.net/) package. 
 #### Loading module
-Indeed, on some machines, it is possible to modify dynamically the user environment throughout some modulefiles which may be installed by the system administrator. First check if the `<product>`  is available on the machine by running
+Indeed, on some machines, it is possible to modify dynamically the user environment throughout some modulefiles which may have been installed by the system administrator. First check if the `<product>`  is available on the machine by running
 ```
 module avail <product>
 ```
@@ -25,9 +25,9 @@ Another case involved the unavailability of CUDA features preventing from [getti
  
 By doing so, the next issue was related to [KOKKOS](https://kokkos.org/) which had failed to detect automatically the GPU architecture since the CUDA driver is not available. 
 > Using the option `-Dkokkos_ARCH_{VALUE}=ON` in the `CMakeLists.txt` during the building stage has allowed to proceed further without being on a GPU-capable computing machine.   For instance, on a Nvidia Ampere architecture with "compute capability 8.0", the argument must be set as ```VALUE=AMPERE80```.   
-> Refer to [Kokkoss - GPU Architectures](https://kokkos.org/kokkos-core-wiki/keywords.html) for in-depth description for other architectures.  
+> Please refer to [Kokkoss - GPU Architectures](https://kokkos.org/kokkos-core-wiki/keywords.html) for in-depth description for other architectures.  
 
 #### Using Guix or Spack
-These multi-platform package managers offer the flexibility to build and install without being root various versions of a given product that can coexist without any conflict or break in the dependencies. To get started with please refer to the following links: [Spack](https://github.com/spack/spack?tab=readme-ov-file) and [Guix](https://gitlab.inria.fr/numpex-pc5/wp3/guix-hpc).   
+These multi-platform package managers offer the flexibility to build and install, without being root, various versions of a given product that can coexist without any conflict or break in the dependencies. To get started with please refer to the following links: [Spack](https://github.com/spack/spack?tab=readme-ov-file) and [Guix](https://gitlab.inria.fr/numpex-pc5/wp3/guix-hpc).   
 ### Architecture-target build
-Another issue we observed is related to how to build executables or libraries targeting a specific and possibly different compute machine architecture.  
+Another issue we observed is related to how, from a given host, to build executables or libraries targetting a specific and possibly different compute machine architecture.  
