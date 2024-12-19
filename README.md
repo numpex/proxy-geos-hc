@@ -27,57 +27,68 @@ One of the key features of the SEM and FD proxy benchmarks are their adaptabilit
 
 # Quick Start to compile and install
 
-First consider referring to the page on the [prerequisites](./INSTALL_PREREQUISITES.md) needed.
+First consider referring to the page on the [prerequisites](./INSTALL_PREREQUISITES.md) needed.  
 
+As a convention, we use the generic notation `{ARGUMENT}` for an `argument` that may take several values. The angle brackets `<CONFIG_OPTIONS>` are used as placeholder for configuration options.      
+
+## Start by getting the source codes 
+Using the following Git commands
+```
+git clone https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc   
+git clone https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl 
+```
+
+will  create two folders `proxy-geos-hc` and `proxy-geos-hc_tpl`.   
 ## Step 1: [Build the Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl)
 
-## Step 2: Compile and Install ProxyApp
+## Step 2: Build and Install the ProxyApp
+ 
+ 1. Edit the script `proxy-geos-hc/env/env.sh` with the right paths.  This script contains some environment variables of prototype `{LIBRARY}_DIR` which are used in the CMake configuring the ProxyApp; `{LIBRARY}` being a generic notation for any of the third-party libraries, for instance RAJA, KOKKOS.  
+2. Source the script: `source proxy-geos-hc/env/env.sh `  
+ 
+3. Generate the Makefile and build the executable by running the following commandline. *For consistency, make sure that the same `config.cmake` file is used when building both [third-party-libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/) and the current ProxyApp.*   
 
-There are some environment variables of prototype `{LIBRARY}_DIR` which are used in the CMake configuring the ProxyApp.  Continue by exporting the paths to the third-party libraries required for linking and making the dependencies.  
-This can be achieved by editing and sourcing the `<path-to-ProxyApp/env>/env.sh` script. Note that `PROXY-GEOSX-HC` is the default name for the `ProxyApp` folder when running the `git clone` command for the main branch of the `ProxyApp` repository.  
-  
-Create a build folder `buildProxyApp` from where the executable will be built and installed  
 ```
- cd <path-to-buildProxyApp>  
- cmake  -DCMAKE_BUILD_TYPE=RELEASE CUDA_KOKKOS_RAJA_SETUP -C config.cmake -B . -DCMAKE_INSTALL_PREFIX=<path-to-installProxyApp> -S <path-to-ProxyApp>
- make && make install
+cmake  -DCMAKE_BUILD_TYPE=RELEASE <CUDA_KOKKOS_RAJA_SETUP> -C proxy-geos-hc_tpl/configs/config.cmake -B build -DCMAKE_INSTALL_PREFIX=install -S proxy-geos-hc
+cd build  
+make 
 ```
-
-For consistency, one should use the same `config.cmake` script as the one used when [building the third-party-libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/), that is `<path-to-third-party-lib/configs>/config.cmake`. The ```CUDA_KOKKOS_RAJA_SETUP``` is discussed below. 
+This will build and install the executable in the folder `install`.  
+The ```CUDA_KOKKOS_RAJA_SETUP``` is discussed below. 
  
 
 ### Configuration options CUDA_KOKKOS_RAJA_SETUP
 
  The ```CUDA_KOKKOS_RAJA_SETUP``` is a combination of three options which are used for :  
-- enabling a shared memory programming model `ENABLE_OPENMP=ON`  
+ - considering model programming and portability enabling library such as KOKKOS or RAJA.  This enables abstractions either with respect to the parallel programming model or the data container and the corresponding layout.   In the case of RAJA Lvarray container is used while  KOKKOS provides its own container. By default std::vector container is used.  
+- enabling or not a shared memory programming model `ENABLE_OPENMP=ON`  
 - specifying whether building or not a GPU-accelerated application - depending on the vendor through `[ENABLE_CUDA|ENABLE_HIP|ARM]=ON`    
-- considering performance portability accross various plateforms, with the use of KOKKOS or RAJA library `[USE_KOKKOS|USE_RAJA]=ON`. 
-This enables abstractions either with respect to the parallel programming model or the data container and the corresponding layout.     
 
-#### DEFAULT
-The default compilation (without any specification for `CUDA_KOKKOS_RAJA_SETUP`) is the sequential mode with std::vector implementation. 
+Below are some examples of usual configurations.  
+#### SEQUENTIAL
+The default compilation (without any specification for `CUDA_KOKKOS_RAJA_SETUP`) is the sequential mode. 
 
 #### OPEN_MP
-In the case of OPENMP std::vector container is used, and  `CUDA_KOKKOS_RAJA_SETUP = -DUSE_OMP=ON`.
+`CUDA_KOKKOS_RAJA_SETUP = -DUSE_OMP=ON`.
 
-#### RAJA + OPEN_MP + CUDA
-In the case of RAJA Lvarray container is used, and `CUDA_KOKKOS_RAJA_SETUP` is set as:  
-* on Nvidia GPUs: `-DUSE_RAJA=ON -DENABLE_CUDA=ON`  
-* on AMD GPUs: `-DUSE_RAJA=ON -DENABLE_HIP=ON`   
-* on Nvidia Grace-Hopper: `-DUSE_RAJA=ON -DENABLE_CUDA=ON -DARM=ON`  
+####  RAJA  with OPENMP and GPU
+`CUDA_KOKKOS_RAJA_SETUP` is set as:  
+- on Nvidia GPUs: `-DUSE_RAJA=ON -DENABLE_CUDA=ON -DENABLE_OPENMP=ON`  
+- on AMD GPUs: `-DUSE_RAJA=ON -DENABLE_HIP=ON -DENABLE_OPENMP=ON`   
+- on Nvidia Grace-Hopper: `-DUSE_RAJA=ON -DENABLE_CUDA=ON -DARM=ON -DENABLE_OPENMP=ON`  
 
-#### KOKKOS + OPEN_MP + CUDA
-In the case of KOKKOS which provides its own container, `CUDA_KOKKOS_RAJA_SETUP` is set as:  
-* on Nvidia GPUs: `-DUSE_KOKKOS=ON -DENABLE_CUDA=ON`   
-* on AMD GPUs: `-DUSE_KOKKOS=ON -DENABLE_HIP=ON`   
-* on Nvidia Grace-Hopper: `-DUSE_KOKKOS=ON -DENABLE_CUDA=ON -DARM=ON`  
+#### KOKKOS with OPENMP and GPU
+`CUDA_KOKKOS_RAJA_SETUP` is set as:  
+- on Nvidia GPUs: `-DUSE_KOKKOS=ON -DENABLE_CUDA=ON`   
+- on AMD GPUs: `-DUSE_KOKKOS=ON -DENABLE_HIP=ON`   
+- on Nvidia Grace-Hopper: `-DUSE_KOKKOS=ON -DENABLE_CUDA=ON -DARM=ON -DENABLE_OPENMP`  
 
 ## Step 3: Run the executable 
-The executables are installed in `<path-to-installProxyApp/bin>` and can be run as follow:   
+The executables are installed in `install/bin`folder  and can be run as follow:   
 ```
-<path-to-installProxyApp/bin>/{proxyName}_{SETTINGFLAG}.exe (with proxyName: sem or fd)
+install/bin/{proxyName}_{SETTINGFLAG}.exe (with proxyName: sem or fd)
 ```
-The argument `SETTINGFLAG` tag is  `CUDA_KOKKOS_RAJA_SETUP` dependent. For the for the default option `SETTINGFLAG=SEQUENTIAL`. 
+The argument `SETTINGFLAG` tag is  `CUDA_KOKKOS_RAJA_SETUP` dependent. It is used as a label identifying the name of the portability enabling library used (`KOKKOS` or `RAJA`) . For the default option `SETTINGFLAG=SEQUENTIAL` when neither of KOKOSS nor RAJA is used. 
 
-# Reporting issues and things to be improved 
-This ProxyApp will evolve with the aim of easing the deployment and portability on various HPC machines. The specific observations and things to be improved are reported [here](./NOTES_ISSUES.md).
+#Tips and tricks
+Some tips and tricks addressing common problems that you may encountered are reported [here](./TIPS_AND_TRICKS.md).

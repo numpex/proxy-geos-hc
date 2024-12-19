@@ -1,6 +1,6 @@
-## Reporting issues and observations
+## Tips and tricks
 
-We report below some specific observations related to the deployment of the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/) - and the associated [third-party libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl), suggestions and things that can be improved. It can serve as basis to supply the issue tickets related to these repositories. 
+We report below some specific observations related to the deployment of the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/) - and the associated [third-party libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl), suggestions addressing the issues. 
 
 ### Unavailable library
 It occurs that a product or a required specific version can be unavailable. This issue can be addressed by installing the product, either from source or using a package manager (Spack or Guix).   
@@ -24,10 +24,4 @@ Another case involved the unavailability of CUDA features preventing from [getti
  - installing by running the ```.run``` executable file with the following options: ```--silent, --toolkit``` while specifying the ```--toolkitpath``` and the ```--defaultroot```.  
  
 By doing so, the next issue was related to [KOKKOS](https://kokkos.org/) which had failed to detect automatically the GPU architecture since the CUDA driver is not available. 
-> Using the option `-Dkokkos_ARCH_{VALUE}=ON` in the `CMakeLists.txt` during the building stage has allowed to proceed further without being on a GPU-capable computing machine.   For instance, on a Nvidia Ampere architecture with "compute capability 8.0", the argument must be set as ```VALUE=AMPERE80```.   
-> Please refer to [Kokkoss - GPU Architectures](https://kokkos.org/kokkos-core-wiki/keywords.html) for in-depth description for other architectures.  
-
-#### Using Guix or Spack
-These multi-platform package managers offer the flexibility to build and install, without being root, various versions of a given product that can coexist without any conflict or break in the dependencies. To get started with please refer to the following links: [Spack](https://github.com/spack/spack?tab=readme-ov-file) and [Guix](https://gitlab.inria.fr/numpex-pc5/wp3/guix-hpc).   
-### Architecture-target build
-Another issue we observed is related to how, from a given host, to build executables or libraries targetting a specific and possibly different compute machine architecture.  
+Using the option `-Dkokkos_ARCH_{VALUE}=ON` in the `CMakeLists.txt` during the building stage has allowed to proceed further without being on a GPU-capable computing machine.   For instance, on a Nvidia Ampere architecture with "compute capability 8.0", the argument must be set as ```VALUE=AMPERE80```.   Please refer to [Kokkoss - GPU Architectures](https://kokkos.org/kokkos-core-wiki/keywords.html) for in-depth description for other architectures.  
