@@ -6,3 +6,5 @@
 *.vscode*
 readme_folder
 env_old.sh
+./install
+./build
