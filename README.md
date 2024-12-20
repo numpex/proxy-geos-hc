@@ -90,5 +90,5 @@ install/bin/{proxyName}_{SETTINGFLAG}.exe (with proxyName: sem or fd)
 ```
 The argument `SETTINGFLAG` tag is  `CUDA_KOKKOS_RAJA_SETUP` dependent. It is used as a label identifying the name of the portability enabling library used (`KOKKOS` or `RAJA`) . For the default option `SETTINGFLAG=SEQUENTIAL` when neither of KOKOSS nor RAJA is used. 
 
-#Tips and tricks
+# Tips and tricks
 Some tips and tricks addressing common problems that you may encountered are reported [here](./TIPS_AND_TRICKS.md).
