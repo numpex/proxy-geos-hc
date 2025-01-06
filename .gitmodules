@@ -1,4 +1,3 @@
-[submodule "extern/pybind11"]
-	path = extern/pybind11
-	url = ../../pybind/pybind11
-	branch = stable
+[submodule "src/LvArray"]
+	path = src/LvArray
+	url = https://github.com/GEOS-DEV/LvArray.git
