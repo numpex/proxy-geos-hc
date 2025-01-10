@@ -28,33 +28,6 @@
 # the solver is using sequential mode by default
 set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
 set (USE_VECTOR ON CACHE BOOL "" FORCE)
-if(ENABLE_HIP)
-  set(COMP_VER "6.0.0")
-  set(COMP_ARCH "gfx908")
-  #set(CMAKE_CXX_COMPILER "/opt/rocm-6.0.0/bin/amdclang++")
-  set(CMAKE_CXX_COMPILER "/opt/rocm-6.0.0/bin/hipcc")
-  set(ROCM_ROOT_DIR "/opt/rocm-${COMP_VER}")
-  set(ROCM_PATH "/opt/rocm-${COMP_VER}")
-  set(HIP_ROOT_DIR "/opt/rocm-${COMP_VER}/hip")
-  set(HIP_PATH "/opt/rocm-${COMP_VER}/bin")
-  set(GPU_TARGETS "${COMP_ARCH}")
-  message(STATUS "======== ROCM_ROOT_DIR=${ROCM_ROOT_DIR}")
-  set(USE_SEM_INLINE ON CACHE BOOL "" FORCE) #clang doesn't support -fgpu-rdc yet
-else()
-  # CC options
-  set(CMAKE_C_COMPILER  ${CC_ROOT}/gcc${CC_VERSION})
-  set(CMAKE_C_FLAGS_RELEASE "-g -O3 -DNDEBUG" CACHE STRING "")
-  set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "")
-  set(CMAKE_C_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
-
-  # C++ options
-  set(CMAKE_CXX_COMPILER ${CXX_ROOT}/g++${CC_VERSION})
-  set (CMAKE_CXX_FLAGS "-g -O3 -std=c++17  " CACHE STRING "" FORCE)
-  set(CMAKE_CXX_FLAGS_RELEASE "-g -O3 -DNDEBUG " CACHE STRING "")
-  set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g ${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "")
-  set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
-  set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
-endif()
 
 # allow to install only one target
 set (CMAKE_SKIP_INSTALL_ALL_DEPENDENCY "True" CACHE STRING "" FORCE)
@@ -79,81 +52,7 @@ set( DISABLE_UNIT_TESTS ON)
 # force ENABLE_OPENMP to ON
 set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 
-#if (ENABLE_CUDA)
-#	set(CUDA_ARCH $ENV{CUDA_ARCH})
-#	set(CUDA_ARCH_COMPUTE $ENV{CUDA_ARCH_COMPUTE})
-#	set(CUDA_ROOT $ENV{CUDA_ROOT} CACHE PATH "" FORCE)    
-#	if(DEFINED ENV{CUDA_ARCH})
-#	else()
-#		message(FATAL_ERROR "You must have CUDA_ARCH variable set, to specify the architecture")
-#	endif()
-#endif()
-
-# choose platform for Cuda options
-
-if(X86_laptop)
-  set(X86_cypress OFF CACHE STRING "" FORCE)
-  if (ENABLE_CUDA)
-    set(CMAKE_CUDA_ARCHITECTURES ${CUDA_ARCH_COMPUTE} CACHE STRING "")
-    set(CMAKE_CUDA_FLAGS "-lineinfo -g -pg -restrict --expt-relaxed-constexpr --expt-extended-lambda -Werror cross-execution-space-call,reorder,deprecated-declarations -std=c++17" CACHE STRING "")
-    set(CMAKE_CUDA_FLAGS_RELEASE "-g -Xcompiler -DNDEBUG -Xcompiler -O3" CACHE STRING "")
-    set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "-g -lineinfo ${CMAKE_CUDA_FLAGS_RELEASE}" CACHE STRING "")
-    set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
-  endif()
-
-  elseif(Power9_pangea3)
-  # Cuda options for pangea3
-  if (ENABLE_CUDA)
-    set(CUDA_ROOT "/data_local/sw/cuda/11.0.3-rhel8" CACHE PATH "")
-    set(CMAKE_CUDA_ARCHITECTURES ${CUDA_ARCH_COMPUTE} CACHE STRING "" FORCE)
-    set(CMAKE_CUDA_FLAGS "-O3 -restrict -arch ${CUDA_ARCH}  --expt-extended-lambda --expt-relaxed-constexpr -Xcompiler -std=c++17 -Xcompiler -mcpu=powerpc64le -Xcompiler -mtune=powerpc64le  " CACHE STRING "")
-    set(DEVICE "V100GPU" CACHE PATH "" FORCE)
-  else()
-   set(DEVICE "Power9" CACHE PATH "" FORCE)
-  endif()
-
-  elseif(ARM)
-  if (ENABLE_CUDA)
-	  set(CMAKE_CUDA_ARCHITECTURES ${CUDA_ARCH_COMPUTE} CACHE STRING "")
-   set(CMAKE_CUDA_FLAGS "-restrict --expt-relaxed-constexpr --expt-extended-lambda -Werror cross-execution-space-call,reorder,deprecated-declarations -std=c++17" CACHE STRING "")
-   set(CMAKE_CUDA_FLAGS_RELEASE "-Xcompiler -DNDEBUG -Xcompiler -O3" CACHE STRING "")
-   set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "-g -lineinfo ${CMAKE_CUDA_FLAGS_RELEASE}" CACHE STRING "")
-   set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
-   set(DEVICE "H100GPU" CACHE PATH "" FORCE)
-  else()
-   set(DEVICE "GRACE" CACHE PATH "" FORCE)
-  endif()
-
-  elseif(X86_cypress)
-   if (ENABLE_CUDA)
-    set(CMAKE_CUDA_ARCHITECTURES ${CUDA_ARCH_COMPUTE} CACHE STRING "")	  
-    set(CMAKE_CUDA_FLAGS "-restrict -arch ${CUDA_ARCH} --expt-extended-lambda -Werror cross-execution-space-call,reorder,deprecated-declarations -Xcompiler -std=c++17" CACHE STRING "")
-    set(CMAKE_CUDA_FLAGS_RELEASE "-O3 -DNDEBUG -Xcompiler -DNDEBUG -Xcompiler -O3 -Xcompiler -mcpu=${CPU_TUNE_FLAG} -Xcompiler -mtune=${CPU_TUNE_FLAG}" CACHE STRING "")
-    set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "-g -lineinfo ${CMAKE_CUDA_FLAGS_RELEASE}" CACHE STRING "")
-    set(CMAKE_CUDA_FLAGS_DEBUG "-g -G -O0 -Xcompiler -O0" CACHE STRING "")
-    set(DEVICE "A100GPU" CACHE PATH "" FORCE)
-    #elseif(ENABLE_HIP)
-    #set(DEVICE "Mi100GPU" CACHE PATH "" FORCE)
-    #else()
-    #set(DEVICE "EPYCROME" CACHE PATH "" FORCE)
-    endif()
-
-  endif()
-
-if( ENABLE_CUDA )
-  set(ENABLE_CUDA_NVTOOLSEXT ON CACHE BOOL "")
-  set(CUDA_TOOLKIT_ROOT_DIR ${CUDA_ROOT} CACHE PATH "")
-  set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "")
-  set(CMAKE_CUDA_COMPILER ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc CACHE STRING "")
-  set(extraComponentsLinkList ${extraComponentsLinkList} cuda )
-  message ("-- ENABLE_CUDA flag is set: extraComponentsLinkList= ${extraComponentsLinkList} ")
-  set(CMAKE_CUDA_STANDARD 17 CACHE STRING "")
-  set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
-endif()
-
 include( ../blt/SetupBLT.cmake )
-
-set (USE_VECTOR ON CACHE BOOL "" FORCE)
 
 ################################
 # SEM USE OMP

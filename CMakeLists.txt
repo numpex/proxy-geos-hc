@@ -9,14 +9,6 @@ project( proxyapp )
 set (CMAKE_VERBOSE_MAKEFILE ON )
 
 #-----------------------------------------------------
-# Setup the computing resources for running proxyapp
-#-----------------------------------------------------
-option (X86_host "X86 architecture  default" ON)
-option (X86_cypress "Compilation on Cypress Cluster" OFF)
-option (Power9_pangea3 "Power9 architecture  " OFF)
-option (ARM "ARM aarch64 architecture: e.g. grace CPU" OFF)
-
-#-----------------------------------------------------
 # Setup the flags for users to select programming models
 #-----------------------------------------------------
 
