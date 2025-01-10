@@ -11,7 +11,7 @@ export CUDA_ROOT=/hrtc/apps/cuda/12.4.131/aarch64/rocky9/
 
 export OMP_PROC_BIND=spread; export OMP_PLACES=threads
 
-# for kokkos: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON -DARM=ON -DX86_laptop=OFF .. ; make 
-# for raja: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON -DARM=ON -DX86_laptop=OFF .. ; make 
-# for omp on CPU:  cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON -DARM=ON -DX86_laptop=OFF .. ; make
-# for sequential mode on CPU:  cmake -DCMAKE_INSTALL_PREFIX=../install -DARM=ON -DX86_laptop=OFF .. ; make
+# for kokkos: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_KOKKOS=ON -DENABLE_CUDA=ON -DARM=ON -DX86_host=OFF .. ; make 
+# for raja: cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_RAJA=ON -DENABLE_CUDA=ON -DARM=ON -DX86_host=OFF .. ; make 
+# for omp on CPU:  cmake -DCMAKE_INSTALL_PREFIX=../install -DUSE_OMP=ON -DARM=ON -DX86_host=OFF .. ; make
+# for sequential mode on CPU:  cmake -DCMAKE_INSTALL_PREFIX=../install -DARM=ON -DX86_host=OFF .. ; make

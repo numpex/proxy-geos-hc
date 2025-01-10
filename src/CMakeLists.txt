@@ -79,15 +79,15 @@ set( DISABLE_UNIT_TESTS ON)
 # force ENABLE_OPENMP to ON
 set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 
-if (ENABLE_CUDA)
-	set(CUDA_ARCH $ENV{CUDA_ARCH})
-	set(CUDA_ARCH_COMPUTE $ENV{CUDA_ARCH_COMPUTE})
-	set(CUDA_ROOT $ENV{CUDA_ROOT} CACHE PATH "" FORCE)    
-	if(DEFINED ENV{CUDA_ARCH})
-	else()
-		message(FATAL_ERROR "You must have CUDA_ARCH variable set, to specify the architecture")
-	endif()
-endif()
+#if (ENABLE_CUDA)
+#	set(CUDA_ARCH $ENV{CUDA_ARCH})
+#	set(CUDA_ARCH_COMPUTE $ENV{CUDA_ARCH_COMPUTE})
+#	set(CUDA_ROOT $ENV{CUDA_ROOT} CACHE PATH "" FORCE)    
+#	if(DEFINED ENV{CUDA_ARCH})
+#	else()
+#		message(FATAL_ERROR "You must have CUDA_ARCH variable set, to specify the architecture")
+#	endif()
+#endif()
 
 # choose platform for Cuda options
 
@@ -191,7 +191,7 @@ if ( USE_RAJA)
    set (SOLVER "Raja" CACHE PATH "" FORCE)
    message(STATUS "BUILDING SOLVER including RAJA ")
 
-   set (RAJA_DIR "$ENV{RAJA_DIR}")
+   #set (RAJA_DIR "$ENV{RAJA_DIR}")
    if(DEFINED RAJA_DIR)
        message(STATUS "USE RAJA in RAJA_DIR = ${RAJA_DIR}")
        find_package(RAJA REQUIRED
@@ -215,7 +215,7 @@ if ( USE_RAJA)
    ################################
    # Umpire
    ################################
-   set (UMPIRE_DIR "$ENV{UMPIRE_DIR}")
+   #set (UMPIRE_DIR "$ENV{UMPIRE_DIR}")
    if(DEFINED UMPIRE_DIR)
        message(STATUS " USE RAJA: RAJA must be compiled with UMPIRE in UMPIRE_DIR = ${UMPIRE_DIR}")
        find_package(umpire REQUIRED
@@ -230,7 +230,7 @@ if ( USE_RAJA)
    ################################
    # CHAI
    ################################
-   set (CHAI_DIR "$ENV{CHAI_DIR}")
+   #set (CHAI_DIR "$ENV{CHAI_DIR}")
    if(DEFINED CHAI_DIR)
        message(STATUS " USE RAJA in CHAI_DIR = ${CHAI_DIR}")
        find_package(chai REQUIRED
@@ -246,6 +246,31 @@ if ( USE_RAJA)
 
    set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
    set (dependencyList lvarray RAJA chai)
+   
+   ################################
+   # CALIPER
+   ################################
+if(ENABLE_CALIPER)
+    if(NOT EXISTS ${CALIPER_DIR})
+        message(FATAL_ERROR "CALIPER_DIR must be defined and point to a valid directory when using caliper.")
+    endif()
+
+    message(STATUS "Using caliper from ${CALIPER_DIR}")
+
+    find_package(caliper REQUIRED
+                 PATHS ${CALIPER_DIR})
+	 message(STATUS "Caliper found in CMAkeList")
+    blt_register_library(NAME caliper
+                         INCLUDES ${caliper_INCLUDE_PATH}
+                         LIBRARIES caliper
+                         TREAT_INCLUDES_AS_SYSTEM ON)
+
+    set(thirdPartyLibs ${thirdPartyLibs} caliper)
+else()
+    message(STATUS "Not using caliper.")
+endif()
+
+   
    add_subdirectory( LvArray )
    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/LvArray/src)
 
