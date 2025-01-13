@@ -20,9 +20,11 @@ set(CHAI_DIR ${GEOSX_TPL_DIR}/chai CACHE PATH "")
 #set(ENABLE_ADIAK ON CACHE BOOL "" )
 set(CALIPER_DIR ${GEOSX_TPL_DIR}/caliper CACHE PATH "")
 set(adiak_DIR ${GEOSX_TPL_DIR}/adiak/lib/cmake/adiak/ CACHE PATH "")
+#set(adiak_DIR ${GEOSX_TPL_DIR}/adiak/lib CACHE PATH "")
 
 # Set Kokkos_ROOT and KOKKOS_DIR
-
+set(KOKKOS_DIR ${GEOSX_TPL_DIR}/kokkos CACHE PATH "")
+message(STATUS "-- The KOKKOS_DIR is " ${KOKKOS_DIR})
 # BLT as submodule can be tricky in the sens that the CUDA_ARCH need to be passed as argument ./blt/cmake/thirdparty/SetupHIP.cmake:15:          $ENV{ROCM_DIR}
 # ./blt/cmake/BLTOptions.cmake:61:set(BLT_CLANG_CUDA_ARCH "$ENV{CUDA_ARCH}" CACHE STRING "Compute architecture to use when generating CUDA code with Clang")
 
