@@ -1,37 +1,39 @@
-# Set up the tpls
-set( GEOSX_TPL_ROOT_DIR ${CMAKE_SOURCE_DIR}/../$ENV{proxy_tpl_repo} CACHE PATH "")
+# Set up the TPLs
+set( _TPL_ROOT_DIR ${CMAKE_SOURCE_DIR}/../$ENV{proxy_tpl_repo} CACHE PATH "")
 
 # Include the cache file of the third-party library
-include(${GEOSX_TPL_ROOT_DIR}/configs/configI7.cmake) 
+include(${_TPL_ROOT_DIR}/configs/config.cmake) 
 
-set(GEOSX_TPL_DIR ${GEOSX_TPL_ROOT_DIR}/installTPLs CACHE PATH "")
+# _TPL_INSTALL_DIR was originally called GEOSX_TPL_DIR. Still used in some available configs provided in the LvArray submodule
+# _TPL_ROOT_DIR was originally called GEOSX_TPL_ROOT_DIR. Still used in some available configs provided in the LvArray submodule
+#set(_TPL_INSTALL_DIR ${_TPL_ROOT_DIR}/installTPLs CACHE PATH "")
+set(_TPL_INSTALL_DIR ${_TPL_ROOT_DIR}/$ENV{install_tpl_dir} CACHE PATH "")
 
-set(CAMP_DIR ${GEOSX_TPL_DIR}/raja CACHE PATH "")
-set(RAJA_DIR ${GEOSX_TPL_DIR}/raja CACHE PATH "")
+set(CAMP_DIR ${_TPL_INSTALL_DIR}/raja CACHE PATH "")
+set(RAJA_DIR ${_TPL_INSTALL_DIR}/raja CACHE PATH "")
 set( RAJA_ENABLE_VECTORIZATION OFF CACHE BOOL "" FORCE)
 
 #set(ENABLE_UMPIRE ON CACHE BOOL "")
-set(UMPIRE_DIR ${GEOSX_TPL_DIR}/chai CACHE PATH "")
+set(UMPIRE_DIR ${_TPL_INSTALL_DIR}/chai CACHE PATH "")
 
 #set(ENABLE_CHAI ON CACHE BOOL "")
-set(CHAI_DIR ${GEOSX_TPL_DIR}/chai CACHE PATH "")
+set(CHAI_DIR ${_TPL_INSTALL_DIR}/chai CACHE PATH "")
 
 #set(ENABLE_CALIPER ON CACHE BOOL "")
+set(CALIPER_DIR ${_TPL_INSTALL_DIR}/caliper CACHE PATH "")
+
 #set(ENABLE_ADIAK ON CACHE BOOL "" )
-set(CALIPER_DIR ${GEOSX_TPL_DIR}/caliper CACHE PATH "")
-set(adiak_DIR ${GEOSX_TPL_DIR}/adiak/lib/cmake/adiak/ CACHE PATH "")
-#set(adiak_DIR ${GEOSX_TPL_DIR}/adiak/lib CACHE PATH "")
+set(adiak_DIR ${_TPL_INSTALL_DIR}/adiak/lib/cmake/adiak/ CACHE PATH "")
 
 # Set Kokkos_ROOT and KOKKOS_DIR
-set(KOKKOS_DIR ${GEOSX_TPL_DIR}/kokkos CACHE PATH "")
-message(STATUS "-- The KOKKOS_DIR is " ${KOKKOS_DIR})
-# BLT as submodule can be tricky in the sens that the CUDA_ARCH need to be passed as argument ./blt/cmake/thirdparty/SetupHIP.cmake:15:          $ENV{ROCM_DIR}
-# ./blt/cmake/BLTOptions.cmake:61:set(BLT_CLANG_CUDA_ARCH "$ENV{CUDA_ARCH}" CACHE STRING "Compute architecture to use when generating CUDA code with Clang")
-
+set(KOKKOS_DIR ${_TPL_INSTALL_DIR}/kokkos CACHE PATH "")
 
 #set(ENABLE_ADDR2LINE ON CACHE BOOL "")
 
 #set(CHAI_CUDA_FLAGS "-arch ${CUDA_ARCH}" CACHE STRING "" FORCE)
+
+#ENABLE_FIND_MPI to control the setting of the MPI related compiler flag and options. 
+#Be aware that "FindMPI can break nvcc. In that case, you should set ENABLE_FIND_MPI to Off and control" (./cmake/thirdparty/SetupCUDA.cmake #87)
 
 
 # GTEST options

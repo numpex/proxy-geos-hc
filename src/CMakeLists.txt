@@ -52,7 +52,7 @@ set( DISABLE_UNIT_TESTS ON)
 # force ENABLE_OPENMP to ON
 set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 
-if( ENABLE_CUDA )
+if( ENABLE_CUDA AND NOT USE_KOKKOS)
   set(extraComponentsLinkList ${extraComponentsLinkList} cuda )
   message ("-- ENABLE_CUDA flag is set: extraComponentsLinkList= ${extraComponentsLinkList} ")
 endif()
@@ -71,7 +71,7 @@ if(USE_OMP)
   set (USE_LVARRAY OFF CACHE BOOL "" FORCE)
   set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
   set (USE_VECTOR ON CACHE BOOL "" FORCE)
-  set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+  #set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
   message ("-- USE_OMP flag is set: extraComponentsLinkList= ${extraComponentsLinkList} ")
 else()
     message ("-- USE_OMP flag is set to be false and OMP is not enabled")
@@ -101,7 +101,11 @@ if ( USE_RAJA)
                     NO_DEFAULT_PATH)
        get_target_property(RAJA_INCLUDE_DIRS RAJA INTERFACE_INCLUDE_DIRECTORIES)
        set_target_properties(RAJA PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${RAJA_INCLUDE_DIRS}")
-       message(STATUS "RAJA_INCLUDE_DIRS: ${RAJA_INCLUDE_DIRS}")
+       message("-- RAJA_INCLUDE_DIRS: ${RAJA_INCLUDE_DIRS}")
+       # To get the link libraries of RAJA: blt::cuda, blt::openmp, RAJA::cub; camp; dl
+       #get_target_property(RAJA_INTERFACE_LINK_LIBRARIES RAJA INTERFACE_LINK_LIBRARIES)
+       #message(STATUS "RAJA_INTERFACE_LINK_LIBRARIES " ${RAJA_INTERFACE_LINK_LIBRARIES})
+       #set (dependencyList ${dependencyList} ${RAJA_INTERFACE_LINK_LIBRARIES} )   
        set(ENABLE_RAJA ON CACHE BOOL "")
        set(thirdPartyLibs ${thirdPartyLibs} RAJA )
    else()
@@ -144,7 +148,7 @@ if ( USE_RAJA)
      message(FATAL_ERROR "ProxyApp requires CHAI, set CHAI_DIR to the CHAI installation directory.")
    endif()
 
-   set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+   #set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
    set (dependencyList lvarray RAJA chai)
    
    ################################
@@ -159,12 +163,6 @@ if(ENABLE_CALIPER)
 
     find_package(caliper REQUIRED
                  PATHS ${CALIPER_DIR})
-	 message(STATUS "Caliper found in CMAkeList")
-    #blt_register_library(NAME caliper
-    #                     INCLUDES ${caliper_INCLUDE_PATH}
-    #                     LIBRARIES caliper
-    #                     TREAT_INCLUDES_AS_SYSTEM ON)
-
     set(thirdPartyLibs ${thirdPartyLibs} caliper)
 else()
     message(STATUS "Not using caliper.")
@@ -199,39 +197,37 @@ elseif (DEFINED KOKKOS_DIR)
   set (SOLVER "Kokkos" CACHE PATH "" FORCE)
 
   # KOKOS uses OMP
-  find_package(OpenMP)
-    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  #find_package(OpenMP) is not required regarding the previous set up of BLT
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
   message(STATUS "USE KOKKOS in KOKKOS_DIR = ${KOKKOS_DIR}")
   
-# setup KOKOS
+  # setup KOKOS
   find_package(Kokkos REQUIRED
                     PATHS ${KOKKOS_DIR}
                     NO_DEFAULT_PATH)
   get_target_property(KOKKOS_INCLUDE_DIRS Kokkos::kokkos INTERFACE_INCLUDE_DIRECTORIES)
-  set_target_properties(Kokkos::kokkos PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${KOKKOS_INCLUDE_DIRS}")
   message(STATUS "KOKKOS_INCLUDE_DIRS: ${KOKKOS_INCLUDE_DIRS}")     
 
 
   get_target_property(KOKKOS_LINK_LIBS Kokkos::kokkos INTERFACE_LINK_LIBRARIES)
-  set_target_properties(Kokkos::kokkos PROPERTIES INTERFACE_LINK_LIBRARIES "${KOKKOS_LINK_LIBS}")
-  message(STATUS "KOKKOS_LINK_LIBS: ${KOKKOS_LINK_LIBS}")
+  message("-- KOKKOS_LINK_LIBS: ${KOKKOS_LINK_LIBS}")
 
-  get_target_property(KOKKOSCORE_LINK_OPTION Kokkos::kokkoscore INTERFACE_LINK_OPTIONS)
-  message(STATUS "KOKKOSCORE_LINK_OPTION: ${KOKKOSCORE_LINK_OPTION}")
+  #get_target_property(KOKKOSCORE_LINK_OPTION Kokkos::kokkoscore INTERFACE_LINK_OPTIONS)
+  #message(STATUS "KOKKOSCORE_LINK_OPTION: ${KOKKOSCORE_LINK_OPTION}")
 
-  #set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${KOKKOSCORE_LINK_OPTION}")
-  #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${KOKKOSCORE_LINK_OPTION}")
   set (extraComponentsLinkList ${extraComponentsLinkList} Kokkos::kokkos)
-
-  #get_target_property(KOKKOSCORE_LINK_LIBS Kokkos::kokkoscore INTERFACE_LINK_LIBRARIES)
-  #message(STATUS "KOKKOSCORE_LINK_LIBS: ${KOKKOSCORE_LINK_LIBS}")
-  #set (dependencyList ${dependencyList} ${KOKKOSCORE_LINK_LIBS})
   #set(thirdPartyLibs ${thirdPartyLibs} Kokkos::kokkos )
 
+  ## -- The idea below is to get the self-contained dependencies of Kokkos (Kokkos::openmp, Kokkos::cuda etc..)
+  #get_target_property(KOKKOSCORE_LINK_LIBS Kokkos::kokkoscore INTERFACE_LINK_LIBRARIES)
+  #message("-- KOKKOSCORE_LINK_LIBS" ${KOKKOSCORE_LINK_LIBS})
+  #set (dependencyList ${dependencyList} ${KOKKOSCORE_LINK_LIBS})
 
-  set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+
+
+  #set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
   message (STATUS "KOKKOS DEPENDENCY LIST= ${dependencyList}")
   if( ENABLE_HIP )
     set(Kokkos_ENABLE_HIP ON CACHE BOOL "" FORCE)
@@ -241,12 +237,9 @@ elseif (DEFINED KOKKOS_DIR)
     include_directories("/opt/rocm-6.0.0/include")
   endif()
 
-elseif (NOT DEFINED ${KOKKOS_DIR})
-  set (USE_KOKKOS OFF CACHE BOOL "")
-  message("-- KOKKOS_DIR is not defined  not enabled / KOKKOS_DIR = " ${KOKKOS_DIR})
 else ()
   set (USE_KOKKOS OFF CACHE BOOL "")
-  message("-- KOKKOS_DIR is not the correct path and is not enabled")
+  message("-- KOKKOS_DIR is not the correct path and is not enabled / KOKKOS_DIR = " ${KOKKOS_DIR})
 endif()
 
 message(STATUS "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
