@@ -49,8 +49,8 @@ set( ENABLE_EXAMPLES OFF )
 set( ENABLE_DOCS OFF )
 set( ENABLE_BENCHMARKS OFF )
 set( DISABLE_UNIT_TESTS ON)
-# force ENABLE_OPENMP to ON
-set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
+# Avoid forcing ENABLE_OPENMP to ON to be consistent with the option ENABLED when building KOKKOS and RAJA 
+# set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 
 if( ENABLE_CUDA AND NOT USE_KOKKOS)
   set(extraComponentsLinkList ${extraComponentsLinkList} cuda )
@@ -66,17 +66,32 @@ include( ../blt/SetupBLT.cmake )
 if(USE_OMP)
   set (SOLVER "OMP" CACHE PATH "" FORCE)
   message(STATUS "BUILDING SOLVER including OpenMP+Vector on CPU")
+  
   set (USE_KOKKOS OFF CACHE BOOL "")
   set (USE_RAJA OFF CACHE BOOL "")
   set (USE_LVARRAY OFF CACHE BOOL "" FORCE)
-  set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
   set (USE_VECTOR ON CACHE BOOL "" FORCE)
+
+  # We could avoid forcing the value of ENABLE_OPENMP to consider the purely sequential code ?
+  set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
+  set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
+  # Include the core config file after all the option are set
+
+  ## The directory with the config. files
+  set(CONFIG_DIR ${CMAKE_SOURCE_DIR}/../$ENV{proxy_tpl_repo}/configs)
+
+  if(EXISTS ${CONFIG_DIR}/config_core.cmake)
+        include(${CONFIG_DIR}/config_core.cmake)
+  else()
+          message(FATAL_ERROR "The config_core.cmake is not found in the the config files directory: " ${CONFIG_DIR})
+  endif()
+
+
   #set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
   message ("-- USE_OMP flag is set: extraComponentsLinkList= ${extraComponentsLinkList} ")
 else()
     message ("-- USE_OMP flag is set to be false and OMP is not enabled")
 endif()
-
 
 ################################
 # RAJA
@@ -93,7 +108,10 @@ if ( USE_RAJA)
    message( STATUS "-------------------RAJA SETTINGS---------------------------------------" )
    set (SOLVER "Raja" CACHE PATH "" FORCE)
    message(STATUS "BUILDING SOLVER including RAJA ")
-
+   if(NOT ${ENABLE_OPENMP} OR ${ENABLE_CUDA})
+           message(STATUS "ENABLE_OPENMP is set to " ${ENABLE_OPENMP} " ENABLE_CUDA " ${ENABLE_CUDA})
+	   message(FATAL_ERROR "The TPLs have been built without enabling one of the OPENMP or CUDA feature required for USE_RAJA option: please rebuild the RAJA library.")
+   endif()
    if(DEFINED RAJA_DIR)
        message(STATUS "USE RAJA in RAJA_DIR = ${RAJA_DIR}")
        find_package(RAJA REQUIRED
