@@ -49,8 +49,6 @@ set( ENABLE_EXAMPLES OFF )
 set( ENABLE_DOCS OFF )
 set( ENABLE_BENCHMARKS OFF )
 set( DISABLE_UNIT_TESTS ON)
-# Avoid forcing ENABLE_OPENMP to ON to be consistent with the option ENABLED when building KOKKOS and RAJA 
-# set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 
 if( ENABLE_CUDA AND NOT USE_KOKKOS)
   set(extraComponentsLinkList ${extraComponentsLinkList} cuda )
@@ -58,6 +56,19 @@ if( ENABLE_CUDA AND NOT USE_KOKKOS)
 endif()
 
 include( ../blt/SetupBLT.cmake )
+
+
+################################
+# SEM USE SEQUENTIAL MODEL
+################################
+# the solver is sequential +Vector on CPU
+
+if(NOT (USE_OMP OR USE_KOKKOS OR USE_RAJA))
+	message(STATUS "BUILDING SEQUENTIAL SOLVER including Vector on CPU")
+	if(ENABLE_OPENMP OR ENABLE_CUDA OR ENABLE_MPI OR ENABLE_HIP)
+		message(FATAL_ERROR "The sequential mode is not compatible with any GPU-accelerated options or parallel model")
+	endif()
+endif()
 
 ################################
 # SEM USE OMP
@@ -73,20 +84,25 @@ if(USE_OMP)
   set (USE_VECTOR ON CACHE BOOL "" FORCE)
 
   # We could avoid forcing the value of ENABLE_OPENMP to consider the purely sequential code ?
-  set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
-  set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
-  # Include the core config file after all the option are set
+  #set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
 
-  ## The directory with the config. files
-  set(CONFIG_DIR ${CMAKE_SOURCE_DIR}/../$ENV{proxy_tpl_repo}/configs)
-
-  if(EXISTS ${CONFIG_DIR}/config_core.cmake)
-        include(${CONFIG_DIR}/config_core.cmake)
-  else()
-          message(FATAL_ERROR "The config_core.cmake is not found in the the config files directory: " ${CONFIG_DIR})
+  if(ENABLE_CUDA OR ENABLE_HIP OR NOT ENABLE_OPENMP)
+	  message("-- USE_OMP is not compatible with GPU acceleration are going to be turned OFF: ENABLE_CUDA = " ${ENABLE_CUDA} " ENABLE_HIP = ")
+	  set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
+	  set (ENABLE_HIP OFF CACHE STRING "" FORCE)
+	  set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
+	  
+	  
+	  # Include the core config file after all the option are set
+	  message("-- Including the config file to update the compilers args according to the forced options")
+	  ## The directory with the config. files
+	  set(CONFIG_DIR ${CMAKE_SOURCE_DIR}/../$ENV{proxy_tpl_repo}/configs)
+	  if(EXISTS ${CONFIG_DIR}/config_core.cmake)
+		  include(${CONFIG_DIR}/config_core.cmake)
+	  else()
+		  message(FATAL_ERROR "The config_core.cmake is not found in the the config files directory: " ${CONFIG_DIR})
+	  endif()
   endif()
-
-
   #set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
   message ("-- USE_OMP flag is set: extraComponentsLinkList= ${extraComponentsLinkList} ")
 else()
@@ -108,7 +124,7 @@ if ( USE_RAJA)
    message( STATUS "-------------------RAJA SETTINGS---------------------------------------" )
    set (SOLVER "Raja" CACHE PATH "" FORCE)
    message(STATUS "BUILDING SOLVER including RAJA ")
-   if(NOT ${ENABLE_OPENMP} OR ${ENABLE_CUDA})
+   if(NOT (${ENABLE_OPENMP} OR ${ENABLE_CUDA}))
            message(STATUS "ENABLE_OPENMP is set to " ${ENABLE_OPENMP} " ENABLE_CUDA " ${ENABLE_CUDA})
 	   message(FATAL_ERROR "The TPLs have been built without enabling one of the OPENMP or CUDA feature required for USE_RAJA option: please rebuild the RAJA library.")
    endif()
