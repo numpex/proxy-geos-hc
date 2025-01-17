@@ -57,7 +57,6 @@ endif()
 
 include( ../blt/SetupBLT.cmake )
 
-
 ################################
 # SEM USE SEQUENTIAL MODEL
 ################################
@@ -65,9 +64,6 @@ include( ../blt/SetupBLT.cmake )
 
 if(NOT (USE_OMP OR USE_KOKKOS OR USE_RAJA))
 	message(STATUS "BUILDING SEQUENTIAL SOLVER including Vector on CPU")
-	if(ENABLE_OPENMP OR ENABLE_CUDA OR ENABLE_MPI OR ENABLE_HIP)
-		message(FATAL_ERROR "The sequential mode is not compatible with any GPU-accelerated options or parallel model")
-	endif()
 endif()
 
 ################################
@@ -83,26 +79,6 @@ if(USE_OMP)
   set (USE_LVARRAY OFF CACHE BOOL "" FORCE)
   set (USE_VECTOR ON CACHE BOOL "" FORCE)
 
-  # We could avoid forcing the value of ENABLE_OPENMP to consider the purely sequential code ?
-  #set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
-
-  if(ENABLE_CUDA OR ENABLE_HIP OR NOT ENABLE_OPENMP)
-	  message("-- USE_OMP is not compatible with GPU acceleration are going to be turned OFF: ENABLE_CUDA = " ${ENABLE_CUDA} " ENABLE_HIP = ")
-	  set (ENABLE_CUDA OFF CACHE STRING "" FORCE)
-	  set (ENABLE_HIP OFF CACHE STRING "" FORCE)
-	  set( ENABLE_OPENMP ON CACHE STRING "" FORCE)
-	  
-	  
-	  # Include the core config file after all the option are set
-	  message("-- Including the config file to update the compilers args according to the forced options")
-	  ## The directory with the config. files
-	  set(CONFIG_DIR ${CMAKE_SOURCE_DIR}/../$ENV{proxy_tpl_repo}/configs)
-	  if(EXISTS ${CONFIG_DIR}/config_core.cmake)
-		  include(${CONFIG_DIR}/config_core.cmake)
-	  else()
-		  message(FATAL_ERROR "The config_core.cmake is not found in the the config files directory: " ${CONFIG_DIR})
-	  endif()
-  endif()
   #set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
   message ("-- USE_OMP flag is set: extraComponentsLinkList= ${extraComponentsLinkList} ")
 else()
@@ -136,10 +112,6 @@ if ( USE_RAJA)
        get_target_property(RAJA_INCLUDE_DIRS RAJA INTERFACE_INCLUDE_DIRECTORIES)
        set_target_properties(RAJA PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${RAJA_INCLUDE_DIRS}")
        message("-- RAJA_INCLUDE_DIRS: ${RAJA_INCLUDE_DIRS}")
-       # To get the link libraries of RAJA: blt::cuda, blt::openmp, RAJA::cub; camp; dl
-       #get_target_property(RAJA_INTERFACE_LINK_LIBRARIES RAJA INTERFACE_LINK_LIBRARIES)
-       #message(STATUS "RAJA_INTERFACE_LINK_LIBRARIES " ${RAJA_INTERFACE_LINK_LIBRARIES})
-       #set (dependencyList ${dependencyList} ${RAJA_INTERFACE_LINK_LIBRARIES} )   
        set(ENABLE_RAJA ON CACHE BOOL "")
        set(thirdPartyLibs ${thirdPartyLibs} RAJA )
    else()
@@ -252,17 +224,8 @@ elseif (DEFINED KOKKOS_DIR)
   #message(STATUS "KOKKOSCORE_LINK_OPTION: ${KOKKOSCORE_LINK_OPTION}")
 
   set (extraComponentsLinkList ${extraComponentsLinkList} Kokkos::kokkos)
-  #set(thirdPartyLibs ${thirdPartyLibs} Kokkos::kokkos )
-
-  ## -- The idea below is to get the self-contained dependencies of Kokkos (Kokkos::openmp, Kokkos::cuda etc..)
-  #get_target_property(KOKKOSCORE_LINK_LIBS Kokkos::kokkoscore INTERFACE_LINK_LIBRARIES)
-  #message("-- KOKKOSCORE_LINK_LIBS" ${KOKKOSCORE_LINK_LIBS})
-  #set (dependencyList ${dependencyList} ${KOKKOSCORE_LINK_LIBS})
-
-
 
   #set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
-  message (STATUS "KOKKOS DEPENDENCY LIST= ${dependencyList}")
   if( ENABLE_HIP )
     set(Kokkos_ENABLE_HIP ON CACHE BOOL "" FORCE)
     set(Kokkos_ENABLE_CUDA OFF CACHE BOOL "" FORCE)
