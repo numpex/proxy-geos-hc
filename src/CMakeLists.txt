@@ -174,9 +174,14 @@ else()
     message(STATUS "Not using caliper.")
 endif()
 
-   
+if(USE_LVARRAY_EXT)
+	# Find package
+	find_package(lvarray REQUIRED
+	   	     PATHS ${path_LVARRAY})
+else()	
    add_subdirectory( LvArray )
    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/LvArray/src)
+endif()
 
    if( ENABLE_HIP )
      set (dependencyList ${dependencyList} blt::hip blt::hip_runtime)
@@ -244,26 +249,23 @@ if(USE_KOKKOS OR USE_RAJA)
 	## What programming on the host
 	
 	if(ENABLE_OPENMP)
-		set(flag_models "hOMP" CACHE STRING "")
+		set(flag_hmodel "hOMP")
 	elseif(ENABLE_MPI)
-		set(flag_models "hMPI" CACHE STRING "")
+		set(flag_hmodel "hMPI")
 	else()
-		set(flag_models "hSERIAL" CACHE STRING "")
+		set(flag_hmodel "hSERIAL")
 	endif()
 	
 	## What programming on the device
+	set(flag_dmodel "")
 	if(ENABLE_CUDA OR ENABLE_HIP)
-		#if(${DEVICE})
-		#	set(flag_models "${flag_models}_d${DEVICE}" CACHE STRING "")
-		#else()
-		#	set(flag_models "${flag_models}_dGPU" CACHE STRING "")
-		#endif()
-		set(flag_models "${flag_models}_d${CUDA_ARCH}" CACHE STRING "")
+		set(flag_dmodel "_d${CUDA_ARCH}")
 	endif()
-	set(SOLVER "${SOLVER}-${flag_models}" CACHE STRING "")
+	set(flag_models "${flag_hmodel}${flag_dmodel}" CACHE STRING "" FORCE)
+	set(SOLVER "${SOLVER}-${flag_models}" CACHE PATH "" FORCE)
 endif()
 # The solver's flag
-message(STATUS "The flag related to the enabled models is: ${flag_models} - the solver is: " ${SOLVER})
+message(STATUS "The flag related to the enabled models is: ${flag_models} - the solver is: " ${SOLVER} "flag_dmodel = " ${flag_dmodel} " flag_hmodel " ${flag_hmodel})
 
 message(STATUS "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 

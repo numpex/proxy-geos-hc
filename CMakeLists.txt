@@ -3,6 +3,14 @@ cmake_minimum_required( VERSION 3.22.1 )
 project( proxyapp )
 
 #-----------------------------------------------------
+# Setup Flags for whether considering an external libs 
+# for the submodule
+#-----------------------------------------------------
+
+set(USE_LVARRAY_EXT OFF CACHE BOOL "Specify if we are using an externally installed library")
+set(path_LVARRAY "" CACHE PATH "")
+
+#-----------------------------------------------------
 # Setup Flags for Building and Installation
 #-----------------------------------------------------
 
