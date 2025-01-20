@@ -26,8 +26,7 @@
 #-------------------------------------------------------------------
 
 # the solver is using sequential mode by default
-set (MODEL_LIBRARY "" CACHE PATH "" FORCE)
-#set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
+set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
 set (USE_VECTOR ON CACHE BOOL "" FORCE)
 
 # allow to install only one target
@@ -72,7 +71,7 @@ endif()
 ################################
 # the solver is using OpenMP+Vector on CPU
 if(USE_OMP)
-	#set (SOLVER "OMP" CACHE PATH "" FORCE)
+  set (SOLVER "OMP" CACHE PATH "" FORCE)
   message(STATUS "BUILDING SOLVER including OpenMP+Vector on CPU")
   
   set (USE_KOKKOS OFF CACHE BOOL "")
@@ -99,8 +98,7 @@ if ( USE_RAJA)
    # set solver
    message( " " )
    message( STATUS "-------------------RAJA SETTINGS---------------------------------------" )
-   #set (SOLVER "Raja" CACHE PATH "" FORCE)
-   set (MODEL_LIBRARY "Raja" CACHE PATH "" FORCE)
+   set (SOLVER "Raja" CACHE PATH "" FORCE)
    message(STATUS "BUILDING SOLVER including RAJA ")
    if(NOT (${ENABLE_OPENMP} OR ${ENABLE_CUDA}))
            message(STATUS "ENABLE_OPENMP is set to " ${ENABLE_OPENMP} " ENABLE_CUDA " ${ENABLE_CUDA})
@@ -202,8 +200,7 @@ elseif (DEFINED KOKKOS_DIR)
   set (USE_VECTOR OFF CACHE BOOL "" FORCE)
   message ("-- USE_KOKKOS flag is set to be true and KOKOS is now enabled")
   message("-- Found the KOKKOS library in ${KOKKOS_DIR}")
-  #set (SOLVER "Kokkos" CACHE PATH "" FORCE)
-  set (MODEL_LIBRARY "Kokkos" CACHE PATH "" FORCE)
+  set (SOLVER "Kokkos" CACHE PATH "" FORCE)
 
   # KOKOS uses OMP
   #find_package(OpenMP) is not required regarding the previous set up of BLT
@@ -242,29 +239,30 @@ else ()
   message("-- KOKKOS_DIR is not the correct path and is not enabled / KOKKOS_DIR = " ${KOKKOS_DIR})
 endif()
 
-# SettingFlag associated to the config.. used for the name of the executable
-
-## What programming on the host
-if(ENABLE_OPENMP)
-	set(flag_models "hOMP" CACHE STRING "")
-elseif(ENABLE_MPI)
-	set(flag_models "hMPI" CACHE STRING "")
-else()
-	set(flag_models "hSERIAL" CACHE STRING "")
+if(USE_KOKKOS OR USE_RAJA)
+	# SettingFlag associated to the config.. used for the name of the executable
+	## What programming on the host
+	
+	if(ENABLE_OPENMP)
+		set(flag_models "hOMP" CACHE STRING "")
+	elseif(ENABLE_MPI)
+		set(flag_models "hMPI" CACHE STRING "")
+	else()
+		set(flag_models "hSERIAL" CACHE STRING "")
+	endif()
+	
+	## What programming on the device
+	if(ENABLE_CUDA OR ENABLE_HIP)
+		#if(${DEVICE})
+		#	set(flag_models "${flag_models}_d${DEVICE}" CACHE STRING "")
+		#else()
+		#	set(flag_models "${flag_models}_dGPU" CACHE STRING "")
+		#endif()
+		set(flag_models "${flag_models}_d${CUDA_ARCH}" CACHE STRING "")
+	endif()
+	set(SOLVER "${SOLVER}-${flag_models}" CACHE STRING "")
 endif()
-
-## What programming on the device
-if(ENABLE_CUDA OR ENABLE_HIP)
-	#if(${DEVICE})
-	#	set(flag_models "${flag_models}_d${DEVICE}" CACHE STRING "")
-	#else()
-	#	set(flag_models "${flag_models}_dGPU" CACHE STRING "")
-	#endif()
-	set(flag_models "${flag_models}_d${CUDA_ARCH}" CACHE STRING "")
-endif()
-
 # The solver's flag
-set(SOLVER "${MODEL_LIBRARY}-${flag_models}" CACHE STRING "")
 message(STATUS "The flag related to the enabled models is: ${flag_models} - the solver is: " ${SOLVER})
 
 message(STATUS "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")

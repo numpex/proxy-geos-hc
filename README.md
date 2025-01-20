@@ -44,30 +44,33 @@ will  create two folders `proxy-geos-hc` and `proxy-geos-hc_tpl`. The `--recursi
 
 ```
 cd proxy-geos-hc  
-cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_SETUP> -C configs/config_proxy-app.cmake -B build -DCMAKE_INSTALL_PREFIX=install -S .
+cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -C configs/config_proxy-app.cmake -B build -DCMAKE_INSTALL_PREFIX=install -S .
 cd build  
 make 
 ```
-This will build and install the executable in the folder `install`.  `<KOKKOS_RAJA_SETUP>` is the placeholder for the configuration option discussed below.   
+This will build and install the executable in the folder `install`.  `<KOKKOS_RAJA_OMP>` is the placeholder for the configuration option discussed below.   
  
 
-### Configuration options KOKKOS_RAJA_SETUP
+### Configuration options KOKKOS_RAJA_OMP
 
- The `KOKKOS_RAJA_SETUP` is used to specify which model programming and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current proxy-app, Lvarray container is used for RAJA while  KOKKOS provides its own container. By default, without any specification for `KOKKOS_RAJA_SETUP`, std::vector container is used.  
+ The `KOKKOS_RAJA_OMP` is used to specify which model programming and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current proxy-app, Lvarray container is used for RAJA while  KOKKOS provides its own container. By default, without any specification for `KOKKOS_RAJA_OMP`, std::vector container is used.  
 #### 1. DEFAULT option
-The default option (without any specification for `KOKKOS_RAJA_SETUP`) is relevant for the sequential or a shared memory parallelization mode. For the latest, one could set `KOKKOS_RAJA_SETUP` as `-DUSE_OMP=ON`.
+The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequential mode with std::vector implementation. 
 
-#### 2. RAJA  with OPENMP and GPU
-To use RAJA, set `KOKKOS_RAJA_SETUP` as `-DUSE_RAJA=ON`. This option is only compatible when the OpenMP (on the host) and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_models.cmake`.  
+#### 2. OPEN_MP
+In the case of shared-memory parallelization std::vector container is used, and  `CUDA_KOKKOS_RAJA_OMP` is set as `-DUSE_OMP=ON`.
 
-#### 3. KOKKOS with OPENMP and GPU
-To use KOKKOS, set `KOKKOS_RAJA_SETUP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode. 
+#### 3. RAJA  with OPENMP and GPU
+To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP (on the host) and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_models.cmake`.  
+
+#### 4. KOKKOS with OPENMP and GPU
+To use KOKKOS, set `KOKKOS_RAJA_OMP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode. 
 ## Step 3: Run the executable 
 The executables are installed in `proxy-geos-hc/install/bin`folder  and can be run as follow:   
 ```
-proxy-geos-hc/install/bin/{proxyName}_{LIB-MODELS}.exe (with proxyName: sem or fd)
+proxy-geos-hc/install/bin/<proxyName>_<LIB-MODELS>.exe (with proxyName: sem or fd)
 ```
-The tag `LIB-MODELS` is  `KOKKOS_RAJA_SETUP` and enabled programming models dependent. The first part `LIB` is used as a label identifying the name of the portability enabling library (`Kokkos`, `Raja` or empty for the default configuration). It is suffixed by a tag related to the enabled model on the host and the `CUDA_ARCH` flag of the device if a GPU-acceleration is required.   
+The tag `LIB-MODELS` is  `KOKKOS_RAJA_OMP` and enabled programming models dependent. The first part `LIB` is used as a label identifying the name of the main model programming library (`Kokkos`, `Raja`, `OMP` or empty for the default configuration). When using RAJA or KOKKOS, it is suffixed by a tag related to the enabled model on the host and the `CUDA_ARCH` flag of the device if a GPU-acceleration is required.   
 As an example, if KOKKOS is used and a shared-memory parallelization enabled on the host in addition to a  GPU accelaration on the device,  `LIB-MODELS=Kokkos-hOMP_d<CUDA_ARCH>`.  
 
 # Tips and tricks
