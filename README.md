@@ -55,7 +55,7 @@ This will build and install the executable in the folder `install`.  `<KOKKOS_RA
 
  The `KOKKOS_RAJA_SETUP` is used to specify which model programming and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current proxy-app, Lvarray container is used for RAJA while  KOKKOS provides its own container. By default, without any specification for `KOKKOS_RAJA_SETUP`, std::vector container is used.  
 #### 1. DEFAULT option
-The default option (without any specification for `KOKKOS_RAJA_SETUP`) **is relevant for the sequential or a shared memory parallelization mode**. For the latest, one could set `KOKKOS_RAJA_SETUP` as `-DUSE_OMP=ON`.
+The default option (without any specification for `KOKKOS_RAJA_SETUP`) is relevant for the sequential or a shared memory parallelization mode. For the latest, one could set `KOKKOS_RAJA_SETUP` as `-DUSE_OMP=ON`.
 
 #### 2. RAJA  with OPENMP and GPU
 To use RAJA, set `KOKKOS_RAJA_SETUP` as `-DUSE_RAJA=ON`. This option is only compatible when the OpenMP (on the host) and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_models.cmake`.  
@@ -67,7 +67,8 @@ The executables are installed in `proxy-geos-hc/install/bin`folder  and can be r
 ```
 proxy-geos-hc/install/bin/{proxyName}_{LIB-MODELS}.exe (with proxyName: sem or fd)
 ```
-The tag `LIB-MODELS` is  `KOKKOS_RAJA_SETUP` and enabled programming models dependent. The first part `LIB` is used as a label identifying the name of the portability enabling library (`Kokkos`, `Raja` or empty for the default configuration). It is suffixed by a tag related to the enabled model on the host and the `CUDA_ARCH` flag of the device if a GPU-acceleration is required.   As an example, if KOKKOS is used and a shared-memory parallelization enabled on the host in addition to a  GPU accelaration on the device,  `LIB-MODELS=Kokkos-hOMP_d<CUDA_ARCH>`.  
+The tag `LIB-MODELS` is  `KOKKOS_RAJA_SETUP` and enabled programming models dependent. The first part `LIB` is used as a label identifying the name of the portability enabling library (`Kokkos`, `Raja` or empty for the default configuration). It is suffixed by a tag related to the enabled model on the host and the `CUDA_ARCH` flag of the device if a GPU-acceleration is required.   
+As an example, if KOKKOS is used and a shared-memory parallelization enabled on the host in addition to a  GPU accelaration on the device,  `LIB-MODELS=Kokkos-hOMP_d<CUDA_ARCH>`.  
 
 # Tips and tricks
 Some tips and tricks addressing common problems that you may encountered are reported [here](./TIPS_AND_TRICKS.md).
