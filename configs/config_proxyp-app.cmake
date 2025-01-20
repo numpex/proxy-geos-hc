@@ -1,13 +1,20 @@
 # Set up the TPLs
-set( _TPL_ROOT_DIR ${CMAKE_SOURCE_DIR}/../$ENV{proxy_tpl_repo} CACHE PATH "")
+#set( _TPL_ROOT_DIR ${CMAKE_SOURCE_DIR}/../$ENV{proxy_tpl_repo} CACHE PATH "")
+set( _TPL_ROOT_DIR $ENV{proxy_tpl_dir} CACHE PATH "")
+if(NOT EXISTS ${_TPL_ROOT_DIR})
+	message(FATAL_ERROR "The path provided for the TPLs is not valid: _TPL_ROOT_DIR = " ${_TPL_ROOT_DIR})
+endif()
 
 # Include the cache file of the third-party library
-include(${_TPL_ROOT_DIR}/configs/config.cmake) 
+if(EXISTS ${_TPL_ROOT_DIR}/configs/config_tpls.cmake)
+	include(${_TPL_ROOT_DIR}/configs/config_tpls.cmake) 
+else()
+	message(FATAL_ERROR "The config_tpls file is not found in the provided _TPL_ROOT_DIR " ${_TPL_ROOT_DIR})
+endif()
 
-# _TPL_INSTALL_DIR was originally called GEOSX_TPL_DIR. Still used in some available configs provided in the LvArray submodule
-# _TPL_ROOT_DIR was originally called GEOSX_TPL_ROOT_DIR. Still used in some available configs provided in the LvArray submodule
-#set(_TPL_INSTALL_DIR ${_TPL_ROOT_DIR}/installTPLs CACHE PATH "")
-set(_TPL_INSTALL_DIR ${_TPL_ROOT_DIR}/$ENV{install_tpl_dir} CACHE PATH "")
+# To keep track of change: Beaware that _TPL_INSTALL_DIR was originally called GEOSX_TPL_DIR 
+# and used in some available configs provided in the LvArray submodule (src/LvArray/cmake/blt/host-configs/)
+set(_TPL_INSTALL_DIR ${_TPL_ROOT_DIR}/$ENV{install_tpl_folder} CACHE PATH "")
 
 set(CAMP_DIR ${_TPL_INSTALL_DIR}/raja CACHE PATH "")
 set(RAJA_DIR ${_TPL_INSTALL_DIR}/raja CACHE PATH "")
