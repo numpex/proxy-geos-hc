@@ -39,9 +39,8 @@ will  create two folders `proxy-geos-hc` and `proxy-geos-hc_tpl`. The `--recursi
 
 ## Step 2: Build and Install the ProxyApp
  
- 1. Please make sure that the `proxy_tpl_dir` and `install_tpl_folder` are exported, by sourcing the script `source proxy-geos-hc_tpl/env_var.sh`. These variables are required to set the directory paths of the TPLs required to generate the build files.  
-2. Generate the Makefile and build the executable by running the following commandlines. *Be aware that for consistency, the `config_proxy-app.cmake`  file must include the same `config_tpls.cmake` file which has been used when building the [Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/).*    
-
+ 1. Please make sure that the `proxy_tpl_dir` and `install_tpl_folder` are exported, by sourcing the script `source proxy-geos-hc_tpl/env_var.sh`. These variables are used in the`config_proxy-app.cmake`  file to pre-load the cache during the CMake build. For consistency, it includes the `config_tpls.cmake` file which has been used to pre-load the cache when building the [Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/).
+2. Generate the Makefile and build the executable by running the following commandlines. 
 ```
 cd proxy-geos-hc  
 cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -C configs/config_proxy-app.cmake -B build -DCMAKE_INSTALL_PREFIX=install -S .
@@ -71,7 +70,7 @@ The executables are installed in `proxy-geos-hc/install/bin`folder  and can be r
 proxy-geos-hc/install/bin/<proxyName>_<LIB-MODELS>_<Device>.exe (with proxyName: sem or fd)
 ```
 The tag `LIB-MODELS` is  `KOKKOS_RAJA_OMP` and models dependent. The first part `LIB` is used as a label identifying the name of the main model programming library (`Kokkos`, `Raja`, `OMP` or empty for the default configuration). When using RAJA or KOKKOS, it is suffixed by a tag related to the enabled model on the host and the `CUDA_ARCH` flag of the device if a GPU-acceleration is required.   
-As an example, if KOKKOS is used and a shared-memory parallelization enabled on the host in addition to a  GPU accelaration on the device,  `LIB-MODELS=Kokkos-hOMP_d<CUDA_ARCH>_<Device>`. The `CUDA_ARCH` and `device` labels are respectively specified in the `config_platform.cmake` and `config_core.cmake` files. 
+For example, if KOKKOS is used and a shared-memory parallelization enabled on the host in addition to a  GPU accelaration on the device,  `LIB-MODELS=Kokkos-hOMP_d<CUDA_ARCH>_<Device>`. The `CUDA_ARCH` and `device` labels are respectively specified in the `config_platform.cmake` file. 
 
 # Tips and tricks
 Some tips and tricks addressing common problems that you may encountered are reported [here](./TIPS_AND_TRICKS.md).
