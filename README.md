@@ -39,7 +39,12 @@ will  create two folders `proxy-geos-hc` and `proxy-geos-hc_tpl`. The `--recursi
 
 ## Step 2: Build and Install the ProxyApp
  
- 1. Please make sure that the `proxy_tpl_dir` and `install_tpl_folder` are exported, by sourcing the script `source proxy-geos-hc_tpl/env_var.sh`. These variables are used in the`config_proxy-app.cmake`  file to pre-load the cache during the CMake build. For consistency, it includes the `config_tpls.cmake` file which has been used to pre-load the cache when building the [Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/).
+ 1. Edit and source the script `source proxy-geos-hc_tpl/env_var.sh` to export  
+   
+   - `proxy_tpl_dir` *the TPLs code directory*  
+   - `install_tpl_folder` *the name of its subfolder where the libraries are installed*  
+   - `config_tpls` *the name of the `config_<machine's name>.cmake` file which has been used to pre-load the cache when building the [Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/)*.   
+These variables are required for the file `proxy-geos-hc/configs/config_proxy-app.cmake` which is a wrapper to the `config_<machine's name>.cmake`.  
 2. Generate the Makefile and build the executable by running the following commandlines. 
 ```
 cd proxy-geos-hc  
@@ -65,12 +70,12 @@ To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid
 #### 4. KOKKOS with OPENMP and GPU
 To use KOKKOS, set `KOKKOS_RAJA_OMP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode. 
 ## Step 3: Run the executable 
-The executables are installed in `proxy-geos-hc/install/bin`folder  and can be run as follow:   
+The executables are installed in `proxy-geos-hc/install/bin`folder  and can be run as follows:   
 ```
-proxy-geos-hc/install/bin/<proxyName>_<LIB-MODELS>_<Device>.exe (with proxyName: sem or fd)
+proxy-geos-hc/install/bin/<proxyName>_<LIB-MODELS>_<DEVICE>.exe (with proxyName: sem or fd)
 ```
 The tag `LIB-MODELS` is  `KOKKOS_RAJA_OMP` and models dependent. The first part `LIB` is used as a label identifying the name of the main model programming library (`Kokkos`, `Raja`, `OMP` or empty for the default configuration). When using RAJA or KOKKOS, it is suffixed by a tag related to the enabled model on the host and the `CUDA_ARCH` flag of the device if a GPU-acceleration is required.   
-For example, if KOKKOS is used and a shared-memory parallelization enabled on the host in addition to a  GPU accelaration on the device,  `LIB-MODELS=Kokkos-hOMP_d<CUDA_ARCH>_<Device>`. The `CUDA_ARCH` and `device` labels are respectively specified in the `config_platform.cmake` file. 
+For example, if KOKKOS is used and a shared-memory parallelization enabled on the host in addition to a  GPU accelaration on the device,  `LIB-MODELS=Kokkos-hOMP_d<CUDA_ARCH>_<DEVICE>`. The `CUDA_ARCH` and `device` labels are respectively specified in the `config_platform.cmake` file. 
 
 # Tips and tricks
 Some tips and tricks addressing common problems that you may encountered are reported [here](./TIPS_AND_TRICKS.md).
