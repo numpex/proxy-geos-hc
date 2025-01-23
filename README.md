@@ -41,12 +41,8 @@ will  create two folders `proxy-geos-hc` and `proxy-geos-hc_tpl`. The `--recursi
 ## Step 1: [Build the Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl)
 
 ## Step 2: Build and Install the ProxyApp
- 
- 1. Edit the script `proxy-geos-hc_tpl/env_var.sh` with the right arguments for the environment variables:   
-   - `proxy_tpl_dir` *the path of the TPLs code directory*  
-   - `install_tpl` *the name of its subfolder where the libraries are installed*  
-   - `config_tpl` *the name of the `config_<machine's name>.cmake` file which has been used to pre-load the cache when building the [Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/)*.   
-2. Source the script `source proxy-geos-hc_tpl/env_var.sh` to export these variables. They are required for the file `proxy-geos-hc/configs/config_proxy-app.cmake` which is a wrapper to the `config_<machine's name>.cmake`.  
+
+ 1. Consider [exporting the environment variables](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/reconf?ref_type=heads#export-the-environment-variables-before-the-build). They are required for config file `proxy-geos-hc/configs/config_proxy-app.cmake`, which serves as a wrapper for the config file (`config_<machine's name>.cmake`) that has been used to pre-load the cache when building the TPLs.  
 3. Generate the Makefile and build the executable by running the following commandlines. 
 ```
 cd proxy-geos-hc  
