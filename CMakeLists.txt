@@ -8,7 +8,7 @@ project( proxyapp )
 #-----------------------------------------------------
 
 set(USE_LVARRAY_EXT OFF CACHE BOOL "Specify if we are using an externally installed library")
-set(path_LVARRAY "" CACHE PATH "")
+set(LVARRAY_DIR "" CACHE PATH "")
 
 #-----------------------------------------------------
 # Setup Flags for Building and Installation

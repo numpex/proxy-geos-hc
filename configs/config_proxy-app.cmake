@@ -5,16 +5,16 @@ if(NOT EXISTS ${_TPL_ROOT_DIR})
 endif()
 
 # Include the cache file of the third-party libraries
-set(config_tpls $ENV{config_tpls} CACHE PATH "")
-if(EXISTS ${_TPL_ROOT_DIR}/configs/${config_tpls})
-	include(${_TPL_ROOT_DIR}/configs/${config_tpls}) 
+set(config_tpl $ENV{config_tpl} CACHE PATH "")
+if(EXISTS ${_TPL_ROOT_DIR}/configs/${config_tpl})
+	include(${_TPL_ROOT_DIR}/configs/${config_tpl}) 
 else()
-	message(FATAL_ERROR "The config_tpls file ${config_tpls} is not found in the provided _TPL_ROOT_DIR " ${_TPL_ROOT_DIR})
+	message(FATAL_ERROR "The config_tpl file ${config_tpl} is not found in the provided _TPL_ROOT_DIR " ${_TPL_ROOT_DIR})
 endif()
 
 # To keep track of change: Beaware that _TPL_INSTALL_DIR was originally called GEOSX_TPL_DIR 
 # and used in some available configs provided in the LvArray submodule (src/LvArray/cmake/blt/host-configs/)
-set(_TPL_INSTALL_DIR ${_TPL_ROOT_DIR}/$ENV{install_tpl_folder} CACHE PATH "")
+set(_TPL_INSTALL_DIR ${_TPL_ROOT_DIR}/$ENV{install_tpl} CACHE PATH "")
 
 set(CAMP_DIR ${_TPL_INSTALL_DIR}/raja CACHE PATH "")
 set(RAJA_DIR ${_TPL_INSTALL_DIR}/raja CACHE PATH "")
