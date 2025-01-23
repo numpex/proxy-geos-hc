@@ -28,6 +28,9 @@ One of the key features of the SEM and FD proxy benchmarks are their adaptabilit
 # Quick Start to compile and install
 
 First consider referring to the page on the [prerequisites](./INSTALL_PREREQUISITES.md) needed.  
+
+As a convention, the angle brackets `<variable>` are used as placeholder for *variable* or *option*.     
+
 ## Start by getting the source codes 
 Using the following Git commands
 ```
@@ -39,25 +42,24 @@ will  create two folders `proxy-geos-hc` and `proxy-geos-hc_tpl`. The `--recursi
 
 ## Step 2: Build and Install the ProxyApp
  
- 1. Edit and source the script `source proxy-geos-hc_tpl/env_var.sh` to export  
-   
-   - `proxy_tpl_dir` *the TPLs code directory*  
+ 1. Edit the script `proxy-geos-hc_tpl/env_var.sh` with the right arguments for the environment variables:   
+   - `proxy_tpl_dir` *the path of the TPLs code directory*  
    - `install_tpl_folder` *the name of its subfolder where the libraries are installed*  
    - `config_tpls` *the name of the `config_<machine's name>.cmake` file which has been used to pre-load the cache when building the [Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/)*.   
-These variables are required for the file `proxy-geos-hc/configs/config_proxy-app.cmake` which is a wrapper to the `config_<machine's name>.cmake`.  
-2. Generate the Makefile and build the executable by running the following commandlines. 
+2. Source the script `source proxy-geos-hc_tpl/env_var.sh` to export these variables. They are required for the file `proxy-geos-hc/configs/config_proxy-app.cmake` which is a wrapper to the `config_<machine's name>.cmake`.  
+3. Generate the Makefile and build the executable by running the following commandlines. 
 ```
 cd proxy-geos-hc  
 cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -C configs/config_proxy-app.cmake -B build -DCMAKE_INSTALL_PREFIX=install -S .
 cd build  
 make 
 ```
-This will build and install the executable in the folder `install`.  `<KOKKOS_RAJA_OMP>` is the placeholder for the configuration option discussed below.   
+This will build and install the executable in the folder `build`. The configuration option `KOKKOS_RAJA_OMP` is discussed below.   
  
 
 ### Configuration option KOKKOS_RAJA_OMP
 
- The `KOKKOS_RAJA_OMP` is used to specify which model programming and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current proxy-app, Lvarray container is used for RAJA while  KOKKOS provides its own container. By default, without any specification for `KOKKOS_RAJA_OMP`, std::vector container is used.  
+ The `KOKKOS_RAJA_OMP` is used to specify which model programming and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current ProxyApp, Lvarray container is used for RAJA while  KOKKOS provides its own container. By default, without any specification for `KOKKOS_RAJA_OMP`, std::vector container is used.  
 #### 1. DEFAULT option
 The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequential mode with std::vector implementation. 
 
@@ -65,17 +67,17 @@ The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequenti
 In the case of shared-memory parallelization std::vector container is used, and  `CUDA_KOKKOS_RAJA_OMP` is set as `-DUSE_OMP=ON`.
 
 #### 3. RAJA  with OPENMP and GPU
-To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP (on the host) and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_models.cmake`.  
+To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_<machine's name>.cmake` - See [What programming models for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl#2-what-programming-models-for-the-tpls).  
 
 #### 4. KOKKOS with OPENMP and GPU
 To use KOKKOS, set `KOKKOS_RAJA_OMP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode. 
 ## Step 3: Run the executable 
-The executables are installed in `proxy-geos-hc/install/bin`folder  and can be run as follows:   
+The executables are installed in `proxy-geos-hc/install/bin`folder and can be run as follows:   
 ```
 proxy-geos-hc/install/bin/<proxyName>_<LIB-MODELS>_<DEVICE>.exe (with proxyName: sem or fd)
 ```
-The tag `LIB-MODELS` is  `KOKKOS_RAJA_OMP` and models dependent. The first part `LIB` is used as a label identifying the name of the main model programming library (`Kokkos`, `Raja`, `OMP` or empty for the default configuration). When using RAJA or KOKKOS, it is suffixed by a tag related to the enabled model on the host and the `CUDA_ARCH` flag of the device if a GPU-acceleration is required.   
-For example, if KOKKOS is used and a shared-memory parallelization enabled on the host in addition to a  GPU accelaration on the device,  `LIB-MODELS=Kokkos-hOMP_d<CUDA_ARCH>_<DEVICE>`. The `CUDA_ARCH` and `device` labels are respectively specified in the `config_platform.cmake` file. 
+The tag `LIB-MODELS` is `KOKKOS_RAJA_OMP` and models dependent. The first part `LIB` is used as a label identifying the name of the main model programming library (`Kokkos`, `Raja`, `OMP` or empty for the default configuration). When using RAJA or KOKKOS, it is suffixed by a tag related to the enabled model on the host and the `CUDA_ARCH` flag of the device if a GPU-acceleration is required.   
+For example, if KOKKOS is used and a shared-memory parallelization enabled in addition to a GPU accelaration on the device, `LIB-MODELS=Kokkos-hOMP_d<CUDA_ARCH>_<DEVICE>`. The `CUDA_ARCH` and `DEVICE` labels of the GPU device are respectively specified in the `config_<machine's name>.cmake` file. 
 
 # Tips and tricks
 Some tips and tricks addressing common problems that you may encountered are reported [here](./TIPS_AND_TRICKS.md).
