@@ -4,7 +4,7 @@
 
 if(NOT DEFINED DEVICE)
   set (SEM_EXECUTABLE "sem_${SOLVER}.exe" CACHE PATH "" FORCE)
-else()
+else(ENABLE_HIP OR ENABLE_CUDA)
   set (SEM_EXECUTABLE "sem_${SOLVER}_${DEVICE}.exe" CACHE PATH "" FORCE)
 endif()
 

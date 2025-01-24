@@ -4,7 +4,7 @@
 
 if(NOT DEFINED DEVICE)
   set (FD_EXECUTABLE "fd_${SOLVER}.exe" CACHE PATH "" FORCE)
-else()
+else(ENABLE_HIP OR ENABLE_CUDA)
   set (FD_EXECUTABLE "fd_${SOLVER}_${DEVICE}.exe" CACHE PATH "" FORCE)
 endif()
 

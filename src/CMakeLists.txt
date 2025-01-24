@@ -1,4 +1,4 @@
-#-------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
 # The Solver Implementation is with Programming Models:
 #
 #  Users can choose from "OMP", "RAJA", and "KOKKOS" as following:
@@ -6,24 +6,14 @@
 #  (0) The default is using sequential mode
 #  (1) If USE_OMP is ON, it is using OpenMP+Vector on CPU.
 #  (2) If USE_RAJA is ON, it is using RAJA+LVARRAY+CUDA.
-#  (3) If USE_KOKKOS is ON, it is using KOKKOS+CUDA.
+#  (3) If USE_KOKKOS is ON, it is using KOKKOS with or without CUDA and OpenMP.
 #
-#  And the users can chose data containers as following:
 #
-#  env variables to be defined before build
-#  the variables above are defined for Pangea3
-#  _TPL must be first compiled and installed
+#  Edit the env_var.sh file in the TPLs folder to set the Env variables to be defined before build of both TPL and the ProxyApp 
+#  _TPL must be first compiled and installed from the TPLs repo
+#  The exported Env variables are required to set the _TPL paths in the config file configs/config_proxy-app.cmake 
 #
-#  example:
-#  export MODULEPATH=/data_local/appli_local/MTS/GEOSX/modulefiles/:$MODULEPATH
-#  module load cmake/3.21.4 gcc/8.4.1 cuda/11.0.3 ompi/4.1.2 openblas/0.3.18 python4geosx/3.8.5-gcc-8.4.1-ompi-4.1.2
-#  export _TPL_ROOT_DIR=/users/j0024947/appli_src/geosx/codes/proxyApp/tpl4ProxyApp/installTPL
-#  export RAJA_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/raja
-#  export CAMP_DIR=${SEM_TPL_ROOT_DIR}/raja/lib/cmake/camp
-#  export CHAI_DIR=${SEM_TPL_ROOT_DIR}/chai/share/chai/cmake/
-#  export UMPIRE_DIR=${SEM_TPL_ROOT_DIR}/chai/lib/cmake/umpire/
-#
-#-------------------------------------------------------------------
+#-----------------------------------------------------------------------------------------------------------------------------
 
 # the solver is using sequential mode by default
 set (SOLVER "SEQUENTIAL" CACHE PATH "" FORCE)
@@ -177,7 +167,7 @@ endif()
 if(USE_LVARRAY_EXT)
 	# Find package
 	find_package(lvarray REQUIRED
-	   	     PATHS ${path_LVARRAY})
+		     PATHS ${LVARRAY_DIR})
 else()	
    add_subdirectory( LvArray )
    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/LvArray/src)
@@ -249,23 +239,17 @@ if(USE_KOKKOS OR USE_RAJA)
 	## What programming on the host
 	
 	if(ENABLE_OPENMP)
-		set(flag_hmodel "hOMP")
+		set(flag_hmodel "OMP")
 	elseif(ENABLE_MPI)
-		set(flag_hmodel "hMPI")
-	else()
-		set(flag_hmodel "hSERIAL")
+		set(flag_hmodel "MPI")
+		#else()
+		#set(flag_hmodel "SERIAL")
 	endif()
 	
-	## What programming on the device
-	set(flag_dmodel "")
-	if(ENABLE_CUDA OR ENABLE_HIP)
-		set(flag_dmodel "_d${CUDA_ARCH}")
-	endif()
-	set(flag_models "${flag_hmodel}${flag_dmodel}" CACHE STRING "" FORCE)
-	set(SOLVER "${SOLVER}-${flag_models}" CACHE PATH "" FORCE)
+	set(SOLVER "${SOLVER}_${flag_hmodel}" CACHE PATH "" FORCE)
 endif()
 # The solver's flag
-message(STATUS "The flag related to the enabled models is: ${flag_models} - the solver is: " ${SOLVER} "flag_dmodel = " ${flag_dmodel} " flag_hmodel " ${flag_hmodel})
+message(STATUS "The flag related to the enabled model on the host is: ${flag_hmodel} - The solver is: " ${SOLVER})
 
 message(STATUS "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 
