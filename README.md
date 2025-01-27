@@ -1,12 +1,12 @@
-# Welcome to the  ProxyApp project!
+# Welcome to the  ProxyApp Project!
 
-The ProxyApp project  collects a suite of simple codes representing real applications.
+The proxyApp project  collects a suite of simple codes representing real applications.
 It is intended to be a standard tool for evaluating and comparing the performance of different high-performance computing (HPC) systems, particularly those used for scientific simulations.
 
 
 # Actual applications 
 
-Current implementation of the proxyApp includes SEM ( Spectral finite Element Methods) and FD ( Finite Differences methods) to solve 2nd order acoustic wave equation in 2D and 3D spaces:  
+Current implementation of the proxyApp includes SEM (Spectral finite Element Methods) and FD (Finite Differences methods) to solve 2nd order acoustic wave equation in 2D and 3D spaces:  
 * The SEM proxy application is a benchmark designed to simulate wave propagation using the spectral element method (SEM), which is a Galerkin-based finite element method for solving partial differential equations.  
 * The FD proxy applicaton is a benchmark designed to simulate wave propagation using finite differences stencils operators for solving partial differential equations.  
 
@@ -14,14 +14,14 @@ One of the key features of the SEM and FD proxy benchmarks are their adaptabilit
 
 # What Programming Models and data containers ?
 
-- The programming models available in the current ProxyApp implementations include:  
+- The programming models available in the current proxyApp implementations include:  
     * OpenMP [https://www.openmp.org/] to parallelizing for loops  
     * RAJA [https://raja.readthedocs.io/en/develop/]  
     * KOKKOS [https://kokkos.github.io/kokkos-core-wiki/]  
     
-    RAJA, KOKKOS and other third-party libraries must first be compiled and installed  from the [Third-Party Libraries repository](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl) - described at [**step 1**, below](#quick-start-to-compile-and-install).  
+    RAJA, KOKKOS and other Third-Party Libraries (TPLs) must first be compiled and installed  from the [third-party libraries repository](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl) - [**step 1**, below](#quick-start-to-compile-and-install).  
 
-- The data containers availbable in the current ProxyApp implementations include:   
+- The data containers availbable in the current proxyApp implementations include:   
     * LvArray [https://lvarray.readthedocs.io/en/latest/]  
     * C++ std::vector  
 
@@ -42,7 +42,7 @@ will  create two folders `proxy-geos-hc` and `proxy-geos-hc_tpl`. The `--recursi
 
 ## Step 2: Build and Install the ProxyApp
 
- 1. Consider [exporting the environment variables defined at Step 1](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/reconf?ref_type=heads#export-the-environment-variables-before-the-build). They are required for the config file `proxy-geos-hc/configs/config_proxy-app.cmake`, which serves as a wrapper for the config file (`config_<machine's name>.cmake`) that has been used to pre-load the cache when building the TPLs.  
+ 1. Consider [exporting the environment variables defined at Step 1](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/reconf?ref_type=heads#step-2-some-environment-variables-for-the-build). They are required for the config file `proxy-geos-hc/configs/config_proxy-app.cmake`, which serves as a wrapper for the config file (`config_<machine's name>.cmake`) that has been used to pre-load the cache when building the TPLs.  
 3. Generate the Makefile and build the executable by running the following command lines 
 ```
 cd proxy-geos-hc  
@@ -55,7 +55,7 @@ This will build and install the executable in the folder `build`. The configurat
 
 ### Configuration option KOKKOS_RAJA_OMP
 
- The `KOKKOS_RAJA_OMP` is used to specify which model programming and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current ProxyApp, Lvarray container is used for RAJA while  KOKKOS provides its own container. In cases where neither RAJA nor KOKKOS is used, std::vector container is used.  
+ The `KOKKOS_RAJA_OMP` is used to specify which programming model and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current proxyApp, Lvarray container is used for RAJA while  KOKKOS provides its own container. In cases where neither RAJA nor KOKKOS is used, std::vector container is used.  
 #### 1. DEFAULT option
 The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequential mode. [**Not supported at the moment**](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/8).  
 
@@ -63,7 +63,7 @@ The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequenti
 To use OMP, set `CUDA_KOKKOS_RAJA_OMP` as `-DUSE_OMP=ON`, for a shared-memory parallelization mode. [**Not  supported at the moment**](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/8).  
 
 #### 3. RAJA  with OPENMP and GPU
-To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_<machine's name>.cmake` - See [What programming models for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl#2-what-programming-models-for-the-tpls).  
+To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_<machine's name>.cmake` - See [What Programming Models for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/reconf?ref_type=heads#step-3-build-the-third-party-libraries).  
 
 #### 4. KOKKOS with OPENMP and GPU
 To use KOKKOS, set `KOKKOS_RAJA_OMP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode. 
