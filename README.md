@@ -42,7 +42,7 @@ will  create two folders `proxy-geos-hc` and `proxy-geos-hc_tpl`. The `--recursi
 
 ## Step 2: Build and Install the ProxyApp
 
- 1. Consider [exporting the environment variables defined at Step 1](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/reconf?ref_type=heads#step-2-some-environment-variables-for-the-build). They are required for the config file `proxy-geos-hc/configs/config_proxy-app.cmake`, which serves as a wrapper for the config file (`config_<machine's name>.cmake`) that has been used to pre-load the cache when building the TPLs.  
+ 1. Consider [exporting the environment variables defined at Step 1](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl#step-2-some-environment-variables-for-the-build). They are required for the config file `proxy-geos-hc/configs/config_proxy-app.cmake`, which serves as a wrapper for the config file (`config_<machine's name>.cmake`) that has been used to pre-load the cache when building the TPLs.  
 3. Generate the Makefile and build the executable by running the following command lines 
 ```
 cd proxy-geos-hc  
@@ -63,7 +63,7 @@ The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequenti
 To use OMP, set `CUDA_KOKKOS_RAJA_OMP` as `-DUSE_OMP=ON`, for a shared-memory parallelization mode. [**Not  supported at the moment**](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/8).  
 
 #### 3. RAJA  with OPENMP and GPU
-To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_<machine's name>.cmake` - See [What Programming Models for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/reconf?ref_type=heads#step-3-build-the-third-party-libraries).  
+To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_<machine's name>.cmake` - See [What Programming Models for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl#step-11-programming-models-enabled-for-the-tpls).  
 
 #### 4. KOKKOS with OPENMP and GPU
 To use KOKKOS, set `KOKKOS_RAJA_OMP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode. 
