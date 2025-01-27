@@ -48,14 +48,15 @@ will  create two folders `proxy-geos-hc` and `proxy-geos-hc_tpl`. The `--recursi
 cd proxy-geos-hc  
 cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -C configs/config_proxy-app.cmake -B build -DCMAKE_INSTALL_PREFIX=install -S .
 cd build  
-make 
+make && make install
 ```
-This will build and install the executable in the folder `build`. The configuration option `KOKKOS_RAJA_OMP` is discussed below.   
+This will build and install the executable in the folder `build`. The configuration option `KOKKOS_RAJA_OMP` is discussed below.    
  
 
 ### Configuration option KOKKOS_RAJA_OMP
 
  The `KOKKOS_RAJA_OMP` is used to specify which programming model and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current proxyApp, Lvarray container is used for RAJA while  KOKKOS provides its own container. In cases where neither RAJA nor KOKKOS is used, std::vector container is used.  
+ Some ready-to-use command lines for each of these configurations are provided [here - HowToInstall](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/blob/develop/howToInstall.md?ref_type=heads).   
 #### 1. DEFAULT option
 The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequential mode. [**Not supported at the moment**](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/8).  
 
@@ -66,7 +67,7 @@ To use OMP, set `CUDA_KOKKOS_RAJA_OMP` as `-DUSE_OMP=ON`, for a shared-memory pa
 To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_<machine's name>.cmake` - See [What Programming Models for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl#step-11-programming-models-enabled-for-the-tpls).  
 
 #### 4. KOKKOS with OPENMP and GPU
-To use KOKKOS, set `KOKKOS_RAJA_OMP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode. 
+To use KOKKOS, set `KOKKOS_RAJA_OMP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode.   
 ## Step 3: Run the executable 
 The executables are installed in the `proxy-geos-hc/build/bin`folder. The corresponding names have a specific prototype, which accounts of several inputs, and they can be run as follows:   
 ```
