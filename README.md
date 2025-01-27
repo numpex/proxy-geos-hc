@@ -69,9 +69,9 @@ To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid
 #### 4. KOKKOS with OPENMP and GPU
 To use KOKKOS, set `KOKKOS_RAJA_OMP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode.   
 ## Step 3: Run the executable 
-The executables are installed in the `proxy-geos-hc/build/bin`folder. The corresponding names have a specific prototype, which accounts of several inputs, and they can be run as follows:   
+The executables are installed in the `proxy-geos-hc/install/bin`folder. The corresponding names have a specific prototype, which accounts of several inputs, and they can be run as follows:   
 ```
-proxy-geos-hc/build/bin/<proxyName>_<LIB>_<HostModel>_<DEVICE>.exe 
+proxy-geos-hc/install/bin/<proxyName>_<LIB>_<HostModel>_<DEVICE>.exe 
 ```
 1.  `proxyName: sem or fd` since the executables are installed for both FD and SEM solvers  
 2. `LIB` is used as a label identifying the name of the abstraction enabling library. It is only relevant when KOKKOS or RAJA is used.  
