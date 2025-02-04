@@ -69,7 +69,7 @@ if(USE_OMP)
   set (USE_LVARRAY OFF CACHE BOOL "" FORCE)
   set (USE_VECTOR ON CACHE BOOL "" FORCE)
 
-  #set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+  set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
   message ("-- USE_OMP flag is set: extraComponentsLinkList= ${extraComponentsLinkList} ")
 else()
     message ("-- USE_OMP flag is set to be false and OMP is not enabled")
@@ -144,7 +144,7 @@ if ( USE_RAJA)
      message(FATAL_ERROR "ProxyApp requires CHAI, set CHAI_DIR to the CHAI installation directory.")
    endif()
 
-   #set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+   set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
    set (dependencyList lvarray RAJA chai)
    
    ################################
@@ -197,11 +197,6 @@ elseif (DEFINED KOKKOS_DIR)
   message("-- Found the KOKKOS library in ${KOKKOS_DIR}")
   set (SOLVER "Kokkos" CACHE PATH "" FORCE)
 
-  # KOKOS uses OMP
-  #find_package(OpenMP) is not required regarding the previous set up of BLT
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
   message(STATUS "USE KOKKOS in KOKKOS_DIR = ${KOKKOS_DIR}")
   
   # setup KOKOS
@@ -218,9 +213,9 @@ elseif (DEFINED KOKKOS_DIR)
   #get_target_property(KOKKOSCORE_LINK_OPTION Kokkos::kokkoscore INTERFACE_LINK_OPTIONS)
   #message(STATUS "KOKKOSCORE_LINK_OPTION: ${KOKKOSCORE_LINK_OPTION}")
 
-  set (extraComponentsLinkList ${extraComponentsLinkList} Kokkos::kokkos)
+  set (dependencyList ${dependencyList} Kokkos::kokkos)
 
-  #set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+  set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
   if( ENABLE_HIP )
     set(Kokkos_ENABLE_HIP ON CACHE BOOL "" FORCE)
     set(Kokkos_ENABLE_CUDA OFF CACHE BOOL "" FORCE)
@@ -233,7 +228,32 @@ else ()
   set (USE_KOKKOS OFF CACHE BOOL "")
   message("-- KOKKOS_DIR is not the correct path and is not enabled / KOKKOS_DIR = " ${KOKKOS_DIR})
 endif()
-
+  # Using OMP
+if(((USE_KOKKOS OR USE_RAJA) AND ENABLE_OPENMP) OR USE_OMP)
+  message(STATUS "-- USE_OMP: enforcing the flags for OpenMP")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" CACHE STRING "" FORCE)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" CACHE STRING "" FORCE)
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}" CACHE STRING "" FORCE)
+  
+  
+  set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${OpenMP_C_FLAGS}" CACHE STRING "" FORCE)
+  set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OpenMP_CXX_FLAGS}" CACHE STRING "" FORCE)
+  
+  set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${OpenMP_C_FLAGS}" CACHE STRING "" FORCE)
+  set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${OpenMP_CXX_FLAGS}" CACHE STRING "" FORCE)
+  
+  set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${OpenMP_C_FLAGS}" CACHE STRING "" FORCE)
+  set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${OpenMP_CXX_FLAGS}" CACHE STRING "" FORCE)
+  
+  set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} ${OpenMP_C_FLAGS}" CACHE STRING "" FORCE)
+  set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} ${OpenMP_CXX_FLAGS}" CACHE STRING "" FORCE)
+  
+  set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
+  set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
+  set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
+  set (CMAKE_Fortran_FLAGS_RELWITHDEBINFO "${CMAKE_Fortran_FLAGS_RELWITHDEBINFO} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
+  set (CMAKE_Fortran_FLAGS_MINSIZEREL "${CMAKE_Fortran_FLAGS_MINSIZEREL} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
+endif()
 if(USE_KOKKOS OR USE_RAJA)
 	# SettingFlag associated to the config.. used for the name of the executable
 	## What programming on the host
