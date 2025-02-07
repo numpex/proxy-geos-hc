@@ -214,8 +214,9 @@ elseif (DEFINED KOKKOS_DIR)
   #message(STATUS "KOKKOSCORE_LINK_OPTION: ${KOKKOSCORE_LINK_OPTION}")
 
   set (dependencyList ${dependencyList} Kokkos::kokkos)
-
-  set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+  if(ENABLE_OPENMP)
+    set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+  endif()
   if( ENABLE_HIP )
     set(Kokkos_ENABLE_HIP ON CACHE BOOL "" FORCE)
     set(Kokkos_ENABLE_CUDA OFF CACHE BOOL "" FORCE)
@@ -254,7 +255,7 @@ if(((USE_KOKKOS OR USE_RAJA) AND ENABLE_OPENMP) OR USE_OMP)
   set (CMAKE_Fortran_FLAGS_RELWITHDEBINFO "${CMAKE_Fortran_FLAGS_RELWITHDEBINFO} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_Fortran_FLAGS_MINSIZEREL "${CMAKE_Fortran_FLAGS_MINSIZEREL} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
 endif()
-if(USE_KOKKOS OR USE_RAJA)
+if((USE_KOKKOS OR USE_RAJA) AND ENABLE_OPENMP)
 	# SettingFlag associated to the config.. used for the name of the executable
 	## What programming on the host
 	
