@@ -281,7 +281,11 @@ else()
 
   set (dependencyList ${dependencyList} Kokkos::kokkos)
   if(ENABLE_OPENMP)
+<<<<<<< HEAD
 	  set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+=======
+    set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
+>>>>>>> 0719d475efdd0f8bd1016b90e26fb027f626d50b
   endif()
   if( ENABLE_HIP )
     set(Kokkos_ENABLE_HIP ON CACHE BOOL "" FORCE)
