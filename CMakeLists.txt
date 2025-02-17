@@ -13,7 +13,7 @@ set(LVARRAY_DIR "" CACHE PATH "")
 #-----------------------------------------------------
 # Setup Flags for Building and Installation
 #-----------------------------------------------------
-
+set (GUIX_INSTALLED_TPL OFF CACHE BOOL "Specify if we are using some TPLs installed with GUIX")
 set (CMAKE_VERBOSE_MAKEFILE ON )
 
 #-----------------------------------------------------
