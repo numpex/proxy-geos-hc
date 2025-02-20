@@ -68,6 +68,9 @@ endif()
 
 include(${BLT_SOURCE_DIR}/SetupBLT.cmake )
 
+set(dependencyList "")
+set(extraComponentsLinkList "")
+
 if(DEFINED COPY_ENABLE_OPENMP)
 	set(ENABLE_OPENMP ${COPY_ENABLE_OPENMP} CACHE BOOL "Set back ENABLE_OPENMP to its original OFF value" FORCE)
 endif()
@@ -123,28 +126,41 @@ if ( USE_RAJA)
    message(STATUS "BUILDING SOLVER including RAJA with the following setting: RAJA_ENABLE_CUDA = "${RAJA_ENABLE_CUDA} " and RAJA_ENABLE_OPENMP = " ${RAJA_ENABLE_OPENMP})
    if(NOT (${ENABLE_OPENMP} OR ${ENABLE_CUDA}))
            message(STATUS "ENABLE_OPENMP is set to " ${ENABLE_OPENMP} " ENABLE_CUDA " ${ENABLE_CUDA})
-	   message(STATUS "The TPLs have been built without enabling one of the OPENMP or CUDA feature required for USE_RAJA option: please rebuild the RAJA library.")
+	   message(STATUS "The TPLs have been built without enabling one of the OPENMP or CUDA feature required for USE_RAJA option: please rebuild the RAJA library ?")
    endif()
-    
+   
+   #if(DEFINED CAMP_DIR)
+   #    find_package(camp REQUIRED
+   #	       PATHS ${CAMP_DIR}
+   #                NO_DEFAULT_PATH)
+   #else()
+   #   # CAMP is required when using RAJA. Consider using find_package when RAJA_DIR not defined, that is GUIX_INSTALLED_TPLS=ON 
+   #   message(STATUS "ProxyApp requires CAMP: CAMP_DIR not set.") 
+   #   find_package(camp REQUIRED)
+   #endif()
+
    if(DEFINED RAJA_DIR)
-       message(STATUS "USE RAJA in RAJA_DIR = ${RAJA_DIR}")
        find_package(RAJA REQUIRED
                     PATHS ${RAJA_DIR}
                     NO_DEFAULT_PATH)
+       find_package(camp REQUIRED
+	       PATHS ${CAMP_DIR}
+	       	     ${camp_DIR}
+                    NO_DEFAULT_PATH)
    else()
-       message(STATUS "ProxyApp requires RAJA: RAJA_DIR not set.")
-       
-       # CAMP is required when using RAJA. Consider using find_package when RAJA_DIR not defined, that is GUIX_INSTALLED_TPLS=ON
+       message(STATUS "ProxyApp requires RAJA: RAJA_DIR not set.") 
        find_package(camp REQUIRED)
-       get_target_property(CAMP_INCLUDE_DIRS camp INTERFACE_INCLUDE_DIRECTORIES)
-       set_target_properties(camp PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CAMP_INCLUDE_DIRS}")
-       message("-- CAMP_INCLUDE_DIRS: ${CAMP_INCLUDE_DIRS}")
-       set (dependencyList ${dependencyList} camp )
        find_package(RAJA REQUIRED)
    endif()
+   get_target_property(CAMP_INCLUDE_DIRS camp INTERFACE_INCLUDE_DIRECTORIES)
+   set_target_properties(camp PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CAMP_INCLUDE_DIRS}")
+   message("-- camp_DIR: ${camp_DIR} or ${CAMP_DIR}")
+   message("-- CAMP_INCLUDE_DIRS: ${CAMP_INCLUDE_DIRS}")
+   set (dependencyList ${dependencyList} camp )
    
    get_target_property(RAJA_INCLUDE_DIRS RAJA INTERFACE_INCLUDE_DIRECTORIES)
    set_target_properties(RAJA PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${RAJA_INCLUDE_DIRS}")
+   message(STATUS "USE RAJA in RAJA_DIR = ${RAJA_DIR}")      
    message("-- RAJA_INCLUDE_DIRS: ${RAJA_INCLUDE_DIRS}")
 
    if( ENABLE_HIP )
@@ -157,10 +173,9 @@ if ( USE_RAJA)
    # Umpire
    ################################
    # Umpire is not mandatory for RAJA
+   #if(FALSE)
    if(ENABLE_UMPIRE OR ENABLE_CHAI)
-   #if(ENABLE_UMPIRE)
 	   if(DEFINED UMPIRE_DIR)
-		   message(STATUS " USE RAJA: RAJA will be compiled with UMPIRE in UMPIRE_DIR = ${UMPIRE_DIR}")
 		   find_package(umpire REQUIRED
 			   PATHS ${UMPIRE_DIR}
 			   NO_DEFAULT_PATH)
@@ -168,11 +183,14 @@ if ( USE_RAJA)
 		   message(STATUS "ProxyApp requires Umpire: UMPIRE_DIR not set for finding package.")
 		   find_package(umpire REQUIRED)
 	   endif()
+	   
 	   get_target_property(UMPIRE_INCLUDE_DIRS umpire INTERFACE_INCLUDE_DIRECTORIES)
    	   set_target_properties(umpire PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${UMPIRE_INCLUDE_DIRS}")
-	   message("-- UMPIRE_INCLUDE_DIRS: ${UMPIRE_INCLUDE_DIRS}")
+	   message(STATUS " USE RAJA: RAJA will be compiled with UMPIRE in UMPIRE_DIR = ${UMPIRE_DIR}")
+	   message("-- UMPIRE_INCLUDE_DIRS: ${UMPIRE_INCLUDE_DIRS} / umpire_DIR "${umpire_DIR})
 	   set (extraComponentsLinkList ${extraComponentsLinkList} umpire )
    endif()
+   #endif()
    
    ################################
    # CHAI
@@ -181,7 +199,6 @@ if ( USE_RAJA)
    if(ENABLE_CHAI)
 	   set(ENABLE_UMPIRE ON CACHE BOOL "" FORCE)
 	   if(DEFINED CHAI_DIR)
-		   message(STATUS " ENABLE_CHAI in CHAI_DIR = ${CHAI_DIR}")
 		   find_package(chai REQUIRED 
 			   PATHS ${CHAI_DIR} 
 			   NO_DEFAULT_PATH)
@@ -191,7 +208,8 @@ if ( USE_RAJA)
 	   endif()
 	   get_target_property(CHAI_INCLUDE_DIRS chai INTERFACE_INCLUDE_DIRECTORIES)
 	   set_target_properties(chai PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CHAI_INCLUDE_DIRS}")
-	   message("-- CHAI_INCLUDE_DIRS: ${CHAI_INCLUDE_DIRS}")
+	   message(STATUS " ENABLE_CHAI in CHAI_DIR = ${CHAI_DIR}")
+	   message("-- CHAI_INCLUDE_DIRS: ${CHAI_INCLUDE_DIRS} / chai_DIR ${chai_DIR}")
 	   set (extraComponentsLinkList ${extraComponentsLinkList} chai )
    endif()
    if(ENABLE_OPENMP)
@@ -202,17 +220,17 @@ if ( USE_RAJA)
    # CALIPER
    ################################
 if(ENABLE_CALIPER)
+	    #find_package(adiak REQUIRED)
     if(EXISTS ${CALIPER_DIR})
-      message(STATUS "Using caliper from ${CALIPER_DIR}")
       find_package(caliper REQUIRED
                  PATHS ${CALIPER_DIR})
     else()
-	    #find_package(adiak REQUIRED)
       message(STATUS "CALIPER_DIR not set for finding package")
       find_package(caliper REQUIRED)
     endif()
     get_target_property(CALIPER_INCLUDE_DIRS caliper INTERFACE_INCLUDE_DIRECTORIES)
     set_target_properties(caliper PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CALIPER_INCLUDE_DIRS}")
+    message(STATUS "Using caliper from ${CALIPER_DIR}")
     set (extraComponentsLinkList ${extraComponentsLinkList} caliper )
 else()
     message(STATUS "Not using caliper.")
@@ -220,8 +238,6 @@ endif()
 
 if(USE_LVARRAY_EXT)
 	# Find package
-	#find_package(lvarray REQUIRED
-	#	     PATHS ${LVARRAY_DIR})
 	if(NOT EXISTS ${LVARRAY_DIR})
 		message(FATAL_ERROR "LVARRAY_DIR must be set to a defined directory to find the lvarray lib. LVARRAY_DIR is now set to "${LVARRAY_DIR})
 	endif()
@@ -319,6 +335,7 @@ if(ENABLE_OPENMP OR USE_OMP)
   set (CMAKE_Fortran_FLAGS_RELWITHDEBINFO "${CMAKE_Fortran_FLAGS_RELWITHDEBINFO} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_Fortran_FLAGS_MINSIZEREL "${CMAKE_Fortran_FLAGS_MINSIZEREL} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
 endif()
+message(STATUS "-- The dependencies for building the proxy-app are: " ${dependencyList} " extraComponentsLinkLists = "${extraComponentsLinkList})
 if((USE_KOKKOS OR USE_RAJA) AND (ENABLE_OPENMP OR ENABLE_MPI))
 	# SettingFlag associated to the config.. used for the name of the executable
 	## What programming on the host
