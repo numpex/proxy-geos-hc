@@ -75,7 +75,7 @@ set(ENABLE_OPENMPTARGET OFF CACHE BOOL "" FORCE)
 ###########################################################
 
 # The directory with the config. files
-set(CONFIG_DIR $ENV{proxy_tpl_dir}/configs)
+set(CONFIG_DIR $ENV{proxy_config_root}/configs)
 if(EXISTS ${CONFIG_DIR}/config_core_guix.cmake)
           include(${CONFIG_DIR}/config_core_guix.cmake)
 else()
