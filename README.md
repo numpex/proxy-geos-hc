@@ -46,7 +46,7 @@ will  create two folders `proxy-geos-hc` and `proxy-geos-hc_tpl`. The `--recursi
 3. Generate the Makefile and build the executable by running the following command lines 
 ```
 cd proxy-geos-hc  
-cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -C configs/config_proxy-app.cmake -B build -DCMAKE_INSTALL_PREFIX=install -S .
+cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -DGUIX_INSTALLED_TPL=<BOOL> -C configs/config_proxy-app.cmake -B build -DCMAKE_INSTALL_PREFIX=install -S .
 cd build  
 make && make install
 ```
