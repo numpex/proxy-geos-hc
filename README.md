@@ -49,8 +49,8 @@ Some environment variables are required to configure the CMake when building the
 
 #### Environment variables in env_var.sh for the CMake build
 
-| Build Option       |    proxy_config_root      | config_proxy | Sourcing required for| other environment variables|
-|: ---------- :|: ------------------- :| :-----------:| :------------------- :| :------------------- :|
+| Build Option       |    proxy_config_root      | config_proxy | Sourcing required for| other environment variables|  
+|: ---------- :|: ------------------- :| :-----------:| :------------------- :| :------------------- :|  
 | From source   |  `proxy-geos-hc_tpl` | `config_<machine's name>.cmake` |TPLs and ProxyApp|`install_tpl` and `build_tpl` |   
 | Using Guix   | `proxy-geos-hc` |`config_<machine's name>_guix.cmake` |ProxyApp only|  |   
    
