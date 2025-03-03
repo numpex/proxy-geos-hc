@@ -49,15 +49,16 @@ Some environment variables are required to configure the CMake when building the
 
 #### Environment variables in env_var.sh for the CMake build
 
-| Build Option       |    proxy_config_root      | config_proxy | Sourcing required for| other environment variables|  
-|: ---------- :|: ------------------- :| :-----------:| :------------------- :| :------------------- :|  
-| From source   |  `proxy-geos-hc_tpl` | `config_<machine's name>.cmake` |TPLs and ProxyApp|`install_tpl` and `build_tpl` |   
-| Using Guix   | `proxy-geos-hc` |`config_<machine's name>_guix.cmake` |ProxyApp only|  |   
+| Build Option       |    proxy_config_root     | config_proxy | Sourcing required for| other environment variables|  
+|----------|-------------------|-----------|-------------------|-------------------|  
+| From source   |  `proxy-geos-hc_tpl` | `config_<machine's name>.cmake` | TPLs and ProxyApp |  `install_tpl` and `build_tpl` |   
+| Using Guix   | `proxy-geos-hc` | `config_<machine's name>_guix.cmake` | ProxyApp only |  |   
+   
    
  1. Edit the script `proxy-geos-hc/env_var.sh` with the right arguments for the environment variables, as discribed in the [table](####environment-variables-in-env_var.sh-for-the-cMake-build):   
    - `proxy_config_root` *the root path of the `configs` folder*  
    - `config_proxy` *the name of the config file to be used to pre-load the cache when building the ProxyApp, and [the TPLs when building from source](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/)*.  
-   - `build_tpl` and `install_tpl` *the name of its binary and install directories where the libraries are to be built and installed*, in the case where the TPLs are built from source   
+   - `build_tpl` and `install_tpl` *the names of its binary and install directories where the libraries are to be built and installed*, in the case where the TPLs are built from source   
   2. Source the script `source proxy-geos-hc/env_var.sh` to export these variables.  
 
 The next step involves setting up the configuration file to be used during the cmake build of the proxyApp. They are also required when building [ the TPLs from source](###from-source). 
