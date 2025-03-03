@@ -28,4 +28,4 @@ Edit the Part 2 of your `config_<machine's name>.cmake` to set the platform-spec
 - The variable `CUDA_ARCH` or `COMP_ARCH` is used to specify the architecture of the device. The related variables must be set in respect to the GPU programming model enabled and specified at [Part 1](##1.-programming models enabled for the TPLs). We refer to the following webpage for a mapping between various [GPU microarchitectures and their corresponding flags or compute capabilities](https://kokkos.org/kokkos-core-wiki/keywords.html#gpu-architectures)  
 - Some compilation flags for the targetted architecture (`mtune` and `mcpu`) are set through the variable `CPU_TUNE_FLAG`.   
 
-The host machine dependent variables and paths must be set and are only required when installing from source. This is done within the *conditional if* scopes on `NOT GUIX_INSTALLED_TPL`. 
+The host machine dependent variables and paths must be set and are only required when installing from source. This is done within the *conditional if* scopes on `BUILD_FROM_TPLMIRROR`. 

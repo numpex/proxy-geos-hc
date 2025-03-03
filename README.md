@@ -76,11 +76,11 @@ It allows to build the ProxyApp within a containerized build environment with al
 3. Generate the Makefile and build the executable by running the following command lines 
 ```
 cd proxy-geos-hc  
-cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -DGUIX_INSTALLED_TPL=<BOOL> -C configs/config_proxy-app.cmake -B ./build -DCMAKE_INSTALL_PREFIX=./install -S .
+cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -DBUILD_FROM_TPLMIRROR=<BOOL> -C configs/config_proxy-app.cmake -B ./build -DCMAKE_INSTALL_PREFIX=./install -S .
 cd build  
 make && make install
 ```
-This will build and install the executables in the folder `build`. The boolean `BOOL`, for the argument `GUIX_INSTALLED_TPL`, is used to specify whether the TPLs have been installed from source or using a Package Manager. The configuration option `KOKKOS_RAJA_OMP` is discussed below.    
+This will build and install the executables in the folder `build`. The boolean `BOOL`, for the argument `BUILD_FROM_TPLMIRROR`, is used to specify whether the TPLs have been installed from source or using a Package Manager. The configuration option `KOKKOS_RAJA_OMP` is discussed below.    
 
 ### Configuration option KOKKOS_RAJA_OMP
 

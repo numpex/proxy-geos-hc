@@ -1,7 +1,7 @@
 # This config_core file is included by the TPLs after all the ENABLED options are set. 
 # It is also included from the main side in sequential case, after forcing some options 
 ## C options
-if(NOT GUIX_INSTALLED_TPL)
+if(BUILD_FROM_TPLMIRROR)
 	set(CMAKE_C_COMPILER ${CC_ROOT}/gcc${CC_VERSION} CACHE PATH "")
 endif()
 set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG -march=${CPU_TUNE_FLAG} -mtune=${CPU_TUNE_FLAG}" CACHE STRING "")
@@ -9,7 +9,7 @@ set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g ${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "")
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
 
 ## C++ options
-if(NOT GUIX_INSTALLED_TPL)
+if(BUILD_FROM_TPLMIRROR)
 	set(CMAKE_CXX_COMPILER ${CXX_ROOT}/g++${CC_VERSION} CACHE PATH "")
 endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=${CPU_TUNE_FLAG} -mtune=${CPU_TUNE_FLAG}" CACHE STRING "")
@@ -18,7 +18,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g" CACHE STRING "")
 set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
 
 ## Fortran options
-if(NOT GUIX_INSTALLED_TPL)
+if(BUILD_FROM_TPLMIRROR)
 	set(CMAKE_Fortran_COMPILER ${GFORTRAN_ROOT}/gfortran CACHE PATH "")
 endif()
 set(CMAKE_Fortran_FLAGS_RELEASE "-O3 -DNDEBUG -march=${CPU_TUNE_FLAG} -mtune=${CPU_TUNE_FLAG}" CACHE STRING "")
@@ -44,7 +44,7 @@ if(ENABLE_CUDA)
   # Cuda options
   set(ENABLE_CUDA_NVTOOLSEXT ON CACHE BOOL "") #Not used
     set(CMAKE_CUDA_HOST_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "")
-    if(NOT GUIX_INSTALLED_TPL)
+    if(BUILD_FROM_TPLMIRROR)
 	    set(CMAKE_CUDA_COMPILER ${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc CACHE STRING "") 
     endif()
     set(CMAKE_CUDA_ARCHITECTURES ${CUDA_ARCH_COMPUTE} CACHE STRING "")

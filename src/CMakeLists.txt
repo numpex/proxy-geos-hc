@@ -134,7 +134,7 @@ if ( USE_RAJA)
    #	       PATHS ${CAMP_DIR}
    #                NO_DEFAULT_PATH)
    #else()
-   #   # CAMP is required when using RAJA. Consider using find_package when RAJA_DIR not defined, that is GUIX_INSTALLED_TPLS=ON 
+   #   # CAMP is required when using RAJA. Consider using find_package when RAJA_DIR not defined, that is BUILD_FROM_TPLMIRROR=OFF 
    #   message(STATUS "ProxyApp requires CAMP: CAMP_DIR not set.") 
    #   find_package(camp REQUIRED)
    #endif()
@@ -173,7 +173,6 @@ if ( USE_RAJA)
    # Umpire
    ################################
    # Umpire is not mandatory for RAJA
-   #if(FALSE)
    if(ENABLE_UMPIRE OR ENABLE_CHAI)
 	   if(DEFINED UMPIRE_DIR)
 		   find_package(umpire REQUIRED

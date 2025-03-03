@@ -25,8 +25,8 @@ set(ENABLE_ADIAK OFF CACHE BOOL "" FORCE)
 set(RAJA_ENABLE_CUDA ${ENABLE_CUDA} CACHE BOOL "" FORCE)
 set(RAJA_ENABLE_OPENMP ${ENABLE_OPENMP} CACHE BOOL "" FORCE)
 
-message(STATUS "GUIX_INSTALLED_TPL " ${GUIX_INSTALLED_TPL})
-if(NOT GUIX_INSTALLED_TPL)
+message(STATUS "BUILD_FROM_TPLMIRROR " ${BUILD_FROM_TPLMIRROR})
+if(BUILD_FROM_TPLMIRROR)
 	message(STATUS "--Setting the paths for the TPL")
 	# To keep track of change: Beaware that _TPL_INSTALL_DIR was originally called GEOSX_TPL_DIR 
 	# and used in some available configs provided in the LvArray submodule (src/LvArray/cmake/blt/host-configs/)
