@@ -38,16 +38,12 @@ git clone --recursive https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geo
 ```
 will  create the folder `proxy-geos-hc`. The `--recursive` option allows to ship the relevant submodules: [BLT](https://github.com/LLNL/blt) and  [LvArray](https://github.com/GEOS-DEV/LvArray).    
 
-The ProxyApp depends on some third-party libraries which can be installed using one of the two options described below. They include a build from source and a build using the Guix package manager. For the former, using the following Git command
-```   
-git clone --recursive https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl 
-```
-will fetch the third-party libraries source codes in the folder `proxy-geos-hc_tpl`.  
+In case where the TPLs are built and installed from source you shall consider [Getting the TPLs source code](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads#getting-the-tpls-source-codes) to create the folder `proxy-geos-hc_tpl`.  
 
-## Environment variables for the ProxyApp build 
+## Environment variables for building the ProxyApp 
 Some environment variables are required to configure the CMake when building the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc#step-2-build-and-install-the-proxyapp). Their choice is specific to the method used for installing the TPLs. The [table](####environment-variables-in-env_var.sh-for-the-cMake-build) below summarizes the set up for the two build options.   
 
-#### Environment variables in env_var.sh for the CMake build
+#### Environment variables in env_var.sh for the CMake builds
 
 | Build Option       |    proxy_config_root     | config_proxy | Sourcing required for| other environment variables|  
 |-------------------|-------------------|-------------------|-------------------|-------------------|  
@@ -57,47 +53,39 @@ Some environment variables are required to configure the CMake when building the
    
  1. Edit the script `proxy-geos-hc/env_var.sh` with the right arguments for the environment variables, as discribed in the [table](####environment-variables-in-env_var.sh-for-the-cMake-build):   
    - `proxy_config_root` *the root path of the `configs` folder*  
-   - `config_proxy` *the name of the config file to be used to pre-load the cache when building the ProxyApp, and [the TPLs when building from source](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/)*.  
+   - `config_proxy` *the name of the config file to be used to pre-load the cache when building the ProxyApp*   
    - `build_tpl` and `install_tpl` *the names of its binary and install directories where the libraries are to be built and installed*, in the case where the TPLs are built from source   
-  2. Source the script `source proxy-geos-hc/env_var.sh` to export these variables.  
+  2. Source the script `proxy-geos-hc/env_var.sh` to export these variables.  
 
-The next step involves setting up the configuration file to be used during the cmake build of the proxyApp. They are also required when building [ the TPLs from source](###from-source). 
+The next step involves setting up the configuration file to be used during the CMake builds. 
 
-## Step 1. [Edit the configuration file for the build process](./Notes_config_setting.md)
-
-
+## Step 1. [Edit the configuration file for the build process](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/Notes_config_setting.md?ref_type=heads)
 ## Step 2.  Installing the TPLs dependencies
-
 Use one of the two options described below to install the TPLs
-
 ### From Source
-
-The build and install of the TPLs from code proceeds as follows:  
-- Source the env_var.sh script  
-- [From source Build of the Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl)  
+The build and install of the TPLs from code is described on the following page  
+#### [From source Install of the Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads#getting-the-tpls-source-codes)  
 
 ### Using a Package Manager
-
 The alternative option involves installing the TPLs using a Package Manager and is described on the following page 
-#### [Guix package manager Build of the Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/3)
+#### [Guix package manager Install of the Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/3)
 It allows to build the ProxyApp within a containerized build environment with all the TPLs dependencies.   
 
 ## Step 3. Build and Install the ProxyApp
-
  1. Consider [exporting the environment variables](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc##environment-variables-for-the-proxyapp-build)  that are required, by sourcing the `env_var.sh` file. They are required for the config file `proxy-geos-hc/configs/config_proxy-app.cmake`. It serves as a wrapper for the config file `${proxy_config_root}/configs/${config_proxy}` that would have been used to pre-load the cache when building the TPLs from source.  
 3. Generate the Makefile and build the executable by running the following command lines 
 ```
 cd proxy-geos-hc  
-cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -DGUIX_INSTALLED_TPL=<BOOL> -C configs/config_proxy-app.cmake -B ${build_tpl} -DCMAKE_INSTALL_PREFIX=${install_tpl} -S .
-cd ${build_tpl}  
+cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -DGUIX_INSTALLED_TPL=<BOOL> -C configs/config_proxy-app.cmake -B ./build -DCMAKE_INSTALL_PREFIX=./install -S .
+cd build  
 make && make install
 ```
-This will build and install the executable in the folder `build`. The boolean `BOOL`, for the argument `GUIX_INSTALLED_TPL`, is used to specify whether the TPLs have been installed from source or using a Package Manager. The configuration option `KOKKOS_RAJA_OMP` is discussed below.    
+This will build and install the executables in the folder `build`. The boolean `BOOL`, for the argument `GUIX_INSTALLED_TPL`, is used to specify whether the TPLs have been installed from source or using a Package Manager. The configuration option `KOKKOS_RAJA_OMP` is discussed below.    
 
 ### Configuration option KOKKOS_RAJA_OMP
 
  The `KOKKOS_RAJA_OMP` is used to specify which programming model and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current proxyApp, Lvarray container is used for RAJA while  KOKKOS provides its own container. In cases where neither RAJA nor KOKKOS is used, std::vector container is used.  
- Some ready-to-use command lines for each of these configurations are provided [here - HowToInstall](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/blob/develop/howToInstall.md?ref_type=heads).   
+ Some ready-to-use command lines for each of these configurations are provided [here](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/blob/develop/howToInstall.md?ref_type=heads).   
 #### 1. DEFAULT option
 The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequential mode. [**Not supported at the moment**](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/8).  
 
@@ -105,7 +93,7 @@ The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequenti
 To use OMP, set `CUDA_KOKKOS_RAJA_OMP` as `-DUSE_OMP=ON`, for a shared-memory parallelization mode. [**Not  supported at the moment**](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/8).  
 
 #### 3. RAJA  with OPENMP and GPU
-To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_<machine's name>.cmake` - See [What Programming Models for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl##11programming-models-enabled-for-the-tpls).  
+To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_<machine's name>.cmake` - See [Programming Models Enabled for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/Notes_config_setting.md?ref_type=heads#1-programming-models-enabled-for-the-tpls).  
 
 #### 4. KOKKOS with OPENMP and GPU
 To use KOKKOS, set `KOKKOS_RAJA_OMP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode.   
