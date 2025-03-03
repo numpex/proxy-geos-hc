@@ -48,6 +48,7 @@ will fetch the third-party libraries source codes in the folder `proxy-geos-hc_t
 Some environment variables are required to configure the CMake when building the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc#step-2-build-and-install-the-proxyapp). Their choice is specific to the method used for installing the TPLs. The [table](####environment-variables-in-env_var.sh-for-the-cMake-build) below summarizes the set up for the two build options.   
 
 #### Environment variables in env_var.sh for the CMake build
+
 | Build Option       |    proxy_config_root      | config_proxy | Sourcing required for| other environment variables|
 |: ---------- :|: ------------------- :| :-----------:| :------------------- :| :------------------- :|
 | From source   |  `proxy-geos-hc_tpl` | `config_<machine's name>.cmake` |TPLs and ProxyApp|`install_tpl` and `build_tpl` |   
