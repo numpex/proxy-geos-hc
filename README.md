@@ -54,7 +54,7 @@ Some environment variables are required to configure the CMake when building the
  1. Edit the script `proxy-geos-hc/env_var.sh` with the right arguments for the environment variables, as discribed in the [table](####environment-variables-in-env_var.sh-for-the-cMake-build):   
    - `proxy_config_root` *the root path of the `configs` folder*  
    - `config_proxy` *the name of the config file to be used to pre-load the cache when building the ProxyApp*   
-   - `build_tpl` and `install_tpl` *the names of its binary and install directories where the libraries are to be built and installed*, in the case where the TPLs are built from source   
+   - `build_tpl` and `install_tpl` *the names of the binary and install directories where the libraries are to be built and installed*, in the case where the TPLs are built from source   
   2. Source the script `proxy-geos-hc/env_var.sh` to export these variables.  
 
 The next step involves setting up the configuration file to be used during the CMake builds. 
@@ -72,7 +72,7 @@ The alternative option involves installing the TPLs using a Package Manager and 
 It allows to build the ProxyApp within a containerized build environment with all the TPLs dependencies.   
 
 ## Step 3. Build and Install the ProxyApp
- 1. Consider [exporting the environment variables](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc##environment-variables-for-the-proxyapp-build)  that are required, by sourcing the `env_var.sh` file. They are required for the config file `proxy-geos-hc/configs/config_proxy-app.cmake`. It serves as a wrapper for the config file `${proxy_config_root}/configs/${config_proxy}` that would have been used to pre-load the cache when building the TPLs from source.  
+ 1. Consider [exporting the environment variables](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc##environment-variables-for-the-proxyapp-build)  that are required, by sourcing the `env_var.sh` file. They are required for the config file `proxy-geos-hc/configs/config_proxy-app.cmake`. It serves as a wrapper for the config file `${proxy_config_root}/configs/${config_proxy}` that would have also been used to pre-load the cache when building the TPLs from source.  
 3. Generate the Makefile and build the executable by running the following command lines 
 ```
 cd proxy-geos-hc  

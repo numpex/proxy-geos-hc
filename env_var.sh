@@ -5,5 +5,5 @@ export config_proxy='config_x86_guix.cmake'
 #export config_proxy='config_x86_rtx2000.cmake'
 
 # For BUILD_FROM_TPLMIRROR=ON, the build and install folders for the TPLs. It is supposed to be a subfolder of $ENV{proxy_config_root}. 
-#export build_tpl='buildTPLs_O1_C1'
-#export install_tpl='installTPLs_O1_C1'
+export build_tpl='buildTPLs_O1_C1'
+export install_tpl='installTPLs_O1_C1'
