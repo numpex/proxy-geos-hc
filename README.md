@@ -80,5 +80,11 @@ proxy-geos-hc/install/bin/<proxyName>_<LIB>_<HostModel>_<DEVICE>.exe
 
 For example, if KOKKOS is used and OMP enabled in addition to a GPU acceleration on a Nvidia `RTX2000` device, the following two executables will be installed `fd_Kokkos_OMP_RTX2000`, `sem_Kokkos_OMP_RTX2000`.  
  
+You may encounter path issues for the TPLs libraries. The following lines fix the issue:
+```
+ export LD_LIBRARY_PATH=/path/to/proxy-geos-hc_tpl/installTPLs/chai/lib/:$LD_LIBRARY_PATH
+ export LD_LIBRARY_PATH=/path/to/proxy-geos-hc_tpl/installTPLs/kokkos/lib/:$LD_LIBRARY_PATH
+ export LD_LIBRARY_PATH=/path/to/proxy-geos-hc_tpl/installTPLs/raja/lib/:$LD_LIBRARY_PATH
+```
 # Tips and tricks
 Some tips and tricks addressing common problems that you may encountered are reported [here](./TIPS_AND_TRICKS.md).
