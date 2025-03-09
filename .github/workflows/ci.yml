@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-spack
+
+    strategy:
+      matrix:
+        preset: [default, kokkos]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Configure CMake
+      run: |
+        spacktivate proxy-geos
+        cmake --preset ${{ matrix.preset }}
+
+    - name: Build
+      run: cmake --build --preset ${{ matrix.preset }}
+
+    - name: Test
+      run: ctest --preset ${{ matrix.preset }}
