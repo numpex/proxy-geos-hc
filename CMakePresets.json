@@ -1,0 +1,93 @@
+{
+    "version": 3,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Default Config",
+            "description": "Default config",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build/default",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_INSTALL_PREFIX" : "${sourceDir}/build/default/install/",
+                "CMAKE_BUILD_TYPE": "Release",
+                "USE_OMP": "ON",
+                "USE_RAJA": "OFF",
+                "USE_KOKKOS": "OFF",
+                "ENABLE_TESTS": "ON"
+            },
+            "vendor": {
+                "example.com/ExampleIDE/1.0": {
+                    "autoFormat": true
+                }
+            }
+        },
+        {
+            "name": "kokkos",
+            "displayName": "kokkos Config",
+            "description": "kokkos config",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build/kokkos",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_INSTALL_PREFIX" : "${sourceDir}/build/kokkos/install/",
+                "CMAKE_BUILD_TYPE": "Release",
+                "USE_OMP": "OFF",
+                "USE_RAJA": "OFF",
+                "USE_KOKKOS": "ON",
+                "ENABLE_TESTS": "ON"
+            },
+            "vendor": {
+                "example.com/ExampleIDE/1.0": {
+                    "autoFormat": true
+                }
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default",
+            "jobs": 10
+        },
+        {
+            "name": "kokkos",
+            "configurePreset": "kokkos",
+            "jobs": 10
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default",
+
+            "output": {
+                "outputOnFailure": true
+            },
+            "execution": {
+                "noTestsAction": "ignore",
+                "stopOnFailure": true
+            },
+            "environment": {
+                "OMP_PROC_BIND": "true"
+            }
+        },
+        {
+            "name": "kokkos",
+            "inherits": "default",
+            "configurePreset": "kokkos"
+        }
+    ],
+    "vendor": {
+        "example.com/ExampleIDE/1.0": {
+            "autoFormat": false
+        }
+    }
+}
