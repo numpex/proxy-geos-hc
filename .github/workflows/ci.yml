@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-texlive #self-ubuntu-24.04
+    runs-on: self-spack
 
     strategy:
       matrix:
@@ -19,7 +19,9 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Configure CMake
-      run: cmake --preset ${{ matrix.preset }}
+      run: |
+        spacktivate proxy-geos
+        cmake --preset ${{ matrix.preset }}
 
     - name: Build
       run: cmake --build --preset ${{ matrix.preset }}
