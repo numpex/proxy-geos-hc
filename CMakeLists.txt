@@ -33,7 +33,7 @@ option (USE_KOKKOS "Use KOKKOS to parallelise loops" OFF)
 # Tests directory to perform differen tests before
 # integration into proxy apps
 #---------------------------------------------------
-option (addTests "add Tests directory" OFF)
+option (ENABLE_TESTS "add Tests directory" OFF)
 
 #--------------------------------------------------------
 # Option to save snapshots of wavefields (for debugging)

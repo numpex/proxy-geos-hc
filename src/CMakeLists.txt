@@ -360,6 +360,6 @@ configure_file( utils/commonConfig.hpp.in
 
 add_subdirectory( sem )
 add_subdirectory( fd )
-if ( addTests)
+if ( ENABLE_TESTS )
   add_subdirectory( tests )
 endif()
