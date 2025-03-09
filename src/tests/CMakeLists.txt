@@ -8,7 +8,12 @@
 # the followings need "-DUSE_KOKKOS=ON -DENABLE_CUDA=ON"
 #set (testcase  Kokkos)
 #set (testcase  Kokkos0)
-set (testcase  Kokkos1)
+#set (testcase  Kokkos1)
+if ( USE_KOKKOS )
+
+LIST(APPEND TESTCASES "Kokkos" "Kokkos0" )
+  message(STATUS "Building tests with Kokkos: ${TESTCASES}")
+endif()
 #set (testcase  FDTDKokkos)
 
 # the followings need "-DUSE_RAJA=ON -DENABLE_HIP=ON"

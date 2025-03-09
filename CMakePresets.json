@@ -67,13 +67,16 @@
         {
             "name": "default",
             "configurePreset": "default",
-            
+
             "output": {
                 "outputOnFailure": true
             },
             "execution": {
                 "noTestsAction": "ignore",
                 "stopOnFailure": true
+            },
+            "environment": {
+                "OMP_PROC_BIND": "true"
             }
         },
         {
