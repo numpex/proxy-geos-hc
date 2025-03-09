@@ -23,6 +23,7 @@ jobs:
 
     - name: Configure CMake
       run: |
+        source /data/cemosis/spack/share/spack/setup-env.sh
         spacktivate proxy-geos
         cmake --preset ${{ matrix.preset }}
 
