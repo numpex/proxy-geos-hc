@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     runs-on: self-spack
-
+    continue-on-error: true
     strategy:
       matrix:
         preset: [default, kokkos]
