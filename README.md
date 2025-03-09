@@ -53,6 +53,21 @@ make && make install
 This will build and install the executable in the folder `build`. The configuration option `KOKKOS_RAJA_OMP` is discussed below.    
  
 
+## Compiling using spack environment
+
+. Activate default environment for 
+```
+spacktivate proxy-geos
+```
+
+. configure build and test with default preset
+```
+cmake --preset default
+cmake --build --preset default
+ctest --preset default
+```
+
+
 ### Configuration option KOKKOS_RAJA_OMP
 
  The `KOKKOS_RAJA_OMP` is used to specify which programming model and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current proxyApp, Lvarray container is used for RAJA while  KOKKOS provides its own container. In cases where neither RAJA nor KOKKOS is used, std::vector container is used.  
