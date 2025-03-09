@@ -27,6 +27,28 @@
                     "autoFormat": true
                 }
             }
+        },
+        {
+            "name": "kokkos",
+            "displayName": "kokkos Config",
+            "description": "kokkos config",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build/kokkos",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_INSTALL_PREFIX" : "${sourceDir}/build/kokkos/install/",
+                "CMAKE_BUILD_TYPE": "Release",
+                "USE_OMP": "OFF",
+                "USE_RAJA": "OFF",
+                "USE_KOKKOS": "ON",
+                "ENABLE_TESTS": "ON"
+            },
+            "vendor": {
+                "example.com/ExampleIDE/1.0": {
+                    "autoFormat": true
+                }
+            }
         }
     ],
     "buildPresets": [
@@ -34,12 +56,18 @@
             "name": "default",
             "configurePreset": "default",
             "jobs": 10
+        },
+        {
+            "name": "kokkos",
+            "configurePreset": "kokkos",
+            "jobs": 10
         }
     ],
     "testPresets": [
         {
             "name": "default",
             "configurePreset": "default",
+            
             "output": {
                 "outputOnFailure": true
             },
@@ -47,6 +75,11 @@
                 "noTestsAction": "ignore",
                 "stopOnFailure": true
             }
+        },
+        {
+            "name": "kokkos",
+            "inherits": "default",
+            "configurePreset": "kokkos"
         }
     ],
     "vendor": {
