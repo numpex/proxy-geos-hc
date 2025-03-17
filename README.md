@@ -68,7 +68,7 @@ The build and install of the TPLs from code is described on the following page
 
 ### Using a Package Manager
 The alternative option involves installing the TPLs using a Package Manager and is described on the following page 
-#### [Guix package manager Install of the Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/3)
+#### [Guix package manager Install of the Third-Party Libraries](./Install_TPLs_Guix.md)
 It allows to build the ProxyApp within a containerized build environment with all the TPLs dependencies.   
 
 ## Step 3. Build and Install the ProxyApp
