@@ -19,13 +19,11 @@ One of the key features of the SEM and FD proxy benchmarks are their adaptabilit
     * RAJA [https://raja.readthedocs.io/en/develop/]  
     * KOKKOS [https://kokkos.github.io/kokkos-core-wiki/]  
     
-    RAJA, KOKKOS and other Third-Party Libraries (TPLs) can be compiled and installed: either from source as described  within the [third-party libraries repository](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl) or using a Package Manager (Guix or Spack).  
-
 - The data containers availbable in the current proxyApp implementations include:   
     * LvArray [https://lvarray.readthedocs.io/en/latest/]  
     * C++ std::vector  
 
-# Quick Start to compile and install
+# How to compile and install
 
 First consider referring to the page on the [prerequisites](./INSTALL_PREREQUISITES.md) needed.  
 
@@ -38,41 +36,26 @@ git clone --recursive https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geo
 ```
 will  create the folder `proxy-geos-hc`. The `--recursive` option allows to ship the relevant submodules: [BLT](https://github.com/LLNL/blt) and  [LvArray](https://github.com/GEOS-DEV/LvArray).    
 
-In case where the TPLs are built and installed from source you shall consider [Getting the TPLs source code](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads#getting-the-tpls-source-codes) to create the folder `proxy-geos-hc_tpl`.  
+RAJA, KOKKOS and other Third-Party Libraries (TPLs) can be compiled and installed either from mirror as described  within the [third-party libraries repository](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl) or using a Package Manager (Guix or Spack).  In the former case you shall consider [Getting the TPLs source code](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads#getting-the-tpls-source-codes) to create the folder `proxy-geos-hc_tpl` which provides with some tarballs of TPLs specific versions. In the latest case, one has the possibility to build the ProxyApp within a containerized development environment with all the TPLs dependencies.  
 
-## Environment variables for building the ProxyApp 
-Some environment variables are required to configure the CMake when building the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc#step-2-build-and-install-the-proxyapp). Their choice is specific to the method used for installing the TPLs. The [table](####environment-variables-in-env_var.sh-for-the-cMake-build) below summarizes the set up for the two build options.   
-
-#### Environment variables in env_var.sh for the CMake builds
-
-| Build Option       |    proxy_config_root     | config_proxy | Sourcing required for| other environment variables|  
-|-------------------|-------------------|-------------------|-------------------|-------------------|  
-| From source   |  `proxy-geos-hc_tpl` | `config_<machine's name>.cmake` | TPLs and ProxyApp |  `install_tpl` and `build_tpl` |   
-| Using Guix   | `proxy-geos-hc` | `config_<machine's name>_guix.cmake` | ProxyApp only |  |   
+## Step 0. Environment variables for the CMake builds 
+Some environment variables are required to configure the CMake when building either the TPLs from mirror or the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc#step-2-build-and-install-the-proxyapp). The table below summarizes the set up for each of the two install options for the TPLs.   
    
-   
- 1. Edit the script `proxy-geos-hc/env_var.sh` with the right arguments for the environment variables, as discribed in the [table](####environment-variables-in-env_var.sh-for-the-cMake-build):   
-   - `proxy_config_root` *the root path of the `configs` folder*  
-   - `config_proxy` *the name of the config file to be used to pre-load the cache when building the ProxyApp*   
-   - `build_tpl` and `install_tpl` *the names of the binary and install directories where the libraries are to be built and installed*, in the case where the TPLs are built from source   
+ 1. Edit the script `proxy-geos-hc/env_var.sh` with the right arguments for the environment variables:   
+   - `proxy_config_root` *the root path of the `configs` folder*: `proxy-geos-hc_tpl`  if installing the TPL from mirror (default), i.e. `BUILD_FROM_TPLMIRROR=ON` otherwise `proxy-geos-hc`   
+   - `config_proxy` *the name of the config file `config_<machine's name>.cmake`, located in the folder `${proxy_config_root}/configs`, to be used to pre-load the CMake cache*   
+   - `build_tpl` and `install_tpl` *the names of the binary and install directories where the libraries are to be built and installed*, in the case where the TPLs are built from mirror   
   2. Source the script `proxy-geos-hc/env_var.sh` to export these variables.  
 
-The next step involves setting up the configuration file to be used during the CMake builds. 
+The next step involves setting up the configuration file to be used during the CMake builds in respect to the boolean value of `BUILD_FROM_TPLMIRROR`. 
 
-## Step 1. [Edit the configuration file for the build process](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/Notes_config_setting.md?ref_type=heads)
+## Step 1. [Edit the configuration file for the build process](./Notes_config_setting.md)
 ## Step 2.  Installing the TPLs dependencies
-Use one of the two options described below to install the TPLs
-### From Source
-The build and install of the TPLs from code is described on the following page  
-#### [From source Install of the Third-Party Libraries](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads#getting-the-tpls-source-codes)  
-
-### Using a Package Manager
-The alternative option involves installing the TPLs using a Package Manager and is described on the following page 
-#### [Guix package manager Install of the Third-Party Libraries](./Install_TPLs_Guix.md)
-It allows to build the ProxyApp within a containerized build environment with all the TPLs dependencies.   
+#### [From mirror](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads)   
+#### [From Guix Package Manager](./Install_TPLs_Guix.md)
 
 ## Step 3. Build and Install the ProxyApp
- 1. Consider [exporting the environment variables](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc##environment-variables-for-the-proxyapp-build)  that are required, by sourcing the `env_var.sh` file. They are required for the config file `proxy-geos-hc/configs/config_proxy-app.cmake`. It serves as a wrapper for the config file `${proxy_config_root}/configs/${config_proxy}` that would have also been used to pre-load the cache when building the TPLs from source.  
+ 1. Export the environment variables  that are required, by sourcing the `env_var.sh` file. They are required for the config file `proxy-geos-hc/configs/config_proxy-app.cmake`. It serves as a wrapper for the config file `${proxy_config_root}/configs/${config_proxy}` that must be used to pre-load the CMake cache for the build.  
 3. Generate the Makefile and build the executable by running the following command lines 
 ```
 cd proxy-geos-hc  

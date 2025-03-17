@@ -23,9 +23,11 @@ Edit the Part 1 of your `config_<machine's name>.cmake` file to specify the prog
 When installing the TPLs with a package manager, make sure to use some TPLs packages whose enabled programming models are consistent with those specified at Part 1 of the `config_<machine's name>.cmake`.   
 
 ## 2. Platform-specific parameters
+The *conditional if* scopes on `BUILD_FROM_TPLMIRROR` are used to set the host machine dependent variables and paths. They are only required when installing from mirror.   
+
 Edit the Part 2 of your `config_<machine's name>.cmake` to set the platform-specific variables.  It emboddies various variables which are used to specify the compilers (for instance gcc, g++, gfortran, mpicc, nvcc, hipcc) and the compute options:   
 - The root to the compilers for the programming model enabled on the host is typically `/usr/bin`  
 - The variable `CUDA_ARCH` or `COMP_ARCH` is used to specify the architecture of the device. The related variables must be set in respect to the GPU programming model enabled and specified at [Part 1](##1.-programming models enabled for the TPLs). We refer to the following webpage for a mapping between various [GPU microarchitectures and their corresponding flags or compute capabilities](https://kokkos.org/kokkos-core-wiki/keywords.html#gpu-architectures)  
 - Some compilation flags for the targetted architecture (`mtune` and `mcpu`) are set through the variable `CPU_TUNE_FLAG`.   
 
-The host machine dependent variables and paths must be set and are only required when installing from source. This is done within the *conditional if* scopes on `BUILD_FROM_TPLMIRROR`. 
+

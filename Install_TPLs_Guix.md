@@ -4,7 +4,7 @@
 Install Guix  following the steps described in the [Guix documentation](https://guix.gnu.org/manual/fr/guix.fr.html#Installation). We recommand to install Guix from the [script installer](https://guix.gnu.org/manual/en/html_node/Binary-Installation.html#index-installer-script) in order to have the latest updates of the `guix-daeomon`. 
 
 ## Getting started - guix shell 
-To build an isolated development environment there are two options. One involves using `guix shell --container`, the other `guix shell --pure`. In the following, we describe the latest approach. The `guix shell` command allows to create a child environment within a parent environment. Getting back to the parent environment can be achieved running `exit` or `Ctrl+D`. The `--pure` option is useful to clear the environment variables of the parent environment. Therefore enhancing the isolation.  
+There are two options to build an isolated development environment. One involves using `guix shell --container`, the other `guix shell --pure`. In the following, we describe the latest approach. The `guix shell` command allows to create a child environment within a parent environment. Getting back to the parent environment can be achieved running `exit` or `Ctrl+D`. The `--pure` option is useful to clear the environment variables of the parent environment. Therefore enhancing the isolation.  
 The command 
 ```
 guix shell --pure <package_list>
