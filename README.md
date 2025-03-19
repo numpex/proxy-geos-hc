@@ -47,14 +47,14 @@ This differentitation in the TPLs install options is carried through the CMake f
 Some environment variables are required to configure the CMake when building either the TPLs from mirror or the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc#step-2-build-and-install-the-proxyapp).   
    
  1. Edit the script `proxy-geos-hc/env_var.sh` with the right arguments for the environment variables:   
-   - `proxy_config_root` *the root path of the `configs` folder*: `proxy-geos-hc_tpl`  if installing the TPL from mirror otherwise `proxy-geos-hc`   
+   - `proxy_config_root` *the absolute path of the directory `proxy-geos-hc`*   
    - `config_proxy` *the name of the config file `config_<machine's name>.cmake`, located in the folder `${proxy_config_root}/configs`, to be used to pre-load the CMake cache*   
    - `build_tpl` and `install_tpl` *the names of the binary and install directories where the libraries are to be built and installed* ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) <!--, in the case where the TPLs are built from mirror -->  
   2. Source the script `proxy-geos-hc/env_var.sh` to export these variables.  
 
-The next step involves setting up the configuration file to be used during the CMake builds. The compilers and related CMake variables are relevant for set up only when building from mirror ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green),  that is `BUILD_FROM_TPLMIRROR=ON`. Alternatively ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue), when installing from a package manager with the aim to build the proxyApp within a containerized development environment the CMake variables for the compilers are not required and we rely on CMake for a conistent and automatic set up. 
+The next step involves setting up the configuration file to be used during the CMake builds. The compilers and related CMake variables are relevant for set up only when building from mirror ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green). Alternatively ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue), when installing from a package manager with the aim to build the proxyApp within a containerized development environment the CMake variables for the compilers are not required and we rely on CMake for a conistent and automatic set up. 
 
-## Step 1. [Edit the configuration file for the build process](./Notes_config_setting.md)
+## Step 1. [Edit the configuration file for the CMake build](./Notes_config_setting.md)
 ## Step 2.  Installing the TPLs dependencies
 #### [From mirror](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads)  ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green)
 #### [From Guix Package Manager](./Install_TPLs_Guix.md) ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue)
