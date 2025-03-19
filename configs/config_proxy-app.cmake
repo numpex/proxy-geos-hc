@@ -8,8 +8,12 @@ endif()
 # Include the cache file of the third-party libraries
 set(config_proxy $ENV{config_proxy} CACHE PATH "")
 if(EXISTS ${_CONFIG_ROOT_DIR}/configs/${config_proxy})
-	include(${_CONFIG_ROOT_DIR}/configs/${config_proxy}) 
-else()
+	include(${_CONFIG_ROOT_DIR}/configs/${config_proxy})
+	set(CONFIG_DIR "${_CONFIG_ROOT_DIR}/configs" CACHE PATH "" FORCE)	
+elseif(EXISTS ${_CONFIG_ROOT_DIR}/${config_proxy})
+	include(${_CONFIG_ROOT_DIR}/${config_proxy})
+	set(CONFIG_DIR ${_CONFIG_ROOT_DIR} CACHE PATH "" FORCE)	
+else()	
 	message(FATAL_ERROR "The config_proxy file ${config_proxy} is not found in the provided _CONFIG_ROOT_DIR " ${_CONFIG_ROOT_DIR})
 endif()
 
@@ -30,7 +34,7 @@ if(BUILD_FROM_TPLMIRROR)
 	message(STATUS "--Setting the paths for the TPL")
 	# To keep track of change: Beaware that _TPL_INSTALL_DIR was originally called GEOSX_TPL_DIR 
 	# and used in some available configs provided in the LvArray submodule (src/LvArray/cmake/blt/host-configs/)
-	set(_TPL_INSTALL_DIR ${_CONFIG_ROOT_DIR}/$ENV{install_tpl} CACHE PATH "")
+	set(_TPL_INSTALL_DIR $ENV{install_tpl_dir} CACHE PATH "")
 	
 	if(USE_RAJA)
 		set(CAMP_DIR ${_TPL_INSTALL_DIR}/raja CACHE PATH "")

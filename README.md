@@ -49,7 +49,7 @@ Some environment variables are required to configure the CMake when building eit
  1. Edit the script `proxy-geos-hc/env_var.sh` with the right arguments for the environment variables:   
    - `proxy_config_root` *the absolute path of the directory `proxy-geos-hc`*   
    - `config_proxy` *the name of the config file `config_<machine's name>.cmake`, located in the folder `${proxy_config_root}/configs`, to be used to pre-load the CMake cache*   
-   - `install_tpl` *the name of the install directoriy where the libraries are to be installed* ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green)   
+   - `install_tpl_dir` *the absolute path of the install directory where the libraries are to be installed* ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green)   
   2. Source the script `proxy-geos-hc/env_var.sh` to export these variables.  
 
 The next step involves setting up the configuration file to be used during the CMake builds. The compilers and related CMake variables are relevant for set up only when building from mirror ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green). Alternatively ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue), when installing from a package manager with the aim to build the proxyApp within a containerized development environment the CMake variables for the compilers are not required and we rely on CMake for a conistent and automatic set up. 
