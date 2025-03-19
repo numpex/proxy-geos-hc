@@ -76,8 +76,8 @@ set(ENABLE_OPENMPTARGET OFF CACHE BOOL "" FORCE)
 
 # The directory with the config. files
 set(CONFIG_DIR $ENV{proxy_config_root}/configs)
-if(EXISTS ${CONFIG_DIR}/config_core_guix.cmake)
-          include(${CONFIG_DIR}/config_core_guix.cmake)
+if(EXISTS ${CONFIG_DIR}/config_core.cmake)
+          include(${CONFIG_DIR}/config_core.cmake)
 else()
           message(FATAL_ERROR "The config_core.cmake is not found in the the config files directory: " ${CONFIG_DIR})
 endif()
