@@ -36,18 +36,23 @@ git clone --recursive https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geo
 ```
 will  create the folder `proxy-geos-hc`. The `--recursive` option allows to ship the relevant submodules: [BLT](https://github.com/LLNL/blt) and  [LvArray](https://github.com/GEOS-DEV/LvArray).    
 
-RAJA, KOKKOS and other Third-Party Libraries (TPLs) can be compiled and installed either from mirror as described  within the [third-party libraries repository](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl) or using a Package Manager (Guix or Spack).  In the former case you shall consider [Getting the TPLs source code](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads#getting-the-tpls-source-codes) to create the folder `proxy-geos-hc_tpl` which provides with some tarballs of TPLs specific versions. In the latest case, one has the possibility to build the ProxyApp within a containerized development environment with all the TPLs dependencies.  
+### TPLs install options 
+KOKKOS, RAJA and the other Third-Party Libraries (TPLs) can be compiled and installed either from mirror as described  within the [third-party libraries repository](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl) or using a Package Manager (Guix or Spack).   
+- In the former case https://img.shields.io/badge/TPL_from-Mirror-green you shall consider [Getting the TPLs source code](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads#getting-the-tpls-source-codes) to create the folder `proxy-geos-hc_tpl` which provides with some tarballs of TPLs specific versions.  
+- In the other case https://img.shields.io/badge/TPL_from-Guix-blue, installing the TPLs with a Package Manager offers the possibility to build the ProxyApp within a containerized development environment with all the dependencies. 
+
+This differentitation in the TPLs install options is carried through the CMake flag `BUILD_FROM_TPLMIRROR` which is `ON` by default https://img.shields.io/badge/TPL_from-Mirror-green.   
 
 ## Step 0. Environment variables for the CMake builds 
-Some environment variables are required to configure the CMake when building either the TPLs from mirror or the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc#step-2-build-and-install-the-proxyapp). The table below summarizes the set up for each of the two install options for the TPLs.   
+Some environment variables are required to configure the CMake when building either the TPLs from mirror or the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc#step-2-build-and-install-the-proxyapp).   
    
  1. Edit the script `proxy-geos-hc/env_var.sh` with the right arguments for the environment variables:   
-   - `proxy_config_root` *the root path of the `configs` folder*: `proxy-geos-hc_tpl`  if installing the TPL from mirror (default), i.e. `BUILD_FROM_TPLMIRROR=ON` otherwise `proxy-geos-hc`   
+   - `proxy_config_root` *the root path of the `configs` folder*: `proxy-geos-hc_tpl`  if installing the TPL from mirror otherwise `proxy-geos-hc`   
    - `config_proxy` *the name of the config file `config_<machine's name>.cmake`, located in the folder `${proxy_config_root}/configs`, to be used to pre-load the CMake cache*   
-   - `build_tpl` and `install_tpl` *the names of the binary and install directories where the libraries are to be built and installed*, in the case where the TPLs are built from mirror   
+   - `build_tpl` and `install_tpl` *the names of the binary and install directories where the libraries are to be built and installed* https://img.shields.io/badge/TPL_from-Mirror-green <!--, in the case where the TPLs are built from mirror -->  
   2. Source the script `proxy-geos-hc/env_var.sh` to export these variables.  
 
-The next step involves setting up the configuration file to be used during the CMake builds in respect to the boolean value of `BUILD_FROM_TPLMIRROR`. 
+The next step involves setting up the configuration file to be used during the CMake builds. The compilers and related CMake variables are relevant for set up only when building from mirror https://img.shields.io/badge/TPL_from-Mirror-green,  that is `BUILD_FROM_TPLMIRROR=ON`. Alternatively, when installing from a package manager with the aim to build the proxyApp within a containerized development environment the CMake variables for the compilers are not required and we rely on CMake for a conistent and automatic set up. 
 
 ## Step 1. [Edit the configuration file for the build process](./Notes_config_setting.md)
 ## Step 2.  Installing the TPLs dependencies
@@ -55,7 +60,7 @@ The next step involves setting up the configuration file to be used during the C
 #### [From Guix Package Manager](./Install_TPLs_Guix.md)
 
 ## Step 3. Build and Install the ProxyApp
- 1. Export the environment variables  that are required, by sourcing the `env_var.sh` file. They are required for the config file `proxy-geos-hc/configs/config_proxy-app.cmake`. It serves as a wrapper for the config file `${proxy_config_root}/configs/${config_proxy}` that must be used to pre-load the CMake cache for the build.  
+ 1. Export the environment variables by sourcing the `env_var.sh` file, as instructed at [Step 0](##step-0.-Environment-variables-for-the-CMake-builds). They are required to set up the config file `proxy-geos-hc/configs/config_proxy-app.cmake` which serves as a wrapper for the config file `${proxy_config_root}/configs/${config_proxy}` that must be used to pre-load the CMake cache for the build.  
 3. Generate the Makefile and build the executable by running the following command lines 
 ```
 cd proxy-geos-hc  
@@ -63,11 +68,11 @@ cmake  -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -DBUILD_FROM_TPLMIRROR=<BOOL
 cd build  
 make && make install
 ```
-This will build and install the executables in the folder `build`. The boolean `BOOL`, for the argument `BUILD_FROM_TPLMIRROR`, is used to specify whether the TPLs have been installed from source or using a Package Manager. The configuration option `KOKKOS_RAJA_OMP` is discussed below.    
+This will build the binaries and install the executables respectively in the folders `build` and `install/bin`. The boolean `BOOL`, for the argument `BUILD_FROM_TPLMIRROR`, is used to specify whether the TPLs have been installed from mirror or using a Package Manager. The configuration option `KOKKOS_RAJA_OMP` is discussed below.    
 
 ### Configuration option KOKKOS_RAJA_OMP
 
- The `KOKKOS_RAJA_OMP` is used to specify which programming model and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current proxyApp, Lvarray container is used for RAJA while  KOKKOS provides its own container. In cases where neither RAJA nor KOKKOS is used, std::vector container is used.  
+ The `KOKKOS_RAJA_OMP` is used to specify which programming model and portability enabling library is used. The available options include RAJA and KOKKOS. This enables cross-platform seamingless and abstractions either with respect to the parallel programming model or the data container and the corresponding layout. In the current proxyApp, Lvarray container is used for RAJA while  KOKKOS provides its own container. In cases where neither RAJA nor KOKKOS is used, `std::vector` container is used.  
  Some ready-to-use command lines for each of these configurations are provided [here](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/blob/develop/howToInstall.md?ref_type=heads).   
 #### 1. DEFAULT option
 The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequential mode. [**Not supported at the moment**](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/8).  
