@@ -25,7 +25,7 @@ One of the key features of the SEM and FD proxy benchmarks are their adaptabilit
 
 # How to compile and install
 
-First consider referring to the page on the [prerequisites](./INSTALL_PREREQUISITES.md) needed.  
+First consider referring to the page on the [prerequisites](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/readme-docs/INSTALL_PREREQUISITES.md?ref_type=heads#key-aspects-and-prerequisites--for-proxyapp) needed.  
 
 As a convention, the angle brackets `<variable>` are used as placeholder for *variable* or *option*.     
 
@@ -51,12 +51,12 @@ At most, two environment variables are required to configure the CMake when buil
    - `install_tpl_dir` *the absolute path of the install directory where the libraries are to be installed* ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green)   
   2. Source the script `proxy-geos-hc/env_var.sh` to export these variables.  
 
-The next step involves setting up the configuration file `$config_proxy` to be used during the CMake builds. The compilers and related CMake variables are relevant for set up only when building from mirror ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green). Alternatively, when installing <!-- ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue) --> from a package manager, e.g. ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue),  with the aim to build the proxyApp within a containerized development environment, the CMake variables for the compilers are not required and we rely on CMake for a conistent and automatic set up. 
+The next step involves setting up the configuration file `${config_proxy}` to be used during the CMake builds. The compilers and related CMake variables are relevant for set up only when building from mirror ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green). Alternatively, when installing <!-- ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue) --> from a package manager, e.g. ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue),  with the aim to build the proxyApp within a containerized development environment, the CMake variables for the compilers are not required and we rely on CMake for a conistent and automatic set up. 
 
-## Step 1. [Edit the configuration file for the CMake build](./Notes_config_setting.md)
+## Step 1. [Edit the configuration file for the CMake build](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/readme-docs/Notes_config_setting.md?ref_type=heads#configuration-for-the-build-process)
 ## Step 2.  Installing the TPLs dependencies
 #### [From mirror](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads)  ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green)
-#### [From Guix Package Manager](./Install_TPLs_Guix.md) ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue)
+#### [From Guix Package Manager](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/readme-docs/Install_TPLs_Guix.md?ref_type=heads#getting-guix-package-manager) ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue)
 
 ## Step 3. Build and Install the ProxyApp
  1. Export the environment variables by sourcing the `env_var.sh` file, as instructed at [Step 0](##step-0.-Environment-variables-for-the-CMake-builds). They are required to set up the config file `proxy-geos-hc/configs/config_proxy-app.cmake` which serves as a wrapper for the config `${config_proxy}` file that must be used to pre-load the CMake cache for the build. It also sets the relevant libraries paths in case where the ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) option is used.  
@@ -80,7 +80,7 @@ The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequenti
 To use OMP, set `CUDA_KOKKOS_RAJA_OMP` as `-DUSE_OMP=ON`, for a shared-memory parallelization mode. [**Not  supported at the moment**](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/8).  
 
 #### 3. RAJA  with OPENMP and GPU
-To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `proxy-geos-hc_tpls/configs/config_<machine's name>.cmake` - See [Programming Models Enabled for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/Notes_config_setting.md?ref_type=heads#1-programming-models-enabled-for-the-tpls).  
+To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `${config_proxy}` - See [Programming Models Enabled for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/readme-docs/Notes_config_setting.md?ref_type=heads#configuration-for-the-build-process).  
 
 #### 4. KOKKOS with OPENMP and GPU
 To use KOKKOS, set `KOKKOS_RAJA_OMP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode.   
@@ -98,4 +98,4 @@ proxy-geos-hc/install/bin/<proxyName>_<LIB>_<HostModel>_<DEVICE>.exe
 For example, if KOKKOS is used and OMP enabled in addition to a GPU acceleration on a Nvidia `RTX2000` device, the following two executables will be installed `fd_Kokkos_OMP_RTX2000`, `sem_Kokkos_OMP_RTX2000`.  
  
 # Tips and tricks
-Some tips and tricks addressing common problems that you may encountered are reported [here](./TIPS_AND_TRICKS.md).
+Some tips and tricks addressing common problems that you may encountered are reported [here](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/readme-docs/TIPS_AND_TRICKS.md?ref_type=heads#tips-and-tricks).
