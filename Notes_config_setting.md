@@ -1,8 +1,8 @@
 # Configuration for the build process
 
-The current step follows the export of the [environment variables](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc##environment-variables-for-the-proxyapp-build). One of them defines the root path to the config folder. The folder `${proxy_config_root}/configs` contains the config files for the build process. Apart of the `config_core` file, there are several configuration files which are provided for various architectures and used to pre-load the cache when generating the CMake files at the [build stage](###build-the-third-party-libraries). They can be used as example to adapt the configuration file to any different architecture.   
+The current step helps to set up the config file which will be used to pre-load the cache during the CMake build process for either the install of the [TPLs from mirror](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads#build-the-third-party-libraries) or the [proxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/dev_docs/guix?ref_type=heads#step-3-build-and-install-the-proxyapp).  The configuration involves a couple of CMake config files, with one main config file including the other. The folder [proxy-geos-hc/configs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/dev_docs/guix/configs?ref_type=heads) contains some examples of config file. Apart of the `config_core` file, there are several configuration files which are provided for various architectures<!-- and used to pre-load the cache when generating the CMake files at the [build stage](###build-the-third-party-libraries)-->. They can be used as example to adapt the configuration file to any different architecture.   
 
-The template of these machine-specific configuration files whose name follows the prototype `config_<machine's name>.cmake` includes four parts. They are described in the [table below](###table-of-the-config-files) and sorted in decreasing  order of setup likelihood.   
+The template of the (main) machine-specific configuration files, whose name follows the prototype `config_<machine's name>.cmake`, includes four parts. They are described in the [table below](###table-of-the-config-files) and sorted in decreasing  order of setup likelihood.   
 
 #### Constitutive parts of the `config_<machine's name>.cmake` 
 | #Part       | Description         | Setup likelihood | 
@@ -23,7 +23,7 @@ Edit the Part 1 of your `config_<machine's name>.cmake` file to specify the prog
 When installing the TPLs with a package manager, make sure to use some TPLs packages whose enabled programming models are consistent with those specified at Part 1 of the `config_<machine's name>.cmake`.   
 
 ## 2. Platform-specific parameters
-The *conditional if* scopes on `BUILD_FROM_TPLMIRROR` are used to set the host machine dependent variables and paths. They are only required when installing from mirror.   
+The *conditional if* scopes on `BUILD_FROM_TPLMIRROR` are used to set the host machine dependent variables and paths. They are likely not required for set up when building the proxyApp or the TPL libraries within a containerized development environment (from a package manager).   
 
 Edit the Part 2 of your `config_<machine's name>.cmake` to set the platform-specific variables.  It emboddies various variables which are used to specify the compilers (for instance gcc, g++, gfortran, mpicc, nvcc, hipcc) and the compute options:   
 - The root to the compilers for the programming model enabled on the host is typically `/usr/bin`  
