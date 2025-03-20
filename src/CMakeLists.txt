@@ -301,6 +301,7 @@ else()
   if( ENABLE_HIP )
     set(Kokkos_ENABLE_HIP ON CACHE BOOL "" FORCE)
     set(Kokkos_ENABLE_CUDA OFF CACHE BOOL "" FORCE)
+    #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=gfx906")
     include_directories("${ROCM_ROOT_DIR}/include")
   endif()
   message (STATUS "KOKKOS DEPENDENCY LIST= ${dependencyList}")
@@ -352,8 +353,16 @@ endif()
 # The solver's flag
 message(STATUS "The flag related to the enabled model on the host is: ${flag_hmodel} - The solver is: " ${SOLVER})
 
-message(STATUS "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+if (ENABLE_HIP)
+    find_program(HIPCC_EXECUTABLE NAMES hipcc)
+    if (HIPCC_EXECUTABLE)
+        set(CMAKE_CXX_COMPILER "${HIPCC_EXECUTABLE}")
+    else()
+        message(FATAL_ERROR "hipcc not found. Make sure it is installed and available in your PATH.")
+    endif()
+endif()
 
+message(STATUS "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 configure_file( utils/commonConfig.hpp.in
                 ${CMAKE_BINARY_DIR}/src/commonConfig.hpp)
 
