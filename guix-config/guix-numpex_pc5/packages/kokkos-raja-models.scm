@@ -14,6 +14,7 @@
   #:use-module (guix build-system gnu)
   #:use-module (gnu packages cpp)
   #:use-module (guix-hpc-non-free packages cpp)
+  #:use-module (guix-hpc packages cpp)
   #:use-module (llnl tainted geos)
   #:use-module (guix-science-nonfree packages cuda))
 
@@ -87,3 +88,24 @@
   (make-raja-cuda-spec-compute "raja-cuda-a40" "86"))
 (define-public raja-cuda-a100
   (make-raja-cuda-spec-compute "raja-cuda-a100" "80"))
+
+
+;;This create a kokkos-hip package related to a specific architecture
+
+(define (make-kokkos-hip-spec-architecture name hip-arch)
+  (package/inherit kokkos-hip
+    (name name)
+    (arguments
+     (substitute-keyword-arguments (package-arguments kokkos-hip)
+       ((#:configure-flags flags)
+        #~(append (list (string-append "-DKokkos_ARCH_" #$hip-arch "=ON"))
+                  (delete "-DKokkos_ARCH_VEGA90A=ON" #$flags)
+                  ))
+       ))
+    ))
+
+(define-public kokkos-hip-vega906
+  (make-kokkos-hip-spec-architecture "kokkos-hip-vega906" "VEGA906"))
+
+
+
