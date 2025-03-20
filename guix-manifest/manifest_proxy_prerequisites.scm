@@ -24,4 +24,6 @@
         "coreutils"
         "plocate"
         "cmake@3.25"
+	"mkl"
+        "gfortran-toolchain@11"
         "gcc-toolchain@11"))

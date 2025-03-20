@@ -44,15 +44,14 @@ KOKKOS, RAJA and the other Third-Party Libraries (TPLs) can be compiled and inst
 This differentitation in the TPLs install options is carried through the CMake flag `BUILD_FROM_TPLMIRROR` which is `ON` by default ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green).   
 
 ## Step 0. Environment variables for the CMake builds 
-Some environment variables are required to configure the CMake when building either the TPLs from mirror or the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc#step-2-build-and-install-the-proxyapp).   
+At most, two environment variables are required to configure the CMake when building either the TPLs from mirror or the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc#step-2-build-and-install-the-proxyapp).   
    
  1. Edit the script `proxy-geos-hc/env_var.sh` with the right arguments for the environment variables:   
-   - `proxy_config_root` *the absolute path of the directory `proxy-geos-hc`*   
-   - `config_proxy` *the name of the config file `config_<machine's name>.cmake`, located in the folder `${proxy_config_root}/configs`, to be used to pre-load the CMake cache*   
+   - `config_proxy` *the filename of the config file to be used to pre-load the CMake cache*. Some examples are provided in the folder `proxy-geos-hc/configs`   
    - `install_tpl_dir` *the absolute path of the install directory where the libraries are to be installed* ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green)   
   2. Source the script `proxy-geos-hc/env_var.sh` to export these variables.  
 
-The next step involves setting up the configuration file to be used during the CMake builds. The compilers and related CMake variables are relevant for set up only when building from mirror ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green). Alternatively ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue), when installing from a package manager with the aim to build the proxyApp within a containerized development environment the CMake variables for the compilers are not required and we rely on CMake for a conistent and automatic set up. 
+The next step involves setting up the configuration file `$config_proxy` to be used during the CMake builds. The compilers and related CMake variables are relevant for set up only when building from mirror ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green). Alternatively, when installing <!-- ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue) --> from a package manager, e.g. ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue),  with the aim to build the proxyApp within a containerized development environment, the CMake variables for the compilers are not required and we rely on CMake for a conistent and automatic set up. 
 
 ## Step 1. [Edit the configuration file for the CMake build](./Notes_config_setting.md)
 ## Step 2.  Installing the TPLs dependencies
@@ -60,7 +59,7 @@ The next step involves setting up the configuration file to be used during the C
 #### [From Guix Package Manager](./Install_TPLs_Guix.md) ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue)
 
 ## Step 3. Build and Install the ProxyApp
- 1. Export the environment variables by sourcing the `env_var.sh` file, as instructed at [Step 0](##step-0.-Environment-variables-for-the-CMake-builds). They are required to set up the config file `proxy-geos-hc/configs/config_proxy-app.cmake` which serves as a wrapper for the config file `${proxy_config_root}/configs/${config_proxy}` that must be used to pre-load the CMake cache for the build.  
+ 1. Export the environment variables by sourcing the `env_var.sh` file, as instructed at [Step 0](##step-0.-Environment-variables-for-the-CMake-builds). They are required to set up the config file `proxy-geos-hc/configs/config_proxy-app.cmake` which serves as a wrapper for the config `${config_proxy}` file that must be used to pre-load the CMake cache for the build. It also sets the relevant libraries paths in case where the ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) option is used.  
 3. Generate the Makefile and build the executable by running the following command lines 
 ```
 cd proxy-geos-hc  
