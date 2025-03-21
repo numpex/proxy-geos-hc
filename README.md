@@ -43,17 +43,18 @@ KOKKOS, RAJA and the other Third-Party Libraries (TPLs) needed by the proxyApp c
 
 Labels ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) and ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue) will be used throughout the document to highlight when some specific handling is needed depending on the TPL installation method.
 
-Differentiation in the TPLs install method is carried through the CMake flag `BUILD_FROM_TPLMIRROR` which is `ON` by default ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green).   
+The CMake flag `BUILD_FROM_TPLMIRROR` is used to transmit the information on the actual TPL installation method to the build system.
+Default value is `ON`, corresponding to ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green).   
 
 ## Environment variables
 Following environment variables are expected during the CMake build process:
-- `config_proxy`:  the filename of the config file to be used (see [Step 1](#step-1-setting-up-the-configuration-file))
-- `install_tpl_dir`: the absolute path of the directory where the TPL libraries are installed (see [step 2](#step-2--installing-the-tpls-dependencies)) in case of  ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) method. Not needed with ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue).     
+- `config_proxy`:  the filename of the config file to be used (see [Step 1](#step-1-set-up-the-configuration-file))
+- `install_tpl_dir`: the absolute path of the directory where the TPL libraries are installed (see [step 2](#step-2--install-the-tpls-dependencies)) in case of  ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) method. Not needed with ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue).     
 
-The script `proxy-geos-hc/env_var.sh` can be used to stored relevant values for these environments variables.
+The script `proxy-geos-hc/env_var.sh` can be used to keep a record of the relevant values for these environments variables.
 
 
-## Step 1. Setting up the configuration file
+## Step 1. Set up the configuration file
 The configuration file allows to specify:
 - which accelerations are enabled, depending on the underlying hardware capabilities
 - the paths for compilers & tools, in case of ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) method.
@@ -62,7 +63,7 @@ The configuration file allows to specify:
 1. Follow the [instructions for editing the configuration file](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/readme-docs/Notes_config_setting.md?ref_type=heads#configuration-for-the-build-process). Examples are provided in the folder `proxy-geos-hc/configs`.
 2. Make sure to update the `config_proxy` environment variable with the name of your specific configuration file.
 
-## Step 2.  Installing the TPLs dependencies
+## Step 2.  Install the TPLs dependencies
 -  ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green): 
    1. Apply the following [instructions](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads) 
    2. Make sure to update the `install_tpl_dir` environment variable.
