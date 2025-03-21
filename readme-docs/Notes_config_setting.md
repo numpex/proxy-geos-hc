@@ -1,33 +1,42 @@
-# Configuration for the build process
+# Configuration files for the build process
 
-The current step helps to set up the config file which will be used to pre-load the cache during the CMake build process for either the install of the [TPLs from mirror](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads#build-the-third-party-libraries) or the [proxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/dev_docs/guix?ref_type=heads#step-3-build-and-install-the-proxyapp).  The configuration involves a couple of CMake config files, with one main config file including the other. The folder [proxy-geos-hc/configs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/dev_docs/guix/configs?ref_type=heads) contains some examples of config file. Apart of the `config_core` file, there are several configuration files which are provided for various architectures<!-- and used to pre-load the cache when generating the CMake files at the [build stage](###build-the-third-party-libraries)-->. They can be used as example to adapt the configuration file to any different architecture.   
+## Overview
+In order to ensure consistency and to avoid redundancy, we have centralized all configuration data into an unique set of configuration files that are used to pre-load the cache during the CMake build process for **both** the proxyApp **and** the installation of the TPLs from mirror.
 
-The template of the (main) machine-specific configuration files, whose name follows the prototype `config_<machine's name>.cmake`, includes four parts. They are described in the [table below](###table-of-the-config-files) and sorted in decreasing  order of setup likelihood.   
+The folder `configs` in the Proxyapp repo includes :
+1. A collection of machine-dependent configuration files, whose names follow the `config_<machine's name>.cmake` convention.
+2. A file named `config_core.cmake` which contains generic configuration ; this file must be included by all machine-dependent configuration files
+3. A file named `config-proxy-app.cmake` which contains all the specific configuration variables needed only in the case of the Proxyapp build - this file will automatically include the machine-dependent configuration file whose name is defined by the environment variable `config_proxy` (see [here](README.md#Environment-variables)).
 
-#### Constitutive parts of the `config_<machine's name>.cmake` 
-| #Part       | Description         | Setup likelihood | 
+## Creating your machine-dependent file
+
+Have a look on the existing `config_<machine's name>.cmake` files and initiate a copy of the one that is closer to your architecture. Then adapt it according to your needs.
+
+Those files are made of 4 distinct parts, as described in the table below:
+
+| #Part       | Description         | Need to adjust | 
 | ---------- | ------------------- | -----------|
-| 1   |  specifies the enabled programming models | Very high |  
-| 2   | sets some platform specific parameters |Very high|  
-| 3 | sets some TPLs config options for profiling (Caliper, OMPT) | Low |  
-| 4  | includes the `config_core` which sets most CMake variables for the build |Very low|    
+| 1   |  specifies the enabled accelerations | Very likely |  
+| 2   | platform specific parameters |Very likely|  
+| 3 | TPLs config options for profiling (Caliper, OMPT) | Not likely |  
+| 4  | includes the `config_core` which sets most CMake variables for the build |Very unlikely|    
 
-## 1. Programming models enabled for the TPLs
-Edit the Part 1 of your `config_<machine's name>.cmake` file to specify the programming models which are considered in the TPLs. You can enable a GPU-accelerated code and a shared memory parallelization on the host.  To do so,  
+### Part 1. Accelerations enabled
+Edit this part to specify the accelerations that are supported by the underlying hardware architecture. You can enable a GPU-accelerated code and a shared memory parallelization on the host.  To do so,  
 1. set `ENABLE_OPENMP=ON`,   
 2. for the GPU programming models - depending on the vendor, set   
-- on Nvidia GPUs: ` ENABLE_CUDA=ON`   
+- on Nvidia GPUs: `ENABLE_CUDA=ON`   
 - on AMD GPUs: `ENABLE_HIP=ON`   
 - on Nvidia Grace-Hopper: `ENABLE_CUDA=ON ARM=ON`  
 
-When installing the TPLs with a package manager, make sure to use some TPLs packages whose enabled programming models are consistent with those specified at Part 1 of the `config_<machine's name>.cmake`.   
+**Important note**: when installing the TPLs with a package manager, make sure to select TPLs packages whose enabled accelerations are consistent with those specified in the part 1 of the `config_<machine's name>.cmake`.   
 
-## 2. Platform-specific parameters
-The *conditional if* scopes on `BUILD_FROM_TPLMIRROR` are used to set the host machine dependent variables and paths. They are likely not required for set up when building the proxyApp or the TPL libraries within a containerized development environment (from a package manager).   
+### Part 2. Platform-specific parameters
 
-Edit the Part 2 of your `config_<machine's name>.cmake` to set the platform-specific variables.  It emboddies various variables which are used to specify the compilers (for instance gcc, g++, gfortran, mpicc, nvcc, hipcc) and the compute options:   
-- The root to the compilers for the programming model enabled on the host is typically `/usr/bin`  
-- The variable `CUDA_ARCH` or `COMP_ARCH` is used to specify the architecture of the device. The related variables must be set in respect to the GPU programming model enabled and specified at [Part 1](##1.-programming models enabled for the TPLs). We refer to the following webpage for a mapping between various [GPU microarchitectures and their corresponding flags or compute capabilities](https://kokkos.org/kokkos-core-wiki/keywords.html#gpu-architectures)  
+Edit this part to set the platform-specific variables.  It emboddies various variables which are used to specify the paths for compilers (for instance gcc, g++, gfortran, mpicc, nvcc, hipcc), for libraries and other compute options:   
+- The path to the compilers on the host is typically `/usr/bin`  
+- The variable `CUDA_ARCH` or `COMP_ARCH` is used to specify the architecture of the device. The related variables must be set in accordance to the GPU acceleration specified in [Part 1](#part-1-accelerations-enabled). We refer to the following webpage for a mapping between various [GPU microarchitectures and their corresponding flags or compute capabilities](https://kokkos.org/kokkos-core-wiki/keywords.html#gpu-architectures)  
 - Some compilation flags for the targetted architecture (`mtune` and `mcpu`) are set through the variable `CPU_TUNE_FLAG`.   
 
+Note that specification of the paths is only needed when installing TPLs from mirror. In case of installation with package managers, these paths will be found automatically. This is the reason why all these settings are encompassed in a `if(BUILD_FROM_TPLMIRROR)`.
 
