@@ -41,7 +41,7 @@ KOKKOS, RAJA and the other Third-Party Libraries (TPLs) can be compiled and inst
 - In the former case ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) you shall consider [Getting the TPLs source code](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads#getting-the-tpls-source-codes) to create the folder `proxy-geos-hc_tpl` which provides with some tarballs of TPLs specific versions.  
 - In the other case ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue), installing the TPLs with a Package Manager offers the possibility to build the ProxyApp within a containerized development environment with all the dependencies. 
 
-This differentitation in the TPLs install options is carried through the CMake flag `BUILD_FROM_TPLMIRROR` which is `ON` by default ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green).   
+This differentiation in the TPLs install options is carried through the CMake flag `BUILD_FROM_TPLMIRROR` which is `ON` by default ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green).   
 
 ## Step 0. Environment variables for the CMake builds 
 At most, two environment variables are required to configure the CMake when building either the TPLs from mirror or the [ProxyApp](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc#step-2-build-and-install-the-proxyapp).   
