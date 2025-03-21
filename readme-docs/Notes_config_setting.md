@@ -1,7 +1,7 @@
 # Configuration files for the build process
 
 ## Overview
-In order to ensure consistency and to avoid redundancy, we have centralized all configuration data into an unique set of configuration files that are used to pre-load the cache during the CMake build process for **both** the proxyApp **and** the installation of the TPLs from mirror.
+In order to ensure consistency and to avoid redundancy, we have centralized all configuration data into an unique set of configuration files that are used to pre-load the cache during the CMake build process for **both** the proxyApp **and** the Third-Party Libraries in case of ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green).
 
 The folder `configs` in the Proxyapp repo includes :
 1. A collection of machine-dependent configuration files, whose names follow the `config_<machine's name>.cmake` convention.
@@ -29,7 +29,7 @@ Edit this part to specify the accelerations that are supported by the underlying
 - on AMD GPUs: `ENABLE_HIP=ON`   
 - on Nvidia Grace-Hopper: `ENABLE_CUDA=ON ARM=ON`  
 
-**Important note**: when installing the TPLs with a package manager, make sure to select TPLs packages whose enabled accelerations are consistent with those specified in the part 1 of the `config_<machine's name>.cmake`.   
+**Important note** ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue): when installing the TPLs with a package manager, make sure to select TPLs packages whose enabled accelerations are consistent with those specified in the part 1 of the `config_<machine's name>.cmake`.   
 
 ### Part 2. Platform-specific parameters
 
@@ -38,5 +38,5 @@ Edit this part to set the platform-specific variables.  It emboddies various var
 - The variable `CUDA_ARCH` or `COMP_ARCH` is used to specify the architecture of the device. The related variables must be set in accordance to the GPU acceleration specified in [Part 1](#part-1-accelerations-enabled). We refer to the following webpage for a mapping between various [GPU microarchitectures and their corresponding flags or compute capabilities](https://kokkos.org/kokkos-core-wiki/keywords.html#gpu-architectures)  
 - Some compilation flags for the targetted architecture (`mtune` and `mcpu`) are set through the variable `CPU_TUNE_FLAG`.   
 
-Note that specification of the paths is only needed when installing TPLs from mirror. In case of installation with package managers, these paths will be found automatically. This is the reason why all these settings are encompassed in a `if(BUILD_FROM_TPLMIRROR)`.
+Note that specification of the paths is only needed with the ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) method. In case of installation with package managers, these paths will be found automatically. This is the reason why all these settings are encompassed in a `if(BUILD_FROM_TPLMIRROR)`.
 
