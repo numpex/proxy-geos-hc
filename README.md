@@ -25,7 +25,7 @@ One of the key features of the SEM and FD proxy benchmarks are their adaptabilit
 
 # How to compile and install
 
-First consider referring to the page on the [prerequisites](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/readme-docs/INSTALL_PREREQUISITES.md?ref_type=heads#key-aspects-and-prerequisites--for-proxyapp) needed.  
+First consider referring to the page on the [prerequisites](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/main/readme-docs/INSTALL_PREREQUISITES.md?ref_type=heads#key-aspects-and-prerequisites--for-proxyapp) needed.  
 
 As a convention, the angle brackets `<variable>` are used as placeholder for *variable* or *option*.     
 
@@ -60,15 +60,15 @@ The configuration file allows to specify:
 - the paths for compilers & tools, in case of ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) method.
 
 
-1. Follow the [instructions for editing the configuration file](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/readme-docs/Notes_config_setting.md?ref_type=heads#configuration-for-the-build-process). Examples are provided in the folder `proxy-geos-hc/configs`.
+1. Follow the [instructions for editing the configuration file](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/main/readme-docs/Notes_config_setting.md?ref_type=heads#configuration-for-the-build-process). Examples are provided in the folder `proxy-geos-hc/configs`.
 2. Make sure to update the `config_proxy` environment variable with the name of your specific configuration file.
 
 ## Step 2.  Install the TPLs dependencies
 -  ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green): 
-   1. Apply the following [instructions](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/dev_docs/guix?ref_type=heads) 
+   1. Apply the following [instructions](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/main?ref_type=heads) 
    2. Make sure to update the `install_tpl_dir` environment variable.
 - ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue):
-   1. Apply the following [instructions](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/readme-docs/Install_TPLs_Guix.md?ref_type=heads#getting-guix-package-manager) 
+   1. Apply the following [instructions](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/main/readme-docs/Install_TPLs_Guix.md?ref_type=heads#getting-guix-package-manager) 
 
 
 ## Step 3. Build and Install the ProxyApp
@@ -97,7 +97,7 @@ The default option (without any specification for `KOKKOS_RAJA_OMP`) is sequenti
 To use OMP, set `KOKKOS_RAJA_OMP` as `-DUSE_OMP=ON`, for a shared-memory parallelization mode. [**Not  supported at the moment**](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/issues/8).  
 
 #### 3. RAJA  with OPENMP and GPU
-To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `${config_proxy}` - See [Programming Models Enabled for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/readme-docs/Notes_config_setting.md?ref_type=heads#configuration-for-the-build-process).  
+To use RAJA, set `KOKKOS_RAJA_OMP` as `-DUSE_RAJA=ON`. This option is only valid when the OpenMP and GPU features are enabled in `${config_proxy}` - See [Programming Models Enabled for the TPLs](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/main/readme-docs/Notes_config_setting.md?ref_type=heads#configuration-for-the-build-process).  
 
 #### 4. KOKKOS with OPENMP and GPU
 To use KOKKOS, set `KOKKOS_RAJA_OMP` as `-DUSE_KOKKOS=ON`. This option is compatible with any combination of programming models. When none of the programming models is enabled, it is equivalent to a serial or sequential mode.   
@@ -121,4 +121,4 @@ You may encounter path issues for the TPLs libraries. The following lines fix th
  export LD_LIBRARY_PATH=/path/to/proxy-geos-hc_tpl/installTPLs/raja/lib/:$LD_LIBRARY_PATH
 ```
 # Tips and tricks
-Some tips and tricks addressing common problems that you may encountered are reported [here](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/blob/dev_docs/guix/readme-docs/TIPS_AND_TRICKS.md?ref_type=heads#tips-and-tricks).
+Some tips and tricks addressing common problems that you may encountered are reported [here](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/main/readme-docs/TIPS_AND_TRICKS.md?ref_type=heads#tips-and-tricks).

@@ -49,7 +49,7 @@ guix shell -L proxy-geos-hc/guix-config --pure -m proxy-geos-hc/guix-manifest/ma
 One of the simplest way for creating a manifest with some package transformations for different packages could be to create a manifest file for each of the packages and then gather them in a unique manifest file. Indeed one could run the `guix shell` command passing the `-m` option a multiple time.
 
 ```
-guix shell -m manifest_1.scm -m manifest_2.scm -m ... --export-manifest manifest_merged.scm
+guix shell -m manifest_1.scm -m manifest_2.scm -m ... --export-manifest > manifest_merged.scm
 ```
 It worth to notice that the `--pure` option not required there, since the aim with the previous commandline is simply to create the manifest file and not to create the development environment. 
 </details> 
@@ -60,11 +60,4 @@ guix shell -L proxy-geos-hc/guix-config --pure -m proxy-geos-hc/guix-manifest/ma
 ```
 There are several examples of manifest files provided in the folder guix-manifest.  
 
-Once the development environment has been created, continue with the [build and install of the proxyApp.](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/dev_docs/guix?ref_type=heads#step-3-build-and-install-the-proxyapp)
-
-<!-- # Build the proxyApp's main 
-To build the proxyApp within the development environment, run the following commandline 
-```
-cmake  -DBUILD_FROM_TPLMIRROR=OFF -DCMAKE_BUILD_TYPE=RELEASE <KOKKOS_RAJA_OMP> -C configs/config_proxy-app.cmake -B build -DCMAKE_INSTALL_PREFIX=install -S .
-```
-Setting `-DBUILD_FROM_TPLMIRROR=OFF` allows the CMake build system to consider finding the installed packages without any path information from the user.    -->
+Once the development environment has been created, continue with the [build and install of the proxyApp.](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/main?ref_type=heads#step-3-build-and-install-the-proxyapp)
