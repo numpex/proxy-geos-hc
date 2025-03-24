@@ -47,7 +47,7 @@ The CMake flag `BUILD_FROM_TPLMIRROR` is used to transmit the information on the
 Default value is `ON`, corresponding to ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green).   
 
 ## Environment variables
-Following environment variables are expected during the CMake build process:
+The following environment variables are expected during the CMake build process:
 - `config_proxy`:  the filename of the config file to be used (see [Step 1](#step-1-set-up-the-configuration-file))
 - `install_tpl_dir`: the absolute path of the directory where the TPL libraries are installed (see [step 2](#step-2--install-the-tpls-dependencies)) in case of  ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) method. Not needed with ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue).     
 
