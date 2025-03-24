@@ -61,4 +61,4 @@ guix shell -L proxy-geos-hc/guix-config --pure -m proxy-geos-hc/guix-manifest/ma
 ```
 There are several examples of manifest files provided in the folder `guix-manifest`.  
 
-Once the development environment has been created, continue with the [build and install of the proxyApp.](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc/-/tree/main?ref_type=heads#step-3-build-and-install-the-proxyapp)
+Once the development environment has been created, continue with the [build and install of the proxyApp.](../README.md#step-3-build-and-install-the-proxyapp)
