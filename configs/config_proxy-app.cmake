@@ -1,36 +1,31 @@
-
-# Set up the TPLs
-set( _CONFIG_ROOT_DIR $ENV{proxy_config_root} CACHE PATH "")
-if(NOT EXISTS ${_CONFIG_ROOT_DIR})
-	message(FATAL_ERROR "The path provided for the TPLs is not valid: _CONFIG_ROOT_DIR = " ${_CONFIG_ROOT_DIR})
-endif()
-
-# Include the cache file of the third-party libraries
+# Include the config file
 set(config_proxy $ENV{config_proxy} CACHE PATH "")
-if(EXISTS ${_CONFIG_ROOT_DIR}/configs/${config_proxy})
-	include(${_CONFIG_ROOT_DIR}/configs/${config_proxy}) 
-else()
-	message(FATAL_ERROR "The config_proxy file ${config_proxy} is not found in the provided _CONFIG_ROOT_DIR " ${_CONFIG_ROOT_DIR})
+if(EXISTS ${config_proxy})
+	include(${config_proxy})
+else()	
+	message(FATAL_ERROR "The config_proxy file ${config_proxy} is not found: Please check the provided path")
 endif()
 
 #####################################
 ############# What is enabled for RAJA
 ######################################
-set( RAJA_ENABLE_VECTORIZATION OFF CACHE BOOL "" FORCE)
-set(ENABLE_UMPIRE ON CACHE BOOL "" FORCE)
-set(ENABLE_CHAI ON CACHE BOOL "" FORCE)
-set(ENABLE_CALIPER OFF CACHE BOOL "" FORCE)
-set(ENABLE_ADIAK OFF CACHE BOOL "" FORCE)
-#Inherited from the TPLs config file   
-set(RAJA_ENABLE_CUDA ${ENABLE_CUDA} CACHE BOOL "" FORCE)
-set(RAJA_ENABLE_OPENMP ${ENABLE_OPENMP} CACHE BOOL "" FORCE)
-
-message(STATUS "GUIX_INSTALLED_TPL " ${GUIX_INSTALLED_TPL})
-if(NOT GUIX_INSTALLED_TPL)
+if(USE_RAJA)
+	set( RAJA_ENABLE_VECTORIZATION OFF CACHE BOOL "" FORCE)
+	set(ENABLE_UMPIRE ON CACHE BOOL "" FORCE)
+	set(ENABLE_CHAI ON CACHE BOOL "" FORCE)
+	set(ENABLE_CALIPER OFF CACHE BOOL "" FORCE)
+	set(ENABLE_ADIAK OFF CACHE BOOL "" FORCE)
+	
+	#Inherited from the TPLs config file   
+	#set(RAJA_ENABLE_CUDA ${ENABLE_CUDA} CACHE BOOL "" FORCE)
+	#set(RAJA_ENABLE_OPENMP ${ENABLE_OPENMP} CACHE BOOL "" FORCE)
+endif()
+message(STATUS "BUILD_FROM_TPLMIRROR " ${BUILD_FROM_TPLMIRROR})
+if(BUILD_FROM_TPLMIRROR)
 	message(STATUS "--Setting the paths for the TPL")
 	# To keep track of change: Beaware that _TPL_INSTALL_DIR was originally called GEOSX_TPL_DIR 
 	# and used in some available configs provided in the LvArray submodule (src/LvArray/cmake/blt/host-configs/)
-	set(_TPL_INSTALL_DIR ${_CONFIG_ROOT_DIR}/$ENV{install_tpl} CACHE PATH "")
+	set(_TPL_INSTALL_DIR $ENV{install_tpl_dir} CACHE PATH "")
 	
 	if(USE_RAJA)
 		set(CAMP_DIR ${_TPL_INSTALL_DIR}/raja CACHE PATH "")
