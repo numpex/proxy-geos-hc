@@ -9,16 +9,20 @@
   #:use-module (guix gexp)
   #:use-module (guix utils)
   #:use-module (guix packages)
+  #:use-module (gnu packages)
+  #:use-module (gnu packages base)
   #:use-module (guix git-download)
   #:use-module (guix build-system cmake)
+  #:use-module (guix build-system)
   #:use-module (guix build-system gnu)
   #:use-module (gnu packages cpp)
   #:use-module (guix-hpc-non-free packages cpp)
   #:use-module (guix-hpc packages cpp)
   #:use-module (llnl tainted geos)
+  #:use-module (llnl geos)
   #:use-module (guix-science-nonfree packages cuda))
 
-;; This creates a kokkos version with specific tweaks for gyselalibxx / with OpenMP enabled
+;; This creates a template for enabling OpenMP on top of a given kokkos-cuda-<arch> 
 (define (make-kokkos-cuda-openmp name kokkos-cuda-arch)
   (package/inherit kokkos-cuda-arch
     (name name)
@@ -88,6 +92,112 @@
   (make-raja-cuda-spec-compute "raja-cuda-a40" "86"))
 (define-public raja-cuda-a100
   (make-raja-cuda-spec-compute "raja-cuda-a100" "80"))
+
+;; camp-cuda for various arichecture 
+(define (make-camp-cuda-spec-compute name cuda-arch-compute)
+  (package/inherit camp-cuda
+    (name name)
+    (arguments (substitute-keyword-arguments (package-arguments camp-cuda)
+                 ((#:configure-flags flags)
+                  #~(append (list (string-append "-DCMAKE_CUDA_ARCHITECTURES="#$cuda-arch-compute))
+			    (list (string-append "-DCUDA_ARCH=sm_"#$cuda-arch-compute))
+			          #$flags
+                            ))
+		 ))
+    ))
+
+(define-public camp-cuda-ada
+  (make-camp-cuda-spec-compute "camp-cuda-ada" "89"))
+(define-public camp-cuda-v100
+  (make-camp-cuda-spec-compute "camp-cuda-v100" "70"))
+(define-public camp-cuda-t4
+  (make-camp-cuda-spec-compute "camp-cuda-t4" "75"))
+(define-public camp-cuda-p100
+  (make-camp-cuda-spec-compute "camp-cuda-p100" "60"))
+(define-public camp-cuda-k40
+  (make-camp-cuda-spec-compute "camp-cuda-k40" "35"))
+(define-public camp-cuda-a40
+  (make-camp-cuda-spec-compute "camp-cuda-a40" "86"))
+(define-public camp-cuda-a100
+  (make-camp-cuda-spec-compute "camp-cuda-a100" "80"))
+
+
+;; umpire-cuda for various arichecture 
+(define (make-umpire-cuda-spec-compute name cuda-arch-compute)
+  (package/inherit umpire
+    (name name)
+    (arguments (substitute-keyword-arguments (package-arguments umpire)
+                 ((#:configure-flags flags)
+                  #~(append (list (string-append "-DCMAKE_CUDA_ARCHITECTURES="#$cuda-arch-compute))
+			    (list (string-append "-DCUDA_ARCH=sm_"#$cuda-arch-compute))
+			          #$flags
+                            ))
+		 ))
+    ;;(inputs (list cuda openmpi blt openssh-sans-x))
+    ))
+
+(define-public umpire-cuda-ada
+  (make-umpire-cuda-spec-compute "umpire-cuda-ada" "89"))
+(define-public umpire-cuda-v100
+  (make-umpire-cuda-spec-compute "umpire-cuda-v100" "70"))
+(define-public umpire-cuda-t4
+  (make-umpire-cuda-spec-compute "umpire-cuda-t4" "75"))
+(define-public umpire-cuda-p100
+  (make-umpire-cuda-spec-compute "umpire-cuda-p100" "60"))
+(define-public umpire-cuda-k40
+  (make-umpire-cuda-spec-compute "umpire-cuda-k40" "35"))
+(define-public umpire-cuda-a40
+  (make-umpire-cuda-spec-compute "umpire-cuda-a40" "86"))
+(define-public umpire-cuda-a100
+  (make-umpire-cuda-spec-compute "umpire-cuda-a100" "80"))
+
+;; This creates a chai-cuda where openmp and cuda are enabled throughout inheritence from chai-cuda and specification of a different compute capability
+;;(define (make-append-cuda name cudaflag)
+;;  (* #$name-#$cudaflag))
+
+;;(define (make-append-cuda name cudaflag)
+;;  (* #$name-#$cudaflag))
+;;(define (make-append-cuda name cudaflag)
+;;  (#$name))
+(define (make-chai-cuda-spec-compute name cudaflag cuda-arch-compute)
+  (package/inherit chai-cuda
+    (name name)
+    (inputs (modify-inputs (package-inputs chai-cuda)
+			   (delete "camp-cuda")
+			   (delete "raja-cuda")
+			   (delete "umpire")
+			   (append camp-cuda-ada)
+			   (append raja-cuda-ada)
+			   (append umpire-cuda-ada)
+			   ;;(append (#:make-append-cuda raja-cuda ada))
+			   ;;(replace "raja-cuda" #:(raja-cuda-#$cudaflag))
+			   ;;(append (string-append "camp-cuda-" cudaflag))
+			   ;;(append (string-append "camp-cuda-"#$cuda-arch-string))
+			   ;;(append (lookup-package-input this-package (string-append "raja-cuda-"#$cudaflag)))
+			   ))
+    (arguments (substitute-keyword-arguments (package-arguments chai-cuda)
+                 ((#:configure-flags flags)
+                  #~(append (list (string-append "-DCMAKE_CUDA_ARCHITECTURES="#$cuda-arch-compute)
+				  (string-append "-DCUDA_ARCH=sm_"#$cuda-arch-compute))
+			          (delete "-DCMAKE_CUDA_ARCHITECTURES=70" (delete "-DCUDA_ARCH=sm_70" #$flags))
+                            ))
+		 ))
+    ))
+
+(define-public chai-cuda-ada
+  (make-chai-cuda-spec-compute "chai-cuda-ada" "ada" "89"))
+;;(define-public chai-cuda-v100
+;;  (make-chai-cuda-spec-compute "chai-cuda-v100" "v100" "70"))
+;;(define-public chai-cuda-t4
+;;  (make-chai-cuda-spec-compute "chai-cuda-t4" "t4" "75"))
+;;(define-public chai-cuda-p100
+;;  (make-chai-cuda-spec-compute "chai-cuda-p100" "p100" "60"))
+;;(define-public chai-cuda-k40
+;;  (make-chai-cuda-spec-compute "chai-cuda-k40" "k40" "35"))
+;;(define-public chai-cuda-a40
+;;  (make-chai-cuda-spec-compute "chai-cuda-a40" "a40" "86"))
+;;(define-public chai-cuda-a100
+;;  (make-chai-cuda-spec-compute "chai-cuda-a100" "a100" "80"))
 
 
 ;;This create a kokkos-hip package related to a specific architecture
