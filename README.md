@@ -68,7 +68,7 @@ The configuration file allows to specify:
    1. Apply the following [instructions](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/main?ref_type=heads) 
    2. Make sure to update the `install_tpl_dir` environment variable.
 - ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue):
-   1. Apply the following [instructions](./readme-docs/Install_TPLs_Guix.md#getting-guix-package-manager) 
+   1. Apply the following [instructions](./guix/docs/Install_TPLs_Guix.md#getting-guix-package-manager) 
 
 
 ## Step 3. Build and Install the ProxyApp
