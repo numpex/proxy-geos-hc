@@ -1,11 +1,14 @@
-# Include the config file
-set(config_proxy $ENV{config_proxy} CACHE PATH "")
-if(EXISTS ${config_proxy})
-	include(${config_proxy})
-else()	
-	message(FATAL_ERROR "The config_proxy file ${config_proxy} is not found: Please check the provided path")
+# Include the config file for pre-loading the cache
+if(DEFINED ENV{config_proxy})
+	set(config_proxy $ENV{config_proxy} CACHE PATH "")
+	if(EXISTS ${config_proxy})
+		include(${config_proxy})
+	else()	
+		message(FATAL_ERROR "The config_proxy file ${config_proxy} is not found: Please check the provided path")
+	endif()
+else()
+	message(STATUS "---No config file specified--- = "${config_proxy} " or "$ENV{config_proxy})
 endif()
-
 #####################################
 ############# What is enabled for RAJA
 ######################################
