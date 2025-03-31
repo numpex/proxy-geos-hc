@@ -25,7 +25,7 @@ One of the key features of the SEM and FD proxy benchmarks are their adaptabilit
 
 # How to compile and install
 
-First consider referring to the page on the [prerequisites](./readme-docs/INSTALL_PREREQUISITES.md#key-aspects-and-prerequisites--for-proxyapp) needed.  
+First consider referring to the page on the [prerequisites](./readme-docs/INSTALL_PREREQUISITES.md) needed.  
 
 As a convention, the angle brackets `<variable>` are used as placeholder for *variable* or *option*.     
 
@@ -60,7 +60,7 @@ The configuration file allows to specify:
 - the paths for compilers & tools, in case of ![TPL_MIRROR](https://img.shields.io/badge/TPL_from-Mirror-green) method.
 
 
-1. Follow the [instructions for editing the configuration file](./readme-docs/Notes_config_setting.md#configuration-for-the-build-process). Examples are provided in the folder `proxy-geos-hc/configs`.
+1. Follow the [instructions for editing the configuration file](./readme-docs/Notes_config_setting.md). Examples are provided in the folder `proxy-geos-hc/configs`.
 2. Make sure to update the `config_proxy` environment variable with the name of your specific configuration file.
 
 ## Step 2.  Install the TPLs dependencies
@@ -68,7 +68,7 @@ The configuration file allows to specify:
    1. Apply the following [instructions](https://gitlab.inria.fr/numpex-pc5/wp2-co-design/proxy-geos-hc_tpl/-/tree/main?ref_type=heads) 
    2. Make sure to update the `install_tpl_dir` environment variable.
 - ![TPL_GUIX](https://img.shields.io/badge/TPL_from-Guix-blue):
-   1. Apply the following [instructions](./guix/docs/Install_TPLs_Guix.md#getting-guix-package-manager) 
+   1. Apply the following [instructions](./guix/docs/Install_TPLs_Guix.md) 
 
 
 ## Step 3. Build and Install the ProxyApp
@@ -121,4 +121,4 @@ You may encounter path issues for the TPLs libraries. The following lines fix th
  export LD_LIBRARY_PATH=/path/to/proxy-geos-hc_tpl/installTPLs/raja/lib/:$LD_LIBRARY_PATH
 ```
 # Tips and tricks
-Some tips and tricks addressing common problems that you may encountered are reported [here](./readme-docs/TIPS_AND_TRICKS.md#tips-and-tricks).
+Some tips and tricks addressing common problems that you may encountered are reported [here](./readme-docs/TIPS_AND_TRICKS.md).
