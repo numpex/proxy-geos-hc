@@ -93,7 +93,12 @@ Activate default environment for
 spacktivate proxy-geos
 ```
 
-configure build and test with default preset
+## Build and test with Presets
+
+CMake [Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html) can be used to lighten the build and test process and to be more flexible on the use of several configurations. Below are some command lines to use them. This feature will be upgraded later and so the documentation about it.
+
+
+Configure build and test with default preset
 ```
 cmake --preset default
 cmake --build --preset default
