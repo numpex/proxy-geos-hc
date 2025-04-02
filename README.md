@@ -88,12 +88,12 @@ The configuration option `KOKKOS_RAJA_OMP` is discussed below.
 
 ## Compiling using spack environment
 
-. Activate default environment for 
+Activate default environment for 
 ```
 spacktivate proxy-geos
 ```
 
-. configure build and test with default preset
+configure build and test with default preset
 ```
 cmake --preset default
 cmake --build --preset default
