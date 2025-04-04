@@ -33,7 +33,7 @@ option (USE_KOKKOS "Use KOKKOS to parallelise loops" OFF)
 # Tests directory to perform differen tests before
 # integration into proxy apps
 #---------------------------------------------------
-option (addTests "add Tests directory" OFF)
+option (ENABLE_TESTS "add Tests directory" ON)
 
 #--------------------------------------------------------
 # Option to save snapshots of wavefields (for debugging)
@@ -60,7 +60,7 @@ option (SEM_MESHCOLOR "use coloring scheme" OFF)
 # Option to use hierarchical parallelism in Kokkos
 #---------------------------------------------------------
 option (USE_KOKKOS_TEAMS "use hierarchical parallelism in Kokkos" OFF)
-
+enable_testing()
 add_subdirectory(src)
 
 

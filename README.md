@@ -122,3 +122,24 @@ You may encounter path issues for the TPLs libraries. The following lines fix th
 ```
 # Tips and tricks
 Some tips and tricks addressing common problems that you may encountered are reported [here](./readme-docs/TIPS_AND_TRICKS.md).
+
+# Experimental topics
+## Compiling using spack environment
+
+Activate default environment for 
+```
+spacktivate proxy-geos
+```
+
+## Build and test with Presets
+
+CMake [Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html) can be used to lighten the build and test process and to be more flexible on the use of several configurations. Below are some command lines to use them. This feature will be upgraded later and so the documentation about it.
+
+
+Configure build and test with default preset
+```
+cmake --preset default
+cmake --build --preset default
+ctest --preset default
+```
+

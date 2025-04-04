@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-spack
+    continue-on-error: true
+    strategy:
+      matrix:
+        preset: [default, kokkos]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Configure CMake
+      run: |
+        source /data/cemosis/spack/share/spack/setup-env.sh
+        spack env activate proxy-geos
+        cmake --preset ${{ matrix.preset }}
+
+    - name: Build
+      run: cmake --build --preset ${{ matrix.preset }}
+
+    - name: Test
+      run: ctest --preset ${{ matrix.preset }}

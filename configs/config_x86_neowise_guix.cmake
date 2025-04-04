@@ -11,7 +11,7 @@ message(STATUS "The CONFIG_NAME is ${CONFIG_NAME} and HOST_NAME = ${HOST_NAME}")
 ####################################################
 
 ## On the Host
-set(ENABLE_OPENMP OFF CACHE BOOL "" FORCE)
+set(ENABLE_OPENMP ON CACHE BOOL "" FORCE)
 ## On the device
 set(ENABLE_CUDA OFF CACHE BOOL "" FORCE)
 ## Setting ENABLE_OPENMP=ON and ENABLE_CUDA=ON is mandatory for the option USE_RAJA on the proxy-app side
@@ -74,11 +74,8 @@ set(ENABLE_OPENMPTARGET OFF CACHE BOOL "" FORCE)
 ###########################################################
 # Part 4: Include the core config file after all the option are set
 ###########################################################
-
-# The directory with the config. files
-set(CONFIG_DIR $ENV{proxy_config_root}/configs)
-if(EXISTS ${CONFIG_DIR}/config_core_guix.cmake)
-          include(${CONFIG_DIR}/config_core_guix.cmake)
+if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/config_core.cmake)
+	include(${CMAKE_CURRENT_LIST_DIR}/config_core.cmake)
 else()
-          message(FATAL_ERROR "The config_core.cmake is not found in the the config files directory: " ${CONFIG_DIR})
+	message(FATAL_ERROR "The config_core.cmake is not found in the the config files directory: " ${CMAKE_CURRENT_LIST_DIR})
 endif()
