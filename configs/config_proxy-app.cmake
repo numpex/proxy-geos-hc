@@ -24,7 +24,7 @@ if(USE_RAJA)
 	#set(RAJA_ENABLE_OPENMP ${ENABLE_OPENMP} CACHE BOOL "" FORCE)
 endif()
 message(STATUS "BUILD_FROM_TPLMIRROR " ${BUILD_FROM_TPLMIRROR})
-if(BUILD_FROM_TPLMIRROR)
+if(BUILD_FROM_TPLMIRROR OR DEFINED ENV{install_tpl_dir})
 	message(STATUS "--Setting the paths for the TPL")
 	# To keep track of change: Beaware that _TPL_INSTALL_DIR was originally called GEOSX_TPL_DIR 
 	# and used in some available configs provided in the LvArray submodule (src/LvArray/cmake/blt/host-configs/)
