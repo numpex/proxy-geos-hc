@@ -26,7 +26,10 @@ jobs:
         submodules: true
 
     - name: Set up Spack
-      uses: spack/setup-spack@v2           
+      uses: spack/setup-spack@v2
+      with:
+        color: true
+        path: _spack
     - name: Install
       run: |
         ls -l
