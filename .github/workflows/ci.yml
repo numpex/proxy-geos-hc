@@ -14,25 +14,25 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       packages: write
-    continue-on-error: true
+    continue-on-error: false
     strategy:
       matrix:
         env_variant: [omp]
     steps:
-    - name: Set up Spack
-      uses: spack/setup-spack@v2      
+   
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
         submodules: true
+
+    - name: Set up Spack
+      uses: spack/setup-spack@v2           
     - name: Install
-      shell: spack-bash
       run: |
         ls -l
         spack -e spack/proxy-geos-${{ matrix.env_variant }} install --no-check-signature
 
     - name: Push packages and update index
-      shell: spack-bash
       run: |
         spack -e . mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" numpex-buildcache
         spack -e . buildcache push --base-image ubuntu:24.04 --unsigned --update-index numpex-buildcache
