@@ -26,8 +26,9 @@ jobs:
         submodules: true
 
     - name: Set up Spack
-      uses: spack/setup-spack@v2
+      uses: spack/setup-spack@v2.1.1
       with:
+        buildcache: true
         color: true
         path: _spack
     - name: Install
