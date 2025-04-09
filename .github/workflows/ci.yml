@@ -11,7 +11,7 @@ on:
 
 jobs:
   build-cache:
-    runs-on: self-ubuntu-24.04
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
     continue-on-error: false
@@ -43,7 +43,7 @@ jobs:
 
   build:
     needs: build-cache
-    runs-on: self-ubuntu-24.04
+    runs-on: ubuntu-24.04
     permissions:
       packages: write
     continue-on-error: true
@@ -59,7 +59,7 @@ jobs:
         submodules: true
 
     - name: Set up Spack
-      uses: spack/setup-spack@v2
+      uses: spack/setup-spack@v2.1.1
 
     - name: Configure CMake
       shell: spack-bash
