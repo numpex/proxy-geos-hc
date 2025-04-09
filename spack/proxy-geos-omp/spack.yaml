@@ -1,0 +1,24 @@
+# This is a Spack Environment file.
+#
+# It describes a set of packages to be installed, along with
+# configuration settings.
+spack:
+  # add package specs to the `specs` list
+  packages:
+    all:
+      compiler: [gcc@14:, clang@14:18]
+    mpi:
+      require: ['openmpi@:4 fabrics=auto']
+  definitions:
+  - compilers: [gcc@14:]
+  - packages: [caliper,chai+openmp,raja+openmp,umpire+openmp,kokkos+openmp]
+  specs:
+  - $compilers
+  - matrix:
+    - [$packages]
+    - [$%compilers]
+  view: true
+  concretizer:
+    unify: when_possible
+  config:
+    target: x86_64_v3
