@@ -1,6 +1,15 @@
 cmake_minimum_required( VERSION 3.22.1 )
 
-project( proxyapp )
+project( proxy-geos VERSION 0.1 LANGUAGES CXX Fortran)
+
+# -----------------------------------------------------
+# cmake c++ standard
+#-----------------------------------------------------
+if (NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  set(CMAKE_CXX_STANDARD 20)
+endif()
+
 
 #-----------------------------------------------------
 # Setup Flags for whether considering an external libs 
