@@ -44,6 +44,8 @@ jobs:
   build:
     needs: build-cache
     runs-on: self-ubuntu-24.04
+    permissions:
+      packages: write
     continue-on-error: true
     strategy:
       matrix:
@@ -59,10 +61,10 @@ jobs:
     - name: Set up Spack
       uses: spack/setup-spack@v2
 
-
     - name: Configure CMake
+      shell: spack-bash
       run: |
-        spack env activate --sh spack/proxy-geos-${{ matrix.env_variant }}
+        spack env activate spack/proxy-geos-${{ matrix.env_variant }}
         cmake --preset ${{ matrix.preset }}
 
     - name: Build
