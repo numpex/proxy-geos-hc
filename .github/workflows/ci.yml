@@ -63,7 +63,7 @@ jobs:
       uses: spack/setup-spack@v2.1.1
 
     - name: Configure CMake
-      shell: spack-bash
+      shell: spack-bash {0}
       run: |
         spack env activate spack/proxy-geos-${{ matrix.env_variant }}
         cmake --preset ${{ matrix.preset }}
