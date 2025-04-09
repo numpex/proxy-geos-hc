@@ -37,8 +37,8 @@ jobs:
 
     - name: Push packages and update index
       run: |
-        spack -e . mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" numpex-buildcache
-        spack -e . buildcache push --base-image ubuntu:24.04 --unsigned --update-index numpex-buildcache
+        spack -e spack/proxy-geos-${{ matrix.env_variant }} mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" numpex-buildcache
+        spack -e spack/proxy-geos-${{ matrix.env_variant }} buildcache push --base-image ubuntu:24.04 --unsigned --update-index numpex-buildcache
       if: ${{ !cancelled() }}
 
   build:
