@@ -66,6 +66,9 @@ jobs:
         color: true
         path: _spack
 
+    - name: Spack Install
+      run: spack -e spack/proxy-geos-${{ matrix.env_variant }} install --no-check-signature
+
     - name: Configure CMake
       shell: spack-bash {0}
       run: |
@@ -77,4 +80,3 @@ jobs:
 
     - name: Test
       run: ctest --preset ${{ matrix.preset }}
-    
