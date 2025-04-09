@@ -36,6 +36,7 @@
             "description": "kokkos config",
             "generator": "Unix Makefiles",
             "binaryDir": "${sourceDir}/build/kokkos",
+            "inherits": "cpp20",
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "g++",
                 "CMAKE_C_COMPILER": "gcc",
@@ -58,6 +59,7 @@
             "description": "raja config",
             "generator": "Unix Makefiles",
             "binaryDir": "${sourceDir}/build/raja",
+            "inherits": "cpp20",
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "g++",
                 "CMAKE_C_COMPILER": "gcc",

@@ -9,7 +9,7 @@ if (NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_CXX_STANDARD 20)
 endif()
-
+message(STATUS "CMAKE_CXX_STANDARD is set to ${CMAKE_CXX_STANDARD}")
 
 #-----------------------------------------------------
 # Setup Flags for whether considering an external libs 
