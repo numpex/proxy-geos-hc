@@ -123,7 +123,7 @@ if ( USE_RAJA)
    message( " " )
    message( STATUS "-------------------RAJA SETTINGS---------------------------------------" )
    set (SOLVER "Raja" CACHE PATH "" FORCE)
-   message(STATUS "BUILDING SOLVER including RAJA with the following setting: RAJA_ENABLE_CUDA = "${RAJA_ENABLE_CUDA} " and RAJA_ENABLE_OPENMP = " ${RAJA_ENABLE_OPENMP})
+   message(STATUS "BUILDING SOLVER including RAJA with the following setting (before find_package raja): RAJA_ENABLE_CUDA = "${RAJA_ENABLE_CUDA} " and RAJA_ENABLE_OPENMP = " ${RAJA_ENABLE_OPENMP})
    if(NOT (${ENABLE_OPENMP} OR ${ENABLE_CUDA}))
            message(STATUS "ENABLE_OPENMP is set to " ${ENABLE_OPENMP} " ENABLE_CUDA " ${ENABLE_CUDA})
 	   message(STATUS "The TPLs have been built without enabling one of the OPENMP or CUDA feature required for USE_RAJA option: please rebuild the RAJA library ?")
@@ -134,7 +134,7 @@ if ( USE_RAJA)
    #	       PATHS ${CAMP_DIR}
    #                NO_DEFAULT_PATH)
    #else()
-   #   # CAMP is required when using RAJA. Consider using find_package when RAJA_DIR not defined, that is GUIX_INSTALLED_TPLS=ON 
+   #   # CAMP is required when using RAJA. Consider using find_package when RAJA_DIR not defined, that is BUILD_FROM_TPLMIRROR=OFF 
    #   message(STATUS "ProxyApp requires CAMP: CAMP_DIR not set.") 
    #   find_package(camp REQUIRED)
    #endif()
@@ -152,6 +152,8 @@ if ( USE_RAJA)
        find_package(camp REQUIRED)
        find_package(RAJA REQUIRED)
    endif()
+   message(STATUS "BUILDING SOLVER including RAJA with the following setting (after find_package raja): RAJA_ENABLE_CUDA = "${RAJA_ENABLE_CUDA} " and RAJA_ENABLE_OPENMP = " ${RAJA_ENABLE_OPENMP})
+   
    get_target_property(CAMP_INCLUDE_DIRS camp INTERFACE_INCLUDE_DIRECTORIES)
    set_target_properties(camp PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CAMP_INCLUDE_DIRS}")
    message("-- camp_DIR: ${camp_DIR} or ${CAMP_DIR}")
@@ -173,7 +175,6 @@ if ( USE_RAJA)
    # Umpire
    ################################
    # Umpire is not mandatory for RAJA
-   #if(FALSE)
    if(ENABLE_UMPIRE OR ENABLE_CHAI)
 	   if(DEFINED UMPIRE_DIR)
 		   find_package(umpire REQUIRED
@@ -302,6 +303,7 @@ else()
   if( ENABLE_HIP )
     set(Kokkos_ENABLE_HIP ON CACHE BOOL "" FORCE)
     set(Kokkos_ENABLE_CUDA OFF CACHE BOOL "" FORCE)
+    #set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=gfx906")
     include_directories("${ROCM_ROOT_DIR}/include")
   endif()
   message (STATUS "KOKKOS DEPENDENCY LIST= ${dependencyList}")
@@ -353,8 +355,16 @@ endif()
 # The solver's flag
 message(STATUS "The flag related to the enabled model on the host is: ${flag_hmodel} - The solver is: " ${SOLVER})
 
-message(STATUS "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
+if (ENABLE_HIP)
+    find_program(HIPCC_EXECUTABLE NAMES hipcc)
+    if (HIPCC_EXECUTABLE)
+        set(CMAKE_CXX_COMPILER "${HIPCC_EXECUTABLE}")
+    else()
+        message(FATAL_ERROR "hipcc not found. Make sure it is installed and available in your PATH.")
+    endif()
+endif()
 
+message(STATUS "CMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}")
 configure_file( utils/commonConfig.hpp.in
                 ${CMAKE_BINARY_DIR}/src/commonConfig.hpp)
 
