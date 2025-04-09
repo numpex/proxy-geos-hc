@@ -3,7 +3,9 @@
 # It describes a set of packages to be installed, along with
 # configuration settings.
 spack:
-  # add package specs to the `specs` list
+  config:
+    install_tree:
+      padded_length: 128
   packages:
     all:
       compiler: [gcc@14:, clang@14:18]
