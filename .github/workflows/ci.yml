@@ -61,6 +61,10 @@ jobs:
 
     - name: Set up Spack
       uses: spack/setup-spack@v2.1.1
+      with:
+        buildcache: true
+        color: true
+        path: _spack
 
     - name: Configure CMake
       shell: spack-bash {0}
