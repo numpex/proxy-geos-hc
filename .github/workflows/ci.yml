@@ -10,8 +10,35 @@ on:
       - main
 
 jobs:
+  build-cache:
+    runs-on: ubuntu-24.04
+    permissions:
+      packages: write
+    continue-on-error: true
+    strategy:
+      matrix:
+        env_variant: [omp]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Set up Spack
+      uses: spack/setup-spack@v2
+
+    - name: Install
+      run: spack -e spack/proxy-geos-${{ matrix.env_variant }} install --no-check-signature
+
+    - name: Push packages and update index
+      run: |
+        spack -e . mirror set --push --oci-username ${{ github.actor }} --oci-password "${{ secrets.GITHUB_TOKEN }}" local-buildcache
+        spack -e . buildcache push --base-image ubuntu:24.04 --unsigned --update-index local-buildcache
+      if: ${{ !cancelled() }}
+
   build:
-    runs-on: self-spack
+    needs: build-cache
+    runs-on: ubuntu-24.04
     continue-on-error: true
     strategy:
       matrix:
@@ -24,9 +51,13 @@ jobs:
       with:
         submodules: true
 
+    - name: Set up Spack
+      uses: spack/setup-spack@v2
+
+
     - name: Configure CMake
+      shell: spack-bash
       run: |
-        source /data/cemosis/spack/share/spack/setup-env.sh
         spack env activate spack/proxy-geos-${{ matrix.env_variant }}
         cmake --preset ${{ matrix.preset }}
 
@@ -35,3 +66,4 @@ jobs:
 
     - name: Test
       run: ctest --preset ${{ matrix.preset }}
+    
