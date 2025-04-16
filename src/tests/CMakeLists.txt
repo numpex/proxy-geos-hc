@@ -9,9 +9,9 @@
 #set (testcase  Kokkos)
 #set (testcase  Kokkos0)
 #set (testcase  Kokkos1)
-if ( USE_KOKKOS )
+if ( USE_KOKKOS AND NOT (DEVICE STREQUAL "rocm")) 
 
-LIST(APPEND TESTCASES "Kokkos" )
+  LIST(APPEND TESTCASES "Kokkos" )
   message(STATUS "Building tests with Kokkos: ${TESTCASES}")
 endif()
 #set (testcase  FDTDKokkos)
