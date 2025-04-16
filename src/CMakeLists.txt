@@ -9,9 +9,9 @@
 #  (3) If USE_KOKKOS is ON, it is using KOKKOS with or without CUDA and OpenMP.
 #
 #
-#  Edit the env_var.sh file in the TPLs folder to set the Env variables to be defined before build of both TPL and the ProxyApp 
+#  Edit the env_var.sh file in the TPLs folder to set the Env variables to be defined before build of both TPL and the ProxyApp
 #  _TPL must be first compiled and installed from the TPLs repo
-#  The exported Env variables are required to set the _TPL paths in the config file configs/config_proxy-app.cmake 
+#  The exported Env variables are required to set the _TPL paths in the config file configs/config_proxy-app.cmake
 #
 #-----------------------------------------------------------------------------------------------------------------------------
 
@@ -96,7 +96,7 @@ endif()
 if(USE_OMP)
   set (SOLVER "OMP" CACHE PATH "" FORCE)
   message(STATUS "BUILDING SOLVER including OpenMP+Vector on CPU")
-  
+
   set (USE_KOKKOS OFF CACHE BOOL "")
   set (USE_RAJA OFF CACHE BOOL "")
   set (USE_LVARRAY OFF CACHE BOOL "" FORCE)
@@ -118,24 +118,24 @@ if ( USE_RAJA)
    # disable OMP and KOKKOS
    set (USE_OMP OFF CACHE BOOL "")
    set (USE_KOKKOS OFF CACHE BOOL "")
-  
+
    # set solver
    message( " " )
    message( STATUS "-------------------RAJA SETTINGS---------------------------------------" )
    set (SOLVER "Raja" CACHE PATH "" FORCE)
-   message(STATUS "BUILDING SOLVER including RAJA with the following setting (before find_package raja): RAJA_ENABLE_CUDA = "${RAJA_ENABLE_CUDA} " and RAJA_ENABLE_OPENMP = " ${RAJA_ENABLE_OPENMP})
+   message(STATUS "BUILDING SOLVER including RAJA with the following setting (before find_package raja): RAJA_ENABLE_CUDA = ${RAJA_ENABLE_CUDA} and RAJA_ENABLE_OPENMP = ${RAJA_ENABLE_OPENMP}")
    if(NOT (${ENABLE_OPENMP} OR ${ENABLE_CUDA}))
-           message(STATUS "ENABLE_OPENMP is set to " ${ENABLE_OPENMP} " ENABLE_CUDA " ${ENABLE_CUDA})
+           message(STATUS "ENABLE_OPENMP is set to ${ENABLE_OPENMP} ENABLE_CUDA ${ENABLE_CUDA}")
 	   message(STATUS "The TPLs have been built without enabling one of the OPENMP or CUDA feature required for USE_RAJA option: please rebuild the RAJA library ?")
    endif()
-   
+
    #if(DEFINED CAMP_DIR)
    #    find_package(camp REQUIRED
    #	       PATHS ${CAMP_DIR}
    #                NO_DEFAULT_PATH)
    #else()
-   #   # CAMP is required when using RAJA. Consider using find_package when RAJA_DIR not defined, that is BUILD_FROM_TPLMIRROR=OFF 
-   #   message(STATUS "ProxyApp requires CAMP: CAMP_DIR not set.") 
+   #   # CAMP is required when using RAJA. Consider using find_package when RAJA_DIR not defined, that is BUILD_FROM_TPLMIRROR=OFF
+   #   message(STATUS "ProxyApp requires CAMP: CAMP_DIR not set.")
    #   find_package(camp REQUIRED)
    #endif()
 
@@ -148,21 +148,21 @@ if ( USE_RAJA)
 	       	     ${camp_DIR}
                     NO_DEFAULT_PATH)
    else()
-       message(STATUS "ProxyApp requires RAJA: RAJA_DIR not set.") 
+       message(STATUS "ProxyApp requires RAJA: RAJA_DIR not set.")
        find_package(camp REQUIRED)
        find_package(RAJA REQUIRED)
    endif()
-   message(STATUS "BUILDING SOLVER including RAJA with the following setting (after find_package raja): RAJA_ENABLE_CUDA = "${RAJA_ENABLE_CUDA} " and RAJA_ENABLE_OPENMP = " ${RAJA_ENABLE_OPENMP})
-   
+   message(STATUS "BUILDING SOLVER including RAJA with the following setting (after find_package raja): RAJA_ENABLE_CUDA = " ${RAJA_ENABLE_CUDA} " and RAJA_ENABLE_OPENMP = " ${RAJA_ENABLE_OPENMP})
+
    get_target_property(CAMP_INCLUDE_DIRS camp INTERFACE_INCLUDE_DIRECTORIES)
    set_target_properties(camp PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CAMP_INCLUDE_DIRS}")
    message("-- camp_DIR: ${camp_DIR} or ${CAMP_DIR}")
    message("-- CAMP_INCLUDE_DIRS: ${CAMP_INCLUDE_DIRS}")
    set (dependencyList ${dependencyList} camp )
-   
+
    get_target_property(RAJA_INCLUDE_DIRS RAJA INTERFACE_INCLUDE_DIRECTORIES)
    set_target_properties(RAJA PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${RAJA_INCLUDE_DIRS}")
-   message(STATUS "USE RAJA in RAJA_DIR = ${RAJA_DIR}")      
+   message(STATUS "USE RAJA in RAJA_DIR = ${RAJA_DIR}")
    message("-- RAJA_INCLUDE_DIRS: ${RAJA_INCLUDE_DIRS}")
 
    if( ENABLE_HIP )
@@ -170,7 +170,7 @@ if ( USE_RAJA)
      set(RAJA_ENABLE_CUDA OFF CACHE BOOL "" FORCE)
      include_directories("${ROCM_ROOT_DIR}/include")
    endif()
-   
+
    ################################
    # Umpire
    ################################
@@ -184,24 +184,24 @@ if ( USE_RAJA)
 		   message(STATUS "ProxyApp requires Umpire: UMPIRE_DIR not set for finding package.")
 		   find_package(umpire REQUIRED)
 	   endif()
-	   
+
 	   get_target_property(UMPIRE_INCLUDE_DIRS umpire INTERFACE_INCLUDE_DIRECTORIES)
    	   set_target_properties(umpire PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${UMPIRE_INCLUDE_DIRS}")
 	   message(STATUS " USE RAJA: RAJA will be compiled with UMPIRE in UMPIRE_DIR = ${UMPIRE_DIR}")
-	   message("-- UMPIRE_INCLUDE_DIRS: ${UMPIRE_INCLUDE_DIRS} / umpire_DIR "${umpire_DIR})
+	   message("-- UMPIRE_INCLUDE_DIRS: ${UMPIRE_INCLUDE_DIRS} / umpire_DIR " ${umpire_DIR})
 	   set (extraComponentsLinkList ${extraComponentsLinkList} umpire )
    endif()
    #endif()
-   
+
    ################################
    # CHAI
    ################################
-   # CHAI is not a requisite for RAJA. Umpire is a requisite for CHAI 
+   # CHAI is not a requisite for RAJA. Umpire is a requisite for CHAI
    if(ENABLE_CHAI)
 	   set(ENABLE_UMPIRE ON CACHE BOOL "" FORCE)
 	   if(DEFINED CHAI_DIR)
-		   find_package(chai REQUIRED 
-			   PATHS ${CHAI_DIR} 
+		   find_package(chai REQUIRED
+			   PATHS ${CHAI_DIR}
 			   NO_DEFAULT_PATH)
 	   else()
 		   message(STATUS "ProxyApp requires CHAI: CHAI_DIR not set for finding package.")
@@ -216,7 +216,7 @@ if ( USE_RAJA)
    if(ENABLE_OPENMP)
 	   set (extraComponentsLinkList ${extraComponentsLinkList} openmp )
    endif()
-   
+
    ################################
    # CALIPER
    ################################
@@ -240,13 +240,13 @@ endif()
 if(USE_LVARRAY_EXT)
 	# Find package
 	if(NOT EXISTS ${LVARRAY_DIR})
-		message(FATAL_ERROR "LVARRAY_DIR must be set to a defined directory to find the lvarray lib. LVARRAY_DIR is now set to "${LVARRAY_DIR})
+		message(FATAL_ERROR "LVARRAY_DIR must be set to a defined directory to find the lvarray lib. LVARRAY_DIR is now set to " ${LVARRAY_DIR})
 	endif()
 	find_package(LVARRAY REQUIRED)
 	get_target_property(LVARRAY_INCLUDE_DIRS lvarray INTERFACE_INCLUDE_DIRECTORIES)
 	set_target_properties(lvarray PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${LVARRAY_INCLUDE_DIRS}")
 	message(STATUS "-- Find package for lvarray - LVARRAY_INCLUDE_DIRS " ${LVARRAY_INCLUDE_DIRS})
-else()	
+else()
    add_subdirectory( LvArray )
    include_directories(${CMAKE_CURRENT_SOURCE_DIR}/LvArray/src)
 endif()
@@ -273,7 +273,7 @@ if (NOT USE_KOKKOS)
 else()
   set (USE_LVARRAY OFF CACHE BOOL "" FORCE)
   set (USE_VECTOR OFF CACHE BOOL "" FORCE)
-  
+
   message ("-- USE_KOKKOS flag is set to be true and KOKOS is now enabled")
   set (SOLVER "Kokkos" CACHE PATH "" FORCE)
 
@@ -286,11 +286,11 @@ else()
 	  find_package(Kokkos REQUIRED)
   endif()
   message("-- Found the KOKKOS library in ${KOKKOS_DIR}")
-  
+
   get_target_property(KOKKOS_INCLUDE_DIRS Kokkos::kokkos INTERFACE_INCLUDE_DIRECTORIES)
   get_target_property(KOKKOS_LINK_LIBS Kokkos::kokkos INTERFACE_LINK_LIBRARIES)
-  
-  message(STATUS "KOKKOS_INCLUDE_DIRS: ${KOKKOS_INCLUDE_DIRS}")     
+
+  message(STATUS "KOKKOS_INCLUDE_DIRS: ${KOKKOS_INCLUDE_DIRS}")
   message("-- KOKKOS_LINK_LIBS: ${KOKKOS_LINK_LIBS}")
 
   #get_target_property(KOKKOSCORE_LINK_OPTION Kokkos::kokkoscore INTERFACE_LINK_OPTIONS)
@@ -317,31 +317,31 @@ if(ENABLE_OPENMP OR USE_OMP)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}" CACHE STRING "" FORCE)
-  
-  
+
+
   set (CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} ${OpenMP_C_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} ${OpenMP_CXX_FLAGS}" CACHE STRING "" FORCE)
-  
+
   set (CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} ${OpenMP_C_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} ${OpenMP_CXX_FLAGS}" CACHE STRING "" FORCE)
-  
+
   set (CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${OpenMP_C_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO} ${OpenMP_CXX_FLAGS}" CACHE STRING "" FORCE)
-  
+
   set (CMAKE_C_FLAGS_MINSIZEREL "${CMAKE_C_FLAGS_MINSIZEREL} ${OpenMP_C_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL} ${OpenMP_CXX_FLAGS}" CACHE STRING "" FORCE)
-  
+
   set (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_DEBUG} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_RELEASE} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_Fortran_FLAGS_RELWITHDEBINFO "${CMAKE_Fortran_FLAGS_RELWITHDEBINFO} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
   set (CMAKE_Fortran_FLAGS_MINSIZEREL "${CMAKE_Fortran_FLAGS_MINSIZEREL} ${OpenMP_Fortran_FLAGS}" CACHE STRING "" FORCE)
 endif()
-message(STATUS "-- The dependencies for building the proxy-app are: " ${dependencyList} " extraComponentsLinkLists = "${extraComponentsLinkList})
+message(STATUS "-- The dependencies for building the proxy-app are: " ${dependencyList} " extraComponentsLinkLists = " ${extraComponentsLinkList})
 if((USE_KOKKOS OR USE_RAJA) AND (ENABLE_OPENMP OR ENABLE_MPI))
 	# SettingFlag associated to the config.. used for the name of the executable
 	## What programming on the host
-	
+
 	if(ENABLE_OPENMP)
 		set(flag_hmodel "OMP")
 	elseif(ENABLE_MPI)
@@ -349,7 +349,7 @@ if((USE_KOKKOS OR USE_RAJA) AND (ENABLE_OPENMP OR ENABLE_MPI))
 		#else()
 		#set(flag_hmodel "SERIAL")
 	endif()
-	
+
 	set(SOLVER "${SOLVER}_${flag_hmodel}" CACHE PATH "" FORCE)
 endif()
 # The solver's flag
@@ -370,7 +370,7 @@ configure_file( utils/commonConfig.hpp.in
 
 add_subdirectory( sem )
 add_subdirectory( fd )
-if ( ENABLE_TESTS )  
+if ( ENABLE_TESTS )
   message(STATUS "Building tests")
   add_subdirectory( tests )
 else()

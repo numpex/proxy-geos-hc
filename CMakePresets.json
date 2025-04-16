@@ -12,7 +12,7 @@
             "displayName": "Default Config",
             "description": "Default config",
             "generator": "Unix Makefiles",
-            "binaryDir": "${sourceDir}/build/default",
+            "binaryDir": "${sourceDir}/build/${presetName}",
             "inherits": "cpp20",
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "g++",
@@ -34,12 +34,13 @@
             "name": "kokkos",
             "displayName": "kokkos Config",
             "description": "kokkos config",
-            "generator": "Unix Makefiles",
-            "binaryDir": "${sourceDir}/build/kokkos",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "inherits": "cpp20",
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "g++",
                 "CMAKE_C_COMPILER": "gcc",
-                "CMAKE_INSTALL_PREFIX" : "${sourceDir}/build/kokkos/install/",
+                "CMAKE_INSTALL_PREFIX" : "${sourceDir}/build/${presetName}/install/",
                 "CMAKE_BUILD_TYPE": "Release",
                 "USE_OMP": "OFF",
                 "USE_RAJA": "OFF",
@@ -57,11 +58,12 @@
             "displayName": "raja Config",
             "description": "raja config",
             "generator": "Unix Makefiles",
-            "binaryDir": "${sourceDir}/build/raja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "inherits": "cpp20",
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "g++",
                 "CMAKE_C_COMPILER": "gcc",
-                "CMAKE_INSTALL_PREFIX" : "${sourceDir}/build/raja/install/",
+                "CMAKE_INSTALL_PREFIX" : "${sourceDir}/build/${presetName}/install/",
                 "CMAKE_BUILD_TYPE": "Release",
                 "USE_OMP": "OFF",
                 "USE_RAJA": "ON",
@@ -97,6 +99,23 @@
             "cacheVariables": {
                 "CMAKE_CXX_STANDARD": "17"
             }
+        },
+        {
+            "name": "rocm",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "amdclang++",
+                "CMAKE_C_COMPILER": "amdclang",
+                "DEVICE": "rocm"
+            }
+        },
+        {
+            "name": "kokkos+rocm",
+            "inherits": ["rocm", "kokkos"],
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                
+            }
         }
     ],
     "buildPresets": [
@@ -114,6 +133,10 @@
             "name": "raja",
             "configurePreset": "raja",
             "jobs": 10
+        },
+        {
+            "name": "kokkos+rocm",
+            "configurePreset": "kokkos+rocm"
         }
     ],
     "testPresets": [
@@ -141,7 +164,12 @@
             "name": "raja",
             "inherits": "default",
             "configurePreset": "raja"
-        }
+        },
+        {
+            "name": "kokkos+rocm",
+            "inherits": ["kokkos"],
+            "configurePreset": "kokkos+rocm"
+        }   
     ],
     "vendor": {
         "example.com/ExampleIDE/1.0": {

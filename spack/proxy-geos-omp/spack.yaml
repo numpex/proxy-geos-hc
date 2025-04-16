@@ -1,0 +1,27 @@
+# This is a Spack Environment file.
+#
+# It describes a set of packages to be installed, along with
+# configuration settings.
+spack:
+  config:
+    install_tree:
+      padded_length: 128
+  packages:
+    all:
+      compiler: [gcc@14:, clang@14:18]
+      require: ['target=x86_64_v3']
+    mpi:
+      require: ['openmpi@:4 fabrics=auto']
+  definitions:
+  - compilers: [gcc@12:]
+  - packages: [caliper,chai+openmp,raja+openmp,umpire+openmp,kokkos+openmp]
+  specs:
+  - $compilers
+  - matrix:
+    - [$packages]
+    - [$%compilers]
+  view: true
+  concretizer:
+    unify: when_possible
+  mirrors:
+    numpex-buildcache: oci://ghcr.io/numpex/spack-buildcache
