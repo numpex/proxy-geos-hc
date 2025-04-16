@@ -13,7 +13,7 @@ spack:
     mpi:
       require: ['openmpi@:4 fabrics=auto']
   definitions:
-  - compilers: [gcc@14:]
+  - compilers: [gcc@12:]
   - packages: [caliper,chai+openmp,raja+openmp,umpire+openmp,kokkos+openmp]
   specs:
   - $compilers
